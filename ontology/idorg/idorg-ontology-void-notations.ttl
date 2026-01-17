@@ -1,0 +1,310 @@
+
+##########################################################################
+##########################################################################
+#
+# This file contains void annotations mainly used by the sparql-editor UI
+#
+##########################################################################
+##########################################################################
+
+@prefix idot: <http://identifiers.org/idot/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix voidext: <http://ldf.fi/void-ext#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://identifiers.org/idot/> 
+    owl:imports sh: ;
+    owl:imports dcat: ;
+    sh:declare [
+        sh:prefix "idot" ;
+        sh:namespace "http://identifiers.org/idot/"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "dct" ;
+        sh:prefix "dcterms" ;
+        sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "dcat" ;
+        sh:namespace "http://www.w3.org/ns/dcat#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "rdfs" ;
+        sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ;
+    ] .
+
+
+
+#################################################################
+#    Void notations for triple auto completion
+#################################################################
+
+idot:Registry
+    void:classPartition [ 
+        void:class idot:Namespace ; 
+        void:propertyPartition [
+            void:property rdfs:label ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:title ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:description ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:created ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:modified ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:isDeprecated ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:boolean ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:luiPattern ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:sampleID ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:prefix ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:successor ;
+            void:classPartition [ void:class idot:Namespace ; ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:isNamespaceOf ;
+            void:classPartition [ void:class idot:Resource ; ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:deprecationDate ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:dateTime ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:deprecationOfflineDate ;
+            void:classPartition [ void:class idot:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:dateTime ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:deprecationStatement ;
+            void:classPartition [ void:class idot:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+    ];
+    void:classPartition [ 
+        void:class idot:Resource; 
+        void:propertyPartition [
+            void:property rdfs:label ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:title ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:description ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:created ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:modified ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:isDeprecated ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:isOfficial ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:urlPattern ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:countryCode ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:authHelpUrl ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:authHelpDescription ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:hasProtectedUrls ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:homepage ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:isResourceOf ;
+            void:classPartition [ void:class idot:Namespace ; ] ;
+        ] ;
+        void:propertyPartition [
+            void:property dcterms:publisher ;
+            void:classPartition [ void:class rdfs:Resource ; ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:providerCode ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:deprecationDate ;
+            void:classPartition [ void:class rdfs:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:dateTime ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:deprecationOfflineDate ;
+            void:classPartition [ void:class idot:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:dateTime ] ;
+        ] ;
+        void:propertyPartition [
+            void:property idot:deprecationStatement ;
+            void:classPartition [ void:class idot:Literal ; ] ;
+            voidext:datatypePartition [ voidext:datatype xsd:string ] ;
+        ] ;
+    ] .
+
+
+#################################################################
+#    Examples
+#################################################################
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "URL resolution using owl:sameAs via our virtual triple store" ;
+                   sh:select """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT * WHERE {
+    <http://identifiers.org/uniprot:P12345> owl:sameAs ?obj .
+} LIMIT 10""" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "Reverse resolution using owl:sameAs via our virtual triple store" ;
+                   sh:select """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT * WHERE {
+    <http://purl.uniprot.org/uniprot/P12345> owl:sameAs ?obj .
+} LIMIT 10""" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "Usage of id:active subgraph to limit resolution" ;
+                   sh:select """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?target
+WHERE {
+  GRAPH <id:active> {
+    <http://identifiers.org/ec-code:1.1.1.1> owl:sameAs ?target
+  }
+}""" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "Usage of id:obsolete subgraph to limit resolution" ;
+                   sh:select """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?target
+WHERE {
+  GRAPH <id:obsolete> {
+    <http://identifiers.org/ec-code:1.1.1.1> owl:sameAs ?target
+  }
+}""" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "List namespaces and their names" ;
+                   sh:select """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX idot: <http://identifiers.org/idot/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+SELECT *
+WHERE {
+    ?namespace a idot:Namespace ;
+               dcterms:title ?name .
+}
+LIMIT 10""" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "List namespaces and their url patterns" ;
+                   sh:select """PREFIX idot: <http://identifiers.org/idot/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+SELECT ?namespace ?urlPattern
+WHERE {
+    ?namespace a idot:Namespace ;
+               idot:isNamespaceOf ?resource .
+    ?resource idot:urlPattern ?urlPattern .
+}
+ORDER BY ASC(?namespace)
+LIMIT 10""" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "Using DCAT to access registry" ;
+                   sh:select """PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX idot: <http://identifiers.org/idot/>
+SELECT *
+WHERE {
+    _:namespace a dcat:Dataset ;
+                dcterms:title ?namespaceTitle .
+    [] dcat:servesDataset _:namespace ;
+       dcterms:title      ?resourceTitle ;
+       idot:urlPattern    ?pattern .
+}""" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "Get full description of namespace" ;
+                   sh:describe "DESCRIBE <http://identifiers.org/3dmet>" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "Full description of identifiers.org curie URI" ;
+                   sh:describe "DESCRIBE <http://identifiers.org/3dmet:B00162>" .
+
+[] rdf:type owl:NamedIndividual, sh:SPARQLExecutable ;
+                   rdfs:comment "Find namespace of identifiers.org URI and its metadata" ;
+                   sh:select """PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT * WHERE {
+  <http://identifiers.org/uniprot:P12345> rdfs:member ?namespace .
+  ?namespace ?attribute ?value
+}""" .

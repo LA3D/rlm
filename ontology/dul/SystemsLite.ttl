@@ -1,0 +1,317 @@
+PREFIX :            <http://www.ontologydesignpatterns.org/ont/dul/SystemsLite.owl#>
+PREFIX SystemsLite: <http://www.ontologydesignpatterns.org/ont/dul/SystemsLite.owl#>
+PREFIX daml:        <http://www.daml.org/2001/03/daml+oil#>
+PREFIX dul:         <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#>
+PREFIX owl:         <http://www.w3.org/2002/07/owl#>
+PREFIX owl2xml:     <http://www.w3.org/2006/12/owl2-xml#>
+PREFIX rdf:         <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:        <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rol:         <http://www.ontologydesignpatterns.org/ont/dul/Roles.owl#>
+PREFIX xsd:         <http://www.w3.org/2001/XMLSchema#>
+
+dul:satisfies  rdf:type  owl:ObjectProperty .
+
+dul:isSubordinatedTo  rdf:type  owl:ObjectProperty .
+
+dul:isSettingFor  rdf:type  owl:ObjectProperty .
+
+dul:isPreconditionOf  rdf:type  owl:ObjectProperty .
+
+dul:isPostconditionOf
+        rdf:type  owl:ObjectProperty .
+
+dul:isParticipantIn  rdf:type  owl:ObjectProperty .
+
+dul:isDescribedBy  rdf:type  owl:ObjectProperty .
+
+dul:isDefinedIn  rdf:type  owl:ObjectProperty .
+
+dul:hasSetting  rdf:type  owl:ObjectProperty .
+
+dul:hasComponent  rdf:type  owl:ObjectProperty .
+
+dul:describes  rdf:type  owl:ObjectProperty .
+
+dul:defines  rdf:type  owl:ObjectProperty .
+
+dul:classifies  rdf:type  owl:ObjectProperty .
+
+rol:AgentRole  rdf:type  owl:Class .
+
+dul:WorkflowExecution
+        rdf:type  owl:Class .
+
+dul:Workflow  rdf:type  owl:Class .
+
+dul:SocialObject  rdf:type  owl:Class .
+
+dul:Role  rdf:type  owl:Class .
+
+dul:PlanExecution  rdf:type  owl:Class .
+
+dul:PhysicalObject  rdf:type  owl:Class .
+
+dul:PhysicalArtifact  rdf:type  owl:Class .
+
+dul:Design  rdf:type  owl:Class .
+
+dul:Action  rdf:type  owl:Class .
+
+SystemsLite:SystemImplementationWorkflow
+        rdf:type         owl:Class;
+        rdfs:comment     "The description of how to implement a 'designed' system (i.e. systems that are described by a SystemDesign, e.g. a DesignedPhysicalSystem, a NonPhysicalSystem, or some HybridSystem).";
+        rdfs:label       "System implementation workflow"@en;
+        rdfs:subClassOf  dul:Workflow;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:hasComponent;
+                           owl:someValuesFrom  SystemsLite:SystemDesign
+                         ] .
+
+SystemsLite:SystemImplementationWorkflowExecution
+        rdf:type         owl:Class;
+        rdfs:comment     "A situation satisfying the production workflow of a system.";
+        rdfs:label       "System implementation workflow execution"@en;
+        rdfs:subClassOf  dul:WorkflowExecution;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:satisfies;
+                           owl:someValuesFrom  SystemsLite:SystemImplementationWorkflow
+                         ] .
+
+SystemsLite:WorkingItemRole
+        rdf:type         owl:Class;
+        rdfs:comment     "A role played by entities when are temporary states of an expected final product.\nAlso known as Throughput in Systems theory.";
+        rdfs:label       "Working item role"@en;
+        rdfs:subClassOf  dul:Role;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isSubordinatedTo;
+                           owl:someValuesFrom  SystemsLite:ResourceRole
+                         ];
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  [ rdf:type            owl:Class;
+                                                owl:intersectionOf  ( dul:Entity
+                                                                      [ rdf:type            owl:Restriction;
+                                                                        owl:onProperty      dul:hasSetting;
+                                                                        owl:someValuesFrom  dul:PlanExecution
+                                                                      ]
+                                                                    )
+                                              ];
+                           owl:onProperty     dul:classifies
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isDefinedIn;
+                           owl:someValuesFrom  SystemsLite:DynamicSystemDesign
+                         ] .
+
+SystemsLite:DesignedPhysicalSystem
+        rdf:type          owl:Class;
+        rdfs:comment      "A material artifact that isDescribedBy a SystemImplementationWorkflow. \nI.e., analytically: whose constituents or parts are physical objects that are members of a Collection that isUnifiedBy a Workflow for implementing a SystemDesign, and therefore are in the setting of a DesignObjectMaterialization .\nAlso, it isDescribedBy a SystemDesign .";
+        rdfs:label        "Designed physical system"@en;
+        rdfs:subClassOf   dul:PhysicalArtifact , SystemsLite:PhysicalSystem;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:isDescribedBy;
+                            owl:someValuesFrom  SystemsLite:SystemDesign
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:hasSetting;
+                            owl:someValuesFrom  SystemsLite:DesignObjectMaterialization
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:isDescribedBy;
+                            owl:someValuesFrom  SystemsLite:SystemImplementationWorkflow
+                          ];
+        owl:disjointWith  SystemsLite:NonPhysicalSystem .
+
+SystemsLite:DesignObjectMaterialization
+        rdf:type         owl:Class;
+        rdfs:comment     "A situation in which an object exists that has been produced according to a system design specification.";
+        rdfs:label       "Design object materialization"@en;
+        rdfs:subClassOf  SystemsLite:SystemAsSituation;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isDescribedBy;
+                           owl:someValuesFrom  SystemsLite:SystemImplementationWorkflow
+                         ] .
+
+SystemsLite:DesignSpecificationWorkflow
+        rdf:type         owl:Class;
+        rdfs:comment     "The description of how to produce a design specification (e.g a SystemDesign).";
+        rdfs:label       "Design specification workflow"@en;
+        rdfs:subClassOf  dul:Workflow;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  dul:Design;
+                           owl:onProperty     dul:describes
+                         ] .
+
+SystemsLite:NonPhysicalSystem
+        rdf:type          owl:Class;
+        rdfs:comment      "A SystemAsSituation that has only non-physical entities in its setting. For example, a purely theoretical system. It is always designed, then it is described by a SystemImplementationWorkflow.\nNonPhysicalSystem is disjoint from PhysicalSystem, as well as from HybridSystem .";
+        rdfs:label        "Non physical system"@en;
+        rdfs:subClassOf   SystemsLite:SystemAsSituation;
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  dul:SocialObject;
+                            owl:onProperty     dul:isSettingFor
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:isDescribedBy;
+                            owl:someValuesFrom  SystemsLite:SystemImplementationWorkflow
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:isSettingFor;
+                            owl:someValuesFrom  dul:SocialObject
+                          ];
+        owl:disjointWith  SystemsLite:PhysicalSystem .
+
+dul:Agent  rdf:type  owl:Class .
+
+SystemsLite:PerformerRole
+        rdf:type         owl:Class;
+        rdfs:comment     "An AgentRole that is only played by agents that actively participate in some Action at the time of role-playing.";
+        rdfs:label       "Performer role"@en;
+        rdfs:subClassOf  rol:AgentRole;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  [ rdf:type            owl:Class;
+                                                owl:intersectionOf  ( dul:Agent
+                                                                      [ rdf:type            owl:Restriction;
+                                                                        owl:onProperty      dul:isParticipantIn;
+                                                                        owl:someValuesFrom  dul:Action
+                                                                      ]
+                                                                    )
+                                              ];
+                           owl:onProperty     dul:classifies
+                         ] .
+
+SystemsLite:PhysicalSystem
+        rdf:type         owl:Class;
+        rdfs:comment     "A physical object that isDescribedBy a SystemDesign . \nI.e., analytically: a 'natural' system whose constituents or parts are physical objects that are members of a Collection that isUnifiedBy a SystemDesign .\nNotice that such SystemDesign is not necessarily bound to a SystemImplementationWorkflow, therefore it can be a reconstruction (or theory) about the structure and functions of a natural system.";
+        rdfs:label       "Physical system"@en;
+        rdfs:subClassOf  dul:PhysicalObject;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:hasSetting;
+                           owl:someValuesFrom  SystemsLite:SystemAsSituation
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isDescribedBy;
+                           owl:someValuesFrom  SystemsLite:SystemDesign
+                         ] .
+
+SystemsLite:ProductRole
+        rdf:type         owl:Class;
+        rdfs:comment     "A role played by entities within a post-condition of a (production) plan.\nAlso known as Output in Systems theory.";
+        rdfs:label       "Product role"@en;
+        rdfs:subClassOf  dul:Role;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  [ rdf:type            owl:Class;
+                                                owl:intersectionOf  ( dul:Entity
+                                                                      [ rdf:type            owl:Restriction;
+                                                                        owl:onProperty      dul:hasSetting;
+                                                                        owl:someValuesFrom  [ rdf:type            owl:Class;
+                                                                                              owl:intersectionOf  ( dul:Situation
+                                                                                                                    [ rdf:type            owl:Restriction;
+                                                                                                                      owl:onProperty      dul:isPostconditionOf;
+                                                                                                                      owl:someValuesFrom  dul:PlanExecution
+                                                                                                                    ]
+                                                                                                                  )
+                                                                                            ]
+                                                                      ]
+                                                                    )
+                                              ];
+                           owl:onProperty     dul:classifies
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isSubordinatedTo;
+                           owl:someValuesFrom  SystemsLite:WorkingItemRole
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isDefinedIn;
+                           owl:someValuesFrom  SystemsLite:DynamicSystemDesign
+                         ] .
+
+SystemsLite:HybridSystem
+        rdf:type          owl:Class;
+        rdfs:comment      "A SystemAsSituation that has both physical and non-physical entities in its setting. For example, an ecosystem, a social system, etc. It can be designed or not, depending on if it is described by a SystemImplementationWorkflow or not.\nHybridSystem is disjoint from PhysicalSystem .";
+        rdfs:label        "Hybrid system"@en;
+        rdfs:subClassOf   SystemsLite:SystemAsSituation;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:isSettingFor;
+                            owl:someValuesFrom  dul:PhysicalObject
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:isSettingFor;
+                            owl:someValuesFrom  dul:SocialObject
+                          ];
+        owl:disjointWith  SystemsLite:NonPhysicalSystem .
+
+dul:Situation  rdf:type  owl:Class .
+
+dul:Entity  rdf:type  owl:Class .
+
+SystemsLite:ResourceRole
+        rdf:type         owl:Class;
+        rdfs:comment     "A role played by entities during the execution of a plan, which do not play at the same time any performer or product roles.\nAlso known as Input in Systems theory.";
+        rdfs:label       "Resource role"@en;
+        rdfs:subClassOf  dul:Role;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  [ rdf:type            owl:Class;
+                                                owl:intersectionOf  ( dul:Entity
+                                                                      [ rdf:type            owl:Restriction;
+                                                                        owl:onProperty      dul:hasSetting;
+                                                                        owl:someValuesFrom  [ rdf:type            owl:Class;
+                                                                                              owl:intersectionOf  ( dul:Situation
+                                                                                                                    [ rdf:type            owl:Restriction;
+                                                                                                                      owl:onProperty      dul:isPreconditionOf;
+                                                                                                                      owl:someValuesFrom  dul:PlanExecution
+                                                                                                                    ]
+                                                                                                                  )
+                                                                                            ]
+                                                                      ]
+                                                                    )
+                                              ];
+                           owl:onProperty     dul:classifies
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isDefinedIn;
+                           owl:someValuesFrom  SystemsLite:DynamicSystemDesign
+                         ] .
+
+SystemsLite:SystemAsSituation
+        rdf:type         owl:Class;
+        rdfs:comment     "The realization aspect of a system, satisfying the descriptive aspect.If the descriptive part only includes a design, it can be a situation in which that design has been realized (e.g. consisting essentially of a system-as-artifact as a design object).If the descriptive part includes a project, it can be a workflow situation resulting in the production of e.g. a system-as-artifact.If the descriptive part includes a set of instructions, it can be a situation in which e.g. a system-as-artifact interacts with the environment effectively (according to some evaluation criteria).";
+        rdfs:label       "System as situation"@en;
+        rdfs:subClassOf  dul:Situation;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:satisfies;
+                           owl:someValuesFrom  SystemsLite:SystemDesign
+                         ] .
+
+SystemsLite:DynamicSystemDesign
+        rdf:type         owl:Class;
+        rdfs:comment     "A class for dynamic system designs.\nFollowing systems theory, a minimal set of role types (input-throughput-output) is defined here.";
+        rdfs:label       "Dynamic system design"@en;
+        rdfs:subClassOf  SystemsLite:SystemDesign;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:defines;
+                           owl:someValuesFrom  SystemsLite:ProductRole
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:defines;
+                           owl:someValuesFrom  SystemsLite:WorkingItemRole
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:defines;
+                           owl:someValuesFrom  SystemsLite:ResourceRole
+                         ] .
+
+SystemsLite:SystemDesign
+        rdf:type         owl:Class;
+        rdfs:comment     "The description of a system from the design viewpoint: how it is structured, and the functions (tasks) that it should support. This may also include aesthetic functions and refunctionalizations.";
+        rdfs:label       "System design"@en;
+        rdfs:subClassOf  dul:Design;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isDescribedBy;
+                           owl:someValuesFrom  SystemsLite:DesignSpecificationWorkflow
+                         ] .
+
+<http://www.ontologydesignpatterns.org/ont/dul/SystemsLite.owl>
+        rdf:type         owl:Ontology;
+        rdfs:comment     "An ontology of systems, plugins to DOLCE Ultralite. OWL engineering by Aldo Gangemi.";
+        owl:imports      <http://www.ontologydesignpatterns.org/ont/dul/Roles.owl> , <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl>;
+        owl:versionInfo  "1.1 added English labels." , "1.1" .

@@ -1,0 +1,11 @@
+@prefix ex:  <http://example.org/data#> .
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# Replace these with your real classes/properties once sio.ttl is loaded.
+# Below, we only assert instance facts; subclass/property/domain/range live in sio.ttl.
+
+ex:obs1 ex:measures ex:systolic .
+ex:systolic rdf:type ex:BloodPressure .
+ex:alice ex:hasMeasurement ex:obs1 .
+

@@ -1,0 +1,2806 @@
+# PubChemRDF model in SHACL
+# This schema follows the Shape Constraints Language (SHACL) specification (https://www.w3.org/TR/shacl/).
+
+
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix vocab: <http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#> .
+@prefix bao: <http://www.bioassayontology.org/bao#> .
+@prefix bp3: <http://www.biopax.org/release/biopax-level3.owl#> .
+@prefix cheminf: <http://semanticscience.org/resource/> .
+@prefix cito: <http://purl.org/spar/cito/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix epo_cpc: <http://data.epo.org/linked-data/def/cpc/> .
+@prefix epo_patent: <http://data.epo.org/linked-data/def/patent/> .
+@prefix fabio: <http://purl.org/spar/fabio/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix frapo: <http://purl.org/cerif/frapo/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix pdbo: <http://rdf.wwpdb.org/schema/pdbx-v50.owl#> .
+@prefix prism: <http://prismstandard.org/namespaces/basic/3.0/> .
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix up: <http://purl.uniprot.org/core/> .
+@prefix vcard2006: <http://www.w3.org/2006/vcard/ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix : <http://rdf.ncbi.nlm.nih.gov/pubchem/> .
+
+
+:Anatomy a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Anatomy ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Anatomy ;
+    sh:hasValue sio:SIO_001262 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:altLabel ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:class :Patent ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Author a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Author ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Author ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:family-name ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:given-name ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:fn ;
+    sh:name "formatted name" ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:organization-name ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:hasUID ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:source ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:BioAssay a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:BioAssay ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:BioAssay ;
+    sh:hasValue bao:BAO_0000015 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path bao:BAO_0000210 ;
+    sh:name "has assay stage" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:source ;
+    sh:class :Source ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path bao:BAO_0000209 ;
+    sh:name "has measure group" ;
+    sh:class :MeasureGroup ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path bao:BAO_0000540 ;
+    sh:name "is confirmatory assay of" ;
+    sh:class :BioAssay ;
+  ] ;
+
+  sh:property [
+    sh:path bao:BAO_0001067 ;
+    sh:name "is primary assay of" ;
+    sh:class :BioAssay ;
+  ] ;
+
+  sh:property [
+    sh:path bao:BAO_0001094 ;
+    sh:name "is summary assay of" ;
+    sh:class :BioAssay ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:class :Patent ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Book a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Book ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Book ;
+    sh:hasValue fabio:Book ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:isbn ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:location ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:date ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:publisher ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:creator ;
+    sh:class :Author ;
+  ] ;
+
+  sh:property [
+    sh:path skos:exactMatch ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Cell a sh:NodeShape ;
+  sh:name "Cell Line" ;
+  sh:closed true ;
+  sh:targetClass vocab:Cell ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Cell ;
+    sh:hasValue sio:SIO_010054 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:altLabel ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path obo:BFO_0000050 ;
+    sh:name "part of" ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path up:organism ;
+    sh:class :Taxonomy ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0001000 ;
+    sh:name "derived from" ;
+    sh:class :Anatomy ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:class :Reference ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Compound a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:targetClass vocab:Compound ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Compound ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0000087 ;
+    sh:name "has role" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:is_active_ingredient_of ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path cheminf:CHEMINF_000455 ;
+    sh:name "is isotopologue of" ;
+    sh:class :Compound ;
+  ] ;
+
+  sh:property [
+    sh:path cheminf:CHEMINF_000461 ;
+    sh:name "is stereoisomer of" ;
+    sh:class :Compound ;
+  ] ;
+
+  sh:property [
+    sh:path cheminf:CHEMINF_000480 ;
+    sh:name "has component with uncharged counterpart" ;
+    sh:class :Compound ;
+  ] ;
+
+  sh:property [
+    sh:path cheminf:CHEMINF_000462 ;
+    sh:name "has same connectivity as" ;
+    sh:class :Compound ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:has_parent ;
+    sh:class :Compound ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:connectivity_smiles ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:covalent_unit_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:defined_atom_stereo_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:defined_bond_stereo_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:exact_mass ;
+    sh:datatype xsd:decimal ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:hydrogen_bond_acceptor_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:hydrogen_bond_donor_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:inchikey ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:isotope_atom_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:iupac_inchi ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:molecular_formula ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:molecular_weight ;
+    sh:datatype xsd:decimal ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:mono_isotopic_weight ;
+    sh:datatype xsd:decimal ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:non_hydrogen_atom_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:preferred_iupac_name ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:rotatable_bond_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:smiles ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:structure_complexity ;
+    sh:datatype xsd:decimal ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:total_formal_charge ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:tpsa ;
+    sh:name "Topological Polar Surface Area" ;
+    sh:datatype xsd:decimal ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:undefined_atom_stereo_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:undefined_bond_stereo_count ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:xlogp3 ;
+    sh:name "XLOPG3" ;
+    sh:datatype xsd:decimal ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0002162 ;
+    sh:name "in taxon" ;
+    sh:class :Taxonomy ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000008 ;
+    sh:name "has attribute" ;
+    sh:or (
+      [ sh:class :DescriptorCompoundIdentifier ]
+      [ sh:class :DescriptorConnectivitySmiles ]
+      [ sh:class :DescriptorCovalentUnitCount ]
+      [ sh:class :DescriptorDefinedAtomStereoCount ]
+      [ sh:class :DescriptorDefinedBondStereoCount ]
+      [ sh:class :DescriptorExactMass ]
+      [ sh:class :DescriptorHeavyAtomCount ]
+      [ sh:class :DescriptorHydrogenBondAcceptorCount ]
+      [ sh:class :DescriptorHydrogenBondDonorCount ]
+      [ sh:class :DescriptorInChI ]
+      [ sh:class :DescriptorIsotopeAtomCount ]
+      [ sh:class :DescriptorIUPACName ]
+      [ sh:class :DescriptorMolecularFormula ]
+      [ sh:class :DescriptorMolecularWeight ]
+      [ sh:class :DescriptorMonoIsotopicWeight ]
+      [ sh:class :DescriptorRotatableBondCount ]
+      [ sh:class :DescriptorSmiles ]
+      [ sh:class :DescriptorStructureComplexity ]
+      [ sh:class :DescriptorTotalFormalCharge ]
+      [ sh:class :DescriptorTPSA ]
+      [ sh:class :DescriptorUndefinedAtomStereoCount ]
+      [ sh:class :DescriptorUndefinedBondStereoCount ]
+      [ sh:class :DescriptorXLOGP3 ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Concept a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:targetClass vocab:Concept ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Concept ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path pav:importedFrom ;
+    sh:class :Source ;
+  ] ;
+
+  sh:property [
+    sh:path skos:broader ;
+    sh:class :Concept ;
+  ] ;
+
+  sh:property [
+    sh:path skos:inScheme ;
+    sh:class :Concept ;
+  ] .
+
+
+:ConservedDomain a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:ConservedDomain ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:ConservedDomain ;
+    sh:hasValue obo:SO_0000417 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:abstract ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:class :Reference ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceCompoundCompound a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_001435 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_001435 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :Compound ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :Compound ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceCompoundDisease a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_000993 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_000993 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :Compound ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :Disease ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceCompoundGene a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_001257 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_001257 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :Compound ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :GeneSymbol ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceDiseaseCompound a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_000993 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_000993 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :Disease ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :Compound ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceDiseaseDisease a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_001436 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_001436 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :Disease ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :Disease ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceDiseaseGene a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_000983 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_000983 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :Disease ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :GeneSymbol ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceGeneCompound a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_001257 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_001257 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :GeneSymbol ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :Compound ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceGeneDisease a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_000983 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_000983 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :GeneSymbol ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :Disease ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:CooccurrenceGeneGene a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_001437 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_001437 ;
+    sh:hasValue vocab:Cooccurrence ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_001157 ;
+    sh:name "is result of text mining" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:subject ;
+    sh:class :GeneSymbol ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdf:object ;
+    sh:class :GeneSymbol ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorCompoundIdentifier a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000140 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000140 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorConnectivitySmiles a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000376 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000376 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorCovalentUnitCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000369 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000369 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorDefinedAtomStereoCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000370 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000370 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorDefinedBondStereoCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000371 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000371 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorExactMass a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000338 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000338 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000221 ;
+    sh:name "has unit" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorHeavyAtomCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000373 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000373 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorHydrogenBondAcceptorCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000388 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000388 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorHydrogenBondDonorCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000387 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000387 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorInChI a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000396 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000396 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorIsotopeAtomCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000372 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000372 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorIUPACName a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000382 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000382 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorMolecularFormula a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000335 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000335 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorMolecularWeight a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000334 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000334 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000221 ;
+    sh:name "has unit" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorMonoIsotopicWeight a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000337 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000337 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000221 ;
+    sh:name "has unit" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorRotatableBondCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000389 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000389 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorSmiles a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000379 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000379 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorStructureComplexity a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000390 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000390 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorTotalFormalCharge a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000336 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000336 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorTPSA a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000392 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000392 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000221 ;
+    sh:name "has unit" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorUndefinedAtomStereoCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000374 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000374 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorUndefinedBondStereoCount a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000375 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000375 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorXLOGP3 a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass cheminf:CHEMINF_000395 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue cheminf:CHEMINF_000395 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:decimal ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:DescriptorSubstanceVersion a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass obo:IAO_0000129 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue obo:IAO_0000129 ;
+    sh:hasValue vocab:Descriptor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Disease a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Disease ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Disease ;
+    sh:hasValue sio:SIO_010299 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:altLabel ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path skos:closeMatch ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path skos:relatedMatch ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Endpoint a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:targetClass vocab:Endpoint ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Endpoint ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:label ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:decimal ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:hasQualifier ;
+    sh:datatype xsd:string ;
+    sh:in ( "<" "<=" "=" ">=" ">" ) ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000221 ;
+    sh:name "has unit" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:PubChemAssayOutcome ;
+    sh:nodeKind sh:IRI ;
+    sh:in ( vocab:inactive vocab:active vocab:inconclusive vocab:unspecified vocab:probe ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path obo:IAO_0000136 ;
+    sh:name "is about" ;
+    sh:class :Substance ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path cito:citesAsDataSource ;
+    sh:or (
+      [ sh:class :Patent ]
+      [ sh:class :Reference ]
+    ) ;
+  ] .
+
+
+:Gene a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Gene ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Gene ;
+    sh:hasValue sio:SIO_010035 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:altLabel ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0000056 ;
+    sh:name "participates in" ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0000085 ;
+    sh:name "has function" ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0001025 ;
+    sh:name "located in" ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000558 ;
+    sh:name "is ortholog to" ;
+    sh:class :Gene ;
+  ] ;
+
+  sh:property [
+    sh:path bao:BAO_0002870 ;
+    sh:name "has gene symbol" ;
+    sh:class :GeneSymbol ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path up:organism ;
+    sh:class :Taxonomy ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:or (
+      [ sh:class :Patent ]
+      [ sh:class :Reference ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:GeneSymbol a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_001383 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_001383 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Grant a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Grant ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Grant ;
+    sh:hasValue frapo:Grant ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path frapo:hasGrantNumber ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path frapo:hasFundingAgency ;
+    sh:class :Organization ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:InChIKey a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:InChIKey ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:InChIKey ;
+    sh:hasValue cheminf:CHEMINF_000399 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:subject ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000011 ;
+    sh:name "is attribute of" ;
+    sh:class :Compound ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Journal a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Journal ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Journal ;
+    sh:hasValue fabio:Journal ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:eissn ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:issn ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path fabio:hasNLMJournalTitleAbbreviation ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path fabio:hasNationalLibraryOfMedicineJournalId ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:exactMatch ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:MeasureGroup a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:MeasureGroup ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:MeasureGroup ;
+    sh:hasValue bao:BAO_0000040 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path obo:OBI_0000299 ;
+    sh:name "has specified output" ;
+    sh:class :Endpoint ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0000057 ;
+    sh:name "has participant" ;
+    sh:or (
+      [ sh:class :Cell ]
+      [ sh:class :Gene ]
+      [ sh:class :Protein ]
+      [ sh:class :Taxonomy ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:source ;
+    sh:class :Source ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Organization a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Organization ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Organization ;
+    sh:hasValue vcard2006:Organization ;
+    sh:hasValue frapo:FundingAgency ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:country-name ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:fn ;
+    sh:name "formatted name" ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path skos:closeMatch ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Patent a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Patent ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Patent ;
+    sh:hasValue epo_patent:Publication ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:abstract ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:filingDate ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:grantDate ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:priorityDate ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:publicationDate ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:publicationNumber ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:titleOfInvention ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:applicantVC ;
+    sh:name "assignee" ;
+    sh:class :PatentAssignee ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:inventorVC ;
+    sh:name "inventor" ;
+    sh:class :PatentInventor ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:classificationIPCInventive ;
+    sh:class :PatentIPC ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:classificationCPCInventive ;
+    sh:class :PatentCPC ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:classificationCPCAdditional ;
+    sh:class :PatentCPC ;
+  ] ;
+
+  sh:property [
+    sh:path epo_patent:classificationIPCAdditional ;
+    sh:class :PatentIPC ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isCitedBy ;
+    sh:class :Patent ;
+  ] .
+
+
+:PatentAssignee a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:PatentAssignee ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:PatentAssignee ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:fn ;
+    sh:name "formatted name" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:PatentCPC a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:targetClass vocab:PatentCPC ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:PatentCPC ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:modified ;
+    sh:name "modified date" ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_cpc:level ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_cpc:symbol ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:broader ;
+    sh:class :PatentCPC ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path epo_cpc:concordantIPC ;
+    sh:class :PatentIPC ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:PatentInventor a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:PatentInventor ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:PatentInventor ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vcard2006:fn ;
+    sh:name "formatted name" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:PatentIPC a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:PatentIPC ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:PatentIPC ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path owl:sameAs ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:label ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:broader ;
+    sh:class :PatentIPC ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Pathway a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Pathway ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Pathway ;
+    sh:hasValue bp3:Pathway ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path up:organism ;
+    sh:class :Taxonomy ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:source ;
+    sh:class :Source ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:class :Reference ;
+  ] ;
+
+  sh:property [
+    sh:path bp3:pathwayComponent ;
+    sh:class :Pathway ;
+  ] ;
+
+  sh:property [
+    sh:path skos:related ;
+    sh:name "related pathway" ;
+    sh:class :Pathway ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0000057 ;
+    sh:name "has participant" ;
+    sh:or (
+      [ sh:class :Compound ]
+      [ sh:class :Gene ]
+      [ sh:class :Protein ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Protein a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:targetClass vocab:Protein ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Protein ;
+    sh:hasValue sio:SIO_010043 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:altLabel ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path bao:BAO_0002817 ;
+    sh:name "has sequence" ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:hasSimilarProtein ;
+    sh:class :Protein ;
+  ] ;
+
+  sh:property [
+    sh:path up:enzyme ;
+    sh:class :Enzyme ;
+  ] ;
+
+  sh:property [
+    sh:path up:encodedBy ;
+    sh:class :Gene ;
+  ] ;
+
+  sh:property [
+    sh:path up:organism ;
+    sh:class :Taxonomy ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:or (
+      [ sh:class :Patent ]
+      [ sh:class :Reference ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0002180 ;
+    sh:name "has component" ;
+    sh:or (
+      [ sh:class :ConservedDomain ]
+      [ sh:nodeKind sh:IRI ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path pdbo:link_to_pdb ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Enzyme a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass sio:SIO_010343 ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue sio:SIO_010343 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:altLabel ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:subClassOf ;
+    sh:class :Enzyme ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Reference a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Reference ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Reference ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:contentType ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:bibliographicCitation ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:date ;
+    sh:or (
+      [ sh:datatype xsd:date ]
+      [ sh:datatype xsd:string ]
+    ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:startingPage ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:endingPage ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:pageRange ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:isbn ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path prism:issn ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path prism:issueIdentifier ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:language ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path prism:publicationName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:source ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path fabio:hasSubjectTerm ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path fabio:hasPrimarySubjectTerm ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path cito:discusses ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:isPartOf ;
+    sh:or (
+      [ sh:nodeKind sh:IRI ]
+      [ sh:class :Journal ]
+      [ sh:class :Book ]
+    ) ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:creator ;
+    sh:class :Author ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path frapo:hasFundingAgency ;
+    sh:class :Organization ;
+  ] ;
+
+  sh:property [
+    sh:path frapo:isSupportedBy ;
+    sh:class :Grant ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:discussesAsDerivedByTextMining ;
+    sh:or (
+      [ sh:class :Compound ]
+      [ sh:class :Disease ]
+      [ sh:class :GeneSymbol ]
+    ) ;
+  ] .
+
+
+:Source a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Source ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Source ;
+    sh:hasValue dcterms:Dataset ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:alternative ;
+    sh:name "alternative name" ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:rights ;
+    sh:name "license note" ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:license ;
+    sh:name "license url" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path foaf:homepage ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:subject ;
+    sh:class :Concept ;
+  ] .
+
+
+:Substance a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:targetClass vocab:Substance ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Substance ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:available ;
+    sh:name "available date" ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:modified ;
+    sh:name "modified date" ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path vocab:substance_version ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:source ;
+    sh:class :Source ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000008 ;
+    sh:name "has attribute" ;
+    sh:or (
+      [ sh:class :Synonym ]
+      [ sh:class :DescriptorSubstanceVersion ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path obo:RO_0000056 ;
+    sh:name "participates in" ;
+    sh:class :MeasureGroup ;
+  ] ;
+
+  sh:property [
+    sh:path cheminf:CHEMINF_000477 ;
+    sh:name "has pubchem normalized counterpart" ;
+    sh:class :Compound ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:or (
+      [ sh:class :Patent ]
+      [ sh:class :Reference ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path pdbo:link_to_pdb ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+:Synonym a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:targetClass vocab:Synonym ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Synonym ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000300 ;
+    sh:name "has value" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:subject ;
+    sh:or (
+      [ sh:nodeKind sh:IRI ]
+      [ sh:class :Concept ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path sio:SIO_000011 ;
+    sh:name "is attribute of" ;
+    sh:class :Compound ;
+    sh:maxCount 1 ;
+  ] .
+
+
+:Taxonomy a sh:NodeShape ;
+  sh:closed true ;
+  sh:targetClass vocab:Taxonomy ;
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:nodeKind sh:IRI ;
+    sh:hasValue vocab:Taxonomy ;
+    sh:hasValue sio:SIO_010000 ;
+    sh:minCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:prefLabel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+
+  sh:property [
+    sh:path skos:altLabel ;
+    sh:datatype xsd:string ;
+  ] ;
+
+  sh:property [
+    sh:path cito:isDiscussedBy ;
+    sh:or (
+      [ sh:class :Patent ]
+      [ sh:class :Reference ]
+    ) ;
+  ] ;
+
+  sh:property [
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+
+# prefixes in PubChemRDF
+<> sh:declare
+  [ sh:prefix "owl" ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] ,
+  [ sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] ,
+  [ sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ] ,
+  [ sh:prefix "xsd" ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ] ,
+  [ sh:prefix "vocab" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#"^^xsd:anyURI ] ,
+  [ sh:prefix "ruleset" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/ruleset/"^^xsd:anyURI ] ,
+  [ sh:prefix "anatomy" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/anatomy/"^^xsd:anyURI ] ,
+  [ sh:prefix "author" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/author/"^^xsd:anyURI ] ,
+  [ sh:prefix "bioassay" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/bioassay/"^^xsd:anyURI ] ,
+  [ sh:prefix "book" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/book/"^^xsd:anyURI ] ,
+  [ sh:prefix "cell" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/cell/"^^xsd:anyURI ] ,
+  [ sh:prefix "compound" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/compound/"^^xsd:anyURI ] ,
+  [ sh:prefix "concept" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/concept/"^^xsd:anyURI ] ,
+  [ sh:prefix "conserveddomain" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/conserveddomain/"^^xsd:anyURI ] ,
+  [ sh:prefix "cooccurrence" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/cooccurrence/"^^xsd:anyURI ] ,
+  [ sh:prefix "descriptor" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/descriptor/"^^xsd:anyURI ] ,
+  [ sh:prefix "disease" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/disease/"^^xsd:anyURI ] ,
+  [ sh:prefix "endpoint" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/endpoint/"^^xsd:anyURI ] ,
+  [ sh:prefix "gene" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/gene/"^^xsd:anyURI ] ,
+  [ sh:prefix "grant" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/grant/"^^xsd:anyURI ] ,
+  [ sh:prefix "inchikey" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/inchikey"^^xsd:anyURI ] ,
+  [ sh:prefix "journal" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/journal/"^^xsd:anyURI ] ,
+  [ sh:prefix "measuregroup" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/measuregroup/"^^xsd:anyURI ] ,
+  [ sh:prefix "organization" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/organization/"^^xsd:anyURI ] ,
+  [ sh:prefix "patent" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/patent/"^^xsd:anyURI ] ,
+  [ sh:prefix "patentassignee" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/patentassignee/"^^xsd:anyURI ] ,
+  [ sh:prefix "patentinventor" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/patentinventor/"^^xsd:anyURI ] ,
+  [ sh:prefix "patentcpc" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/patentcpc/"^^xsd:anyURI ] ,
+  [ sh:prefix "patentipc" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/patentipc/"^^xsd:anyURI ] ,
+  [ sh:prefix "pathway" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/pathway/"^^xsd:anyURI ] ,
+  [ sh:prefix "protein" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/protein/"^^xsd:anyURI ] ,
+  [ sh:prefix "reaction" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/reaction/"^^xsd:anyURI ] ,
+  [ sh:prefix "reference" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/reference/"^^xsd:anyURI ] ,
+  [ sh:prefix "source" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/source/"^^xsd:anyURI ] ,
+  [ sh:prefix "substance" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/substance/"^^xsd:anyURI ] ,
+  [ sh:prefix "synonym" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/synonym/"^^xsd:anyURI ] ,
+  [ sh:prefix "taxonomy" ; sh:namespace "http://rdf.ncbi.nlm.nih.gov/pubchem/taxonomy/"^^xsd:anyURI ] ,
+  [ sh:prefix "bao" ; sh:namespace "http://www.bioassayontology.org/bao#"^^xsd:anyURI ] ,
+  [ sh:prefix "bp3" ; sh:namespace "http://www.biopax.org/release/biopax-level3.owl#"^^xsd:anyURI ] ,
+  [ sh:prefix "chembl" ; sh:namespace "http://rdf.ebi.ac.uk/resource/chembl/molecule/"^^xsd:anyURI ] ,
+  [ sh:prefix "chembl.assay" ; sh:namespace "http://rdf.ebi.ac.uk/resource/chembl/assay/"^^xsd:anyURI ] ,
+  [ sh:prefix "cheminf" ; sh:namespace "http://semanticscience.org/resource/"^^xsd:anyURI ] ,
+  [ sh:prefix "cito" ; sh:namespace "http://purl.org/spar/cito/"^^xsd:anyURI ] ,
+  [ sh:prefix "dcterms" ; sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ] ,
+  [ sh:prefix "edam" ; sh:namespace "http://edamontology.org/"^^xsd:anyURI ] ,
+  [ sh:prefix "efo" ; sh:namespace "http://www.ebi.ac.uk/efo/"^^xsd:anyURI ] ,
+  [ sh:prefix "ensembl" ; sh:namespace "http://rdf.ebi.ac.uk/resource/ensembl/"^^xsd:anyURI ] ,
+  [ sh:prefix "epo_cpc" ; sh:namespace "http://data.epo.org/linked-data/def/cpc/"^^xsd:anyURI ] ,
+  [ sh:prefix "epo_ipc" ; sh:namespace "http://data.epo.org/linked-data/def/ipc/"^^xsd:anyURI ] ,
+  [ sh:prefix "epo_patent" ; sh:namespace "http://data.epo.org/linked-data/def/patent/"^^xsd:anyURI ] ,
+  [ sh:prefix "fabio" ; sh:namespace "http://purl.org/spar/fabio/"^^xsd:anyURI ] ,
+  [ sh:prefix "foaf" ; sh:namespace "http://xmlns.com/foaf/0.1/"^^xsd:anyURI ] ,
+  [ sh:prefix "frapo" ; sh:namespace "http://purl.org/cerif/frapo/"^^xsd:anyURI ] ,
+  [ sh:prefix "idorg" ; sh:namespace "http://identifiers.org/"^^xsd:anyURI ] ,
+  [ sh:prefix "mesh" ; sh:namespace "http://id.nlm.nih.gov/mesh/"^^xsd:anyURI ] ,
+  [ sh:prefix "meshv" ; sh:namespace "http://id.nlm.nih.gov/mesh/vocab#"^^xsd:anyURI ] ,
+  [ sh:prefix "ncit" ; sh:namespace "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#"^^xsd:anyURI ] ,
+  [ sh:prefix "ndfrt" ; sh:namespace "http://purl.bioontology.org/ontology/NDFRT"^^xsd:anyURI ] ,
+  [ sh:prefix "obo" ; sh:namespace "http://purl.obolibrary.org/obo/"^^xsd:anyURI ] ,
+  [ sh:prefix "pav" ; sh:namespace "http://purl.org/pav/"^^xsd:anyURI ] ,
+  [ sh:prefix "pdbo" ; sh:namespace "http://rdf.wwpdb.org/schema/pdbx-v50.owl#"^^xsd:anyURI ] ,
+  [ sh:prefix "prism" ; sh:namespace "http://prismstandard.org/namespaces/basic/3.0/"^^xsd:anyURI ] ,
+  [ sh:prefix "sio" ; sh:namespace "http://semanticscience.org/resource/"^^xsd:anyURI ] ,
+  [ sh:prefix "skos" ; sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ] ,
+  [ sh:prefix "snomedct" ; sh:namespace "http://purl.bioontology.org/ontology/SNOMEDCT"^^xsd:anyURI ] ,
+  [ sh:prefix "uniprot" ; sh:namespace "http://purl.uniprot.org/uniprot/"^^xsd:anyURI ] ,
+  [ sh:prefix "up" ; sh:namespace "http://purl.uniprot.org/core/"^^xsd:anyURI ] ,
+  [ sh:prefix "vcard2006" ; sh:namespace "http://www.w3.org/2006/vcard/ns#"^^xsd:anyURI ] ,
+  [ sh:prefix "void" ; sh:namespace "http://rdfs.org/ns/void#"^^xsd:anyURI ] ,
+  [ sh:prefix "wd" ; sh:namespace "http://www.wikidata.org/entity/"^^xsd:anyURI ] ,
+  [ sh:prefix "wipo_ipc" ; sh:namespace "http://www.wipo.int/classifications/ipc/ipcpub/?notion=scheme&symbol="^^xsd:anyURI ] .

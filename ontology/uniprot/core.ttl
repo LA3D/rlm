@@ -1,0 +1,3786 @@
+BASE   <http://purl.uniprot.org/core/>
+PREFIX : <http://purl.uniprot.org/core/>
+PREFIX core: <http://purl.uniprot.org/core/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc11: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX vann: <http://purl.org/vocab/vann/>
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+PREFIX widoco: <https://w3id.org/widoco/vocab#>
+
+core:   rdf:type                       owl:Ontology;
+        rdfs:label                     "UniProt RDF schema ontology";
+        rdfs:comment                   "Properties and classes used for protein annotation.";
+        owl:imports                    <http://www.w3.org/2004/02/skos/core>;
+        owl:imports                    foaf:;
+        owl:imports                    <http://biohackathon.org/resource/faldo>;
+        owl:imports                    rdf:;
+        owl:imports                    rdfs:;
+        dc11:description               "The UniProt RDF schema ontology contains predicates used to describe UniProt entries and associated data.";
+        dc11:title                     "UniProt RDF schema ontology";
+        dc11:license                   <http://creativecommons.org/licenses/by/4.0/>;
+        dc11:abstract                  "The UniProt RDF schema ontology is used to describe concepts that are central to the UniProt datasets. Especially those for which there is on consensus concept available in the wider Bioinformatics community.";
+        vann:preferredNamespacePrefix  "up";
+        bibo:status                    <http://purl.org/ontology/bibo/status/published>;
+        widoco:introduction            "UniProt as a large knowledge graph has a need to introduce the concepts it uses in it's RDF depiction. The UniProt consortium tries to reuse as much as possible existing ontologies and concepts widely used by authorative resources. When this is not possible UniProt has introduced it's own concepts described in this ontology file.";
+        rdfs:seeAlso                   <http://www.github.com/sib-swiss/sparql-training/tree/master/uniprot>;
+        rdfs:seeAlso                   <https://sparql.uniprot.org/sparql>;
+        rdfs:seeAlso                   <https://sparql.uniprot.org/.well-known/sparql-examples/>;
+        owl:versionInfo                "2025_03" .
+
+rdfs:label  rdf:type  owl:AnnotationProperty .
+
+xsd:date  rdf:type  rdfs:Datatype .
+
+xsd:gYear  rdf:type  rdfs:Datatype .
+
+xsd:gYearMonth  rdf:type  rdfs:Datatype .
+
+xsd:string  rdf:type  rdfs:Datatype .
+
+<http://biohackathon.org/resource/faldo#location>
+        rdf:type  owl:ObjectProperty .
+
+<http://biohackathon.org/resource/faldo#reference>
+        rdf:type  owl:ObjectProperty .
+
+core:activity  rdf:type   owl:ObjectProperty;
+        rdfs:label        "catalytic activity";
+        rdfs:comment      "The catalytic activity of an enzyme.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Enzyme;
+        rdfs:range        core:Catalytic_Activity .
+
+core:alternativeName  rdf:type  owl:ObjectProperty;
+        rdfs:label          "alternativeName";
+        rdfs:comment        "A synonym of the recommended name.";
+        rdfs:isDefinedBy    core:;
+        rdfs:range          core:Structured_Name;
+        rdfs:subPropertyOf  core:structuredName;
+        rdfs:seeAlso        <http://www.uniprot.org/manual/protein_names>;
+        rdfs:domain         _:b0 .
+
+_:b0    rdf:type     owl:Class;
+        owl:unionOf  _:b1 .
+
+_:b1    rdf:first  core:Part;
+        rdf:rest   _:b2 .
+
+_:b2    rdf:first  core:Protein;
+        rdf:rest   rdf:nil .
+
+core:annotation  rdf:type  owl:ObjectProperty;
+        rdfs:label        "annotation";
+        rdfs:comment      "Attaches an annotation to a resource.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Annotation;
+        rdfs:domain       core:Protein .
+
+core:attribution  rdf:type  owl:ObjectProperty;
+        rdfs:label        "attribution";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Attribution;
+        rdfs:domain       _:b3 .
+
+_:b3    rdf:type     owl:Class;
+        owl:unionOf  _:b4 .
+
+_:b4    rdf:first  core:Protein;
+        rdf:rest   _:b5 .
+
+_:b5    rdf:first  rdf:Statement;
+        rdf:rest   rdf:nil .
+
+core:basedOn  rdf:type    owl:ObjectProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "based on";
+        rdfs:comment      "The sequence on which the description of a modified sequence is based.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Modified_Sequence;
+        rdfs:range        core:Simple_Sequence .
+
+core:catalyticActivity
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "catalytic activity";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Catalytic_Activity_Annotation;
+        rdfs:range        core:Catalytic_Activity .
+
+core:catalyzedPhysiologicalReaction
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "catalyzed physiological reaction";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Catalytic_Activity_Annotation .
+
+core:catalyzedReaction
+        rdf:type          owl:ObjectProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "catalyzed reaction";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Catalytic_Activity .
+
+core:category  rdf:type   owl:ObjectProperty;
+        rdfs:label        "category";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database .
+
+core:cellularComponent
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "cellular component";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Cellular_Component;
+        rdfs:domain       _:b6 .
+
+_:b6    rdf:type            owl:Class;
+        owl:intersectionOf  _:b7 .
+
+_:b7    rdf:first  _:b8 .
+
+_:b8    rdf:type                  owl:Restriction;
+        owl:onProperty            core:cellularComponent;
+        owl:onClass               core:Cellular_Component;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b7    rdf:rest  _:b9 .
+
+_:b9    rdf:first  _:b10 .
+
+_:b10   rdf:type                     owl:Restriction;
+        owl:onProperty               core:orientation;
+        owl:onClass                  core:Orientation;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b9    rdf:rest  _:b11 .
+
+_:b11   rdf:first  _:b12 .
+
+_:b12   rdf:type                     owl:Restriction;
+        owl:onProperty               core:topology;
+        owl:onClass                  core:Topology;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b11   rdf:rest  rdf:nil .
+
+core:chainSequenceMapping
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "chainSequenceMapping";
+        rdfs:comment      "A mapping between a Sequence/Entry and aminoacids described in a PDB record."^^xsd:anyURI;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Protein .
+
+core:citation  rdf:type   owl:ObjectProperty;
+        rdfs:label        "citation";
+        rdfs:comment      "A publication from which data was extracted, or which contains additional information.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Citation;
+        rdfs:domain       _:b13 .
+
+_:b13   rdf:type     owl:Class;
+        owl:unionOf  _:b14 .
+
+_:b14   rdf:first  core:Cellular_Component;
+        rdf:rest   _:b15 .
+
+_:b15   rdf:first  core:Database;
+        rdf:rest   _:b16 .
+
+_:b16   rdf:first  core:External_Sequence;
+        rdf:rest   _:b17 .
+
+_:b17   rdf:first  core:Nucleotide_Resource;
+        rdf:rest   _:b18 .
+
+_:b18   rdf:first  core:Orientation;
+        rdf:rest   _:b19 .
+
+_:b19   rdf:first  core:Protein;
+        rdf:rest   _:b20 .
+
+_:b20   rdf:first  core:Topology;
+        rdf:rest   rdf:nil .
+
+core:classifiedWith  rdf:type  owl:ObjectProperty;
+        rdfs:label        "classified with";
+        rdfs:comment      "A concept that classifies this resource.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Concept;
+        rdfs:domain       core:Protein .
+
+core:cofactor  rdf:type   owl:ObjectProperty;
+        rdfs:label        "cofactor";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Cofactor_Annotation .
+
+core:commonName  rdf:type   owl:ObjectProperty;
+        rdf:type            owl:FunctionalProperty;
+        rdfs:label          "common name";
+        rdfs:isDefinedBy    core:;
+        rdfs:domain         core:Taxon;
+        rdfs:subPropertyOf  core:name .
+
+core:commonTaxon  rdf:type  owl:ObjectProperty;
+        rdfs:label        "common taxon";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Cluster;
+        rdfs:range        core:Taxon .
+
+core:component  rdf:type    owl:ObjectProperty;
+        rdfs:label          "proteome component";
+        rdfs:comment        "A component of a protein.";
+        rdfs:isDefinedBy    core:;
+        rdfs:range          core:Part;
+        rdfs:domain         core:Protein;
+        rdfs:subPropertyOf  core:part .
+
+core:conflictingSequence
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "conflicting sequence";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:External_Sequence;
+        rdfs:domain       _:b21 .
+
+_:b21   rdf:type     owl:Class;
+        owl:unionOf  _:b22 .
+
+_:b22   rdf:first  core:Protein;
+        rdf:rest   _:b23 .
+
+_:b23   rdf:first  core:Sequence_Caution_Annotation;
+        rdf:rest   _:b24 .
+
+_:b24   rdf:first  core:Sequence_Conflict_Annotation;
+        rdf:rest   rdf:nil .
+
+core:context  rdf:type    owl:ObjectProperty;
+        rdfs:label        "context";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Citation_Statement .
+
+core:database  rdf:type   owl:ObjectProperty;
+        rdfs:label        "database";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Database;
+        rdfs:domain       core:Resource .
+
+core:disease  rdf:type    owl:ObjectProperty;
+        rdfs:label        "disease";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Disease;
+        rdfs:domain       core:Disease_Annotation .
+
+core:domain  rdf:type       owl:ObjectProperty;
+        rdfs:label          "domain";
+        rdfs:comment        "A domain of a protein.";
+        rdfs:isDefinedBy    core:;
+        rdfs:range          core:Part;
+        rdfs:domain         core:Protein;
+        rdfs:subPropertyOf  core:part .
+
+core:encodedBy  rdf:type  owl:ObjectProperty;
+        rdfs:label        "encoded by";
+        rdfs:comment      "The gene by which a protein is encoded.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Gene;
+        rdfs:domain       core:Protein .
+
+core:encodedIn  rdf:type  owl:ObjectProperty;
+        rdfs:label        "encoded in";
+        rdfs:comment      "The subcellular location where a protein is encoded.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Protein;
+        rdfs:range        core:Subcellular_Location .
+
+core:enzyme  rdf:type     owl:ObjectProperty;
+        rdfs:label        "enzyme";
+        rdfs:comment      "The catalytic activity associated with a protein. or part of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Enzyme;
+        rdfs:domain       _:b25 .
+
+_:b25   rdf:type     owl:Class;
+        owl:unionOf  _:b26 .
+
+_:b26   rdf:first  core:Part;
+        rdf:rest   _:b27 .
+
+_:b27   rdf:first  core:Protein;
+        rdf:rest   rdf:nil .
+
+core:enzymeClass  rdf:type  owl:ObjectProperty;
+        rdfs:label        "enzyme class";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Catalytic_Activity;
+        rdfs:range        core:Enzyme .
+
+core:erratum  rdf:type    owl:ObjectProperty;
+        rdfs:label        "erratum";
+        rdfs:comment      "An erratum for a publication.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Published_Citation;
+        rdfs:domain       core:Published_Citation;
+        owl:inverseOf     core:erratumFor .
+
+core:erratumFor  rdf:type  owl:ObjectProperty;
+        rdfs:label        "erratum for";
+        rdfs:comment      "The publication which an erratum refers to.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Published_Citation;
+        rdfs:domain       core:Published_Citation .
+
+core:existence  rdf:type  owl:ObjectProperty;
+        rdfs:label        "existence";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Protein .
+
+core:host  rdf:type       owl:ObjectProperty;
+        rdfs:label        "host";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Taxon;
+        rdfs:range        core:Taxon .
+
+core:interaction  rdf:type  owl:ObjectProperty;
+        rdfs:label        "interaction";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Interaction;
+        rdfs:domain       core:Protein .
+
+core:isolatedFrom  rdf:type  owl:ObjectProperty;
+        rdfs:label        "isolatedFrom";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Protein;
+        rdfs:range        core:Tissue .
+
+core:ligand  rdf:type     owl:ObjectProperty;
+        rdfs:label        "ligand";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Binding_Site_Annotation .
+
+core:ligandPart  rdf:type  owl:ObjectProperty;
+        rdfs:label        "ligand part";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Binding_Site_Annotation .
+
+core:locatedIn  rdf:type  owl:ObjectProperty;
+        rdfs:label        "located in";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Subcellular_Location_Annotation;
+        rdfs:range        _:b28 .
+
+_:b28   rdf:type            owl:Class;
+        owl:intersectionOf  _:b29 .
+
+_:b29   rdf:first  _:b30 .
+
+_:b30   rdf:type                  owl:Restriction;
+        owl:onProperty            core:cellularComponent;
+        owl:onClass               core:Cellular_Component;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b29   rdf:rest  _:b31 .
+
+_:b31   rdf:first  _:b32 .
+
+_:b32   rdf:type                     owl:Restriction;
+        owl:onProperty               core:orientation;
+        owl:onClass                  core:Orientation;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b31   rdf:rest  _:b33 .
+
+_:b33   rdf:first  _:b34 .
+
+_:b34   rdf:type                     owl:Restriction;
+        owl:onProperty               core:topology;
+        owl:onClass                  core:Topology;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b33   rdf:rest  rdf:nil .
+
+core:locatedOn  rdf:type  owl:ObjectProperty;
+        rdfs:label        "located on";
+        rdfs:comment      "The molecule a this resource is located on.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Molecule;
+        rdfs:domain       core:Nucleotide_Resource .
+
+core:locusName  rdf:type    owl:ObjectProperty;
+        rdfs:label          "locus name";
+        rdfs:isDefinedBy    core:;
+        rdfs:domain         core:Gene;
+        rdfs:subPropertyOf  core:name .
+
+core:mappedAnnotation
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "mapped annotation";
+        rdfs:comment      "Maps annotation to a resource. Used to link annotations/comments from external non UniProt sources via Citations to UniProt resources.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Annotation;
+        rdfs:domain       _:b35 .
+
+_:b35   rdf:type     owl:Class;
+        owl:unionOf  _:b36 .
+
+_:b36   rdf:first  core:Citation_Statement;
+        rdf:rest   _:b37 .
+
+_:b37   rdf:first  core:Protein;
+        rdf:rest   rdf:nil .
+
+core:mappedCitation  rdf:type  owl:ObjectProperty;
+        rdfs:label        "mapped citation";
+        rdfs:comment      "A publication from which data was by a extracted by a mapping from non UniProt origin, or which contains additional information.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Citation;
+        rdfs:domain       core:Protein .
+
+core:member  rdf:type     owl:ObjectProperty;
+        rdfs:label        "member";
+        rdfs:comment      "One of several similar resources.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Cluster;
+        rdfs:range        core:Sequence;
+        owl:inverseOf     core:memberOf .
+
+core:memberOf  rdf:type   owl:ObjectProperty;
+        rdfs:label        "member of";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Cluster;
+        rdfs:domain       core:Sequence .
+
+core:method  rdf:type     owl:ObjectProperty;
+        rdfs:label        "method";
+        rdfs:comment      "The experimental method that was used.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Method;
+        rdfs:domain       _:b38 .
+
+_:b38   rdf:type     owl:Class;
+        owl:unionOf  _:b39 .
+
+_:b39   rdf:first  core:Mass_Spectrometry_Annotation;
+        rdf:rest   _:b40 .
+
+_:b40   rdf:first  core:Structure_Resource;
+        rdf:rest   rdf:nil .
+
+core:modification  rdf:type  owl:ObjectProperty;
+        rdfs:label        "modification";
+        rdfs:comment      "A modification of a sequence.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Alternative_Sequence_Annotation;
+        rdfs:domain       core:Modified_Sequence .
+
+core:nucleotideSequenceMappingIssue
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "nucleotideSequenceMappingIssue";
+        rdfs:comment      "When a CDS differs substantially from a reviewed UniProtKB/Swiss-Prot sequence, the UniProt curators indicate the nature of the difference in the corresponding cross-reference."^^xsd:anyURI;
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Nucleotide_Resource;
+        rdfs:domain       core:Reviewed_Protein .
+
+core:organism  rdf:type   owl:ObjectProperty;
+        rdfs:label        "organism";
+        rdfs:comment      "The organism in which a protein occurs.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Taxon;
+        rdfs:domain       _:b41 .
+
+_:b41   rdf:type     owl:Class;
+        owl:unionOf  _:b42 .
+
+_:b42   rdf:first  core:Protein;
+        rdf:rest   _:b43 .
+
+_:b43   rdf:first  core:Sequence;
+        rdf:rest   rdf:nil .
+
+core:orientation  rdf:type  owl:ObjectProperty;
+        rdfs:label        "orientation";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Orientation;
+        rdfs:domain       _:b44 .
+
+_:b44   rdf:type            owl:Class;
+        owl:intersectionOf  _:b45 .
+
+_:b45   rdf:first  _:b46 .
+
+_:b46   rdf:type                  owl:Restriction;
+        owl:onProperty            core:cellularComponent;
+        owl:onClass               core:Cellular_Component;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b45   rdf:rest  _:b47 .
+
+_:b47   rdf:first  _:b48 .
+
+_:b48   rdf:type                     owl:Restriction;
+        owl:onProperty               core:orientation;
+        owl:onClass                  core:Orientation;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b47   rdf:rest  _:b49 .
+
+_:b49   rdf:first  _:b50 .
+
+_:b50   rdf:type                     owl:Restriction;
+        owl:onProperty               core:topology;
+        owl:onClass                  core:Topology;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b49   rdf:rest  rdf:nil .
+
+core:panproteome  rdf:type  owl:ObjectProperty;
+        rdfs:label        "panproteome";
+        rdfs:comment      "The current pan proteome sequences are derived from the reference proteome\nclusters (75% proteome similarity for Fungus and 55% proteome similarity for\nArchaea and Bacteria). A reference proteome cluster is also known as a\nrepresentative proteome group (RPG) (Chen et al., 2011). A RPG contains similar\nproteomes calculated based on their co-membership in UniRef50 clusters. For each\nnon-singleton reference proteome cluster, a pan proteome is a set of sequences\nconsisting of all the sequences in the reference proteome, plus the addition of\nunique protein sequences that are found in other species or strains of the\ncluster but not in the reference proteome. These additional sequences are\nidentified using UniRef50 membership.";
+        rdfs:seeAlso      <ftp://ftp.uniprot.orftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/pan_proteomes/READMEg/pub/databases/uniprot/current_release/knowledgebase/pan_proteomes/README>;
+        rdfs:seeAlso      <http://pir.georgetown.edu/rps/pp.shtml>;
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Proteome;
+        rdfs:domain       core:Proteome .
+
+core:part  rdf:type       owl:ObjectProperty;
+        rdfs:label        "part";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Part .
+
+core:partOf  rdf:type     owl:ObjectProperty;
+        rdfs:label        "part of";
+        rdfs:isDefinedBy  core: .
+
+core:participant  rdf:type  owl:ObjectProperty;
+        rdfs:label        "participant";
+        rdfs:comment      "A protein that participates in a protein-protein interaction.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Interaction;
+        rdfs:range        core:Participant .
+
+core:potentialSequence
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "potential sequence";
+        rdfs:comment      "This is a predicate added by an automated procedure to link entries/proteins that might be isoforms of each other.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Protein;
+        rdfs:range        core:Sequence .
+
+core:publishedIn  rdf:type  owl:ObjectProperty;
+        rdfs:label        "published in";
+        rdfs:comment      "Reserved predicate to link a citation to the Journal that it appeared in.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Citation;
+        rdfs:range        core:Journal .
+
+core:rank  rdf:type       owl:ObjectProperty;
+        rdfs:label        "rank";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The rank of a taxon.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Rank;
+        rdfs:domain       core:Taxon .
+
+core:recommendedName  rdf:type  owl:ObjectProperty;
+        rdfs:label          "recommended name";
+        rdfs:comment        "The name recommended by the UniProt consortium.";
+        rdfs:isDefinedBy    core:;
+        rdfs:range          core:Structured_Name;
+        rdfs:subPropertyOf  core:structuredName;
+        rdfs:domain         _:b51 .
+
+_:b51   rdf:type     owl:Class;
+        owl:unionOf  _:b52 .
+
+_:b52   rdf:first  core:Part;
+        rdf:rest   _:b53 .
+
+_:b53   rdf:first  core:Protein;
+        rdf:rest   rdf:nil .
+
+core:redundantTo  rdf:type  owl:ObjectProperty;
+        rdfs:label        "redundantTo";
+        rdfs:comment      "Indicates which proteome this proteome is redundant to.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Proteome;
+        rdfs:seeAlso      <http://www.uniprot.org/help/proteome_redundancy>;
+        rdfs:domain       rdfs:Resource .
+
+core:relatedLocation  rdf:type  owl:ObjectProperty;
+        rdfs:label        "related location";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Subcellular_Location;
+        rdfs:range        core:Subcellular_Location .
+
+core:replacedBy  rdf:type  owl:ObjectProperty;
+        rdfs:label        "replaced by";
+        rdfs:comment      "A resource that replaces this resource.";
+        rdfs:isDefinedBy  core:;
+        owl:inverseOf     core:replaces;
+        rdfs:range        _:b54 .
+
+_:b54   rdf:type     owl:Class;
+        owl:unionOf  _:b55 .
+
+_:b55   rdf:first  core:Enzyme;
+        rdf:rest   _:b56 .
+
+_:b56   rdf:first  core:Protein;
+        rdf:rest   _:b57 .
+
+_:b57   rdf:first  core:Taxon;
+        rdf:rest   _:b58 .
+
+_:b58   rdf:first  core:Proteome;
+        rdf:rest   rdf:nil .
+
+core:replacedBy  rdfs:domain  _:b59 .
+
+_:b59   rdf:type     owl:Class;
+        owl:unionOf  _:b60 .
+
+_:b60   rdf:first  core:Enzyme;
+        rdf:rest   _:b61 .
+
+_:b61   rdf:first  core:Protein;
+        rdf:rest   _:b62 .
+
+_:b62   rdf:first  core:Taxon;
+        rdf:rest   _:b63 .
+
+_:b63   rdf:first  core:Proteome;
+        rdf:rest   rdf:nil .
+
+core:replaces  rdf:type   owl:ObjectProperty;
+        rdfs:label        "replaces";
+        rdfs:comment      "A resource that is replaced by this resource.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        _:b64 .
+
+_:b64   rdf:type            owl:Class;
+        owl:intersectionOf  _:b65 .
+
+_:b65   rdf:first  core:Obsolete;
+        rdf:rest   _:b66 .
+
+_:b66   rdf:first  _:b67 .
+
+_:b67   rdf:type     owl:Class;
+        owl:unionOf  _:b68 .
+
+_:b68   rdf:first  core:Enzyme;
+        rdf:rest   _:b69 .
+
+_:b69   rdf:first  core:Protein;
+        rdf:rest   _:b70 .
+
+_:b70   rdf:first  core:Taxon;
+        rdf:rest   _:b71 .
+
+_:b71   rdf:first  core:Proteome;
+        rdf:rest   rdf:nil .
+
+_:b66   rdf:rest  rdf:nil .
+
+core:replaces  rdfs:domain  _:b72 .
+
+_:b72   rdf:type     owl:Class;
+        owl:unionOf  _:b73 .
+
+_:b73   rdf:first  core:Enzyme;
+        rdf:rest   _:b74 .
+
+_:b74   rdf:first  core:Protein;
+        rdf:rest   _:b75 .
+
+_:b75   rdf:first  core:Taxon;
+        rdf:rest   _:b76 .
+
+_:b76   rdf:first  core:Proteome;
+        rdf:rest   rdf:nil .
+
+core:representativeFor
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "representative for";
+        rdf:type          owl:FunctionalProperty;
+        rdf:type          owl:InverseFunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Cluster;
+        rdfs:domain       _:b77 .
+
+_:b77   rdf:type     owl:Class;
+        owl:unionOf  _:b78 .
+
+_:b78   rdf:first  core:Protein;
+        rdf:rest   _:b79 .
+
+_:b79   rdf:first  core:Sequence;
+        rdf:rest   rdf:nil .
+
+core:seedFor  rdf:type    owl:ObjectProperty;
+        rdfs:label        "seed for";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Cluster;
+        rdfs:domain       core:Sequence .
+
+core:sequence  rdf:type   owl:ObjectProperty;
+        rdfs:label        "sequence";
+        rdfs:comment      "An amino acid sequence.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Sequence;
+        owl:inverseOf     core:sequenceFor;
+        rdfs:domain       _:b80 .
+
+_:b80   rdf:type     owl:Class;
+        owl:unionOf  _:b81 .
+
+_:b81   rdf:first  core:Annotation;
+        rdf:rest   _:b82 .
+
+_:b82   rdf:first  core:Protein;
+        rdf:rest   _:b83 .
+
+_:b83   rdf:first  core:Resource;
+        rdf:rest   rdf:nil .
+
+core:sequenceDiscrepancy
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "sequence discrepancy";
+        rdfs:comment      "Used when a CoDing Sequences (CDS) from the INSDC differs substantially from a reviewed UniProtKB/Swiss-Prot sequence, the UniProt curators indicate the nature of the difference as a rdfs:comment linked via this predicate.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Nucleotide_Resource .
+
+core:sequenceFor  rdf:type  owl:ObjectProperty;
+        rdfs:label        "sequence for";
+        rdfs:comment      "A resource that describes this sequence.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Sequence;
+        rdfs:range        _:b84 .
+
+_:b84   rdf:type     owl:Class;
+        owl:unionOf  _:b85 .
+
+_:b85   rdf:first  core:Annotation;
+        rdf:rest   _:b86 .
+
+_:b86   rdf:first  core:Protein;
+        rdf:rest   _:b87 .
+
+_:b87   rdf:first  core:Resource;
+        rdf:rest   rdf:nil .
+
+core:signatureSequenceMatch
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "signature sequence match";
+        rdfs:comment      "Indicates that the signature described by the subject resource matches mathematically and that that match is described by the object of a triple using this property as predicate.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Resource .
+
+core:someMembersClassifiedWith
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "some members classified with";
+        rdfs:comment      "Indicates which GO terms are somewhat consistently used to annotate UniProtKB members of this cluster.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Cluster;
+        rdfs:range        _:b88 .
+
+_:b88   rdf:type     owl:Class;
+        owl:unionOf  _:b89 .
+
+_:b89   rdf:first  <http://purl.obolibrary.org/obo/GO_0003674>;
+        rdf:rest   _:b90 .
+
+_:b90   rdf:first  <http://purl.obolibrary.org/obo/GO_0005575>;
+        rdf:rest   _:b91 .
+
+_:b91   rdf:first  <http://purl.obolibrary.org/obo/GO_0008150>;
+        rdf:rest   rdf:nil .
+
+core:source  rdf:type     owl:ObjectProperty;
+        rdfs:label        "source";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Attribution .
+
+core:status  rdf:type   owl:ObjectProperty;
+        owl:deprecated  true .
+
+core:strain  rdf:type     owl:ObjectProperty;
+        rdfs:label        "strain";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Strain;
+        rdfs:domain       core:Taxon .
+
+core:structuredName  rdf:type  owl:ObjectProperty;
+        rdfs:label        "structured name";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Structured_Name;
+        rdfs:domain       _:b92 .
+
+_:b92   rdf:type     owl:Class;
+        owl:unionOf  _:b93 .
+
+_:b93   rdf:first  core:Part;
+        rdf:rest   _:b94 .
+
+_:b94   rdf:first  core:Protein;
+        rdf:rest   rdf:nil .
+
+core:submittedName  rdf:type  owl:ObjectProperty;
+        rdfs:label          "submitted name";
+        rdfs:comment        "A name provided by the submitter of the underlying nucleotide sequence.";
+        rdfs:isDefinedBy    core:;
+        rdfs:range          core:Structured_Name;
+        rdfs:subPropertyOf  core:structuredName;
+        rdfs:domain         _:b95 .
+
+_:b95   rdf:type     owl:Class;
+        owl:unionOf  _:b96 .
+
+_:b96   rdf:first  core:Part;
+        rdf:rest   _:b97 .
+
+_:b97   rdf:first  core:Protein;
+        rdf:rest   rdf:nil .
+
+core:topology  rdf:type   owl:ObjectProperty;
+        rdfs:label        "topology";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        core:Topology;
+        rdfs:domain       _:b98 .
+
+_:b98   rdf:type            owl:Class;
+        owl:intersectionOf  _:b99 .
+
+_:b99   rdf:first  _:b100 .
+
+_:b100  rdf:type                  owl:Restriction;
+        owl:onProperty            core:cellularComponent;
+        owl:onClass               core:Cellular_Component;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b99   rdf:rest  _:b101 .
+
+_:b101  rdf:first  _:b102 .
+
+_:b102  rdf:type                     owl:Restriction;
+        owl:onProperty               core:orientation;
+        owl:onClass                  core:Orientation;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b101  rdf:rest  _:b103 .
+
+_:b103  rdf:first  _:b104 .
+
+_:b104  rdf:type                     owl:Restriction;
+        owl:onProperty               core:topology;
+        owl:onClass                  core:Topology;
+        owl:maxQualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b103  rdf:rest  rdf:nil .
+
+core:transcribedFrom  rdf:type  owl:ObjectProperty;
+        rdfs:label        "transcribed from";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Transcript_Resource .
+
+core:translatedFrom  rdf:type  owl:ObjectProperty;
+        rdfs:label        "translated from";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:External_Sequence;
+        rdfs:range        core:Nucleotide_Resource .
+
+core:translatedTo  rdf:type  owl:ObjectProperty;
+        rdfs:label        "translated to";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Transcript_Resource .
+
+core:withdrawnFromINSDC
+        rdf:type          owl:ObjectProperty;
+        rdfs:label        "withdrawnFromINSDC";
+        rdfs:isDefinedBy  core: .
+
+rdfs:label  rdf:type  owl:ObjectProperty .
+
+skos:prefLabel  rdf:type  owl:ObjectProperty .
+
+core:abstract  rdf:type   owl:DatatypeProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "abstract";
+        rdfs:comment      "True if the class does not have any direct instances.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database;
+        rdfs:range        xsd:boolean .
+
+core:alias  rdf:type      owl:DatatypeProperty;
+        rdfs:label        "alias";
+        rdfs:comment      "An alternative name used in the flat text format.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:string .
+
+core:allergenName  rdf:type  owl:DatatypeProperty;
+        rdfs:label          "allergen name";
+        rdfs:comment        "See http://www.expasy.org/cgi-bin/lists?allergen.txt";
+        rdfs:isDefinedBy    core:;
+        rdfs:subPropertyOf  core:structuredNameType .
+
+core:atypical  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "atypical";
+        owl:deprecated    true;
+        rdfs:isDefinedBy  core: .
+
+core:author  rdf:type     owl:DatatypeProperty;
+        rdfs:label        "author";
+        rdfs:comment      "The author of a publication.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Citation;
+        rdfs:range        xsd:string .
+
+core:authorsIncomplete
+        rdf:type          owl:DatatypeProperty;
+        rdfs:label        "authorsIncomplete";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Citation;
+        rdfs:range        xsd:boolean .
+
+core:base  rdf:type  owl:DatatypeProperty .
+
+core:begin  rdf:type    owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:biotechName  rdf:type  owl:DatatypeProperty;
+        rdfs:label          "biotechName";
+        rdfs:comment        "A name used in a biotechnological context.";
+        rdfs:isDefinedBy    core:;
+        rdfs:subPropertyOf  core:structuredNameType .
+
+core:cdAntigenName  rdf:type  owl:DatatypeProperty;
+        rdfs:label          "CD molecule antigen name";
+        rdfs:comment        "A name from the Human Cell Differentiation Molecules (HCDM) nomenclature.";
+        rdfs:isDefinedBy    core:;
+        rdfs:subPropertyOf  core:structuredNameType .
+
+core:certain  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "certain";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "False if there is any uncertainty about a statement.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:boolean;
+        rdfs:domain       core:Absorption_Annotation .
+
+core:chain  rdf:type      owl:DatatypeProperty;
+        rdfs:label        "chain";
+        rdfs:comment      "Maps a series of symbols representing chains of a protein to a range of amino acids.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Structure_Mapping_Statement;
+        rdfs:range        xsd:string .
+
+core:checksum  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "checksum";
+        rdfs:comment      "An caclulated value that is used to detect if there are errors in the sequence as shown due to among others IO errors. Both the crc64 and md5sum have collisions in UniProt data and cannot be used as unique keys.";
+        rdfs:isDefinedBy  core: .
+
+core:cofactorLabel  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "cofactorLabel";
+        rdfs:comment      "A cofactor required for a catalytic activity.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Enzyme;
+        rdfs:range        xsd:string .
+
+core:complete  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "complete";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Taxon;
+        rdfs:seeAlso      <http://www.uniprot.org/faq/15>;
+        rdfs:range        xsd:boolean .
+
+core:crc64Checksum  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "crc64Checksum (no longer used in UniProt RDF)";
+        owl:deprecated    true;
+        rdfs:isDefinedBy  core: .
+
+core:created  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "created";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The date a resource was created.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:date;
+        rdfs:domain       _:b105 .
+
+_:b105  rdf:type     owl:Class;
+        owl:unionOf  _:b106 .
+
+_:b106  rdf:first  core:Protein;
+        rdf:rest   _:b107 .
+
+_:b107  rdf:first  core:Resource;
+        rdf:rest   _:b108 .
+
+_:b108  rdf:first  core:Sequence;
+        rdf:rest   rdf:nil .
+
+core:curated  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "curated";
+        rdfs:comment      "If true the described database has some level of curation.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database;
+        rdfs:range        xsd:boolean .
+
+core:date  rdf:type       owl:DatatypeProperty;
+        rdfs:label        "date";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       _:b109 .
+
+_:b109  rdf:type     owl:Class;
+        owl:unionOf  _:b110 .
+
+_:b110  rdf:first  core:Attribution;
+        rdf:rest   _:b111 .
+
+_:b111  rdf:first  core:Citation;
+        rdf:rest   rdf:nil .
+
+core:domains  rdf:type  owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:ecName  rdf:type       owl:DatatypeProperty;
+        rdfs:label          "EC as a name";
+        rdfs:comment        "The ecName is the enzyme classification associated with a structured name of the protein. Proteins are often named after their enzymatic activity but can have more than one activity leading to multiple names.";
+        rdfs:isDefinedBy    core:;
+        rdfs:subPropertyOf  core:structuredNameType .
+
+core:editor  rdf:type     owl:DatatypeProperty;
+        rdfs:label        "editor";
+        rdfs:comment      "The editor of a publication.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Book_Citation;
+        rdfs:range        xsd:string .
+
+core:end  rdf:type      owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:experiments  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "experiments";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Interaction;
+        rdfs:range        xsd:int .
+
+core:exclusionReason  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "proteome exclusion reason";
+        rdfs:comment      "Indicates why the proteins of an Proteome where excluded from UniProtKB.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Proteome;
+        rdfs:range        xsd:string .
+
+core:fragment  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "fragment";
+        rdfs:comment      "Indicates if a sequence is complete or consists of one or more fragments.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Simple_Sequence;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/sequence_status>;
+        rdfs:range        _:b112 .
+
+_:b112  rdf:type   rdfs:Datatype;
+        owl:oneOf  _:b113 .
+
+_:b113  rdf:type   rdf:List;
+        rdf:first  "multiple";
+        rdf:rest   _:b114 .
+
+_:b114  rdf:type   rdf:List;
+        rdf:first  "single";
+        rdf:rest   rdf:nil .
+
+core:frameshift  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "frameshift";
+        rdfs:comment      "True if a sequence modification causes a frameshift.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:RNA_Editing_Annotation;
+        rdfs:range        xsd:boolean .
+
+core:fullName  rdf:type     owl:DatatypeProperty;
+        rdfs:label          "fullName";
+        rdfs:comment        "The full name.";
+        rdfs:isDefinedBy    core:;
+        rdfs:subPropertyOf  core:structuredNameType .
+
+core:fused  rdf:type    owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:group  rdf:type        owl:DatatypeProperty;
+        rdfs:label          "group";
+        rdfs:comment        "The group or consortium that authored a publication.";
+        rdfs:isDefinedBy    core:;
+        rdfs:domain         core:Citation;
+        rdfs:subPropertyOf  core:author;
+        rdfs:range          xsd:string .
+
+core:height  rdf:type     owl:DatatypeProperty;
+        rdfs:label        "height";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:int;
+        rdfs:domain       foaf:Image .
+
+core:hits  rdf:type     owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:identity  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "identity";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The level of sequence identity in a cluster.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Cluster;
+        rdfs:range        _:b115 .
+
+_:b115  rdf:type   rdfs:Datatype;
+        owl:oneOf  _:b116 .
+
+_:b116  rdf:type   rdf:List;
+        rdf:first  "0.5"^^xsd:float;
+        rdf:rest   _:b117 .
+
+_:b117  rdf:type   rdf:List;
+        rdf:first  "0.9"^^xsd:float;
+        rdf:rest   _:b118 .
+
+_:b118  rdf:type   rdf:List;
+        rdf:first  "1.0"^^xsd:float;
+        rdf:rest   rdf:nil .
+
+core:implicit  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "implicit";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "True if existance of this resource can be inferred.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database;
+        rdfs:range        xsd:boolean .
+
+core:institution  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "institution";
+        rdfs:comment      "The institution at which a thesis was written.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Thesis_Citation;
+        rdfs:range        xsd:string .
+
+core:internationalNonproprietaryName
+        rdf:type            owl:DatatypeProperty;
+        rdfs:label          "international non proprietary name";
+        rdfs:comment        "The international nonproprietary name: A generic name for a pharmaceutical substance or active pharmaceutical ingredient that is globally recognized and is a public property.";
+        rdfs:isDefinedBy    core:;
+        rdfs:subPropertyOf  core:structuredNameType .
+
+core:length  rdf:type     owl:DatatypeProperty;
+        rdfs:label        "length";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Sequence;
+        rdfs:range        xsd:int .
+
+core:limit  rdf:type    owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:linkIsExplicit  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "link is explicit";
+        rdfs:comment      "True if the Database is linked by an explicit action to UniProt, false if it is done using a simple hardcoded rule.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database;
+        rdfs:range        xsd:boolean .
+
+core:locator  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "locator";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Citation;
+        rdfs:range        xsd:string .
+
+core:manual  rdf:type     owl:DatatypeProperty;
+        rdfs:label        "manual";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Attribution;
+        rdfs:range        xsd:boolean .
+
+core:mass  rdf:type       owl:DatatypeProperty;
+        rdfs:label        "predicted mass";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The predicted mass of a sequence in Daltons.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Sequence;
+        rdfs:range        xsd:int .
+
+core:maximum  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "maximum";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "A maximum value.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Absorption_Annotation;
+        rdfs:range        xsd:float .
+
+core:md5Checksum  rdf:type  owl:DatatypeProperty;
+        rdfs:label          "MD5 checksum";
+        rdf:type            owl:FunctionalProperty;
+        rdfs:isDefinedBy    core:;
+        rdfs:domain         core:Sequence;
+        rdfs:subPropertyOf  core:checksum;
+        rdfs:range          xsd:string .
+
+core:measuredActivity
+        rdf:type          owl:DatatypeProperty;
+        rdfs:label        "measured activity";
+        rdfs:comment      "The maximum velocity, Vmax.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Kinetics_Annotation;
+        rdfs:range        xsd:string .
+
+core:measuredAffinity
+        rdf:type          owl:DatatypeProperty;
+        rdfs:label        "measured affinity";
+        rdfs:comment      "The Michaelis-Menten constant, Km.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Kinetics_Annotation;
+        rdfs:range        xsd:string .
+
+core:measuredError  rdf:type  owl:DatatypeProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "measured error";
+        rdfs:comment      "The magnitude of the error of a value that was measured.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Mass_Spectrometry_Annotation;
+        rdfs:range        xsd:float .
+
+core:measuredValue  rdf:type  owl:DatatypeProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "measured value";
+        rdfs:comment      "A value that was measured.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Mass_Spectrometry_Annotation;
+        rdfs:range        xsd:float .
+
+core:mnemonic  rdf:type     owl:DatatypeProperty;
+        rdfs:label          "Mnemonic";
+        rdfs:comment        "A rememberable string that can be used to find entries, not a stable identifier!";
+        rdfs:comment        "A easy to remember identifier for a UniProtKB entry, but it is not a stable identifier and should not be used by programs to identify entries.";
+        rdfs:isDefinedBy    core:;
+        rdfs:seeAlso        <http://www.uniprot.org/manual/entry_name>;
+        rdfs:range          xsd:string;
+        rdfs:subPropertyOf  core:name;
+        rdfs:domain         _:b119 .
+
+_:b119  rdf:type     owl:Class;
+        owl:unionOf  _:b120 .
+
+_:b120  rdf:first  core:Cluster;
+        rdf:rest   _:b121 .
+
+_:b121  rdf:first  core:Protein;
+        rdf:rest   _:b122 .
+
+_:b122  rdf:first  core:Sequence;
+        rdf:rest   rdf:nil .
+
+core:modified  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "modified date";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The date a resource was last modified.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:date;
+        rdfs:domain       _:b123 .
+
+_:b123  rdf:type     owl:Class;
+        owl:unionOf  _:b124 .
+
+_:b124  rdf:first  core:Cluster;
+        rdf:rest   _:b125 .
+
+_:b125  rdf:first  core:Protein;
+        rdf:rest   _:b126 .
+
+_:b126  rdf:first  core:Sequence;
+        rdf:rest   rdf:nil .
+
+core:name  rdf:type       owl:DatatypeProperty;
+        rdfs:label        "name";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:string .
+
+core:negative  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "negative";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Interaction;
+        rdfs:range        xsd:boolean .
+
+core:obsolete  rdf:type   owl:DatatypeProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "obsolete";
+        rdfs:comment      "True if this resource has been replaced or deleted.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:boolean;
+        rdfs:domain       _:b127 .
+
+_:b127  rdf:type     owl:Class;
+        owl:unionOf  _:b128 .
+
+_:b128  rdf:first  core:Protein;
+        rdf:rest   _:b129 .
+
+_:b129  rdf:first  core:Taxon;
+        rdf:rest   rdf:nil .
+
+core:oldMnemonic  rdf:type  owl:DatatypeProperty;
+        rdfs:comment        "A mnemonic that is no longer in use for this entry.";
+        rdfs:label          "old mnemonic";
+        rdfs:domain         core:Protein;
+        rdfs:subPropertyOf  core:name;
+        rdfs:isDefinedBy    core:;
+        rdfs:domain         core:Protein;
+        rdfs:range          xsd:string .
+
+core:orfName  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "ORF name";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Gene;
+        rdfs:range        xsd:string .
+
+core:otherName  rdf:type    owl:DatatypeProperty;
+        rdfs:label          "other name";
+        rdfs:isDefinedBy    core:;
+        rdfs:range          xsd:string;
+        rdfs:domain         core:Taxon;
+        rdfs:subPropertyOf  core:name .
+
+core:pages  rdf:type      owl:DatatypeProperty;
+        rdfs:label        "pages";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The first and last page for a chapter or article.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:string;
+        rdfs:domain       _:b130 .
+
+_:b130  rdf:type     owl:Class;
+        owl:unionOf  _:b131 .
+
+_:b131  rdf:first  core:Book_Citation;
+        rdf:rest   _:b132 .
+
+_:b132  rdf:first  core:Journal_Citation;
+        rdf:rest   rdf:nil .
+
+core:partOfLineage  rdf:type  owl:DatatypeProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "part of lineage";
+        rdfs:comment      "True for taxa that can appear as part of an organism's non abbreviated lineage. In the flatfile and XML views of an UniProt entry (as well as at INSDC) only these taxonomic nodes are shown.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Taxon;
+        rdfs:seeAlso      <http://www.uniprot.org/help/taxonomy#lineage>;
+        rdfs:range        xsd:boolean .
+
+core:partial  rdf:type  owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:pattern  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "URL pattern";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "A URL pattern, used to generate links by substituting an identifier.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database;
+        rdfs:range        xsd:string .
+
+core:place  rdf:type      owl:DatatypeProperty;
+        rdf:type          owl:FunctionalProperty;
+        rdfs:label        "place of publication";
+        rdfs:comment      "The place where a publication was published. This usually includes a country name.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:string;
+        rdfs:domain       _:b133 .
+
+_:b133  rdf:type     owl:Class;
+        owl:unionOf  _:b134 .
+
+_:b134  rdf:first  core:Book_Citation;
+        rdf:rest   _:b135 .
+
+_:b135  rdf:first  core:Thesis_Citation;
+        rdf:rest   rdf:nil .
+
+core:position  rdf:type  owl:DatatypeProperty;
+        owl:deprecated  true .
+
+core:precursor  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "precursor";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Simple_Sequence;
+        rdfs:range        xsd:boolean .
+
+core:publisher  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "publisher";
+        rdfs:comment      "The publisher of a book.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Book_Citation;
+        rdfs:range        xsd:string .
+
+core:referenceProteome
+        rdf:type          owl:DatatypeProperty;
+        rdfs:label        "reference proteome";
+        rdfs:isDefinedBy  core:;
+        owl:deprecated    true .
+
+core:representativeProteome
+        rdf:type          owl:DatatypeProperty;
+        rdfs:label        "representative proteome";
+        owl:deprecated    true;
+        rdfs:isDefinedBy  core: .
+
+core:resolution  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "resolution in Angstrom";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The resolution of an experiment, in Angstrom.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Structure_Resource;
+        rdfs:range        xsd:float .
+
+core:reviewed  rdf:type   owl:DatatypeProperty;
+        rdfs:label        "reviewed";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "Indicates whether a resource has been reviewed by a curator.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:boolean;
+        rdfs:domain       _:b136 .
+
+_:b136  rdf:type     owl:Class;
+        owl:unionOf  _:b137 .
+
+_:b137  rdf:first  core:Protein;
+        rdf:rest   _:b138 .
+
+_:b138  rdf:first  core:Taxon;
+        rdf:rest   rdf:nil .
+
+core:scientificName  rdf:type  owl:DatatypeProperty;
+        rdf:type            owl:FunctionalProperty;
+        rdfs:label          "scientific name";
+        rdfs:isDefinedBy    core:;
+        rdfs:range          xsd:string;
+        rdfs:domain         core:Taxon;
+        rdfs:subPropertyOf  core:name .
+
+core:scope  rdf:type      owl:DatatypeProperty;
+        rdfs:label        "scope";
+        rdfs:comment      "The extent of the work carried out by the authors of a publication.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Citation_Statement;
+        rdfs:range        xsd:string .
+
+core:shortCoden  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "shortCoden";
+        rdfs:comment      "Used to link a Journal to its shortCoden";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Journal;
+        rdfs:range        xsd:string .
+
+core:shortName  rdf:type    owl:DatatypeProperty;
+        rdfs:label          "short name";
+        rdfs:comment        "An abbreviation of the full name or an acronym.";
+        rdfs:isDefinedBy    core:;
+        rdfs:subPropertyOf  core:structuredNameType .
+
+core:structuredNameType
+        rdf:type          owl:DatatypeProperty;
+        rdfs:label        "structured name type";
+        rdfs:comment      "All names of the protein, from commonly used to obsolete, to used in the literature..";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Structured_Name;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/protein_names>;
+        rdfs:range        xsd:string .
+
+core:submittedTo  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "submitted to";
+        rdfs:comment      "The database a resource  was submitted to.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Submission_Citation .
+
+core:substitution  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "substitution";
+        rdfs:comment      "A replacement sequence.";
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:string;
+        rdfs:domain       _:b139 .
+
+_:b139  rdf:type     owl:Class;
+        owl:unionOf  _:b140 .
+
+_:b140  rdf:first  core:Mutagenesis_Annotation;
+        rdf:rest   _:b141 .
+
+_:b141  rdf:first  core:Natural_Variant_Annotation;
+        rdf:rest   _:b142 .
+
+_:b142  rdf:first  core:Sequence_Conflict_Annotation;
+        rdf:rest   rdf:nil .
+
+core:synonym  rdf:type      owl:DatatypeProperty;
+        rdfs:label          "synonym";
+        rdf:type            owl:FunctionalProperty;
+        rdfs:isDefinedBy    core:;
+        rdfs:range          xsd:string;
+        rdfs:domain         core:Taxon;
+        rdfs:subPropertyOf  core:name .
+
+core:title  rdf:type      owl:DatatypeProperty;
+        rdfs:label        "title";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The title of a publication.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Citation;
+        rdfs:range        xsd:string .
+
+core:uriTemplate  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "URI template";
+        rdfs:comment      "An string template that can be used to figure out from the database id what uri desribes it.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database;
+        rdfs:range        xsd:string .
+
+core:urlTemplate  rdf:type  owl:DatatypeProperty;
+        rdfs:label        "URL template";
+        rdfs:comment      "An string template that can be used to figure out from the database id what html page talks about it.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Database;
+        rdfs:range        xsd:string .
+
+core:version  rdf:type    owl:DatatypeProperty;
+        rdfs:label        "version";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:int;
+        rdfs:domain       _:b143 .
+
+_:b143  rdf:type     owl:Class;
+        owl:unionOf  _:b144 .
+
+_:b144  rdf:first  core:Protein;
+        rdf:rest   _:b145 .
+
+_:b145  rdf:first  core:Sequence;
+        rdf:rest   rdf:nil .
+
+core:volume  rdf:type     owl:DatatypeProperty;
+        rdfs:label        "volume";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:comment      "The volume a publication is part of.";
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       _:b146 .
+
+_:b146  rdf:type     owl:Class;
+        owl:unionOf  _:b147 .
+
+_:b147  rdf:first  core:Book_Citation;
+        rdf:rest   _:b148 .
+
+_:b148  rdf:first  core:Journal_Citation;
+        rdf:rest   rdf:nil .
+
+core:width  rdf:type      owl:DatatypeProperty;
+        rdfs:label        "width";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:range        xsd:int;
+        rdfs:domain       foaf:Image .
+
+core:xeno  rdf:type       owl:DatatypeProperty;
+        rdfs:label        "xeno";
+        rdf:type          owl:FunctionalProperty;
+        rdfs:isDefinedBy  core:;
+        rdfs:domain       core:Interaction;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/binary_interactions>;
+        rdfs:range        xsd:boolean .
+
+core:Absorption_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Absorption";
+        rdfs:subClassOf   core:Biophysicochemical_Annotation;
+        rdfs:comment      "Indicates the wavelength in nm at which photoreactive proteins such as opsins and DNA photolyases show maximal absorption.";
+        rdfs:isDefinedBy  core: .
+
+core:Active_Site_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Active Site";
+        rdfs:subClassOf   core:Site_Annotation;
+        rdfs:comment      "Amino acid(s) involved in the activity of an enzyme.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/act_site> .
+
+core:Activity_Regulation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Activity Regulation";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of an enzyme, transporter and microbial transcription regulation mechanism.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/activity_regulation> .
+
+core:Allergen_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Allergen";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Information relevant to allergenic proteins.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/allergenic_properties> .
+
+core:Alternative_Initiation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Alternative Initiation";
+        rdfs:subClassOf   core:Alternative_Products_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Alternative_Products_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Alternative Products";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the existence of related protein sequences produced by alternative splicing of the same gene or by the use of alternative initiation codons.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/alternative_products> .
+
+core:Alternative_Promoter_Usage_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Alternative Promoter Usage";
+        rdfs:subClassOf   core:Alternative_Products_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Alternative_Sequence_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Splice Variant";
+        rdfs:subClassOf   core:Natural_Variation_Annotation;
+        rdfs:comment      "Description of sequence variants produced by alternative splicing.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/var_seq> .
+
+core:Alternative_Splicing_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Alternative Splicing";
+        rdfs:subClassOf   core:Alternative_Products_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Annotation  rdf:type  owl:Class;
+        rdfs:label        "Annotation";
+        rdfs:comment      "Description of a resource on a specific topic.";
+        rdfs:isDefinedBy  core: .
+
+core:Attribution  rdf:type  owl:Class;
+        rdfs:label        "Attribution";
+        rdfs:comment      "Entity used to attach evidence or provenance to a rdf statement via reification."@en;
+        rdfs:isDefinedBy  core: .
+
+core:Beta_Strand_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Strand";
+        rdfs:subClassOf   core:Secondary_Structure_Annotation;
+        rdfs:comment      "Beta strand regions within the experimentally determined protein structure";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/strand> .
+
+core:Binding_Site_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Binding Site";
+        rdfs:subClassOf   core:Site_Annotation;
+        rdfs:comment      "Binding site for any chemical group (co-enzyme, prosthetic group, etc.).";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/binding> .
+
+core:Biophysicochemical_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Biophysicochemical Property";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Biophysical and physicochemical data such as pH dependence, temperature dependence, kinetic parameters, redox potentials, and maximal absorption.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      core:biophysicochemical_properties .
+
+core:Biotechnology_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Biotechnology";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the use of a specific protein in a biotechnological process.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/biotechnological_use> .
+
+core:Book_Citation  rdf:type  owl:Class;
+        rdfs:label       "Book Citation";
+        rdfs:subClassOf  core:Published_Citation;
+        rdfs:subClassOf  _:b149 .
+
+_:b149  rdf:type         owl:Restriction;
+        owl:onProperty   core:name;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Book_Citation  rdfs:comment  "A chapter from a book.";
+        rdfs:isDefinedBy  core: .
+
+core:Catalytic_Activity
+        rdf:type          owl:Class;
+        rdfs:label        "Catalytic Activity";
+        rdfs:comment      "The catalytic activity of an enzyme.";
+        rdfs:isDefinedBy  core: .
+
+core:Catalytic_Activity_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Catalytic Activity Annotation";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the reactions catalyzed by an enzyme.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/catalytic_activity> .
+
+core:Caution_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Caution";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Warning about possible errors and/or grounds for confusion.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/caution> .
+
+core:Cellular_Component
+        rdf:type          owl:Class;
+        rdfs:label        "Cellular Component";
+        rdfs:subClassOf   core:Subcellular_Location;
+        rdfs:isDefinedBy  core: .
+
+core:Chain_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Chain";
+        rdfs:subClassOf   core:Molecule_Processing_Annotation;
+        rdfs:comment      "Extent of a polypeptide chain in the mature protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/chain> .
+
+core:Citation  rdf:type  owl:Class;
+        rdfs:label       "Citation";
+        rdfs:subClassOf  _:b150 .
+
+_:b150  rdf:type     owl:Class;
+        owl:unionOf  _:b151 .
+
+_:b151  rdf:first  _:b152 .
+
+_:b152  rdf:type            owl:Restriction;
+        owl:onProperty      core:date;
+        owl:someValuesFrom  xsd:date .
+
+_:b151  rdf:rest  _:b153 .
+
+_:b153  rdf:first  _:b154 .
+
+_:b154  rdf:type            owl:Restriction;
+        owl:onProperty      core:date;
+        owl:someValuesFrom  xsd:gYear .
+
+_:b153  rdf:rest  _:b155 .
+
+_:b155  rdf:first  _:b156 .
+
+_:b156  rdf:type            owl:Restriction;
+        owl:onProperty      core:date;
+        owl:someValuesFrom  xsd:gYearMonth .
+
+_:b155  rdf:rest  rdf:nil .
+
+core:Citation  owl:disjointWith  core:Protein;
+        owl:disjointWith  core:Sequence;
+        rdfs:comment      "Description of a publication from which data was obtained.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/references> .
+
+core:Citation_Statement
+        rdf:type         owl:Class;
+        rdfs:label       "Citation Statement";
+        rdfs:subClassOf  rdf:Statement;
+        rdfs:subClassOf  _:b157 .
+
+_:b157  rdf:type           owl:Restriction;
+        owl:onProperty     core:context;
+        owl:allValuesFrom  _:b158 .
+
+_:b158  rdf:type     owl:Class;
+        owl:unionOf  _:b159 .
+
+_:b159  rdf:first  core:Strain;
+        rdf:rest   _:b160 .
+
+_:b160  rdf:first  core:Tissue;
+        rdf:rest   _:b161 .
+
+_:b161  rdf:first  core:Transposon;
+        rdf:rest   rdf:nil .
+
+core:Citation_Statement
+        rdfs:comment      "The relationship between a resource and a citation.";
+        rdfs:isDefinedBy  core: .
+
+core:Cluster  rdf:type   owl:Class;
+        rdfs:label       "Cluster (UniRef)";
+        rdfs:subClassOf  owl:Thing;
+        rdfs:subClassOf  _:b162 .
+
+_:b162  rdf:type           owl:Restriction;
+        owl:onProperty     core:member;
+        owl:allValuesFrom  core:Sequence .
+
+core:Cluster  owl:disjointWith  core:Protein;
+        owl:disjointWith  core:Sequence;
+        rdfs:comment      "Cluster of proteins with similar sequences.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/uniref/> .
+
+core:Cofactor_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Cofactor";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of an enzyme cofactor.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/cofactor> .
+
+core:Coiled_Coil_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Coiled-Coil";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of a coiled-coil region.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/coiled> .
+
+core:Compositional_Bias_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Compositionally Biased Region";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of a compositionally biased region.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/compbias> .
+
+core:Concept  rdf:type   owl:Class;
+        rdfs:label       "Concept";
+        rdfs:subClassOf  owl:Class;
+        rdfs:subClassOf  _:b163 .
+
+_:b163  rdf:type           owl:Restriction;
+        owl:onProperty     core:replaces;
+        owl:allValuesFrom  core:Concept .
+
+core:Concept  rdfs:comment  "A concept used to classify resources.";
+        rdfs:isDefinedBy  core: .
+
+core:Cross-link_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Crosslink";
+        rdfs:subClassOf   core:Modification_Annotation;
+        rdfs:comment      "Posttranslationally formed amino acid bonds.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/crosslnk> .
+
+core:DNA  rdf:type        owl:Class;
+        rdfs:label        "DNA";
+        rdfs:subClassOf   core:Molecule;
+        rdfs:isDefinedBy  core: .
+
+core:Database  rdf:type   owl:Class;
+        rdfs:label        "Database (description of)";
+        rdfs:subClassOf   owl:Class;
+        rdfs:comment      "Metadata for a life science database.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/cross_references_section> .
+
+core:Developmental_Stage_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Developmental Stage";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the developmentally-specific expression of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/developmental_stage> .
+
+core:Disease  rdf:type    owl:Class;
+        rdfs:label        "Disease";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/diseases/> .
+
+core:Disease_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Disease Annotation";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the diseases associated with a deficiency of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/involvement_in_disease> .
+
+core:Disruption_Phenotype_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Disruption Phenotype";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/disruption_phenotype> .
+
+core:Disulfide_Bond_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Disulfide Bond";
+        rdfs:subClassOf   core:Modification_Annotation;
+        rdfs:comment      "Describes residues which are linked by an intra-chain disulfide bond. If the endpoints are identical, the disulfide bond is an interchain one.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/disulfid> .
+
+core:Domain_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Domain";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the domain structure of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/domain_cc> .
+
+core:Domain_Assignment_Statement
+        rdf:type          owl:Class;
+        rdfs:label        "Domain Assignment Statement";
+        rdfs:subClassOf   rdf:Statement;
+        rdfs:comment      "The relationship between a protein and a protein domain.";
+        rdfs:isDefinedBy  core: .
+
+core:Domain_Extent_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Domain Extent";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of a domain, which is defined as a specific combination of secondary structures organized into a characteristic three-dimensional structure or fold.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/domain> .
+
+core:Electronic_Citation
+        rdf:type         owl:Class;
+        rdfs:label       "Electronic Citation";
+        rdfs:subClassOf  core:Published_Citation;
+        rdfs:subClassOf  _:b164 .
+
+_:b164  rdf:type         owl:Restriction;
+        owl:onProperty   core:name;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Electronic_Citation
+        rdfs:comment      "An electronic publication.";
+        rdfs:isDefinedBy  core: .
+
+core:Endpoint_Statement
+        rdf:type          owl:Class;
+        rdfs:label        "Endpoint Statement";
+        rdfs:subClassOf   rdf:Statement;
+        rdfs:comment      "Metadata for an endpoint of a range on a sequence.";
+        rdfs:isDefinedBy  core: .
+
+core:Enzyme  rdf:type    owl:Class;
+        rdfs:label       "Enzyme";
+        rdfs:subClassOf  _:b165 .
+
+_:b165  rdf:type           owl:Restriction;
+        owl:onProperty     core:replacedBy;
+        owl:allValuesFrom  core:Enzyme .
+
+core:Enzyme  rdfs:subClassOf  _:b166 .
+
+_:b166  rdf:type           owl:Restriction;
+        owl:onProperty     core:replaces;
+        owl:allValuesFrom  core:Enzyme .
+
+core:Enzyme  rdfs:comment  "A specific catalytic activity, defined by the Enzyme Commission of the Nomenclature Committee of the International Union of Biochemistry and Molecular Biology (IUBMB).";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.expasy.org/enzyme/> .
+
+core:Enzyme_Regulation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Enzyme Regulation";
+        rdfs:comment      "The use of this class has been replaced by Activity_Regulation_Annotation";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      core:Activity_Regulation_Annotation;
+        owl:deprecated    true .
+
+core:Erroneous_Gene_Model_Prediction_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Erroneous Gene Model Prediction";
+        rdfs:subClassOf   core:Sequence_Caution_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Erroneous_Initiation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Erroneous Initiation";
+        rdfs:subClassOf   core:Sequence_Caution_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Erroneous_Termination_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Erroneous Termination";
+        rdfs:subClassOf   core:Sequence_Caution_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Erroneous_Translation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Erroneous Translation";
+        rdfs:subClassOf   core:Sequence_Caution_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Excluded_Proteome
+        rdf:type          owl:Class;
+        rdfs:label        "Excluded proteome";
+        rdfs:comment      "A Proteome that has been excluded from UniProtKB for some reason, normally described by statements with the predicate up:exclusionReason";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/proteome> .
+
+core:Experimental_Information_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Experimental Information";
+        rdfs:subClassOf   core:Sequence_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:External_Sequence
+        rdf:type          owl:Class;
+        rdfs:label        "External Sequence";
+        rdfs:subClassOf   core:Known_Sequence;
+        rdfs:comment      "The protein described in the linked record is an alternative splice form of the same gene product as described in this record. The function between the two isoforms is highly divergent.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/alternative_products> .
+
+core:Family_Membership_Statement
+        rdf:type        owl:Class;
+        rdfs:label      "Family Membership Statement";
+        owl:deprecated  true .
+
+core:Frameshift_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Frameshift";
+        rdfs:subClassOf   core:Sequence_Caution_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Function_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Function";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "General description of the functions of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/function> .
+
+core:Gene  rdf:type      owl:Class;
+        rdfs:label       "Gene";
+        rdfs:subClassOf  owl:Thing;
+        rdfs:subClassOf  skos:Concept;
+        rdfs:subClassOf  _:b167 .
+
+_:b167  rdf:type                  owl:Restriction;
+        owl:onProperty            skos:prefLabel;
+        owl:onClass               core:Gene;
+        owl:qualifiedCardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Gene  rdfs:isDefinedBy  core: .
+
+core:Genomic_DNA  rdf:type  owl:Class;
+        rdfs:label        "Genomic DNA";
+        rdfs:subClassOf   core:DNA;
+        rdfs:isDefinedBy  core: .
+
+core:Genomic_RNA  rdf:type  owl:Class;
+        rdfs:label        "Genomic RNA";
+        rdfs:subClassOf   core:RNA;
+        rdfs:isDefinedBy  core: .
+
+core:Glycosylation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Glycosylation Site";
+        rdfs:subClassOf   core:Modification_Annotation;
+        rdfs:comment      "Describes the occurrence of the attachment of a glycan (mono- or polysaccharide) to a residue of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/carbohyd> .
+
+core:Helix_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Helix";
+        rdfs:subClassOf   core:Secondary_Structure_Annotation;
+        rdfs:comment      "Helical regions within the experimentally determined protein structure";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/helix> .
+
+core:Induction_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Induction";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the compounds or conditions that stimulate the synthesis of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/induction> .
+
+core:Initiator_Methionine_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Initiator Methionine";
+        rdfs:subClassOf   core:Molecule_Processing_Annotation;
+        rdfs:comment      "Indicates that the initiator methionine has been cleaved off and is not shown in the sequence.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/init_met> .
+
+core:Interaction  rdf:type  owl:Class;
+        rdfs:label        "Interaction";
+        rdfs:comment      "Description of a protein-protein interaction.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/binary_interactions> .
+
+core:Intramembrane_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "INTRAMEM";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of a region located in a membrane without crossing it";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/Intramembrane> .
+
+core:Journal  rdf:type    owl:Class;
+        rdfs:label        "Journal";
+        rdfs:subClassOf   owl:Thing;
+        rdfs:isDefinedBy  core: .
+
+core:Journal_Citation
+        rdf:type         owl:Class;
+        rdfs:label       "Journal Citation";
+        rdfs:subClassOf  core:Published_Citation;
+        rdfs:subClassOf  _:b168 .
+
+_:b168  rdf:type         owl:Restriction;
+        owl:onProperty   core:name;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Journal_Citation
+        rdfs:comment      "An article published in a journal.";
+        rdfs:isDefinedBy  core: .
+
+core:Kinetics_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Kinetics";
+        rdfs:subClassOf   core:Biophysicochemical_Annotation;
+        rdfs:comment      "Mentions the Michaelis-Menten constant (KM) and maximal velocity (Vmax) of enzymes.";
+        rdfs:isDefinedBy  core: .
+
+core:Known_Sequence  rdf:type  owl:Class;
+        rdfs:label        "Known Sequence";
+        rdfs:subClassOf   core:Sequence;
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/sequences> .
+
+core:Lipidation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Lipid Binding";
+        rdfs:subClassOf   core:Modification_Annotation;
+        rdfs:comment      "Covalent binding of a lipid moiety.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/lipid> .
+
+core:MRNA  rdf:type       owl:Class;
+        rdfs:label        "mRNA";
+        rdfs:subClassOf   core:RNA;
+        rdfs:isDefinedBy  core: .
+
+core:Mass_Measurement_Method
+        rdf:type          owl:Class;
+        rdfs:label        "Mass Measurement";
+        rdfs:subClassOf   core:Method;
+        rdfs:comment      "An experimental method for measuring the mass of a molecule.";
+        rdfs:seeAlso      <http://dbpedia.org/resource/Mass_spectrometry>;
+        rdfs:isDefinedBy  core: .
+
+core:Mass_Spectrometry_Annotation
+        rdf:type         owl:Class;
+        rdfs:label       "Mass";
+        rdfs:subClassOf  core:Experimental_Information_Annotation;
+        rdfs:subClassOf  _:b169 .
+
+_:b169  rdf:type            owl:Restriction;
+        owl:onProperty      core:method;
+        owl:maxCardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Mass_Spectrometry_Annotation
+        rdfs:subClassOf  _:b170 .
+
+_:b170  rdf:type           owl:Restriction;
+        owl:onProperty     core:method;
+        owl:allValuesFrom  core:Mass_Measurement_Method .
+
+core:Mass_Spectrometry_Annotation
+        rdfs:comment      "Indicates the mass of a sequence determined by mass spectrometry.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/mass_spectrometry> .
+
+core:Member_Of_Redudant_Proteome
+        rdf:type          owl:Class;
+        rdfs:label        "Member Of Redudant Proteome";
+        rdfs:subClassOf   core:Obsolete_Protein;
+        rdfs:comment      "This entry was obsoleted because its sequence belongs to a redundant protoeome";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/proteome_redundancy> .
+
+core:Method  rdf:type     owl:Class;
+        rdfs:label        "Method";
+        rdfs:comment      "An experimental method.";
+        rdfs:isDefinedBy  core: .
+
+core:Modification_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Modification";
+        rdfs:subClassOf   core:Sequence_Annotation;
+        rdfs:comment      "Describes amino acid modifications, post pre- and post-translational.";
+        rdfs:isDefinedBy  core: .
+
+core:Modified_Residue_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Modified Residue";
+        rdfs:subClassOf   core:Modification_Annotation;
+        rdfs:comment      "Posttranslational modification of a residue.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/mod_res> .
+
+core:Modified_Sequence
+        rdf:type         owl:Class;
+        rdfs:label       "Modified Sequence";
+        rdfs:subClassOf  core:Known_Sequence;
+        rdfs:subClassOf  _:b171 .
+
+_:b171  rdf:type           owl:Restriction;
+        owl:onProperty     core:basedOn;
+        owl:allValuesFrom  core:Simple_Sequence .
+
+core:Modified_Sequence
+        rdfs:subClassOf  _:b172 .
+
+_:b172  rdf:type           owl:Restriction;
+        owl:onProperty     core:modification;
+        owl:allValuesFrom  core:Alternative_Sequence_Annotation .
+
+core:Modified_Sequence
+        rdfs:isDefinedBy  core: .
+
+core:Molecule  rdf:type   owl:Class;
+        rdfs:label        "Molecule";
+        rdfs:comment      "A biological molecule.";
+        rdfs:isDefinedBy  core: .
+
+core:Molecule_Processing_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Molecule Processing";
+        rdfs:subClassOf   core:Sequence_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Motif_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Motif";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Short (<=20 amino acids) sequence motif of biological interest.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/motif> .
+
+core:Mutagenesis_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Mutagenesis Site";
+        rdfs:subClassOf   core:Experimental_Information_Annotation;
+        rdfs:comment      "Site which has been experimentally altered.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/mutagen> .
+
+core:Natural_Variant_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Sequence Variant";
+        rdfs:subClassOf   core:Natural_Variation_Annotation;
+        rdfs:comment      "Authors report that sequence variants exist.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/variant> .
+
+core:Natural_Variation_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Natural Variation";
+        rdfs:subClassOf   core:Sequence_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Non-adjacent_Residues_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Non-consecutive Residues";
+        rdfs:subClassOf   core:Experimental_Information_Annotation;
+        rdfs:comment      "Indicates that two residues in a sequence are not consecutive and that there are a number of unsequenced residues between them.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/non_cons> .
+
+core:Non-standard_Residue_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Non standard residue";
+        rdfs:subClassOf   core:Modification_Annotation;
+        rdfs:comment      "Describes the occurrence of a non standard residue in the sequence record.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/non_std> .
+
+core:Non-terminal_Residue_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Non-terminal Residue";
+        rdfs:subClassOf   core:Experimental_Information_Annotation;
+        rdfs:comment      "The residue at an extremity of the sequence is not the terminal residue.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/non_ter> .
+
+core:Non_Self_Interaction
+        rdf:type          owl:Class;
+        rdfs:label        "Non self interaction";
+        rdfs:subClassOf   core:Interaction;
+        rdfs:comment      "Description of a non self protein-protein interaction.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/binary_interactions> .
+
+core:Not_Obsolete  rdf:type  owl:Class;
+        rdfs:label           "Not Obsolete";
+        owl:equivalentClass  _:b173 .
+
+_:b173  rdf:type        owl:Restriction;
+        owl:onProperty  core:obsolete;
+        owl:hasValue    false .
+
+core:Not_Obsolete  owl:disjointWith  core:Obsolete;
+        rdfs:comment      "A class introduced to group all records that are currently in the database.";
+        rdfs:isDefinedBy  core: .
+
+core:Not_Obsolete_Protein
+        rdf:type         owl:Class;
+        rdfs:label       "Not obsolete protein (record)";
+        rdfs:subClassOf  core:Not_Obsolete;
+        rdfs:subClassOf  core:Protein;
+        rdfs:subClassOf  _:b174 .
+
+_:b174  rdf:type            owl:Restriction;
+        owl:onProperty      core:sequence;
+        owl:someValuesFrom  core:Simple_Sequence .
+
+core:Not_Obsolete_Protein
+        rdfs:subClassOf  _:b175 .
+
+_:b175  rdf:type         owl:Restriction;
+        owl:onProperty   core:organism;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Not_Obsolete_Protein
+        rdfs:subClassOf  _:b176 .
+
+_:b176  rdf:type            owl:Restriction;
+        owl:onProperty      core:existence;
+        owl:someValuesFrom  core:Protein_Existence .
+
+core:Not_Obsolete_Protein
+        rdfs:isDefinedBy  core: .
+
+core:Not_Obsolete_Taxon
+        rdf:type         owl:Class;
+        rdfs:label       "Not obsolete taxon (record)";
+        rdfs:subClassOf  core:Not_Obsolete;
+        rdfs:subClassOf  core:Taxon;
+        rdfs:subClassOf  _:b177 .
+
+_:b177  rdf:type         owl:Restriction;
+        owl:onProperty   core:scientificName;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Not_Obsolete_Taxon
+        rdfs:isDefinedBy  core: .
+
+core:Nucleotide_Binding_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "DNA Binding";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of a DNA-binding region.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/np_bind> .
+
+core:Nucleotide_Mapping_Statement
+        rdf:type          owl:Class;
+        rdfs:label        "Nucleotide Mapping Statement";
+        rdfs:subClassOf   rdf:Statement;
+        rdfs:comment      "The relationship between a protein and a nucleotide sequence.";
+        rdfs:isDefinedBy  core: .
+
+core:Nucleotide_Resource
+        rdf:type             owl:Class;
+        rdfs:label           "Nucleotide Resource";
+        owl:equivalentClass  _:b178 .
+
+_:b178  rdf:type            owl:Restriction;
+        owl:onProperty      core:locatedOn;
+        owl:minCardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Nucleotide_Resource
+        rdfs:subClassOf   core:Resource;
+        rdfs:comment      "A resource that descripes a nucleotide sequence.";
+        rdfs:isDefinedBy  core: .
+
+core:Observation_Citation
+        rdf:type          owl:Class;
+        rdfs:label        "Observation Citation";
+        rdfs:subClassOf   core:Unpublished_Citation;
+        rdfs:comment      "Citation of an unpublished result.";
+        rdfs:isDefinedBy  core: .
+
+core:Obsolete  rdf:type      owl:Class;
+        rdfs:label           "Obsolete";
+        owl:equivalentClass  _:b179 .
+
+_:b179  rdf:type        owl:Restriction;
+        owl:onProperty  core:obsolete;
+        owl:hasValue    true .
+
+core:Obsolete  rdfs:comment  "The class of all obsolete records in the database (i.e. records that where once published but are now removed).";
+        rdfs:isDefinedBy  core: .
+
+core:Obsolete_Protein
+        rdf:type          owl:Class;
+        rdfs:label        "Obsolete Protein";
+        rdfs:subClassOf   core:Obsolete;
+        rdfs:subClassOf   core:Protein;
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/faq/11> .
+
+core:Obsolete_Taxon  rdf:type  owl:Class;
+        rdfs:label        "Obsolete Taxon";
+        rdfs:subClassOf   core:Obsolete;
+        rdfs:subClassOf   core:Taxon;
+        rdfs:comment      "Taxa are occasionally removed from the taxonomy database (particularly internal nodes, during a taxonomic revision) – these taxids are deleted, and are not reused.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.ncbi.nlm.nih.gov/books/NBK54428/> .
+
+core:Organelle  rdf:type  owl:Class;
+        rdfs:label        "Organelle";
+        rdfs:isDefinedBy  core: .
+
+core:Orientation  rdf:type  owl:Class;
+        rdfs:label        "Orientation";
+        rdfs:subClassOf   core:Subcellular_Location;
+        rdfs:isDefinedBy  core: .
+
+core:Other_DNA  rdf:type  owl:Class;
+        rdfs:label        "Other DNA";
+        rdfs:subClassOf   core:DNA;
+        rdfs:isDefinedBy  core: .
+
+core:Other_RNA  rdf:type  owl:Class;
+        rdfs:label        "Other RNA";
+        rdfs:subClassOf   core:RNA;
+        rdfs:isDefinedBy  core: .
+
+core:PH_Dependence_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "pH Dependence";
+        rdfs:subClassOf   core:Biophysicochemical_Annotation;
+        rdfs:comment      "Describes the optimum pH for enzyme activity and/or the variation of enzyme activity with pH variation.";
+        rdfs:isDefinedBy  core: .
+
+core:PTM_Annotation  rdf:type  owl:Class;
+        rdfs:label        "PTM";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of a posttranslational modification.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/post-translational_modification> .
+
+core:Part  rdf:type       owl:Class;
+        rdfs:label        "Protein part";
+        rdfs:subClassOf   owl:Thing;
+        rdfs:comment      "Description of a part of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/protein_names> .
+
+core:Participant  rdf:type  owl:Class;
+        rdfs:label        "Interaction participant";
+        rdfs:comment      "A participant in a protein-protein interaction.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/binary_interactions> .
+
+core:Patent_Citation  rdf:type  owl:Class;
+        rdfs:label        "Patent Citation";
+        rdfs:subClassOf   core:Published_Citation;
+        rdfs:comment      "A patent application.";
+        rdfs:isDefinedBy  core: .
+
+core:Pathway  rdf:type    owl:Class;
+        rdfs:label        "Pathway";
+        rdfs:comment      "A hierarchical description of a metabolic pathway.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.grenoble.prabi.fr/obiwarehouse/unipathway>;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/pathway> .
+
+core:Pathway_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Pathway annotation";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the metabolic pathways with which a protein is associated.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/pathway> .
+
+core:Peptide_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Peptide";
+        rdfs:subClassOf   core:Molecule_Processing_Annotation;
+        rdfs:comment      "Extent of a released active peptide.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/peptide> .
+
+core:Pharmaceutical_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Pharmaceutical";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the use of a protein as a pharmaceutical drug.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/pharmaceutical_use> .
+
+core:Plasmid  rdf:type    owl:Class;
+        rdfs:label        "Plasmid";
+        rdfs:comment      "Description of a Plasmid";
+        rdfs:isDefinedBy  core: .
+
+core:Polymorphism_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Polymorphism";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of polymorphisms.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/polymorphism> .
+
+core:Propeptide_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Propeptide";
+        rdfs:subClassOf   core:Molecule_Processing_Annotation;
+        rdfs:comment      "Extent of a propeptide.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/propep> .
+
+core:Protein  rdf:type   owl:Class;
+        rdfs:label       "Protein";
+        rdfs:subClassOf  owl:Thing;
+        rdfs:subClassOf  _:b180 .
+
+_:b180  rdf:type           owl:Restriction;
+        owl:onProperty     core:replacedBy;
+        owl:allValuesFrom  core:Protein .
+
+core:Protein  rdfs:subClassOf  _:b181 .
+
+_:b181  rdf:type           owl:Restriction;
+        owl:onProperty     core:replaces;
+        owl:allValuesFrom  core:Protein .
+
+core:Protein  owl:disjointWith  core:Sequence;
+        rdfs:comment      "Description of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/uniprotkb>;
+        vann:example      </uniprot/P06017> .
+
+core:Protein_Existence
+        rdf:type             owl:Class;
+        rdfs:label           "Protein existence evidence";
+        owl:equivalentClass  _:b182 .
+
+_:b182  rdf:type   owl:Class;
+        owl:oneOf  _:b183 .
+
+_:b183  rdf:first  core:Predicted_Existence;
+        rdf:rest   _:b184 .
+
+_:b184  rdf:first  core:Evidence_at_Transcript_Level_Existence;
+        rdf:rest   _:b185 .
+
+_:b185  rdf:first  core:Uncertain_Existence;
+        rdf:rest   _:b186 .
+
+_:b186  rdf:first  core:Inferred_from_Homology_Existence;
+        rdf:rest   _:b187 .
+
+_:b187  rdf:first  core:Evidence_at_Protein_Level_Existence;
+        rdf:rest   rdf:nil .
+
+core:Protein_Existence
+        rdfs:isDefinedBy  core: .
+
+core:Proteome  rdf:type   owl:Class;
+        rdfs:label        "Proteome";
+        rdfs:comment      "Description of a proteome.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/proteome> .
+
+core:Proteome_Component
+        rdf:type          owl:Class;
+        rdfs:label        "Proteome_Component";
+        rdfs:subClassOf   owl:Thing;
+        rdfs:comment      "The component of a proteome. e.g. Chromosome, Contig or Plasmid";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/proteome> .
+
+core:Published_Citation
+        rdf:type          owl:Class;
+        rdfs:label        "Published Citation";
+        rdfs:subClassOf   core:Citation;
+        owl:disjointWith  core:Unpublished_Citation;
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/references> .
+
+core:RNA  rdf:type        owl:Class;
+        rdfs:label        "RNA";
+        rdfs:subClassOf   core:Molecule;
+        rdfs:isDefinedBy  core: .
+
+core:RNA_Editing_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "RNA Editing";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of any type of RNA editing that leads to one or more amino acid changes.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/rna_editing> .
+
+core:range  rdf:type        owl:ObjectProperty;
+        rdfs:label          "range";
+        rdfs:comment        "A specialization of faldo:location where all objects are faldo:Regions";
+        rdfs:subPropertyOf  <http://biohackathon.org/resource/faldo#location>;
+        rdfs:range          <http://biohackathon.org/resource/faldo#Region>;
+        rdfs:isDefinedBy    core: .
+
+core:Rank  rdf:type       owl:Class;
+        rdfs:label        "Taxon rank";
+        rdfs:comment      "A rank of a taxon.";
+        rdfs:isDefinedBy  core: .
+
+core:Redox_Potential_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Redox Potential";
+        rdfs:subClassOf   core:Biophysicochemical_Annotation;
+        rdfs:comment      "Reports the value of the standard (midpoint) oxido-reduction potential(s) for electron transport proteins.";
+        rdfs:isDefinedBy  core: .
+
+core:Reference_Proteome
+        rdf:type          owl:Class;
+        rdfs:label        "Reference_Proteome";
+        rdfs:subClassOf   core:Proteome;
+        rdfs:comment      "Some proteomes have been (manually and algorithmically) selected as reference\nproteomes.";
+        rdfs:seeAlso      <ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/README>;
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/proteome> .
+
+core:Region_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Region";
+        rdfs:subClassOf   core:Sequence_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Repeat_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Repeat";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of an internal sequence repetition.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/repeat> .
+
+core:Representative_Proteome
+        rdf:type          owl:Class;
+        rdfs:label        "Representative_Proteome";
+        rdfs:subClassOf   core:Proteome;
+        rdfs:comment      "A proteome that is believed by curators, or selected programmatically to be representative for a number of related Proteomes";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/proteome> .
+
+core:Resource  rdf:type      owl:Class;
+        rdfs:label           "Resource";
+        owl:equivalentClass  _:b188 .
+
+_:b188  rdf:type            owl:Restriction;
+        owl:onProperty      core:database;
+        owl:someValuesFrom  owl:Thing .
+
+core:Resource  rdfs:comment  "A life science resource.";
+        rdfs:isDefinedBy  core: .
+
+core:Reviewed  rdf:type      owl:Class;
+        rdfs:label           "Reviewed";
+        owl:equivalentClass  _:b189 .
+
+_:b189  rdf:type        owl:Restriction;
+        owl:onProperty  core:reviewed;
+        owl:hasValue    true .
+
+core:Reviewed  rdfs:comment  " The class of all reviewed records in the database (i.e. records that where looked at by a curator for integration into the database).";
+        rdfs:isDefinedBy  core: .
+
+core:Reviewed_Protein
+        rdf:type          owl:Class;
+        rdfs:label        "Reviewed protein (records)";
+        rdfs:subClassOf   core:Protein;
+        rdfs:subClassOf   core:Reviewed;
+        rdfs:isDefinedBy  core: .
+
+core:Ribosomal_Frameshifting
+        rdf:type          owl:Class;
+        rdfs:label        "Ribosomal Frameshifting";
+        rdfs:subClassOf   core:Alternative_Products_Annotation;
+        rdfs:isDefinedBy  core: .
+
+core:Secondary_Structure_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Secondary Structure";
+        rdfs:subClassOf   core:Sequence_Annotation;
+        rdfs:comment      "Describes the secondary structure of proteins whose tertiary structure is known experimentally.";
+        rdfs:isDefinedBy  core: .
+
+core:Self_Interaction
+        rdf:type          owl:Class;
+        rdfs:label        "Self protein interaction";
+        rdfs:subClassOf   core:Interaction;
+        rdfs:comment      "Description of a self protein-protein interaction.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/binary_interactions> .
+
+core:Sequence  rdf:type   owl:Class;
+        rdfs:label        "Sequence";
+        rdfs:comment      "An amino acid sequence.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/help/uniparc>;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/sequences> .
+
+core:Sequence_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Sequence Annotation";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of a special region or site in a protein sequence.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/sequence_annotation> .
+
+core:Sequence_Caution_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Sequence Caution";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Warning about possible errors related to the protein sequence";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/sequence_caution> .
+
+core:Sequence_Conflict_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Sequence Conflict";
+        rdfs:subClassOf   core:Experimental_Information_Annotation;
+        rdfs:comment      "Different sources report differing sequences.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/conflict> .
+
+core:Sequence_Uncertainty_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Unsure Residue";
+        rdfs:subClassOf   core:Experimental_Information_Annotation;
+        rdfs:comment      "Used to describe region(s) of a sequence for which the authors are unsure about the sequence assignment.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/unsure> .
+
+core:Signal_Peptide_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Signal Peptide";
+        rdfs:subClassOf   core:Molecule_Processing_Annotation;
+        rdfs:comment      "Extent of a signal sequence (prepeptide).";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/signal> .
+
+core:Similarity_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Similarity";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the similarities (sequence or structural) of a protein with other proteins.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/sequence_similarities> .
+
+core:Simple_Sequence  rdf:type  owl:Class;
+        rdfs:label        "Simple Sequence";
+        rdfs:subClassOf   core:Known_Sequence;
+        rdfs:isDefinedBy  core: .
+
+core:Site_Annotation  rdf:type  owl:Class;
+        rdfs:label        "Site";
+        rdfs:subClassOf   core:Sequence_Annotation;
+        rdfs:comment      "Any interesting single amino-acid site on the sequence, that is not defined by another feature key. It can also apply to an amino acid bond which is represented by the positions of the two flanking amino acids.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/site> .
+
+core:Status  rdf:type     owl:Class;
+        rdfs:label        "Status";
+        rdfs:comment      "Indicator for the reliability of a piece of information.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/non_experimental_qualifiers> .
+
+core:Strain  rdf:type     owl:Class;
+        rdfs:label        "Strain";
+        rdfs:comment      "A strain of a species.";
+        rdfs:isDefinedBy  core: .
+
+core:Structure_Determination_Method
+        rdf:type          owl:Class;
+        rdfs:label        "Structure Determination";
+        rdfs:subClassOf   core:Method;
+        rdfs:comment      "An experimental method for determining the 3D structure of a protein.";
+        rdfs:isDefinedBy  core: .
+
+core:Structure_Mapping_Statement
+        rdf:type          owl:Class;
+        rdfs:label        "Structure Mapping Statement";
+        rdfs:subClassOf   rdf:Statement;
+        rdfs:comment      "The relationship between a protein and a 3D structure.";
+        rdfs:isDefinedBy  core: .
+
+core:Structure_Resource
+        rdf:type             owl:Class;
+        rdfs:label           "Structure Resource";
+        owl:equivalentClass  _:b190 .
+
+_:b190  rdf:type            owl:Class;
+        owl:intersectionOf  _:b191 .
+
+_:b191  rdf:first  _:b192 .
+
+_:b192  rdf:type           owl:Restriction;
+        owl:onProperty     core:method;
+        owl:allValuesFrom  core:Structure_Determination_Method .
+
+_:b191  rdf:rest  _:b193 .
+
+_:b193  rdf:first  _:b194 .
+
+_:b194  rdf:type         owl:Restriction;
+        owl:onProperty   core:method;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+_:b193  rdf:rest  rdf:nil .
+
+core:Structure_Resource
+        rdfs:subClassOf   core:Resource;
+        rdfs:comment      "A resource that describes the 3D structure of a protein.";
+        rdfs:isDefinedBy  core: .
+
+core:Structured_Name  rdf:type  owl:Class;
+        rdfs:label        "Structured_Name";
+        rdfs:comment      "A resource that holds a set of the known names for this protein together.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/protein_names> .
+
+core:Subcellular_Location
+        rdf:type          owl:Class;
+        rdfs:label        "Subcellular Location";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/locations/> .
+
+core:Subcellular_Location_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Subcellular Location Annotation";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the subcellular location of the mature protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/subcellular_location> .
+
+core:Submission_Citation
+        rdf:type         owl:Class;
+        rdfs:label       "Submission Citation";
+        rdfs:subClassOf  core:Published_Citation;
+        rdfs:subClassOf  _:b195 .
+
+_:b195  rdf:type         owl:Restriction;
+        owl:onProperty   core:submittedTo;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Submission_Citation
+        rdfs:comment      "Data that was submitted directly to a database.";
+        rdfs:isDefinedBy  core: .
+
+core:Subunit_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Subunit";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the quaternary structure of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/subunit_structure> .
+
+core:Taxon  rdf:type     owl:Class;
+        rdfs:label       "Taxon";
+        rdfs:subClassOf  _:b196 .
+
+_:b196  rdf:type            owl:Restriction;
+        owl:onProperty      core:mnemonic;
+        owl:maxCardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Taxon  rdfs:subClassOf  _:b197 .
+
+_:b197  rdf:type           owl:Restriction;
+        owl:onProperty     core:replaces;
+        owl:allValuesFrom  core:Taxon .
+
+core:Taxon  rdfs:comment  "An element of a taxonomy for classifying life forms.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.ncbi.nlm.nih.gov/books/NBK54428/> .
+
+core:Temperature_Dependence_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Temperature Dependence";
+        rdfs:subClassOf   core:Biophysicochemical_Annotation;
+        rdfs:comment      "Indicates the optimum temperature for enzyme activity and/or the variation of enzyme activity with temperature variation; the thermostability/thermolability of the enzyme is also mentioned when it is known.";
+        rdfs:isDefinedBy  core: .
+
+core:Thesis_Citation  rdf:type  owl:Class;
+        rdfs:label       "Thesis Citation";
+        rdfs:subClassOf  core:Published_Citation;
+        rdfs:subClassOf  _:b198 .
+
+_:b198  rdf:type         owl:Restriction;
+        owl:onProperty   core:institution;
+        owl:cardinality  "1"^^xsd:nonNegativeInteger .
+
+core:Thesis_Citation  rdfs:comment  "A Ph.D. thesis.";
+        rdfs:isDefinedBy  core: .
+
+core:Tissue  rdf:type     owl:Class;
+        rdfs:label        "Tissue";
+        rdfs:comment      "A tissue such as lung or heart.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/docs/tisslist> .
+
+core:Tissue_Specificity_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Tissue Specificity";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Description of the tissue specificity of a protein.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/tissue_specificity> .
+
+core:Topological_Domain_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Topological Domain";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "A topological domain.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/domain> .
+
+core:Topology  rdf:type   owl:Class;
+        rdfs:label        "Topology";
+        rdfs:subClassOf   core:Subcellular_Location;
+        rdfs:isDefinedBy  core: .
+
+core:Toxic_Dose_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Toxic Dose";
+        rdfs:subClassOf   core:Annotation;
+        rdfs:comment      "Information on the LD(50). LD stands for \"Lethal Dose\". LD(50) is the amount of a toxin, given all at once, which causes the death of 50% (one half) of a group of test animals.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/toxic_dose> .
+
+core:Transcribed_RNA  rdf:type  owl:Class;
+        rdfs:label        "Transcribed RNA";
+        rdfs:subClassOf   core:RNA;
+        rdfs:isDefinedBy  core: .
+
+core:Transcript_Resource
+        rdf:type          owl:Class;
+        rdfs:label        "Transcript Resource";
+        rdfs:subClassOf   core:Resource;
+        rdfs:isDefinedBy  core: .
+
+core:Transit_Peptide_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Transit Peptide";
+        rdfs:subClassOf   core:Molecule_Processing_Annotation;
+        rdfs:comment      "Extent of a transit peptide (mitochondrion, chloroplast, thylakoid, cyanelle or microbody).";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/transit> .
+
+core:Transmembrane_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Transmembrane";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of a transmembrane region.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/transmem> .
+
+core:Transposon  rdf:type  owl:Class;
+        rdfs:label        "Transposon";
+        rdfs:comment      "A transposon";
+        rdfs:isDefinedBy  core: .
+
+core:Turn_Annotation  rdf:type  owl:Class;
+        rdfs:label        "Turn";
+        rdfs:subClassOf   core:Secondary_Structure_Annotation;
+        rdfs:comment      "Turns within the experimentally determined protein structure.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/turn> .
+
+core:Unassigned_DNA  rdf:type  owl:Class;
+        rdfs:label        "Unassigned DNA";
+        rdfs:subClassOf   core:DNA;
+        rdfs:isDefinedBy  core: .
+
+core:Unassigned_RNA  rdf:type  owl:Class;
+        rdfs:label        "Unassigned RNA";
+        rdfs:subClassOf   core:RNA;
+        rdfs:isDefinedBy  core: .
+
+core:Unknown_Sequence
+        rdf:type          owl:Class;
+        rdfs:label        "Unknown Sequence";
+        rdfs:subClassOf   core:Sequence;
+        rdfs:isDefinedBy  core: .
+
+core:Unpublished_Citation
+        rdf:type          owl:Class;
+        rdfs:label        "Unpublished Citation";
+        rdfs:subClassOf   core:Citation;
+        rdfs:isDefinedBy  core: .
+
+core:Viral_cRNA  rdf:type  owl:Class;
+        rdfs:label        "Viral cRNA";
+        rdfs:subClassOf   core:RNA;
+        rdfs:comment      "Positive cRNA molecule that is made from from a single stranded genomic RNA.";
+        rdfs:isDefinedBy  core: .
+
+core:Zinc_Finger_Annotation
+        rdf:type          owl:Class;
+        rdfs:label        "Zinc Finger";
+        rdfs:subClassOf   core:Region_Annotation;
+        rdfs:comment      "Extent of a zinc finger region.";
+        rdfs:isDefinedBy  core:;
+        rdfs:seeAlso      <http://www.uniprot.org/manual/zn_fing> .
+
+rdf:Statement  rdf:type  owl:Class .
+
+rdfs:Resource  rdf:type  owl:Class .
+
+owl:Class  rdf:type  owl:Class .
+
+owl:Thing  rdf:type  owl:Class .
+
+skos:Concept  rdf:type  owl:Class .
+
+foaf:Image  rdf:type  owl:Class .
+
+core:API  rdf:type        owl:Thing;
+        rdf:type          core:Mass_Measurement_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Atmospheric Pressure Ionization";
+        rdfs:comment      "Mass measurement using Atmospheric Pressure Ionization";
+        rdfs:isDefinedBy  core: .
+
+core:Apicoplast  rdf:type  owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Apicoplast";
+        rdfs:isDefinedBy  core: .
+
+core:Biotype  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:By_Similarity  rdf:type  owl:Thing;
+        rdf:type          core:Status;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "By Similarity";
+        rdfs:isDefinedBy  core: .
+
+core:Chloroplast  rdf:type  owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Chloroplast";
+        rdfs:isDefinedBy  core: .
+
+core:Class  rdf:type    owl:Thing;
+        owl:deprecated  true .
+
+core:Cohort  rdf:type   owl:Thing;
+        owl:deprecated  true .
+
+core:Cyanelle  rdf:type   owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Cyanelle";
+        rdfs:isDefinedBy  core: .
+
+core:ESI  rdf:type        owl:Thing;
+        rdf:type          core:Mass_Measurement_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Electrospray Ionization";
+        rdfs:seeAlso      <http://dbpedia.org/resource/Electrospray_ionization>;
+        rdfs:isDefinedBy  core: .
+
+core:Electron_Microscopy
+        rdf:type          owl:Thing;
+        rdf:type          core:Structure_Determination_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Electron Microscopy";
+        rdfs:comment      "The electron microscope is a microscope that can magnify very small details with high resolving power due to the use of electrons rather than light to scatter off material, magnifying at levels up to 500,000 times.";
+        rdfs:seeAlso      <http://dbpedia.org/resource/Electron_microscopy>;
+        rdfs:isDefinedBy  core: .
+
+core:Evidence_at_Protein_Level_Existence
+        rdf:type          owl:Thing;
+        rdf:type          core:Protein_Existence;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Evidence at protein level";
+        rdfs:isDefinedBy  core: .
+
+core:Evidence_at_Transcript_Level_Existence
+        rdf:type          owl:Thing;
+        rdf:type          core:Protein_Existence;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Evidence at transcript level";
+        rdfs:comment      "Indicates that the existence of a protein has not been strictly proven but that expression data (such as existence of cDNA(s), RT-PCR or Northern blots) indicate the existence of a transcript.";
+        rdfs:isDefinedBy  core: .
+
+core:Experimental  rdf:type  owl:Thing;
+        rdf:type          core:Status;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Indicates that there is some experimental evidence that the given annotation could apply.";
+        rdfs:isDefinedBy  core: .
+
+core:FAB  rdf:type        owl:Thing;
+        rdf:type          core:Mass_Measurement_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Fast Atom Bombardment";
+        rdfs:isDefinedBy  core: .
+
+core:Family  rdf:type   owl:Thing;
+        owl:deprecated  true .
+
+core:Fiber_Diffraction
+        rdf:type          owl:Thing;
+        rdf:type          core:Structure_Determination_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Fiber Diffraction";
+        rdfs:isDefinedBy  core: .
+
+core:Form  rdf:type     owl:Thing;
+        owl:deprecated  true .
+
+core:Forma  rdf:type    owl:Thing;
+        owl:deprecated  true .
+
+core:Forma_Specialis  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Genotype  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Genus  rdf:type    owl:Thing;
+        owl:deprecated  true .
+
+core:Hydrogenosome  rdf:type  owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Hydrogenosome";
+        rdfs:isDefinedBy  core: .
+
+core:Inferred_from_Homology_Existence
+        rdf:type          owl:Thing;
+        rdf:type          core:Protein_Existence;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Inferred from homology";
+        rdfs:isDefinedBy  core: .
+
+core:Infraclass  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Infraorder  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Infrared_Spectroscopy
+        rdf:type          owl:Thing;
+        rdf:type          core:Structure_Determination_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Infrared Spectroscopy";
+        rdfs:comment      "A type of spectroscopy that uses the Infrared portion of the electromagnetic spectrum.";
+        rdfs:seeAlso      <http://dbpedia.org/resource/Infrared_spectroscopy>;
+        rdfs:isDefinedBy  core: .
+
+core:Isolate  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Isotype  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Kingdom  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:LSIMS  rdf:type      owl:Thing;
+        rdf:type          core:Mass_Measurement_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Liquid Secondary Ionization";
+        rdfs:isDefinedBy  core: .
+
+core:MALDI  rdf:type      owl:Thing;
+        rdf:type          core:Mass_Measurement_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Matrix-Assisted Laser Desorption";
+        rdfs:seeAlso      <http://dbpedia.org/resource/Matrix-assisted_laser_desorption_ionization>;
+        rdfs:isDefinedBy  core: .
+
+core:Mitochondrion  rdf:type  owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Mitochondrion";
+        rdfs:isDefinedBy  core: .
+
+core:Morph  rdf:type    owl:Thing;
+        owl:deprecated  true .
+
+core:NMR_Spectroscopy
+        rdf:type          owl:Thing;
+        rdf:type          core:Structure_Determination_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "NMR Spectroscopy";
+        rdfs:seeAlso      <http://dbpedia.org/resource/NMR>;
+        rdfs:isDefinedBy  core: .
+
+core:Neutron_Diffraction
+        rdf:type          owl:Thing;
+        rdf:type          core:Structure_Determination_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Neutron Diffraction";
+        rdfs:seeAlso      <http://dbpedia.org/resource/Neutron_diffraction>;
+        rdfs:isDefinedBy  core: .
+
+core:Non-photosynthetic_plastid
+        rdf:type          owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Non-photosyntethic plastid";
+        rdfs:isDefinedBy  core: .
+
+core:Nucleomorph  rdf:type  owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Nuleomorph";
+        rdfs:isDefinedBy  core: .
+
+core:Order  rdf:type    owl:Thing;
+        owl:deprecated  true .
+
+core:Organellar_chromatophore
+        rdf:type          owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Organellar chromatophore";
+        rdfs:isDefinedBy  core: .
+
+core:PD  rdf:type         owl:Thing;
+        rdf:type          core:Mass_Measurement_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Plasma Desorption";
+        rdfs:comment      "";
+        rdfs:isDefinedBy  core: .
+
+core:Paratype  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Parvorder  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Pathogroup  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Phylum  rdf:type   owl:Thing;
+        owl:deprecated  true .
+
+core:Plastid  rdf:type    owl:Thing;
+        rdf:type          core:Organelle;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Plastid";
+        rdfs:isDefinedBy  core: .
+
+core:Potential  rdf:type  owl:Thing;
+        rdf:type          core:Status;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Potential";
+        rdfs:comment      "indicates that there is some logical or conclusive evidence that the given annotation could apply. This non-experimental qualifier is often used to present results from protein sequence analysis software tools, which are only annotated if the result makes sense in the biological context of a given protein. A typical example is the annotation of N-glycosylation sites in secreted proteins";
+        rdfs:isDefinedBy  core: .
+
+core:Predicted_Existence
+        rdf:type          owl:Thing;
+        rdf:type          core:Protein_Existence;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Predicted";
+        rdfs:comment      "This is used for proteins without evidence at protein, transcript, or homology levels.";
+        rdfs:isDefinedBy  core: .
+
+core:Prediction  rdf:type  owl:Thing;
+        rdf:type          core:Structure_Determination_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Prediction";
+        rdfs:isDefinedBy  core: .
+
+core:Probable  rdf:type   owl:Thing;
+        rdf:type          core:Status;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Probable";
+        rdfs:comment      "The status ‘Probable’ indicates stronger evidence than the qualifier ‘Potential’. This qualifier implies that there must be at least some experimental evidence, which indicates, that the information is expected to be found in the natural environment of a protein.";
+        rdfs:isDefinedBy  core: .
+
+core:SELDI  rdf:type      owl:Thing;
+        rdf:type          core:Mass_Measurement_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Surface Enhanced Laser Desorption Ionization";
+        rdfs:isDefinedBy  core: .
+
+core:Serogroup  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Serotype  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Species  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Species_Group  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Species_Subgroup
+        rdf:type        owl:Thing;
+        owl:deprecated  true .
+
+core:Strain  rdf:type   owl:Thing;
+        owl:deprecated  true .
+
+core:Subclass  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subcohort  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subfamily  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subgenus  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subkingdom  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Suborder  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subphylum  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subspecies  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subtribe  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Subvariety  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Superclass  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Superfamily  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Superkingdom  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Superorder  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Superphylum  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:Taxonomic_Rank_Biotype
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank biotype";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Biotype .
+
+core:Taxonomic_Rank_Class
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank class";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Class .
+
+core:Taxonomic_Rank_Cohort
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank cohort";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Cohort .
+
+core:Taxonomic_Rank_Domain
+        rdf:type          owl:Thing;
+        rdf:type          core:Rank;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Taxonomic rank domain";
+        rdfs:isDefinedBy  core: .
+
+core:Taxonomic_Rank_Family
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank family";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Family .
+
+core:Taxonomic_Rank_Form
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank form";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Form .
+
+core:Taxonomic_Rank_Forma
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank forma";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Forma .
+
+core:Taxonomic_Rank_Forma_Specialis
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank forma specialis";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Forma_Specialis .
+
+core:Taxonomic_Rank_Genotype
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank genotype";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Genotype .
+
+core:Taxonomic_Rank_Genus
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank genus";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Genus .
+
+core:Taxonomic_Rank_Infraclass
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank infraclass";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Infraclass .
+
+core:Taxonomic_Rank_Infraorder
+        rdf:type             owl:Thing;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank infraorder";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Infraorder .
+
+core:Taxonomic_Rank_Isolate
+        rdf:type             owl:Thing;
+        owl:deprecated       true;
+        rdf:type             core:Rank;
+        rdf:type             owl:NamedIndividual;
+        rdfs:label           "Taxonomic rank isolate";
+        rdfs:isDefinedBy     core:;
+        owl:equivalentClass  core:Isolate .
+
+core:Tribe  rdf:type    owl:Thing;
+        owl:deprecated  true .
+
+core:Uncertain_Existence
+        rdf:type          owl:Thing;
+        rdf:type          core:Protein_Existence;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "Uncertain";
+        rdfs:isDefinedBy  core: .
+
+core:Varietas  rdf:type  owl:Thing;
+        owl:deprecated  true .
+
+core:X-Ray_Crystallography
+        rdf:type          owl:Thing;
+        rdf:type          core:Structure_Determination_Method;
+        rdf:type          owl:NamedIndividual;
+        rdfs:label        "X-Ray Crystallography";
+        rdfs:comment      "A technique in crystallography in which the pattern produced by the diffraction of x-rays through the closely spaced lattice of atoms in a crystal is recorded and then analyzed to reveal the nature of that lattice.";
+        rdfs:seeAlso      <http://dbpedia.org/resource/X-ray_crystallography>;
+        rdfs:isDefinedBy  core: .
+
+_:b199  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b200 .
+
+_:b200  rdf:first  core:Evidence_at_Transcript_Level_Existence;
+        rdf:rest   _:b201 .
+
+_:b201  rdf:first  core:Uncertain_Existence;
+        rdf:rest   rdf:nil .
+
+_:b202  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b203 .
+
+_:b203  rdf:first  core:Electron_Microscopy;
+        rdf:rest   _:b204 .
+
+_:b204  rdf:first  core:Fiber_Diffraction;
+        rdf:rest   _:b205 .
+
+_:b205  rdf:first  core:Infrared_Spectroscopy;
+        rdf:rest   _:b206 .
+
+_:b206  rdf:first  core:NMR_Spectroscopy;
+        rdf:rest   _:b207 .
+
+_:b207  rdf:first  core:Neutron_Diffraction;
+        rdf:rest   _:b208 .
+
+_:b208  rdf:first  core:Prediction;
+        rdf:rest   _:b209 .
+
+_:b209  rdf:first  core:X-Ray_Crystallography;
+        rdf:rest   rdf:nil .
+
+_:b210  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b211 .
+
+_:b211  rdf:first  core:Predicted_Existence;
+        rdf:rest   _:b212 .
+
+_:b212  rdf:first  core:Uncertain_Existence;
+        rdf:rest   rdf:nil .
+
+_:b213  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b214 .
+
+_:b214  rdf:first  core:API;
+        rdf:rest   _:b215 .
+
+_:b215  rdf:first  core:ESI;
+        rdf:rest   _:b216 .
+
+_:b216  rdf:first  core:FAB;
+        rdf:rest   _:b217 .
+
+_:b217  rdf:first  core:LSIMS;
+        rdf:rest   _:b218 .
+
+_:b218  rdf:first  core:MALDI;
+        rdf:rest   _:b219 .
+
+_:b219  rdf:first  core:PD;
+        rdf:rest   _:b220 .
+
+_:b220  rdf:first  core:SELDI;
+        rdf:rest   rdf:nil .
+
+_:b221  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b222 .
+
+_:b222  rdf:first  core:By_Similarity;
+        rdf:rest   _:b223 .
+
+_:b223  rdf:first  core:Experimental;
+        rdf:rest   _:b224 .
+
+_:b224  rdf:first  core:Potential;
+        rdf:rest   _:b225 .
+
+_:b225  rdf:first  core:Probable;
+        rdf:rest   rdf:nil .
+
+_:b226  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b227 .
+
+_:b227  rdf:first  core:Evidence_at_Transcript_Level_Existence;
+        rdf:rest   _:b228 .
+
+_:b228  rdf:first  core:Inferred_from_Homology_Existence;
+        rdf:rest   rdf:nil .
+
+_:b229  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b230 .
+
+_:b230  rdf:first  core:Evidence_at_Protein_Level_Existence;
+        rdf:rest   _:b231 .
+
+_:b231  rdf:first  core:Inferred_from_Homology_Existence;
+        rdf:rest   rdf:nil .
+
+_:b232  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b233 .
+
+_:b233  rdf:first  core:Evidence_at_Protein_Level_Existence;
+        rdf:rest   _:b234 .
+
+_:b234  rdf:first  core:Predicted_Existence;
+        rdf:rest   rdf:nil .
+
+_:b235  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b236 .
+
+_:b236  rdf:first  core:Evidence_at_Transcript_Level_Existence;
+        rdf:rest   _:b237 .
+
+_:b237  rdf:first  core:Predicted_Existence;
+        rdf:rest   rdf:nil .
+
+_:b238  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b239 .
+
+_:b239  rdf:first  core:Evidence_at_Protein_Level_Existence;
+        rdf:rest   _:b240 .
+
+_:b240  rdf:first  core:Uncertain_Existence;
+        rdf:rest   rdf:nil .
+
+_:b241  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b242 .
+
+_:b242  rdf:first  core:Taxonomic_Rank_Biotype;
+        rdf:rest   _:b243 .
+
+_:b243  rdf:first  core:Taxonomic_Rank_Class;
+        rdf:rest   _:b244 .
+
+_:b244  rdf:first  core:Taxonomic_Rank_Cohort;
+        rdf:rest   _:b245 .
+
+_:b245  rdf:first  core:Taxonomic_Rank_Domain;
+        rdf:rest   _:b246 .
+
+_:b246  rdf:first  core:Taxonomic_Rank_Family;
+        rdf:rest   _:b247 .
+
+_:b247  rdf:first  core:Taxonomic_Rank_Form;
+        rdf:rest   _:b248 .
+
+_:b248  rdf:first  core:Taxonomic_Rank_Forma;
+        rdf:rest   _:b249 .
+
+_:b249  rdf:first  core:Taxonomic_Rank_Forma_Specialis;
+        rdf:rest   _:b250 .
+
+_:b250  rdf:first  core:Taxonomic_Rank_Genotype;
+        rdf:rest   _:b251 .
+
+_:b251  rdf:first  core:Taxonomic_Rank_Genus;
+        rdf:rest   _:b252 .
+
+_:b252  rdf:first  core:Taxonomic_Rank_Infraclass;
+        rdf:rest   _:b253 .
+
+_:b253  rdf:first  core:Taxonomic_Rank_Infraorder;
+        rdf:rest   _:b254 .
+
+_:b254  rdf:first  core:Taxonomic_Rank_Isolate;
+        rdf:rest   _:b255 .
+
+_:b255  rdf:first  core:Taxonomic_Rank_Kingdom;
+        rdf:rest   _:b256 .
+
+_:b256  rdf:first  core:Taxonomic_Rank_Morph;
+        rdf:rest   _:b257 .
+
+_:b257  rdf:first  core:Taxonomic_Rank_Order;
+        rdf:rest   _:b258 .
+
+_:b258  rdf:first  core:Taxonomic_Rank_Parvorder;
+        rdf:rest   _:b259 .
+
+_:b259  rdf:first  core:Taxonomic_Rank_Pathogroup;
+        rdf:rest   _:b260 .
+
+_:b260  rdf:first  core:Taxonomic_Rank_Phylum;
+        rdf:rest   _:b261 .
+
+_:b261  rdf:first  core:Taxonomic_Rank_Realm;
+        rdf:rest   _:b262 .
+
+_:b262  rdf:first  core:Taxonomic_Rank_Serogroup;
+        rdf:rest   _:b263 .
+
+_:b263  rdf:first  core:Taxonomic_Rank_Serotype;
+        rdf:rest   _:b264 .
+
+_:b264  rdf:first  core:Taxonomic_Rank_Species;
+        rdf:rest   _:b265 .
+
+_:b265  rdf:first  core:Taxonomic_Rank_Species_Group;
+        rdf:rest   _:b266 .
+
+_:b266  rdf:first  core:Taxonomic_Rank_Species_Subgroup;
+        rdf:rest   _:b267 .
+
+_:b267  rdf:first  core:Taxonomic_Rank_Strain;
+        rdf:rest   _:b268 .
+
+_:b268  rdf:first  core:Taxonomic_Rank_Subclass;
+        rdf:rest   _:b269 .
+
+_:b269  rdf:first  core:Taxonomic_Rank_Subcohort;
+        rdf:rest   _:b270 .
+
+_:b270  rdf:first  core:Taxonomic_Rank_Subfamily;
+        rdf:rest   _:b271 .
+
+_:b271  rdf:first  core:Taxonomic_Rank_Subgenus;
+        rdf:rest   _:b272 .
+
+_:b272  rdf:first  core:Taxonomic_Rank_Subkingdom;
+        rdf:rest   _:b273 .
+
+_:b273  rdf:first  core:Taxonomic_Rank_Suborder;
+        rdf:rest   _:b274 .
+
+_:b274  rdf:first  core:Taxonomic_Rank_Subphylum;
+        rdf:rest   _:b275 .
+
+_:b275  rdf:first  core:Taxonomic_Rank_Subspecies;
+        rdf:rest   _:b276 .
+
+_:b276  rdf:first  core:Taxonomic_Rank_Subtribe;
+        rdf:rest   _:b277 .
+
+_:b277  rdf:first  core:Taxonomic_Rank_Subvarietas;
+        rdf:rest   _:b278 .
+
+_:b278  rdf:first  core:Taxonomic_Rank_Superclass;
+        rdf:rest   _:b279 .
+
+_:b279  rdf:first  core:Taxonomic_Rank_Superfamily;
+        rdf:rest   _:b280 .
+
+_:b280  rdf:first  core:Taxonomic_Rank_Superkingdom;
+        rdf:rest   _:b281 .
+
+_:b281  rdf:first  core:Taxonomic_Rank_Superorder;
+        rdf:rest   _:b282 .
+
+_:b282  rdf:first  core:Taxonomic_Rank_Superphylum;
+        rdf:rest   _:b283 .
+
+_:b283  rdf:first  core:Taxonomic_Rank_Tribe;
+        rdf:rest   rdf:nil .
+
+_:b284  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b285 .
+
+_:b285  rdf:first  core:Inferred_from_Homology_Existence;
+        rdf:rest   _:b286 .
+
+_:b286  rdf:first  core:Predicted_Existence;
+        rdf:rest   rdf:nil .
+
+_:b287  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b288 .
+
+_:b288  rdf:first  core:Evidence_at_Protein_Level_Existence;
+        rdf:rest   _:b289 .
+
+_:b289  rdf:first  core:Evidence_at_Transcript_Level_Existence;
+        rdf:rest   rdf:nil .
+
+_:b290  rdf:type             owl:AllDifferent;
+        owl:distinctMembers  _:b291 .
+
+_:b291  rdf:first  core:Inferred_from_Homology_Existence;
+        rdf:rest   _:b292 .
+
+_:b292  rdf:first  core:Uncertain_Existence;
+        rdf:rest   rdf:nil .

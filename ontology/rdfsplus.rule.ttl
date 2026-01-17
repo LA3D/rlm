@@ -1,0 +1,71 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix exs:  <http://example.org/shapes#> .
+
+exs:Prefixes a sh:PrefixDeclaration ;
+  sh:prefix "rdf" ;  sh:namespace rdf: ;
+  sh:prefix "rdfs" ; sh:namespace rdfs: ;
+  sh:prefix "owl" ;  sh:namespace owl: .
+
+# 1) A ⊑ B ∧ B ⊑ C ⇒ A ⊑ C
+exs:SubclassTrans a sh:NodeShape ;
+  sh:targetObjectsOf rdfs:subClassOf ;
+  sh:rule [
+    a sh:SPARQLRule ; sh:prefixes exs:Prefixes ;
+    sh:construct """
+      CONSTRUCT { ?A rdfs:subClassOf ?C . }
+      WHERE { ?A rdfs:subClassOf ?B . ?B rdfs:subClassOf ?C . FILTER(?A != ?C) }
+    """ ] .
+
+# 2) x : A ∧ A ⊑ B ⇒ x : B
+exs:TypeBySubclass a sh:NodeShape ;
+  sh:targetObjectsOf rdf:type ;
+  sh:rule [
+    a sh:SPARQLRule ; sh:prefixes exs:Prefixes ;
+    sh:construct """
+      CONSTRUCT { ?x rdf:type ?B . }
+      WHERE { ?x rdf:type ?A . ?A rdfs:subClassOf ?B . FILTER(?A != ?B) }
+    """ ] .
+
+# 3) P ⊑ Q ∧ Q ⊑ R ⇒ P ⊑ R
+exs:SubpropTrans a sh:NodeShape ;
+  sh:targetObjectsOf rdfs:subPropertyOf ;
+  sh:rule [
+    a sh:SPARQLRule ; sh:prefixes exs:Prefixes ;
+    sh:construct """
+      CONSTRUCT { ?P rdfs:subPropertyOf ?R . }
+      WHERE { ?P rdfs:subPropertyOf ?Q . ?Q rdfs:subPropertyOf ?R . FILTER(?P != ?R) }
+    """ ] .
+
+# 4) s P o ∧ P ⊑ Q ⇒ s Q o
+exs:PropertyInclusion a sh:NodeShape ;
+  sh:targetSubjectsOf rdfs:subPropertyOf ;
+  sh:rule [
+    a sh:SPARQLRule ; sh:prefixes exs:Prefixes ;
+    sh:construct """
+      CONSTRUCT { ?s ?Q ?o . }
+      WHERE { ?P rdfs:subPropertyOf ?Q . ?s ?P ?o . }
+    """ ] .
+
+# 5) s P o ∧ P rdfs:domain C ⇒ s : C
+exs:DomainTyping a sh:NodeShape ;
+  sh:targetObjectsOf rdfs:domain ;
+  sh:rule [
+    a sh:SPARQLRule ; sh:prefixes exs:Prefixes ;
+    sh:construct """
+      CONSTRUCT { ?s rdf:type ?C . }
+      WHERE { ?P rdfs:domain ?C . ?s ?P ?o . }
+    """ ] .
+
+# 6) s P o ∧ P rdfs:range C ⇒ o : C
+exs:RangeTyping a sh:NodeShape ;
+  sh:targetObjectsOf rdfs:range ;
+  sh:rule [
+    a sh:SPARQLRule ; sh:prefixes exs:Prefixes ;
+    sh:construct """
+      CONSTRUCT { ?o rdf:type ?C . }
+      WHERE { ?P rdfs:range ?C . ?s ?P ?o . }
+    """ ] .
+

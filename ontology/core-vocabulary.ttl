@@ -1,0 +1,103 @@
+@prefix : <https://w3id.org/fabric/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Ontology metadata
+: a owl:Ontology ;
+    dct:title "Knowledge Fabric Core Vocabulary"@en ;
+    dct:description "Core vocabulary for blockchain-backed knowledge fabric operations"@en ;
+    dct:creator <https://w3id.org/fabric/org/Org1MSP> ;
+    owl:versionInfo "1.0.0" ;
+    dct:created "2025-09-15"^^xsd:date ;
+    dct:modified "2025-09-15"^^xsd:date .
+
+# Core Classes
+
+:VerifiableKnowledgeAsset a owl:Class ;
+    rdfs:label "Verifiable Knowledge Asset"@en ;
+    skos:definition "A knowledge asset with cryptographic integrity guarantees"@en ;
+    rdfs:comment "Base class for all verifiable knowledge components in the fabric"@en .
+
+:KnowledgeGraph a owl:Class ;
+    rdfs:subClassOf :VerifiableKnowledgeAsset ;
+    rdfs:label "Knowledge Graph"@en ;
+    skos:definition "A named graph with content-addressed identity"@en ;
+    rdfs:comment "RDF graph with deterministic DID based on RDFC-1.0 canonicalization"@en .
+
+:KnowledgeDataset a owl:Class ;
+    rdfs:subClassOf :VerifiableKnowledgeAsset ;
+    rdfs:label "Knowledge Dataset"@en ;
+    skos:definition "A collection of related knowledge graphs"@en ;
+    rdfs:comment "RDF dataset comprising multiple named graphs with versioning support"@en .
+
+:VerifiableCredential a owl:Class ;
+    rdfs:label "Verifiable Credential"@en ;
+    skos:definition "W3C Verifiable Credential for attestation"@en ;
+    rdfs:comment "Cryptographically verifiable claim about knowledge assets"@en .
+
+:ServiceRegistration a owl:Class ;
+    rdfs:label "Service Registration"@en ;
+    skos:definition "Registration record for a knowledge fabric service"@en ;
+    rdfs:comment "Service discovery metadata with capability declarations"@en .
+
+# Core Properties
+
+:hasCanonicalHash a owl:DatatypeProperty ;
+    rdfs:label "has canonical hash"@en ;
+    skos:definition "Content-addressed hash computed via RDFC-1.0 canonicalization"@en ;
+    rdfs:domain :VerifiableKnowledgeAsset ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Base58btc-encoded multihash with z-prefix"@en .
+
+:hasDatasetHash a owl:DatatypeProperty ;
+    rdfs:label "has dataset hash"@en ;
+    skos:definition "Deterministic hash of complete RDF dataset"@en ;
+    rdfs:domain :KnowledgeDataset ;
+    rdfs:range xsd:string ;
+    rdfs:comment "SHA-256 hash of RDFC-1.0 canonical representation"@en .
+
+:hasMember a owl:ObjectProperty ;
+    rdfs:label "has member"@en ;
+    skos:definition "Dataset membership relation"@en ;
+    rdfs:domain :KnowledgeDataset ;
+    rdfs:range :KnowledgeGraph ;
+    rdfs:comment "Links dataset to constituent knowledge graphs"@en .
+
+:hasRole a owl:DatatypeProperty ;
+    rdfs:label "has role"@en ;
+    skos:definition "Role of graph within dataset"@en ;
+    rdfs:domain :KnowledgeGraph ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Functional role: main, metadata, provenance, secondary"@en .
+
+:hasCapability a owl:DatatypeProperty ;
+    rdfs:label "has capability"@en ;
+    skos:definition "Service capability identifier"@en ;
+    rdfs:domain :ServiceRegistration ;
+    rdfs:range xsd:string ;
+    rdfs:comment "SPARQL operations: Query, Update, Construct, Describe"@en .
+
+:attestsIntegrity a owl:ObjectProperty ;
+    rdfs:label "attests integrity"@en ;
+    skos:definition "VC attests integrity of knowledge asset"@en ;
+    rdfs:domain :VerifiableCredential ;
+    rdfs:range :VerifiableKnowledgeAsset ;
+    rdfs:comment "Cryptographic attestation of content integrity"@en .
+
+# Status and Lifecycle
+
+:hasStatus a owl:DatatypeProperty ;
+    rdfs:label "has status"@en ;
+    skos:definition "Lifecycle status indicator"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Values: active, deprecated, revoked, suspended"@en .
+
+:conformsToPolicy a owl:DatatypeProperty ;
+    rdfs:label "conforms to policy"@en ;
+    skos:definition "Policy compliance indicator"@en ;
+    rdfs:range xsd:anyURI ;
+    rdfs:comment "Reference to governance policy"@en .

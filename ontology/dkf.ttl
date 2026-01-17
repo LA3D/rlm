@@ -1,0 +1,693 @@
+# Distributed Knowledge Fabric (DKF) Ontology
+# Version: 1.0
+# Namespace: https://w3id.org/dkf/
+# Description: Core ontology for the Distributed Knowledge Fabric, supporting verifiable, 
+#              provenance-tracked, and blockchain-integrated semantic datasets
+
+@prefix dkf: <https://w3id.org/dkf/> .
+@prefix dkg: <https://ontology.origintrail.io/dkg/1.0#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# =============================================================================
+# ONTOLOGY METADATA
+# =============================================================================
+
+<https://w3id.org/dkf/> a owl:Ontology ;
+    dct:title "Distributed Knowledge Fabric (DKF) Ontology"@en ;
+    dct:description """The DKF ontology provides terms for describing verifiable, provenance-tracked 
+                       semantic datasets in a decentralized infrastructure. It extends and interoperates 
+                       with OriginTrail DKG terms while providing enhanced verification, multi-chain 
+                       support, and dataset-centric operations."""@en ;
+    dct:created "2024-07-31"^^xsd:date ;
+    dct:modified "2024-07-31"^^xsd:date ;
+    dct:creator <https://orcid.org/0000-0003-4091-6059> ; # Charles Vardeman
+    dct:publisher <https://w3id.org/dkf/> ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    vann:preferredNamespacePrefix "dkf" ;
+    vann:preferredNamespaceUri "https://w3id.org/dkf/" ;
+    owl:versionInfo "1.0" ;
+    owl:imports <http://www.w3.org/ns/prov#> ,
+                <http://www.w3.org/ns/dcat#> ,
+                <http://rdfs.org/ns/void#> ,
+                <http://www.w3.org/2004/02/skos/core#> ;
+    rdfs:seeAlso <https://github.com/la3d/protodkf> ,
+                 <https://ontology.origintrail.io/dkg/1.0> .
+
+# =============================================================================
+# CORE CLASSES
+# =============================================================================
+
+## Dataset and Collection Classes
+
+dkf:Dataset a owl:Class ;
+    rdfs:label "DKF Dataset"@en ;
+    rdfs:comment """A verifiable, blockchain-backed semantic dataset containing RDF data 
+                    with comprehensive provenance tracking and cryptographic verification."""@en ;
+    rdfs:subClassOf dcat:Dataset , prov:Entity ;
+    skos:definition """A DKF Dataset represents a collection of RDF triples organized into 
+                       named graphs, backed by blockchain ownership (NFT), and tracked with 
+                       complete provenance from source to storage."""@en ;
+    skos:example """<did:dkf:base:0x123:42> a dkf:Dataset ;
+                     dct:title "W3C PROV Ontology - Verified" ;
+                     dkf:definesNamespace <http://www.w3.org/ns/prov#> .""" ;
+    skos:scopeNote "DKF Datasets are the fundamental unit of data organization in the fabric."@en .
+
+dkf:DatasetCollection a owl:Class ;
+    rdfs:label "Dataset Collection"@en ;
+    rdfs:comment "A smart contract-managed collection of related DKF datasets."@en ;
+    rdfs:subClassOf dcat:Catalog , prov:Collection ;
+    skos:definition """A blockchain-deployed smart contract that manages ownership, access control, 
+                       and lifecycle operations for a group of semantically related datasets."""@en ;
+    skos:scopeNote "Corresponds to ERC-721 contracts in the DKF architecture."@en .
+
+## Agent and Activity Classes
+
+dkf:VerifiedDownloader a owl:Class ;
+    rdfs:label "Verified Downloader"@en ;
+    rdfs:comment "An agent (human or automated) that downloads and verifies ontologies from authoritative sources."@en ;
+    rdfs:subClassOf prov:Agent , prov:SoftwareAgent ;
+    skos:definition """A PROV Agent that performs systematic downloading of ontologies from Cool URIs, 
+                       applies cryptographic verification, and creates verifiable attestations."""@en ;
+    skos:example """<did:key:z6Mk...> a dkf:VerifiedDownloader ;
+                     rdfs:label "DKF Bootstrap Tool v1.0" ;
+                     dkf:agentType "automated_tool" .""" .
+
+## Node Classes
+
+dkf:Node a owl:Class ;
+    rdfs:label "DKF Node"@en ;
+    rdfs:comment "A participant node in the Distributed Knowledge Fabric network."@en ;
+    rdfs:subClassOf prov:Agent , foaf:Agent ;
+    skos:definition """A computational agent that participates in a DKF network by providing semantic 
+                       data services, maintaining verifiable identity, and following network protocols."""@en ;
+    skos:scopeNote """Nodes are the fundamental infrastructure components that enable decentralized 
+                      semantic web operations within constrained network environments."""@en ;
+    skos:example """<did:key:z6MkpTHR8VNsBx...> a dkf:CuratorNode ;
+                     dkf:networkId "corp-research-net" ;
+                     dkf:nodeType "curator" .""" .
+
+dkf:GenesisNode a owl:Class ;
+    rdfs:label "Genesis Node"@en ;
+    rdfs:comment "The first node in a DKF network, providing bootstrap and authority services."@en ;
+    rdfs:subClassOf dkf:Node ;
+    skos:definition """A specialized DKF node that initializes the network, deploys core smart contracts, 
+                       manages node registration, and serves as the root certificate authority."""@en ;
+    skos:scopeNote """Each DKF network has exactly one Genesis node that maintains network integrity."""@en .
+
+dkf:CuratorNode a owl:Class ;
+    rdfs:label "Curator Node"@en ;  
+    rdfs:comment "A node that can create, verify, and manage semantic datasets."@en ;
+    rdfs:subClassOf dkf:Node ;
+    skos:definition """A DKF node with authority to create new datasets, perform verification operations, 
+                       validate content against profiles, and manage specialized domain knowledge."""@en ;
+    skos:scopeNote """Curator nodes typically represent institutional or departmental authority."""@en .
+
+dkf:ConsumerNode a owl:Class ;
+    rdfs:label "Consumer Node"@en ;
+    rdfs:comment "A node that queries and consumes datasets but cannot create them."@en ;
+    rdfs:subClassOf dkf:Node ;
+    skos:definition """A DKF node that provides read-only access to the semantic knowledge fabric, 
+                       typically serving end-user applications and analytical workloads."""@en ;
+    skos:scopeNote """Consumer nodes have minimal resource requirements and focus on query performance."""@en .
+
+dkf:NodeNFT a owl:Class ;
+    rdfs:label "Node NFT"@en ;
+    rdfs:comment "A blockchain NFT representing network membership and identity for a DKF node."@en ;
+    rdfs:subClassOf prov:Entity ;
+    skos:definition """A non-fungible token minted on the private blockchain that establishes 
+                       cryptographic proof of a node's authorized participation in the network."""@en ;
+    skos:scopeNote """Links blockchain identity (did:dkf) to cryptographic identity (did:key)."""@en .
+
+dkf:OntologyDownload a owl:Class ;
+    rdfs:label "Ontology Download Activity"@en ;
+    rdfs:comment "A provenance activity representing the systematic download and verification of an ontology."@en ;
+    rdfs:subClassOf prov:Activity ;
+    skos:definition """A PROV Activity that documents the process of retrieving an ontology from 
+                       its authoritative source, performing integrity verification, and preparing 
+                       it for dataset creation."""@en ;
+    skos:scopeNote "Extends OriginTrail's publishing model with detailed download provenance."@en .
+
+dkf:ContentVerification a owl:Class ;
+    rdfs:label "Content Verification Activity"@en ;
+    rdfs:comment "An activity that verifies the integrity and authenticity of downloaded content."@en ;
+    rdfs:subClassOf prov:Activity ;
+    skos:definition """A PROV Activity that applies cryptographic and semantic verification methods 
+                       to ensure downloaded content matches expected characteristics."""@en .
+
+dkf:NFTMinting a owl:Class ;
+    rdfs:label "NFT Minting Activity"@en ;
+    rdfs:comment "Blockchain activity that creates an NFT representing ownership of a DKF dataset."@en ;
+    rdfs:subClassOf prov:Activity ;
+    skos:definition """A PROV Activity that records the creation of a non-fungible token on a 
+                       blockchain to establish provable ownership of a semantic dataset."""@en ;
+    skos:scopeNote "Links semantic data to blockchain ownership mechanisms."@en .
+
+dkf:NodeRegistration a owl:Class ;
+    rdfs:label "Node Registration Activity"@en ;
+    rdfs:comment "The process of a new node joining the DKF network."@en ;
+    rdfs:subClassOf prov:Activity ;
+    skos:definition """A PROV Activity that documents the complete process of a node requesting network 
+                       membership, undergoing verification, and receiving authorization credentials."""@en ;
+    skos:scopeNote "Includes software attestation, identity verification, and credential issuance."@en .
+
+dkf:SoftwareAttestation a owl:Class ;
+    rdfs:label "Software Attestation Activity"@en ;
+    rdfs:comment "Verification of a node's software components and dependencies."@en ;
+    rdfs:subClassOf prov:Activity ;
+    skos:definition """A PROV Activity that validates the software supply chain, SPDX manifest, and 
+                       container image signatures for a node deployment."""@en ;
+    skos:scopeNote "Critical security activity for establishing node trustworthiness."@en .
+
+## Profile and Validation Classes
+
+dkf:OntologyProfile a owl:Class ;
+    rdfs:label "Ontology Profile"@en ;
+    rdfs:comment "A W3C PROF-compliant profile that specializes an ontology for specific domains or use cases."@en ;
+    rdfs:subClassOf <http://www.w3.org/ns/dx/prof/Profile> ;
+    skos:definition """A specification that constrains, extends or interprets a base ontology 
+                       for particular communities of practice or application domains."""@en ;
+    skos:example """<did:dkf:profile:prov-healthcare> a dkf:OntologyProfile ;
+                     <http://www.w3.org/ns/dx/prof/profileOf> <http://www.w3.org/ns/prov#> .""" .
+
+## Service Classes
+
+dkf:DKFService a owl:Class ;
+    rdfs:label "DKF Service"@en ;
+    rdfs:comment "A service provided by a DKF node to the network."@en ;
+    rdfs:subClassOf <http://www.w3.org/ns/sparql-service-description#Service> ;
+    skos:definition """An abstract service capability that a DKF node provides to other network 
+                       participants, supporting the distributed semantic web infrastructure."""@en ;
+    skos:scopeNote "Specializes W3C Service Description for DKF-specific capabilities."@en .
+
+dkf:SPARQLService a owl:Class ;
+    rdfs:label "SPARQL Service"@en ;
+    rdfs:comment "A SPARQL query and update endpoint provided by a DKF node."@en ;
+    rdfs:subClassOf dkf:DKFService ;
+    skos:definition """A W3C SPARQL 1.1 compliant service that enables querying and updating 
+                       of RDF datasets stored in the DKF network."""@en ;
+    skos:scopeNote "Core service provided by all DKF node types."@en .
+
+dkf:DatasetCreationService a owl:Class ;
+    rdfs:label "Dataset Creation Service"@en ;
+    rdfs:comment "A service that enables creation and minting of new DKF datasets."@en ;
+    rdfs:subClassOf dkf:DKFService ;
+    skos:definition """A service that handles the complete workflow of creating new semantic datasets, 
+                       including verification, blockchain minting, and network registration."""@en ;
+    skos:scopeNote "Typically provided only by Curator and Genesis nodes."@en .
+
+dkf:ValidationService a owl:Class ;
+    rdfs:label "Validation Service"@en ;
+    rdfs:comment "A service that validates datasets against SHACL profiles and domain constraints."@en ;
+    rdfs:subClassOf dkf:DKFService ;
+    skos:definition """A service that performs semantic validation of datasets using SHACL shapes, 
+                       ontology profiles, and domain-specific business rules."""@en ;
+    skos:scopeNote "Ensures data quality and compliance within the network."@en .
+
+dkf:SPDXAttestation a owl:Class ;
+    rdfs:label "SPDX Attestation"@en ;
+    rdfs:comment "A structured attestation of software components using SPDX format."@en ;
+    rdfs:subClassOf prov:Entity ;
+    skos:definition """A machine-readable document that provides complete software bill of materials, 
+                       licensing information, and supply chain provenance for a node deployment."""@en ;
+    skos:scopeNote "Critical for software supply chain security and compliance."@en .
+
+# =============================================================================
+# CORE PROPERTIES
+# =============================================================================
+
+## Content and Verification Properties
+
+dkf:contentHash a owl:DatatypeProperty ;
+    rdfs:label "content hash"@en ;
+    rdfs:comment "SHA256 hash of the dataset's RDF content for integrity verification."@en ;
+    rdfs:domain dkf:Dataset ;
+    rdfs:range xsd:string ;
+    skos:definition """A cryptographic hash (SHA256) computed over the canonical serialization 
+                       of the dataset's RDF content, enabling tamper detection."""@en ;
+    skos:scopeNote "Uses SHA256 for consistency with blockchain hash functions."@en .
+
+dkf:verificationStatus a owl:DatatypeProperty ;
+    rdfs:label "verification status"@en ;
+    rdfs:comment "Status indicating the level of verification applied to the dataset."@en ;
+    rdfs:domain dkf:Dataset ;
+    rdfs:range xsd:string ;
+    skos:definition """An indicator of the verification methods successfully applied to the dataset, 
+                       such as 'cryptographically_verified', 'source_verified', or 'unverified'."""@en ;
+    skos:scopeNote "Enables consumers to assess the trustworthiness of dataset content."@en .
+
+dkf:verificationMethod a owl:DatatypeProperty ;
+    rdfs:label "verification method"@en ;
+    rdfs:comment "Description of the method used to verify dataset content."@en ;
+    rdfs:domain dkf:ContentVerification ;
+    rdfs:range xsd:string ;
+    skos:definition """A description of the cryptographic, semantic, or procedural method 
+                       used to verify the integrity and authenticity of dataset content."""@en ;
+    skos:example "sha256_content_hash", "w3c_cool_uri_retrieval", "manual_expert_review" .
+
+dkf:signature a owl:ObjectProperty ;
+    rdfs:label "signature"@en ;
+    rdfs:comment "Reference to a cryptographic signature proving dataset authenticity."@en ;
+    rdfs:domain dkf:Dataset ;
+    skos:definition """Links a dataset to its cryptographic signature, typically created using 
+                       JSON-LD Signatures or similar W3C standards."""@en ;
+    skos:scopeNote "Supports multiple signature formats through flexible object linking."@en .
+
+## Namespace and Vocabulary Properties
+
+dkf:definesNamespace a owl:ObjectProperty ;
+    rdfs:label "defines namespace"@en ;
+    rdfs:comment "Indicates that this dataset contains the authoritative definition of an RDF namespace."@en ;
+    rdfs:domain dkf:Dataset ;
+    rdfs:range rdfs:Resource ;
+    skos:definition """Links a DKF dataset to the RDF namespace URI that it authoritatively defines, 
+                       enabling namespace-to-dataset resolution."""@en ;
+    skos:example """<did:dkf:base:0x123:42> dkf:definesNamespace <http://www.w3.org/ns/prov#> .""" ;
+    skos:scopeNote "Enables semantic layer queries to locate authoritative vocabulary definitions."@en .
+
+dkf:bindsPrefixTo a owl:ObjectProperty ;
+    rdfs:label "binds prefix to"@en ;
+    rdfs:comment "Associates a prefix declaration with its namespace binding within this dataset."@en ;
+    rdfs:domain dkf:Dataset ;
+    skos:definition """Links a dataset to structured prefix binding information, supporting 
+                       SHACL-style prefix declarations for semantic consistency."""@en .
+
+dkf:isCanonical a owl:DatatypeProperty ;
+    rdfs:label "is canonical"@en ;
+    rdfs:comment "Indicates whether this dataset represents the canonical version of a namespace."@en ;
+    rdfs:domain dkf:Dataset ;
+    rdfs:range xsd:boolean ;
+    skos:definition """A boolean flag indicating whether this dataset should be considered the 
+                       authoritative, canonical representation of its defined namespace."""@en ;
+    skos:scopeNote "Supports version management and namespace resolution precedence."@en .
+
+## Multi-Chain and Blockchain Properties
+
+dkf:blockchainNetwork a owl:DatatypeProperty ;
+    rdfs:label "blockchain network"@en ;
+    rdfs:comment "Identifier of the blockchain network where this dataset's NFT is deployed."@en ;
+    rdfs:domain dkf:NFTMinting ;
+    rdfs:range xsd:string ;
+    skos:definition """The name or identifier of the blockchain network (e.g., 'ethereum_mainnet', 
+                       'base_sepolia', 'gnosis_chain') where the dataset NFT exists."""@en ;
+    skos:scopeNote "Supports multi-chain deployment strategies."@en .
+
+dkf:contractAddress a owl:DatatypeProperty ;
+    rdfs:label "contract address"@en ;
+    rdfs:comment "Blockchain address of the smart contract managing this dataset."@en ;
+    rdfs:domain dkf:NFTMinting ;
+    rdfs:range xsd:string ;
+    skos:definition """The hexadecimal address of the ERC-721 or similar smart contract that 
+                       manages ownership and access control for the dataset."""@en ;
+    skos:example "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b" .
+
+dkf:tokenId a owl:DatatypeProperty ;
+    rdfs:label "token ID"@en ;
+    rdfs:comment "Unique identifier of the NFT representing this dataset within its contract."@en ;
+    rdfs:domain dkf:NFTMinting ;
+    rdfs:range xsd:string ;
+    skos:definition """The unique token identifier within the smart contract that represents 
+                       ownership of this specific dataset."""@en ;
+    skos:scopeNote "Combined with contract address, provides unique on-chain identification."@en .
+
+dkf:transactionHash a owl:DatatypeProperty ;
+    rdfs:label "transaction hash"@en ;
+    rdfs:comment "Hash of the blockchain transaction that created or modified this dataset's NFT."@en ;
+    rdfs:domain dkf:NFTMinting ;
+    rdfs:range xsd:string ;
+    skos:definition """The cryptographic hash of the blockchain transaction that performed 
+                       the NFT minting or modification operation."""@en ;
+    skos:scopeNote "Enables blockchain transaction lookup for audit purposes."@en .
+
+## Download and Source Properties
+
+dkf:downloadMethod a owl:DatatypeProperty ;
+    rdfs:label "download method"@en ;
+    rdfs:comment "Technical method used to obtain the ontology content."@en ;
+    rdfs:domain dkf:OntologyDownload ;
+    rdfs:range xsd:string ;
+    skos:definition """A description of the technical approach used to retrieve the ontology, 
+                       such as HTTP content negotiation, API calls, or manual download."""@en ;
+    skos:example "HTTP_GET_with_content_negotiation", "GitHub_API_release_download" .
+
+dkf:sourceType a owl:DatatypeProperty ;
+    rdfs:label "source type"@en ;
+    rdfs:comment "Classification of the source from which content was obtained."@en ;
+    rdfs:domain prov:Entity ;
+    rdfs:range xsd:string ;
+    skos:definition """A categorical description of the source type, indicating the authority 
+                       and reliability characteristics of the content source."""@en ;
+    skos:example "w3c_cool_uri", "github_repository", "academic_publication" .
+
+dkf:userAgent a owl:DatatypeProperty ;
+    rdfs:label "user agent"@en ;
+    rdfs:comment "Identifier of the software tool used for content retrieval."@en ;
+    rdfs:domain dkf:OntologyDownload ;
+    rdfs:range xsd:string ;
+    skos:definition """The User-Agent string or tool identifier used during the download process, 
+                       providing software provenance information."""@en ;
+    skos:example "DKF-Bootstrap-Tool/1.0", "curl/7.68.0" .
+
+dkf:httpStatus a owl:DatatypeProperty ;
+    rdfs:label "HTTP status"@en ;
+    rdfs:comment "HTTP response status code received during content retrieval."@en ;
+    rdfs:domain dkf:OntologyDownload ;
+    rdfs:range xsd:integer ;
+    skos:definition """The HTTP status code returned by the server during ontology retrieval, 
+                       indicating success (200) or various error conditions."""@en ;
+    skos:scopeNote "Enables diagnosis of download issues and quality assessment."@en .
+
+dkf:contentType a owl:DatatypeProperty ;
+    rdfs:label "content type"@en ;
+    rdfs:comment "MIME type of the retrieved content."@en ;
+    rdfs:domain dkf:OntologyDownload ;
+    rdfs:range xsd:string ;
+    skos:definition """The MIME type returned by the server, indicating the format of the 
+                       retrieved content (e.g., 'text/turtle', 'application/rdf+xml')."""@en ;
+    skos:scopeNote "Critical for proper content parsing and format validation."@en .
+
+## Agent Classification Properties
+
+dkf:agentType a owl:DatatypeProperty ;
+    rdfs:label "agent type"@en ;
+    rdfs:comment "Classification of the type of agent performing an activity."@en ;
+    rdfs:domain prov:Agent ;
+    rdfs:range xsd:string ;
+    skos:definition """A categorical description of the agent type, distinguishing between 
+                       human reviewers, automated tools, and organizational entities."""@en ;
+    skos:example "human_reviewer", "automated_tool", "institutional_agent" .
+
+dkf:version a owl:DatatypeProperty ;
+    rdfs:label "version"@en ;
+    rdfs:comment "Version identifier of software or tool used in dataset creation."@en ;
+    rdfs:domain prov:Agent ;
+    rdfs:range xsd:string ;
+    skos:definition """Version string identifying the specific release or build of software 
+                       used in dataset creation or verification processes."""@en ;
+    skos:scopeNote "Enables reproducibility and issue tracking across tool versions."@en .
+
+## Node Properties
+
+dkf:networkId a owl:DatatypeProperty ;
+    rdfs:label "network ID"@en ;
+    rdfs:comment "Identifier of the private DKF network this node belongs to."@en ;
+    rdfs:domain dkf:Node ;
+    rdfs:range xsd:string ;
+    skos:definition """A string identifier that uniquely identifies the DKF network instance, 
+                       enabling network segmentation and preventing cross-network confusion."""@en ;
+    skos:example "corp-research-net", "field-deployment-alpha", "consortium-healthcare-2024" ;
+    skos:scopeNote "Critical for multi-tenant and multi-network deployments."@en .
+
+dkf:nodeType a owl:DatatypeProperty ;
+    rdfs:label "node type"@en ;
+    rdfs:comment "Classification of the node's role and capabilities in the network."@en ;
+    rdfs:domain dkf:Node ;
+    rdfs:range xsd:string ;
+    skos:definition """A categorical designation indicating the node's authorized capabilities 
+                       and responsibilities within the DKF network hierarchy."""@en ;
+    skos:example "genesis", "curator", "consumer" ;
+    skos:scopeNote "Determines access control and operational permissions."@en .
+
+dkf:offersService a owl:ObjectProperty ;
+    rdfs:label "offers service"@en ;
+    rdfs:comment "A service capability provided by this node to the network."@en ;
+    rdfs:domain dkf:Node ;
+    skos:definition """Links a node to the specific services it provides to other network participants, 
+                       enabling service discovery and capability-based routing."""@en ;
+    skos:scopeNote "Services are described using W3C Service Description vocabulary."@en .
+
+dkf:representsNode a owl:ObjectProperty ;
+    rdfs:label "represents node"@en ;
+    rdfs:comment "Links a blockchain NFT to the DKF node it represents."@en ;
+    rdfs:domain dkf:NodeNFT ;
+    rdfs:range dkf:Node ;
+    skos:definition """Establishes the connection between a node's blockchain identity (NFT) 
+                       and its cryptographic identity (did:key)."""@en ;
+    skos:scopeNote "Enables verification of node authorization through blockchain queries."@en .
+
+dkf:mintedAt a owl:DatatypeProperty ;
+    rdfs:label "minted at"@en ;
+    rdfs:comment "Timestamp when the node NFT was created on the blockchain."@en ;
+    rdfs:domain dkf:NodeNFT ;
+    rdfs:range xsd:dateTime ;
+    skos:definition """ISO 8601 timestamp indicating when the node's blockchain identity was 
+                       established through NFT minting."""@en ;
+    skos:scopeNote "Provides temporal ordering for node network membership."@en .
+
+## Software Attestation Properties
+
+dkf:softwareAttestation a owl:ObjectProperty ;
+    rdfs:label "software attestation"@en ;
+    rdfs:comment "SPDX-based attestation of the software running on this node."@en ;
+    rdfs:domain dkf:Node ;
+    skos:definition """Links a node to structured metadata describing its software components, 
+                       dependencies, licenses, and supply chain provenance."""@en ;
+    skos:scopeNote "Critical for security and compliance in enterprise deployments."@en .
+
+dkf:containerImage a owl:DatatypeProperty ;
+    rdfs:label "container image"@en ;
+    rdfs:comment "Docker image reference with cryptographic digest for this node deployment."@en ;
+    rdfs:domain dkf:Node ;
+    rdfs:range xsd:string ;
+    skos:definition """The complete container image reference including registry, repository, tag, 
+                       and SHA256 digest used for this node deployment."""@en ;
+    skos:example "registry.dkf.local/dkf/curator-node:1.0@sha256:abc123..." ;
+    skos:scopeNote "Enables precise software version identification and verification."@en .
+
+dkf:spdxDocument a owl:ObjectProperty ;
+    rdfs:label "SPDX document"@en ;
+    rdfs:comment "Reference to the SPDX software bill of materials for this node."@en ;
+    rdfs:domain dkf:SoftwareAttestation ;
+    skos:definition """Links to a complete SPDX document describing all software components, 
+                       dependencies, licenses, and supply chain information for the node."""@en ;
+    skos:scopeNote "Provides transparency and compliance for software supply chain security."@en .
+
+dkf:signatureVerified a owl:DatatypeProperty ;
+    rdfs:label "signature verified"@en ;
+    rdfs:comment "Boolean indicating whether the software signatures have been cryptographically verified."@en ;
+    rdfs:domain dkf:SoftwareAttestation ;
+    rdfs:range xsd:boolean ;
+    skos:definition """A flag indicating successful verification of digital signatures on container images, 
+                       SPDX documents, and other software artifacts."""@en ;
+    skos:scopeNote "Critical security indicator for trustworthy node operations."@en .
+
+## Service Properties
+
+dkf:endpoint a owl:DatatypeProperty ;
+    rdfs:label "endpoint"@en ;
+    rdfs:comment "URL endpoint where this service can be accessed."@en ;
+    rdfs:domain dkf:DKFService ;
+    rdfs:range xsd:anyURI ;
+    skos:definition """The HTTP or HTTPS URL where clients can access this service, following 
+                       standard web service conventions."""@en ;
+    skos:example "http://curator.corp.local:8080/api/datasets", "https://node1.dkf.net:7878/query" ;
+    skos:scopeNote "Enables automatic service discovery and client configuration."@en .
+
+dkf:requiresAuthentication a owl:DatatypeProperty ;
+    rdfs:label "requires authentication"@en ;
+    rdfs:comment "Boolean indicating whether this service requires authenticated access."@en ;
+    rdfs:domain dkf:DKFService ;
+    rdfs:range xsd:boolean ;
+    skos:definition """A flag indicating whether clients must present valid credentials 
+                       (such as verifiable credentials) to access this service."""@en ;
+    skos:scopeNote "Critical for access control in enterprise and consortium deployments."@en .
+
+dkf:supportedFormats a owl:DatatypeProperty ;
+    rdfs:label "supported formats"@en ;
+    rdfs:comment "MIME types or format identifiers supported by this service."@en ;
+    rdfs:domain dkf:DKFService ;
+    rdfs:range xsd:string ;
+    skos:definition """A list of content types, serialization formats, or data formats that 
+                       this service can accept or produce."""@en ;
+    skos:example "text/turtle", "application/rdf+xml", "application/ld+json" ;
+    skos:scopeNote "Enables format negotiation and client compatibility checking."@en .
+
+dkf:supportedProfiles a owl:ObjectProperty ;
+    rdfs:label "supported profiles"@en ;
+    rdfs:comment "W3C PROF profiles that this service can validate or process."@en ;
+    rdfs:domain dkf:ValidationService ;
+    skos:definition """Links a validation service to the specific ontology profiles it can 
+                       evaluate, enabling profile-aware validation routing."""@en ;
+    skos:scopeNote "Critical for domain-specific validation in specialized networks."@en .
+
+dkf:validationEngine a owl:DatatypeProperty ;
+    rdfs:label "validation engine"@en ;
+    rdfs:comment "Identifier of the validation technology used by this service."@en ;
+    rdfs:domain dkf:ValidationService ;
+    rdfs:range xsd:string ;
+    skos:definition """A string identifying the validation engine or framework used, such as 
+                       SHACL processors, OWL reasoners, or custom validation logic."""@en ;
+    skos:example "shacl-1.1", "owl-rl-reasoner", "custom-business-rules" ;
+    skos:scopeNote "Enables clients to understand validation capabilities and limitations."@en .
+
+## Dataset Management Properties
+
+dkf:datasetType a owl:DatatypeProperty ;
+    rdfs:label "dataset type"@en ;
+    rdfs:comment "Classification of the semantic content type contained in the dataset."@en ;
+    rdfs:domain dkf:Dataset ;
+    rdfs:range xsd:string ;
+    skos:definition """A categorical description of the dataset's semantic content, such as 
+                       'ontology', 'vocabulary', 'knowledge_graph', or 'linked_data'."""@en ;
+    skos:example "w3c_ontology", "domain_vocabulary", "instance_data" .
+
+# =============================================================================
+# ORIGINTRAIL COMPATIBILITY PROPERTIES
+# =============================================================================
+# These properties provide interoperability with OriginTrail DKG while 
+# maintaining DKF's enhanced verification and provenance model
+
+dkf:publishedBy a owl:ObjectProperty ;
+    rdfs:label "published by"@en ;
+    rdfs:comment "Agent responsible for publishing this knowledge asset (OriginTrail compatibility)."@en ;
+    rdfs:subPropertyOf prov:wasGeneratedBy ;
+    owl:equivalentProperty dkg:publishedBy ;
+    skos:definition """Links a dataset to the agent (person, organization, or system) responsible 
+                       for its publication, maintaining compatibility with OriginTrail DKG."""@en ;
+    skos:scopeNote "Provides bridge between DKF's detailed PROV model and OriginTrail's simpler publishing model."@en .
+
+dkf:publishTime a owl:DatatypeProperty ;
+    rdfs:label "publish time"@en ;
+    rdfs:comment "Timestamp when the knowledge asset was published (OriginTrail compatibility)."@en ;
+    rdfs:subPropertyOf prov:generatedAtTime ;
+    owl:equivalentProperty dkg:publishTime ;
+    rdfs:range xsd:dateTime ;
+    skos:definition """ISO 8601 timestamp indicating when the dataset was published to the 
+                       distributed knowledge fabric."""@en .
+
+dkf:publishedAtBlock a owl:DatatypeProperty ;
+    rdfs:label "published at block"@en ;
+    rdfs:comment "Blockchain block number at which this asset was published (OriginTrail compatibility)."@en ;
+    owl:equivalentProperty dkg:publishedAtBlock ;
+    rdfs:range xsd:integer ;
+    skos:definition """The blockchain block number at which the dataset's NFT was minted or 
+                       the publication transaction was included."""@en .
+
+dkf:publishTx a owl:DatatypeProperty ;
+    rdfs:label "publish transaction"@en ;
+    rdfs:comment "Transaction hash of the publishing operation (OriginTrail compatibility)."@en ;
+    owl:equivalentProperty dkg:publishTx ;
+    rdfs:range xsd:string ;
+    skos:definition """The cryptographic hash of the blockchain transaction that recorded 
+                       the dataset publication."""@en .
+
+dkf:representsPrivateResource a owl:ObjectProperty ;
+    rdfs:label "represents private resource"@en ;
+    rdfs:comment "Links metadata to private resource identifiers (OriginTrail compatibility)."@en ;
+    owl:equivalentProperty dkg:representsPrivateResource ;
+    skos:definition """Connects publicly accessible metadata to private resource identifiers, 
+                       enabling privacy-preserving data architectures."""@en ;
+    skos:scopeNote "Supports OriginTrail's public/private data separation model."@en .
+
+# =============================================================================
+# VOCABULARY ORGANIZATION
+# =============================================================================
+
+## SKOS Concept Scheme for organizing DKF terms
+
+dkf:DKFVocabulary a skos:ConceptScheme ;
+    rdfs:label "DKF Vocabulary"@en ;
+    rdfs:comment "Concept scheme organizing all terms in the Distributed Knowledge Fabric ontology."@en ;
+    skos:hasTopConcept dkf:DatasetManagement ,
+                       dkf:VerificationConcepts ,
+                       dkf:BlockchainIntegration ,
+                       dkf:ProvenanceConcepts ,
+                       dkf:NodeConcepts ,
+                       dkf:ServiceConcepts .
+
+## Top-level concept categories
+
+dkf:DatasetManagement a skos:Concept ;
+    skos:inScheme dkf:DKFVocabulary ;
+    skos:prefLabel "Dataset Management"@en ;
+    skos:definition "Concepts related to organizing, classifying, and managing semantic datasets."@en ;
+    skos:narrower dkf:Dataset , dkf:DatasetCollection , dkf:datasetType .
+
+dkf:VerificationConcepts a skos:Concept ;
+    skos:inScheme dkf:DKFVocabulary ;
+    skos:prefLabel "Verification Concepts"@en ;
+    skos:definition "Concepts related to cryptographic and semantic verification of dataset content."@en ;
+    skos:narrower dkf:ContentVerification , dkf:contentHash , dkf:verificationStatus .
+
+dkf:BlockchainIntegration a skos:Concept ;
+    skos:inScheme dkf:DKFVocabulary ;
+    skos:prefLabel "Blockchain Integration"@en ;
+    skos:definition "Concepts related to blockchain-based ownership and multi-chain operations."@en ;
+    skos:narrower dkf:NFTMinting , dkf:blockchainNetwork , dkf:contractAddress .
+
+dkf:ProvenanceConcepts a skos:Concept ;
+    skos:inScheme dkf:DKFVocabulary ;
+    skos:prefLabel "Provenance Concepts"@en ;
+    skos:definition "Concepts related to tracking the origin and lifecycle of datasets."@en ;
+    skos:narrower dkf:OntologyDownload , dkf:VerifiedDownloader , dkf:downloadMethod .
+
+dkf:NodeConcepts a skos:Concept ;
+    skos:inScheme dkf:DKFVocabulary ;
+    skos:prefLabel "Node Concepts"@en ;
+    skos:definition "Concepts related to DKF network nodes, their identity, and capabilities."@en ;
+    skos:narrower dkf:Node , dkf:GenesisNode , dkf:CuratorNode , dkf:ConsumerNode , 
+                  dkf:NodeNFT , dkf:NodeRegistration , dkf:SoftwareAttestation .
+
+dkf:ServiceConcepts a skos:Concept ;
+    skos:inScheme dkf:DKFVocabulary ;
+    skos:prefLabel "Service Concepts"@en ;
+    skos:definition "Concepts related to services provided by DKF nodes for network functionality."@en ;
+    skos:narrower dkf:DKFService , dkf:SPARQLService , dkf:DatasetCreationService , 
+                  dkf:ValidationService , dkf:SPDXAttestation .
+
+# =============================================================================
+# PROPERTY CHARACTERISTICS AND CONSTRAINTS
+# =============================================================================
+
+# Functional properties (single-valued)
+dkf:contentHash a owl:FunctionalProperty .
+dkf:verificationStatus a owl:FunctionalProperty .
+dkf:isCanonical a owl:FunctionalProperty .
+dkf:contractAddress a owl:FunctionalProperty .
+dkf:tokenId a owl:FunctionalProperty .
+
+# Inverse functional properties (unique identifiers)
+dkf:contractAddress a owl:InverseFunctionalProperty .
+dkf:transactionHash a owl:InverseFunctionalProperty .
+
+# =============================================================================
+# USAGE EXAMPLES AND DOCUMENTATION
+# =============================================================================
+
+dkf:ExampleDataset a dkf:Dataset ;
+    rdfs:label "Example: W3C PROV Ontology Dataset" ;
+    rdfs:comment """This example shows how a W3C ontology would be represented as a DKF dataset 
+                    with full provenance and verification metadata.""" ;
+    dct:title "W3C PROV Ontology - Verified Bootstrap Dataset" ;
+    dkf:definesNamespace <http://www.w3.org/ns/prov#> ;
+    dkf:contentHash "sha256:8f4b5c7d9a1e3f2b8c6d0e9f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b" ;
+    dkf:verificationStatus "cryptographically_verified" ;
+    dkf:datasetType "w3c_ontology" ;
+    dkf:isCanonical true ;
+    prov:wasGeneratedBy dkf:ExampleDownloadActivity .
+
+dkf:ExampleDownloadActivity a dkf:OntologyDownload ;
+    rdfs:label "Example: Download Activity" ;
+    rdfs:comment "Example of how ontology download activities are documented." ;
+    prov:wasAssociatedWith dkf:ExampleDownloader ;
+    prov:used <https://www.w3.org/ns/prov#> ;
+    dkf:downloadMethod "HTTP_GET_with_content_negotiation" ;
+    dkf:httpStatus 200 ;
+    dkf:contentType "text/turtle" ;
+    prov:startedAtTime "2024-07-31T14:25:00Z"^^xsd:dateTime .
+
+dkf:ExampleDownloader a dkf:VerifiedDownloader ;
+    rdfs:label "Example: Downloader Agent" ;
+    rdfs:comment "Example of how downloader agents are described." ;
+    dkf:agentType "automated_tool" ;
+    dkf:version "1.0.0" ;
+    foaf:name "DKF Bootstrap Tool" .

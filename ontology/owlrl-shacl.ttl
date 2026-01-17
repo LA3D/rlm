@@ -1,0 +1,296 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:   <http://example.org/shapes#> .
+
+# ---------- Prefixes for embedded SPARQL ----------
+ex:Prefixes a sh:PrefixDeclaration ;
+  sh:prefix "rdf" ;  sh:namespace rdf: ;
+  sh:prefix "rdfs" ; sh:namespace rdfs: ;
+  sh:prefix "owl" ;  sh:namespace owl: .
+
+############################
+# RDFS SUBCLASS CLOSURE
+############################
+
+# (1) subclass transitivity: if A rdfs:subClassOf B and B rdfs:subClassOf C then A rdfs:subClassOf C
+ex:SubclassTransitivity a sh:NodeShape ;
+  sh:name "scm-subcl-trans" ;
+  sh:targetObjectsOf rdfs:subClassOf ;  # target all superclasses B (… A subClassOf B)
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?A rdfs:subClassOf ?C .
+      }
+      WHERE {
+        ?A rdfs:subClassOf ?B .
+        ?B rdfs:subClassOf ?C .
+        FILTER(?A != ?C)
+      }
+    """ ;
+  ] .
+
+# (2) type propagation via subclass: if x rdf:type A and A subClassOf B then x rdf:type B
+ex:TypeBySubclass a sh:NodeShape ;
+  sh:name "prp-dom/range via subclass typing" ;
+  sh:targetObjectsOf rdf:type ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?x rdf:type ?B .
+      }
+      WHERE {
+        ?x rdf:type ?A .
+        ?A rdfs:subClassOf ?B .
+        FILTER(?A != ?B)
+      }
+    """ ;
+  ] .
+
+############################
+# RDFS SUBPROPERTY CLOSURE
+############################
+
+# (3) subproperty transitivity: P ⊑ Q and Q ⊑ R ⇒ P ⊑ R
+ex:SubpropertyTransitivity a sh:NodeShape ;
+  sh:name "scm-subprp-trans" ;
+  sh:targetObjectsOf rdfs:subPropertyOf ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?P rdfs:subPropertyOf ?R .
+      }
+      WHERE {
+        ?P rdfs:subPropertyOf ?Q .
+        ?Q rdfs:subPropertyOf ?R .
+        FILTER(?P != ?R)
+      }
+    """ ;
+  ] .
+
+# (4) property inclusion on data: if s P o and P ⊑ Q then s Q o
+ex:PropertyInclusion a sh:NodeShape ;
+  sh:name "prp-subprp" ;
+  sh:targetSubjectsOf rdfs:subPropertyOf ;  # P
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?s ?Q ?o .
+      }
+      WHERE {
+        ?P rdfs:subPropertyOf ?Q .
+        ?s ?P ?o .
+      }
+    """ ;
+  ] .
+
+############################
+# DOMAIN/RANGE TYPING
+############################
+
+# (5) domain typing: if s P o and P rdfs:domain C then s rdf:type C
+ex:DomainTyping a sh:NodeShape ;
+  sh:name "prp-dom" ;
+  sh:targetObjectsOf rdfs:domain ;  # C
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?s rdf:type ?C .
+      }
+      WHERE {
+        ?P rdfs:domain ?C .
+        ?s ?P ?o .
+      }
+    """ ;
+  ] .
+
+# (6) range typing: if s P o and P rdfs:range C then o rdf:type C
+ex:RangeTyping a sh:NodeShape ;
+  sh:name "prp-range" ;
+  sh:targetObjectsOf rdfs:range ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?o rdf:type ?C .
+      }
+      WHERE {
+        ?P rdfs:range ?C .
+        ?s ?P ?o .
+      }
+    """ ;
+  ] .
+
+############################
+# EQUIVALENCE & INVERSE
+############################
+
+# (7) owl:equivalentClass -> mutual subclassing
+ex:EquivalentClassImpliesSubclasses a sh:NodeShape ;
+  sh:name "cls-eqc-as-subclass" ;
+  sh:targetObjectsOf owl:equivalentClass ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?A rdfs:subClassOf ?B .
+        ?B rdfs:subClassOf ?A .
+      }
+      WHERE {
+        ?A owl:equivalentClass ?B .
+      }
+    """ ;
+  ] .
+
+# (8) owl:inverseOf on data: if s P o and P owl:inverseOf Q then o Q s
+ex:InverseOfOnData a sh:NodeShape ;
+  sh:name "prp-inv1" ;
+  sh:targetObjectsOf owl:inverseOf ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?o ?Q ?s .
+      }
+      WHERE {
+        ?P owl:inverseOf ?Q .
+        ?s ?P ?o .
+      }
+    """ ;
+  ] .
+
+############################
+# TRANSITIVE & SYMMETRIC PROPERTIES
+############################
+
+# (9) transitive property closure: if P a owl:TransitiveProperty and x P y and y P z then x P z
+ex:TransitiveStep a sh:NodeShape ;
+  sh:name "prp-trp" ;
+  sh:targetSubjectsOf rdf:type ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?x ?P ?z .
+      }
+      WHERE {
+        ?P rdf:type owl:TransitiveProperty .
+        ?x ?P ?y .
+        ?y ?P ?z .
+        FILTER(?x != ?z)
+      }
+    """ ;
+  ] .
+
+# (10) symmetric property: if P a owl:SymmetricProperty and s P o then o P s
+ex:SymmetricStep a sh:NodeShape ;
+  sh:name "prp-sym" ;
+  sh:targetSubjectsOf rdf:type ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?o ?P ?s .
+      }
+      WHERE {
+        ?P rdf:type owl:SymmetricProperty .
+        ?s ?P ?o .
+      }
+    """ ;
+  ] .
+
+############################
+# FUNCTIONAL / INVERSE-FUNCTIONAL  → owl:sameAs (RL-appropriate version)
+############################
+
+# (11) functional property induces sameAs on objects: if P a owl:FunctionalProperty and x P y1 and x P y2 then y1 owl:sameAs y2
+# NOTE: sameAs closure can explode; many production systems use canonicalization. Keep this module optional.
+ex:FunctionalImpliesSameAs a sh:NodeShape ;
+  sh:name "prp-fp" ;
+  sh:deactivated true ;   # enable if you want sameAs materialization
+  sh:targetSubjectsOf rdf:type ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?y1 owl:sameAs ?y2 .
+        ?y2 owl:sameAs ?y1 .
+      }
+      WHERE {
+        ?P rdf:type owl:FunctionalProperty .
+        ?x ?P ?y1 .
+        ?x ?P ?y2 .
+        FILTER(?y1 != ?y2)
+      }
+    """ ;
+  ] .
+
+# (12) inverse-functional property induces sameAs on subjects
+ex:InverseFunctionalImpliesSameAs a sh:NodeShape ;
+  sh:name "prp-ifp" ;
+  sh:deactivated true ;
+  sh:targetSubjectsOf rdf:type ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?x1 owl:sameAs ?x2 .
+        ?x2 owl:sameAs ?x1 .
+      }
+      WHERE {
+        ?P rdf:type owl:InverseFunctionalProperty .
+        ?x1 ?P ?y .
+        ?x2 ?P ?y .
+        FILTER(?x1 != ?x2)
+      }
+    """ ;
+  ] .
+
+############################
+# PROPERTY CHAIN AXIOMS (RL-limited)
+############################
+
+# (13) simple length-2 property chain: (P1 o P2) ⊑ P
+# In OWL RL, property chains are restricted; here we implement the common two-link case.
+ex:PropertyChain2 a sh:NodeShape ;
+  sh:name "prp-spo1" ;
+  sh:targetObjectsOf owl:propertyChainAxiom ;
+  sh:rule [
+    a sh:SPARQLRule ;
+    sh:prefixes ex:Prefixes ;
+    sh:construct """
+      CONSTRUCT {
+        ?x ?P ?z .
+      }
+      WHERE {
+        ?P owl:propertyChainAxiom ?list .
+        # Expecting RDF list (P1 P2)
+        ?list rdf:first ?P1 ;
+              rdf:rest ?tail .
+        ?tail rdf:first ?P2 ;
+              rdf:rest rdf:nil .
+        ?x ?P1 ?y .
+        ?y ?P2 ?z .
+      }
+    """ ;
+  ] .
+

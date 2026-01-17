@@ -278,13 +278,14 @@ def format_iteration(iteration: RLMIteration, max_len: int = 4000) -> list[dict]
     return msgs
 
 # %% ../nbs/00_core.ipynb 63
-def rlm_run(query: str, meta: QueryMetadata, model: str = 'claude-sonnet-4-5', max_iters: int = 10, ns: dict = None) -> tuple[str, list[RLMIteration]]:
+def rlm_run(query: str, meta: QueryMetadata, model: str = 'claude-sonnet-4-5', max_iters: int = 10, ns: dict = None, tools: list = None) -> tuple[str, list[RLMIteration]]:
     "Run RLM loop until FINAL or max iterations"
     if ns is None: ns = {}
     ns['context'] = meta.chunks
     chunk_tool, llm_tool = make_chunk_tool(meta), make_llm_tool(ns, model)
-    tools = [chunk_tool, llm_tool]
-    chat = Chat(model=model, sp=rlm_system_prompt(meta, tools))
+    all_tools = [chunk_tool, llm_tool] + (tools or [])
+    for t in all_tools: ns[t.__name__] = t
+    chat = Chat(model=model, sp=rlm_system_prompt(meta, all_tools))
     iterations = []
     prompt = query
     for i in range(max_iters):

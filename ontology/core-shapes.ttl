@@ -1,0 +1,559 @@
+@prefix : <https://w3id.org/fabric/shapes/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix role: <http://www.w3.org/ns/dx/prof/role/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix fabric: <https://w3id.org/fabric/core#> .
+
+# =============================================================================
+# Knowledge Fabric SHACL Shapes - Governance Validation Bundle
+# =============================================================================
+
+# Shape collection metadata
+: a owl:Ontology ;
+    dct:title "Knowledge Fabric Core SHACL Shapes"@en ;
+    dct:description """SHACL constraints for validating conformance to the Knowledge Fabric
+    ontology and FAIR/PROF governance policies."""@en ;
+    owl:versionInfo "1.0.0" ;
+    dct:created "2025-09-15"^^xsd:date ;
+    dct:conformsTo <https://www.w3.org/TR/shacl/> ;
+    dct:creator <https://w3id.org/fabric/org/Org1MSP> .
+
+# =============================================================================
+# PROF Profile Shapes (W3C Standards Compliance)
+# =============================================================================
+
+# Profile must be properly structured
+:ProfileShape a sh:NodeShape ;
+    sh:targetClass prof:Profile ;
+    rdfs:label "Profile Shape"@en ;
+    rdfs:comment "Validates W3C PROF Profile structure and required metadata"@en ;
+
+    # Required metadata fields
+    sh:property [
+        sh:path dct:title ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:minLength 5 ;
+        sh:message "Profile must have exactly one title (minimum 5 characters)"@en
+    ] ;
+
+    sh:property [
+        sh:path dct:description ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:minLength 20 ;
+        sh:message "Profile must have exactly one description (minimum 20 characters)"@en
+    ] ;
+
+    sh:property [
+        sh:path prof:hasToken ;
+        sh:datatype xsd:token ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^[a-z0-9\\-]+/v[0-9]+\\.[0-9]+\\.[0-9]+$" ;
+        sh:message "Profile must have exactly one token in format 'name/vX.Y.Z'"@en
+    ] ;
+
+    sh:property [
+        sh:path owl:versionInfo ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^[0-9]+\\.[0-9]+\\.[0-9]+$" ;
+        sh:message "Profile must have semantic version (X.Y.Z)"@en
+    ] ;
+
+    # Must have at least vocabulary and validation resources
+    sh:property [
+        sh:path prof:hasResource ;
+        sh:minCount 2 ;
+        sh:message "Profile must have at least 2 resources (vocabulary + validation)"@en
+    ] ;
+
+    # Must conform to base standards
+    sh:property [
+        sh:path dct:conformsTo ;
+        sh:minCount 1 ;
+        sh:message "Profile must declare conformance to at least one base standard"@en
+    ] ;
+
+    # Must have publisher information
+    sh:property [
+        sh:path dct:publisher ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "Profile must have exactly one publisher (IRI)"@en
+    ] ;
+
+    # License is required for FAIR compliance
+    sh:property [
+        sh:path dct:license ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "Profile must have exactly one license for FAIR compliance"@en
+    ] .
+
+# ResourceDescriptor must be properly structured
+:ResourceDescriptorShape a sh:NodeShape ;
+    sh:targetClass prof:ResourceDescriptor ;
+    rdfs:label "Resource Descriptor Shape"@en ;
+    rdfs:comment "Validates PROF ResourceDescriptor structure and metadata"@en ;
+
+    # Required metadata
+    sh:property [
+        sh:path dct:title ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "ResourceDescriptor must have exactly one title"@en
+    ] ;
+
+    sh:property [
+        sh:path dct:description ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "ResourceDescriptor must have exactly one description"@en
+    ] ;
+
+    # Must have exactly one role
+    sh:property [
+        sh:path prof:hasRole ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "ResourceDescriptor must have exactly one role"@en
+    ] ;
+
+    # Must have format information
+    sh:property [
+        sh:path dct:format ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "ResourceDescriptor must have exactly one format (IRI)"@en
+    ] ;
+
+    # Must have artifact reference
+    sh:property [
+        sh:path prof:hasArtifact ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "ResourceDescriptor must have exactly one artifact"@en
+    ] ;
+
+    # Distribution metadata required
+    sh:property [
+        sh:path dcat:mediaType ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "ResourceDescriptor must have exactly one mediaType"@en
+    ] .
+
+# =============================================================================
+# Knowledge Fabric Ontology Shapes
+# =============================================================================
+
+# VerifiableKnowledgeAsset base class validation
+:VerifiableKnowledgeAssetShape a sh:NodeShape ;
+    sh:targetClass fabric:VerifiableKnowledgeAsset ;
+    rdfs:label "Verifiable Knowledge Asset Shape"@en ;
+    rdfs:comment "Validates base requirements for verifiable knowledge assets"@en ;
+
+    # Must have canonical hash for content addressing
+    sh:property [
+        sh:path fabric:hasCanonicalHash ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^z[0-9a-f]{64}$" ;
+        sh:message "VerifiableKnowledgeAsset must have exactly one canonical hash (z + 64 hex chars)"@en
+    ] ;
+
+    # Status is required for lifecycle management
+    sh:property [
+        sh:path fabric:hasStatus ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( "active" "deprecated" "revoked" "suspended" ) ;
+        sh:message "VerifiableKnowledgeAsset must have exactly one status: active, deprecated, revoked, or suspended"@en
+    ] .
+
+# KnowledgeDataset specific validation
+:KnowledgeDatasetShape a sh:NodeShape ;
+    sh:targetClass fabric:KnowledgeDataset ;
+    rdfs:label "Knowledge Dataset Shape"@en ;
+    rdfs:comment "Validates dataset structure and member relationships"@en ;
+
+    # Must have dataset hash
+    sh:property [
+        sh:path fabric:hasDatasetHash ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:pattern "^z[0-9a-f]{64}$" ;
+        sh:message "KnowledgeDataset must have exactly one dataset hash (z + 64 hex chars)"@en
+    ] ;
+
+    # Must have at least one member
+    sh:property [
+        sh:path fabric:hasMember ;
+        sh:class fabric:KnowledgeGraph ;
+        sh:minCount 1 ;
+        sh:message "KnowledgeDataset must have at least one KnowledgeGraph member"@en
+    ] .
+
+# KnowledgeGraph validation
+:KnowledgeGraphShape a sh:NodeShape ;
+    sh:targetClass fabric:KnowledgeGraph ;
+    rdfs:label "Knowledge Graph Shape"@en ;
+    rdfs:comment "Validates graph structure and role assignment"@en ;
+
+    # Must have assigned role within dataset
+    sh:property [
+        sh:path fabric:hasRole ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( "main" "metadata" "provenance" "secondary" "primary" "encounters" "observations" ) ;
+        sh:message "KnowledgeGraph must have exactly one valid role"@en
+    ] .
+
+# ServiceRegistration validation
+:ServiceRegistrationShape a sh:NodeShape ;
+    sh:targetClass fabric:ServiceRegistration ;
+    rdfs:label "Service Registration Shape"@en ;
+    rdfs:comment "Validates service registration metadata and capabilities"@en ;
+
+    # Must have at least one capability
+    sh:property [
+        sh:path fabric:hasCapability ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:message "ServiceRegistration must have at least one capability"@en ;
+        sh:pattern "^(SPARQL\\.(Query|Update|Construct|Describe)|Validation|Governance)$" ;
+        sh:message "ServiceRegistration capabilities must be valid SPARQL operations or fabric services"@en
+    ] .
+
+# VerifiableCredential validation
+:VerifiableCredentialShape a sh:NodeShape ;
+    sh:targetClass fabric:VerifiableCredential ;
+    rdfs:label "Verifiable Credential Shape"@en ;
+    rdfs:comment "Validates VC structure for blockchain attestation"@en ;
+
+    # Must attest integrity of something
+    sh:property [
+        sh:path fabric:attestsIntegrity ;
+        sh:class fabric:VerifiableKnowledgeAsset ;
+        sh:minCount 1 ;
+        sh:message "VerifiableCredential must attest integrity of at least one VerifiableKnowledgeAsset"@en
+    ] .
+
+# =============================================================================
+# FAIR Principles Validation Shapes
+# =============================================================================
+
+# Findability validation
+:FindabilityShape a sh:NodeShape ;
+    sh:targetNode prof:Profile ;
+    rdfs:label "FAIR Findability Shape"@en ;
+    rdfs:comment "Validates FAIR Findability principle compliance"@en ;
+
+    # F1: Assigned globally unique identifier
+    sh:property [
+        sh:path [ sh:inversePath rdf:type ] ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ;
+        sh:message "F1: Profile must have globally unique IRI identifier"@en
+    ] ;
+
+    # F2: Rich metadata
+    sh:property [
+        sh:path dct:title ;
+        sh:minCount 1 ;
+        sh:message "F2: Profile must have title metadata"@en
+    ] ;
+
+    sh:property [
+        sh:path dct:description ;
+        sh:minCount 1 ;
+        sh:message "F2: Profile must have description metadata"@en
+    ] ;
+
+    sh:property [
+        sh:path dct:creator ;
+        sh:minCount 1 ;
+        sh:message "F2: Profile must have creator metadata"@en
+    ] ;
+
+    # F3: Includes identifier of data it describes
+    sh:property [
+        sh:path prof:hasResource ;
+        sh:minCount 1 ;
+        sh:message "F3: Profile must reference data resources it describes"@en
+    ] .
+
+# Accessibility validation
+:AccessibilityShape a sh:NodeShape ;
+    sh:targetClass prof:ResourceDescriptor ;
+    rdfs:label "FAIR Accessibility Shape"@en ;
+    rdfs:comment "Validates FAIR Accessibility principle compliance"@en ;
+
+    # A1: Retrievable by standardized protocol
+    sh:property [
+        sh:path dcat:downloadURL ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ;
+        sh:message "A1: ResourceDescriptor must have downloadURL with standard protocol"@en
+    ] ;
+
+    # A1.1: Protocol is open, free, universally implementable
+    sh:property [
+        sh:path dcat:downloadURL ;
+        sh:pattern "^https?://" ;
+        sh:message "A1.1: Download URL must use open HTTP/HTTPS protocol"@en
+    ] ;
+
+    # A2: Metadata accessible even when data no longer available
+    sh:property [
+        sh:path dcat:accessURL ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ;
+        sh:message "A2: ResourceDescriptor must have persistent access URL for metadata"@en
+    ] .
+
+# Interoperability validation
+:InteroperabilityShape a sh:NodeShape ;
+    sh:targetClass prof:Profile ;
+    rdfs:label "FAIR Interoperability Shape"@en ;
+    rdfs:comment "Validates FAIR Interoperability principle compliance"@en ;
+
+    # I1: Uses formal, accessible, shared, broadly applicable language
+    sh:property [
+        sh:path dct:conformsTo ;
+        sh:hasValue <https://www.w3.org/TR/rdf12-concepts/> ;
+        sh:message "I1: Profile must conform to RDF for formal knowledge representation"@en
+    ] ;
+
+    # I2: Uses vocabularies that follow FAIR principles
+    sh:property [
+        sh:path dct:conformsTo ;
+        sh:hasValue <http://www.w3.org/ns/dx/prof/> ;
+        sh:message "I2: Profile must use FAIR-compliant PROF vocabulary"@en
+    ] ;
+
+    # I3: Includes qualified references to other metadata/data
+    sh:property [
+        sh:path prof:hasResource ;
+        sh:qualifiedValueShape [
+            sh:property [
+                sh:path prof:hasRole ;
+                sh:hasValue role:vocabulary
+            ]
+        ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "I3: Profile must have qualified reference to vocabulary resource"@en
+    ] .
+
+# Reusability validation
+:ReusabilityShape a sh:NodeShape ;
+    sh:targetClass prof:Profile ;
+    rdfs:label "FAIR Reusability Shape"@en ;
+    rdfs:comment "Validates FAIR Reusability principle compliance"@en ;
+
+    # R1: Rich metadata with usage attributes
+    sh:property [
+        sh:path dct:license ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ;
+        sh:message "R1: Profile must have clear usage license"@en
+    ] ;
+
+    sh:property [
+        sh:path dct:rights ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:message "R1: Profile must have rights statement"@en
+    ] ;
+
+    # R1.1: Clear, accessible data usage license
+    sh:property [
+        sh:path dct:license ;
+        sh:pattern "^https?://(creativecommons\\.org|opensource\\.org|www\\.gnu\\.org)" ;
+        sh:message "R1.1: License must be from recognized open license authority"@en
+    ] ;
+
+    # R1.2: Detailed provenance
+    sh:property [
+        sh:path prof:hasResource ;
+        sh:qualifiedValueShape [
+            sh:property [
+                sh:path prof:hasRole ;
+                sh:in ( role:specification :ProvenanceRole )
+            ]
+        ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "R1.2: Profile must have provenance/specification resource"@en
+    ] ;
+
+    # R1.3: Standards conformance for domain
+    sh:property [
+        sh:path dct:conformsTo ;
+        sh:minCount 3 ;
+        sh:message "R1.3: Profile must conform to multiple relevant domain standards"@en
+    ] .
+
+# =============================================================================
+# Content-Addressed Graph DID Validation
+# =============================================================================
+
+# Validates proper Graph DID format and content addressing
+:GraphDIDShape a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            SELECT ?resource WHERE {
+                ?resource prof:hasArtifact ?artifact .
+                FILTER(STRSTARTS(STR(?artifact), "did:graph:v1:"))
+            }
+        """
+    ] ;
+    rdfs:label "Graph DID Shape"@en ;
+    rdfs:comment "Validates content-addressed Graph DID references"@en ;
+
+    sh:property [
+        sh:path prof:hasArtifact ;
+        sh:pattern "^did:graph:v1:z[0-9a-f]{64}$" ;
+        sh:message "Graph DID must follow format: did:graph:v1:z{64-char-hex-hash}"@en
+    ] ;
+
+    # Must have canonical hash metadata
+    sh:property [
+        sh:path :canonicalHash ;
+        sh:datatype xsd:string ;
+        sh:pattern "^z[0-9a-f]{64}$" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Graph DID resource must have canonical hash metadata"@en
+    ] ;
+
+    # Hash algorithm must be specified
+    sh:property [
+        sh:path :hashAlgorithm ;
+        sh:hasValue "RDFC-1.0+SHA-256" ;
+        sh:minCount 1 ;
+        sh:message "Graph DID must specify RDFC-1.0+SHA-256 hash algorithm"@en
+    ] .
+
+# =============================================================================
+# Governance Policy Compliance Shapes
+# =============================================================================
+
+# Validates minimum required resource roles for Knowledge Fabric profiles
+:RequiredResourceRolesShape a sh:NodeShape ;
+    sh:targetClass prof:Profile ;
+    rdfs:label "Required Resource Roles Shape"@en ;
+    rdfs:comment "Validates that profile has minimum required resource roles for Knowledge Fabric governance"@en ;
+
+    # Must have vocabulary resource
+    sh:property [
+        sh:path prof:hasResource ;
+        sh:qualifiedValueShape [
+            sh:property [
+                sh:path prof:hasRole ;
+                sh:hasValue role:vocabulary
+            ]
+        ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "Profile must have at least one vocabulary resource"@en
+    ] ;
+
+    # Must have validation resource
+    sh:property [
+        sh:path prof:hasResource ;
+        sh:qualifiedValueShape [
+            sh:property [
+                sh:path prof:hasRole ;
+                sh:hasValue role:validation
+            ]
+        ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "Profile must have at least one validation resource (SHACL)"@en
+    ] ;
+
+    # Must have specification resource
+    sh:property [
+        sh:path prof:hasResource ;
+        sh:qualifiedValueShape [
+            sh:property [
+                sh:path prof:hasRole ;
+                sh:hasValue role:specification
+            ]
+        ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "Profile must have at least one specification resource"@en
+    ] .
+
+# Validates blockchain integration metadata
+:BlockchainIntegrationShape a sh:NodeShape ;
+    sh:targetClass prof:Profile ;
+    rdfs:label "Blockchain Integration Shape"@en ;
+    rdfs:comment "Validates Knowledge Fabric blockchain integration requirements"@en ;
+
+    # Must specify fabric network details
+    sh:property [
+        sh:path :fabricNetwork ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Profile must specify Fabric network identifier"@en
+    ] ;
+
+    sh:property [
+        sh:path :fabricChannel ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Profile must specify Fabric channel identifier"@en
+    ] ;
+
+    sh:property [
+        sh:path :fabricMSP ;
+        sh:datatype xsd:string ;
+        sh:pattern "^[A-Za-z0-9]+MSP$" ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Profile must specify Fabric MSP identifier ending in 'MSP'"@en
+    ] ;
+
+    # Must specify canonicalization approach
+    sh:property [
+        sh:path :canonicalizationAlgorithm ;
+        sh:hasValue "RDFC-1.0" ;
+        sh:minCount 1 ;
+        sh:message "Profile must use RDFC-1.0 canonicalization algorithm"@en
+    ] ;
+
+    # Must specify governance model
+    sh:property [
+        sh:path :governanceModel ;
+        sh:in ( "Multi-Layer-Authorization" "Certificate-Only" "VC-Based" ) ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Profile must specify supported governance model"@en
+    ] .
+
+# End of SHACL Shapes

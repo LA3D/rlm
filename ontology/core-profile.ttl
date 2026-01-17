@@ -1,0 +1,271 @@
+@prefix : <https://w3id.org/fabric/profiles/core#> .
+@prefix prof: <http://www.w3.org/ns/dx/prof/> .
+@prefix role: <http://www.w3.org/ns/dx/prof/role/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# =============================================================================
+# Knowledge Fabric Core Ontology Profile
+# =============================================================================
+
+:CoreOntologyProfile a prof:Profile ;
+    dct:title "Knowledge Fabric Core Ontology Profile"@en ;
+    dct:description """W3C PROF-compliant profile for the Knowledge Fabric Core Ontology.
+
+This profile defines the complete package structure for a verifiable ontology
+with blockchain-backed integrity guarantees, RDFC-1.0 canonicalization, and
+governance validation via SHACL constraints."""@en ;
+
+    # Profile identification and versioning
+    prof:hasToken "knowledge-fabric-core/v1.0.0" ;
+    owl:versionInfo "1.0.0" ;
+    dct:created "2025-09-15"^^xsd:date ;
+    dct:modified "2025-09-15"^^xsd:date ;
+
+    # Conformance to base standards
+    dct:conformsTo <https://www.w3.org/TR/rdf12-concepts/> ,
+                   <https://www.w3.org/TR/owl2-overview/> ,
+                   <https://www.w3.org/TR/shacl/> ,
+                   <http://www.w3.org/ns/dx/prof/> ,
+                   <https://www.w3.org/TR/vc-data-model/> ;
+
+    # Publisher and organization information
+    dct:publisher <https://w3id.org/fabric/org/Org1MSP> ;
+    dct:creator [
+        foaf:name "Knowledge Fabric System" ;
+        foaf:mbox <mailto:admin@fabric.example.org> ;
+        dct:identifier <https://w3id.org/fabric/org/Org1MSP>
+    ] ;
+
+    # Profile resources with roles
+    prof:hasResource :VocabularyResource ,
+                     :ValidationResource ,
+                     :SpecificationResource ,
+                     :ProvenanceResource ,
+                     :ExampleResource ;
+
+    # Governance and policies
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dct:rights "Licensed under Creative Commons Attribution 4.0 International"@en .
+
+# =============================================================================
+# Resource Descriptors with Graph DIDs
+# =============================================================================
+
+# Vocabulary Resource (Core RDF/OWL definitions)
+:VocabularyResource a prof:ResourceDescriptor ;
+    dct:title "Knowledge Fabric Core Vocabulary"@en ;
+    dct:description "OWL ontology defining core classes and properties for verifiable knowledge assets"@en ;
+
+    # Role and format
+    prof:hasRole role:vocabulary ;
+    dct:format <https://www.w3.org/ns/formats/Turtle> ;
+
+    # Content-addressed artifact reference
+    prof:hasArtifact <did:graph:v1:z4ce597a1f1cfe61b065c705484ab80fcdf5d63d5063a9bc9edaaaa4155c72da5> ;
+
+    # File distribution details
+    dcat:downloadURL <https://w3id.org/fabric/core/vocab.ttl> ;
+    dcat:accessURL <https://w3id.org/fabric/core/> ;
+    dcat:mediaType "text/turtle" ;
+
+    # Integrity metadata
+    dct:identifier "did:graph:v1:z4ce597a1f1cfe61b065c705484ab80fcdf5d63d5063a9bc9edaaaa4155c72da5" ;
+    :canonicalHash "z4ce597a1f1cfe61b065c705484ab80fcdf5d63d5063a9bc9edaaaa4155c72da5" ;
+    :hashAlgorithm "RDFC-1.0+SHA-256" .
+
+# Validation Resource (SHACL constraints)
+:ValidationResource a prof:ResourceDescriptor ;
+    dct:title "Knowledge Fabric SHACL Constraints"@en ;
+    dct:description "SHACL shapes for validating conformance to the Knowledge Fabric ontology"@en ;
+
+    # Role and format
+    prof:hasRole role:validation ;
+    dct:format <https://www.w3.org/ns/formats/Turtle> ;
+
+    # Artifact reference (will be populated after OHW3)
+    prof:hasArtifact :ValidationShapes ;
+
+    # Distribution metadata
+    dcat:downloadURL <https://w3id.org/fabric/core/shapes.ttl> ;
+    dcat:mediaType "text/turtle" ;
+
+    # Validation scope
+    dct:coverage "OWL Classes, Properties, Dataset Structure, FAIR Compliance"@en .
+
+# Specification Resource (Human-readable documentation)
+:SpecificationResource a prof:ResourceDescriptor ;
+    dct:title "Knowledge Fabric Core Ontology Specification"@en ;
+    dct:description "Authoritative human-readable specification of the ontology"@en ;
+
+    # Role and format
+    prof:hasRole role:specification ;
+    dct:format <https://www.w3.org/ns/formats/HTML> ;
+
+    # Documentation artifact
+    prof:hasArtifact :SpecificationDocument ;
+
+    # Distribution metadata
+    dcat:accessURL <https://w3id.org/fabric/core/spec/> ;
+    dcat:mediaType "text/html" ;
+
+    # Language and accessibility
+    dct:language "en" ;
+    dct:audience "Ontology Engineers, Knowledge Architects, Blockchain Developers"@en .
+
+# Provenance Resource (PROV-O lineage)
+:ProvenanceResource a prof:ResourceDescriptor ;
+    dct:title "Ontology Release Provenance"@en ;
+    dct:description "PROV-O graph documenting the creation and lineage of this ontology version"@en ;
+
+    # Role and format
+    prof:hasRole :ProvenanceRole ;
+    dct:format <https://www.w3.org/ns/formats/Turtle> ;
+
+    # Artifact reference (will be populated after OHW4)
+    prof:hasArtifact :ProvenanceGraph ;
+
+    # Distribution metadata
+    dcat:downloadURL <https://w3id.org/fabric/core/prov.ttl> ;
+    dcat:mediaType "text/turtle" ;
+
+    # Provenance specifics
+    dct:coverage "Release Activity, Derivation Chain, Publisher Attribution"@en .
+
+# Example Resource (Sample conforming data)
+:ExampleResource a prof:ResourceDescriptor ;
+    dct:title "Knowledge Fabric Usage Examples"@en ;
+    dct:description "Sample RDF data conforming to the Knowledge Fabric ontology"@en ;
+
+    # Role and format
+    prof:hasRole role:example ;
+    dct:format <https://www.w3.org/ns/formats/Turtle> ;
+
+    # Artifact reference
+    prof:hasArtifact :ExampleData ;
+
+    # Distribution metadata
+    dcat:downloadURL <https://w3id.org/fabric/core/examples.ttl> ;
+    dcat:mediaType "text/turtle" ;
+
+    # Example categories
+    dct:subject "VerifiableCredentials" , "ServiceRegistration" , "GraphIntegrity" , "DatasetCollections" .
+
+# =============================================================================
+# Custom Resource Roles (Extensions to W3C standard roles)
+# =============================================================================
+
+:ProvenanceRole a prof:ResourceRole , skos:Concept ;
+    rdfs:label "Provenance"@en ;
+    skos:definition "PROV-O graph documenting ontology creation, derivation, and publication lineage"@en ;
+    skos:broader role:schema ;
+    skos:note "Extends W3C standard roles for blockchain governance requirements"@en .
+
+# =============================================================================
+# Quality and Conformance Metadata
+# =============================================================================
+
+# FAIR Principles Compliance
+:CoreOntologyProfile dct:conformsTo <https://www.go-fair.org/fair-principles/> ;
+
+    # Findability
+    :findabilityScore "A" ;
+    :hasGlobalIdentifier "https://w3id.org/fabric/core" ;
+    :hasMetadataStandard "DCAT" , "PROF" , "VOID" ;
+
+    # Accessibility
+    :accessibilityScore "A" ;
+    :hasAccessProtocol "HTTPS" , "Content-Negotiation" ;
+    :hasAuthentication "Optional" ;
+
+    # Interoperability
+    :interoperabilityScore "A" ;
+    :usesKnowledgeRepresentationLanguage "OWL2" , "RDF1.2" , "SHACL" ;
+    :hasVocabularyStandards "SKOS" , "DCTERMS" , "FOAF" ;
+
+    # Reusability
+    :reusabilityScore "A" ;
+    :hasUsageRights "CC-BY-4.0" ;
+    :hasQualifiedReferences "W3C-Standards" ;
+    :hasProvenance "PROV-O" .
+
+# =============================================================================
+# Technical Metadata for Knowledge Fabric Integration
+# =============================================================================
+
+# Blockchain Integration Metadata
+:CoreOntologyProfile
+    # Fabric network identification
+    :fabricNetwork "hlf-network" ;
+    :fabricChannel "knowledge-channel" ;
+    :fabricMSP "Org1MSP" ;
+
+    # Content addressing
+    :canonicalizationAlgorithm "RDFC-1.0" ;
+    :hashFunction "SHA-256" ;
+    :encodingScheme "z-base58btc" ;
+
+    # Governance framework
+    :governanceModel "Multi-Layer-Authorization" ;
+    :revocationMechanism "StatusList2021" ;
+    :integrityMechanism "VerifiableCredentials" .
+
+# Dataset composition metadata
+:CoreOntologyProfile
+    dcat:dataset :CoreOntologyDataset .
+
+:CoreOntologyDataset a dcat:Dataset ;
+    dct:title "Knowledge Fabric Core Ontology Dataset"@en ;
+    dct:description "Complete RDF dataset comprising vocabulary, constraints, provenance, and examples"@en ;
+
+    # Dataset structure
+    dcat:distribution :VocabularyDistribution ,
+                      :ValidationDistribution ,
+                      :ProvenanceDistribution ,
+                      :ExampleDistribution ;
+
+    # Quality metrics
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/TECH> ;
+    dcat:keyword "ontology"@en , "blockchain"@en , "verifiable-credentials"@en , "RDFC-1.0"@en ;
+
+    # Versioning
+    owl:versionInfo "1.0.0" ;
+    dcat:version "1.0.0" ;
+    :isVersionOf <https://w3id.org/fabric/core> .
+
+# =============================================================================
+# Distribution Details
+# =============================================================================
+
+:VocabularyDistribution a dcat:Distribution ;
+    dct:title "Vocabulary Turtle Distribution"@en ;
+    dcat:downloadURL <https://w3id.org/fabric/core/vocab.ttl> ;
+    dcat:mediaType "text/turtle" ;
+    dcat:format <https://www.w3.org/ns/formats/Turtle> ;
+    :contentAddressableID "did:graph:v1:z4ce597a1f1cfe61b065c705484ab80fcdf5d63d5063a9bc9edaaaa4155c72da5" .
+
+:ValidationDistribution a dcat:Distribution ;
+    dct:title "SHACL Validation Distribution"@en ;
+    dcat:downloadURL <https://w3id.org/fabric/core/shapes.ttl> ;
+    dcat:mediaType "text/turtle" ;
+    dcat:format <https://www.w3.org/ns/formats/Turtle> .
+
+:ProvenanceDistribution a dcat:Distribution ;
+    dct:title "PROV-O Provenance Distribution"@en ;
+    dcat:downloadURL <https://w3id.org/fabric/core/prov.ttl> ;
+    dcat:mediaType "text/turtle" ;
+    dcat:format <https://www.w3.org/ns/formats/Turtle> .
+
+:ExampleDistribution a dcat:Distribution ;
+    dct:title "Usage Examples Distribution"@en ;
+    dcat:downloadURL <https://w3id.org/fabric/core/examples.ttl> ;
+    dcat:mediaType "text/turtle" ;
+    dcat:format <https://www.w3.org/ns/formats/Turtle> .
+
+# End of Profile

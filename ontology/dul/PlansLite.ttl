@@ -1,0 +1,671 @@
+PREFIX :          <http://www.ontologydesignpatterns.org/ont/dul/PlansLite.owl#>
+PREFIX PlansLite: <http://www.ontologydesignpatterns.org/ont/dul/PlansLite.owl#>
+PREFIX dul:       <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#>
+PREFIX owl:       <http://www.w3.org/2002/07/owl#>
+PREFIX owl2xml:   <http://www.w3.org/2006/12/owl2-xml#>
+PREFIX rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:      <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:       <http://www.w3.org/2001/XMLSchema#>
+
+dul:usesConcept  rdf:type  owl:ObjectProperty .
+
+dul:satisfies  rdf:type  owl:ObjectProperty .
+
+dul:precedes  rdf:type  owl:ObjectProperty .
+
+dul:parametrizes  rdf:type  owl:ObjectProperty .
+
+dul:isParticipantIn  rdf:type  owl:ObjectProperty .
+
+dul:isExecutedIn  rdf:type  owl:ObjectProperty .
+
+dul:isDescribedBy  rdf:type  owl:ObjectProperty .
+
+dul:isComponentOf  rdf:type  owl:ObjectProperty .
+
+dul:hasParticipant  rdf:type  owl:ObjectProperty .
+
+dul:hasParameter  rdf:type  owl:ObjectProperty .
+
+dul:hasComponent  rdf:type  owl:ObjectProperty .
+
+dul:follows  rdf:type  owl:ObjectProperty .
+
+dul:executesTask  rdf:type  owl:ObjectProperty .
+
+dul:directlyPrecedes  rdf:type  owl:ObjectProperty .
+
+dul:directlyFollows  rdf:type  owl:ObjectProperty .
+
+dul:classifies  rdf:type  owl:ObjectProperty .
+
+xsd:integer  rdf:type  rdfs:Datatype .
+
+dul:TimeInterval  rdf:type  owl:Class .
+
+dul:SpaceRegion  rdf:type  owl:Class .
+
+dul:Plan  rdf:type  owl:Class .
+
+dul:Parameter  rdf:type  owl:Class .
+
+dul:Object  rdf:type  owl:Class .
+
+dul:Method  rdf:type  owl:Class .
+
+dul:Goal  rdf:type  owl:Class .
+
+dul:Event  rdf:type  owl:Class .
+
+dul:Entity  rdf:type  owl:Class .
+
+dul:Action  rdf:type  owl:Class .
+
+PlansLite:AbstractMergingTask
+        rdf:type         owl:Class;
+        rdfs:comment     "An abstract merging task is a merging aimed at 'formally' joining the tasks that are direct successor to a case task.\nDifferently from synchronization tasks, which are expected to be executed, abstract mergings only provide abstract boundaries to a task structure, because in a case task, only one action task is supposed to be executed.";
+        rdfs:label       "Abstract merging task"@en;
+        rdfs:subClassOf  PlansLite:MergingTask;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:follows;
+                           owl:someValuesFrom  PlansLite:CaseTask
+                         ] .
+
+dul:Role  rdf:type  owl:Class .
+
+PlansLite:SpatiallyBoundRole
+        rdf:type             owl:Class;
+        rdfs:label           "Spatially bound role"@en;
+        rdfs:subClassOf      dul:Role;
+        owl:equivalentClass  [ rdf:type            owl:Class;
+                               owl:intersectionOf  ( dul:Role
+                                                     [ rdf:type            owl:Restriction;
+                                                       owl:onProperty      dul:hasParameter;
+                                                       owl:someValuesFrom  [ rdf:type            owl:Class;
+                                                                             owl:intersectionOf  ( PlansLite:SpatialParameter
+                                                                                                   [ rdf:type            owl:Restriction;
+                                                                                                     owl:onProperty      dul:parametrizes;
+                                                                                                     owl:someValuesFrom  dul:SpaceRegion
+                                                                                                   ]
+                                                                                                 )
+                                                                           ]
+                                                     ]
+                                                   )
+                             ] .
+
+dul:Task  rdf:type  owl:Class .
+
+PlansLite:InformationGathering
+        rdf:type         owl:Class;
+        rdfs:comment     "An activity aimed at gathering information for some purpose. It is typically sequenced by case tasks for taking decisions (can be part of decision activities).";
+        rdfs:label       "Information gathering"@en;
+        rdfs:subClassOf  dul:Action .
+
+PlansLite:ComplexTask
+        rdf:type             owl:Class;
+        rdfs:comment         "A task that has at least two other tasks as components.";
+        rdfs:label           "Complex task"@en;
+        rdfs:subClassOf      dul:Task;
+        owl:disjointWith     PlansLite:ElementaryTask;
+        owl:equivalentClass  [ rdf:type            owl:Class;
+                               owl:intersectionOf  ( dul:Task
+                                                     [ rdf:type            owl:Restriction;
+                                                       owl:minCardinality  "2"^^xsd:nonNegativeInteger;
+                                                       owl:onProperty      dul:hasComponent
+                                                     ]
+                                                   )
+                             ] .
+
+PlansLite:Schedule  rdf:type  owl:Class;
+        rdfs:comment         "A schedule is a task that cannot be executed twice, since it has a temporal parameter restricted to one value. In other words, a schedule classifies a specific event, which results to be 'scheduled'.\nWhen a schedule is complex, all component tasks must be temporally-bound.";
+        rdfs:label           "Schedule"@en;
+        rdfs:subClassOf      PlansLite:ComplexTask;
+        owl:equivalentClass  [ rdf:type            owl:Class;
+                               owl:intersectionOf  ( PlansLite:ComplexTask
+                                                     [ rdf:type           owl:Restriction;
+                                                       owl:allValuesFrom  PlansLite:TemporallyBoundTask;
+                                                       owl:onProperty     dul:hasComponent
+                                                     ]
+                                                   )
+                             ] .
+
+PlansLite:LoopTask  rdf:type  owl:Class;
+        rdfs:comment      "A loop task is a control task that has as successor an action -or complex- task that sequences at least two distinct activities sharing a minimal common set of properties -they have a MinimalCommonType. Notice that MinimalCommonType cannot be formalised as a first-order predicate, and then neither in OWL-DL. It can be considered a trivial guideline: when sequencing looped actions, choose a definite action class from the ground ontology.\nSome relations typically hold for loop tasks. Exit condition can be used to state what deliberation task causes to exit the cycle; iteration interval can be used to state how much time should be taken by each iteration of the looped activity; iteration cardinality can be used to state how many times the action should be repeated.";
+        rdfs:label        "Loop task"@en;
+        rdfs:subClassOf   PlansLite:ControlTask;
+        owl:disjointWith  PlansLite:SynchroTask .
+
+PlansLite:PlanningAsTechnique
+        rdf:type         owl:Class;
+        rdfs:comment     "The technique by which a planning process can be carried out.";
+        rdfs:label       "Planning as technique"@en;
+        rdfs:subClassOf  dul:Method .
+
+PlansLite:SaturatedPlan
+        rdf:type         owl:Class;
+        rdfs:comment     "A saturated plan is a dul:Plan that cannot be executed twice, since it defines spatio-temporal parameters restricted to one value, e.g. one of its tasks classifies an event that is valued by a definite dul:TimeInterval and a definite dul:SpaceRegion\nOf course, in the case of maximal spatio-temporal regions, a saturated plan tends to approximate an abstract plan from the execution viewpoint, but these worst cases are unavoidable when dealing with maximality.";
+        rdfs:label       "Saturated plan"@en;
+        rdfs:subClassOf  dul:Plan;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:usesConcept;
+                           owl:someValuesFrom  PlansLite:SpatiallyBoundRole
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:usesConcept;
+                           owl:someValuesFrom  PlansLite:TemporallyBoundTask
+                         ] .
+
+PlansLite:DecisionActivity
+        rdf:type         owl:Class;
+        rdfs:comment     "An activity related to planning. It is supposed to execute a 'case task', and can contain an information gathering activity.";
+        rdfs:label       "Decision activity"@en;
+        rdfs:subClassOf  PlansLite:PlanningActivity;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:executesTask;
+                           owl:someValuesFrom  PlansLite:CaseTask
+                         ] .
+
+PlansLite:BranchingTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A task that articulates the plan into an ordered set of tasks.";
+        rdfs:label        "Branching task"@en;
+        rdfs:subClassOf   PlansLite:ControlTask;
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  PlansLite:PlanningActivity;
+                            owl:onProperty     dul:isExecutedIn
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:minCardinality  "2"^^xsd:nonNegativeInteger;
+                            owl:onProperty      dul:directlyPrecedes
+                          ];
+        owl:disjointWith  PlansLite:DeliberationTask , PlansLite:EndingTask , PlansLite:LoopTask , PlansLite:SynchroTask .
+
+PlansLite:EndingTask  rdf:type  owl:Class;
+        rdfs:comment      "An ending task is a control task that has no successor tasks defined in the plan.";
+        rdfs:label        "Ending task"@en;
+        rdfs:subClassOf   PlansLite:ControlTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyFollows;
+                            owl:someValuesFrom  dul:Task
+                          ];
+        owl:disjointWith  PlansLite:LoopTask , PlansLite:SynchroTask .
+
+PlansLite:ParallelTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A task for parallel concurrent activities.";
+        rdfs:label       "Parallel task"@en;
+        rdfs:subClassOf  PlansLite:ConcurrencyTask .
+
+PlansLite:hasIterationCardinality
+        rdf:type      owl:DatatypeProperty;
+        rdfs:comment  "iteration cardinality can be used to state in a task how many times an action should be repeated";
+        rdfs:domain   dul:Task;
+        rdfs:label    "has iteration cardinality"@en;
+        rdfs:range    xsd:integer .
+
+dul:Concept  rdf:type  owl:Class .
+
+PlansLite:GroundedPlan
+        rdf:type         owl:Class;
+        rdfs:comment     "A grounded (aka 'circumstantial') plan has all components classifying named individuals from the ground ontology (e.g. only specific persons, specified resources, a finite number of time intervals and space regions, etc.).\nThis is the typical outcome of a planner, which, given certain constraints (here modeled as a Plan), and available entities in the environment (resources, agents, actions), delivers an optimized 'ground plan' to be executed.";
+        rdfs:label       "Grounded plan"@en , "Circumstantial plan"@en , "Piano istanziato"@it;
+        rdfs:subClassOf  dul:Plan;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  [ rdf:type            owl:Class;
+                                                owl:intersectionOf  ( dul:Concept
+                                                                      [ rdf:type            owl:Restriction;
+                                                                        owl:onProperty      dul:classifies;
+                                                                        owl:someValuesFrom  dul:Entity
+                                                                      ]
+                                                                    )
+                                              ];
+                           owl:onProperty     dul:usesConcept
+                         ] .
+
+PlansLite:SpatialParameter
+        rdf:type         owl:Class;
+        rdfs:label       "Spatial parameter"@en;
+        rdfs:subClassOf  dul:Parameter;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  dul:SpaceRegion;
+                           owl:onProperty     dul:parametrizes
+                         ] .
+
+PlansLite:isInputOf  rdf:type  owl:ObjectProperty;
+        rdfs:domain         dul:Object;
+        rdfs:label          "is input of"@en;
+        rdfs:range          dul:Event;
+        rdfs:subPropertyOf  dul:isParticipantIn;
+        owl:inverseOf       PlansLite:hasInput .
+
+PlansLite:DecisionState
+        rdf:type         owl:Class;
+        rdfs:comment     "A state related to planning. It is sequenced by 'deliberation task', and is preceded by a decision activity.\nWhen a plan is 'private', a decision state is cognitive, otherwise it depends on some cognitive state.";
+        rdfs:label       "Decision state"@en;
+        rdfs:subClassOf  PlansLite:PlanningActivity;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:executesTask;
+                           owl:someValuesFrom  PlansLite:DeliberationTask
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:follows;
+                           owl:someValuesFrom  PlansLite:DecisionActivity
+                         ] .
+
+PlansLite:AbandonmentTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A specialization of ending-task, aimed at sequencing events that end a plan execution without having reached its main-goal, and with no intention to resurrect the plan.\nWhile 'abortion' depends on external causes, 'abandonment' depends on decisions.";
+        rdfs:label        "Abandonment task"@en;
+        rdfs:subClassOf   PlansLite:EndingTask;
+        owl:disjointWith  PlansLite:AbortionTask , PlansLite:CompletionTask , PlansLite:SuspensionTask .
+
+PlansLite:ElementaryTask
+        rdf:type         owl:Class;
+        rdfs:comment     "An atomic task.";
+        rdfs:label       "Elementary task"@en;
+        rdfs:subClassOf  dul:Task .
+
+PlansLite:DecidednessTask
+        rdf:type          owl:Class;
+        rdfs:comment      "The task sequencing a decision to take action in order to start a plan execution.";
+        rdfs:label        "Decidedness task"@en;
+        rdfs:subClassOf   PlansLite:PlanAssessmentTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  PlansLite:PreparednessTask
+                          ];
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  PlansLite:DecisionActivity;
+                            owl:onProperty     dul:isExecutedIn
+                          ];
+        owl:disjointWith  PlansLite:PossibilityTask , PlansLite:PreparednessTask , PlansLite:ReadinessTask , PlansLite:RejectionTask .
+
+PlansLite:BeginningTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A beginning task is a control task that is the predecessor of all tasks defined in the plan.";
+        rdfs:label        "Beginning task"@en;
+        rdfs:subClassOf   PlansLite:ActivationTask;
+        owl:disjointWith  PlansLite:ReactivationTask .
+
+PlansLite:hasMainGoal
+        rdf:type            owl:ObjectProperty;
+        rdfs:domain         dul:Plan;
+        rdfs:label          "has main goal"@en;
+        rdfs:range          dul:Goal;
+        rdfs:subPropertyOf  dul:hasComponent;
+        owl:inverseOf       PlansLite:isMainGoalIn .
+
+PlansLite:ActivationTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A control task aimed at starting an activity. It is specialized either by a beginning task or a reactivation task.";
+        rdfs:label        "Activation task"@en;
+        rdfs:subClassOf   PlansLite:ControlTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  dul:Task
+                          ];
+        owl:disjointWith  PlansLite:BranchingTask , PlansLite:DeliberationTask , PlansLite:LoopTask , PlansLite:SynchroTask .
+
+PlansLite:TemporalParameter
+        rdf:type         owl:Class;
+        rdfs:label       "Temporal parameter"@en;
+        rdfs:subClassOf  dul:Parameter;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  dul:TimeInterval;
+                           owl:onProperty     dul:parametrizes
+                         ] .
+
+PlansLite:TemporallyBoundTask
+        rdf:type             owl:Class;
+        rdfs:label           "Temporally bound task"@en;
+        rdfs:subClassOf      PlansLite:ActionTask;
+        owl:equivalentClass  [ rdf:type            owl:Class;
+                               owl:intersectionOf  ( PlansLite:ActionTask
+                                                     [ rdf:type            owl:Restriction;
+                                                       owl:onProperty      dul:hasParameter;
+                                                       owl:someValuesFrom  [ rdf:type            owl:Class;
+                                                                             owl:intersectionOf  ( PlansLite:TemporalParameter
+                                                                                                   [ rdf:type            owl:Restriction;
+                                                                                                     owl:onProperty      dul:parametrizes;
+                                                                                                     owl:someValuesFrom  dul:TimeInterval
+                                                                                                   ]
+                                                                                                 )
+                                                                           ]
+                                                     ]
+                                                   )
+                             ] .
+
+PlansLite:hasInput  rdf:type  owl:ObjectProperty;
+        rdfs:domain         dul:Event;
+        rdfs:label          "has input"@en;
+        rdfs:range          dul:Object;
+        rdfs:subPropertyOf  dul:hasParticipant .
+
+PlansLite:BagTask  rdf:type  owl:Class;
+        rdfs:comment     "A bag task is a complex task that does not include either a control task, or a successor relation among any two component tasks.The last condition cannot be stated in OWL-DL, because it needs a coreference.";
+        rdfs:label       "Bag task"@en;
+        rdfs:subClassOf  PlansLite:ComplexTask;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  [ rdf:type          owl:Class;
+                                                owl:complementOf  PlansLite:ControlTask
+                                              ];
+                           owl:onProperty     dul:hasComponent
+                         ] .
+
+PlansLite:ReactivationTask
+        rdf:type         owl:Class;
+        rdfs:comment     "An activation task to start a plan execution after it has been suspended.";
+        rdfs:label       "Reactivation task"@en;
+        rdfs:subClassOf  PlansLite:ActivationTask .
+
+PlansLite:ReadinessTask
+        rdf:type          owl:Class;
+        rdfs:comment      "The task joining the decision and preparation phases of the plan assessment, with the activation phases of the plan.";
+        rdfs:label        "Readiness task"@en;
+        rdfs:subClassOf   PlansLite:PlanAssessmentTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  PlansLite:ActivationTask
+                          ];
+        owl:disjointWith  PlansLite:RejectionTask .
+
+PlansLite:hasOutput  rdf:type  owl:ObjectProperty;
+        rdfs:domain         dul:Event;
+        rdfs:label          "has output"@en;
+        rdfs:range          dul:Object;
+        rdfs:subPropertyOf  dul:hasParticipant .
+
+PlansLite:PlanAssessmentTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A task defined in a plan assessment.";
+        rdfs:label       "Plan assessment task"@en;
+        rdfs:subClassOf  PlansLite:ControlTask .
+
+PlansLite:LoopUntil  rdf:type  owl:Class;
+        rdfs:comment     "A loop task, which specifies when a certain condition becomes true for a cyclical task to exit.";
+        rdfs:label       "Loop until"@en;
+        rdfs:subClassOf  PlansLite:LoopTask .
+
+PlansLite:SynchroTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A synchronization task is a merging aimed at waiting for the execution of all (except the optional ones) tasks that are direct successor to a concurrent or any order task.";
+        rdfs:label       "Synchro task"@en;
+        rdfs:subClassOf  PlansLite:MergingTask;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:follows;
+                           owl:someValuesFrom  [ rdf:type     owl:Class;
+                                                 owl:unionOf  ( PlansLite:AnyOrderTask PlansLite:ConcurrencyTask PlansLite:PartlyCaseTask )
+                                               ]
+                         ] .
+
+PlansLite:PlanningActivity
+        rdf:type         owl:Class;
+        rdfs:comment     "The activity to generate a plan.";
+        rdfs:label       "Planning activity"@en;
+        rdfs:subClassOf  dul:Action;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  dul:Plan;
+                           owl:onProperty     PlansLite:hasOutput
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:isDescribedBy;
+                           owl:someValuesFrom  PlansLite:PlanningAsTechnique
+                         ] .
+
+PlansLite:PossibilityTask
+        rdf:type          owl:Class;
+        rdfs:comment      "The task sequencing an activity from which the possibility is raised to execute a plan.";
+        rdfs:label        "Possibility task"@en;
+        rdfs:subClassOf   PlansLite:PlanAssessmentTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  PlansLite:ConsiderednessTask
+                          ];
+        owl:disjointWith  PlansLite:PreparednessTask , PlansLite:ReadinessTask , PlansLite:RejectionTask .
+
+PlansLite:AcceptationTask
+        rdf:type          owl:Class;
+        rdfs:comment      "The task sequencing a positive decision to adopt a plan for execution.";
+        rdfs:label        "Acceptation task"@en;
+        rdfs:subClassOf   PlansLite:PlanAssessmentTask;
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  PlansLite:DecisionActivity;
+                            owl:onProperty     dul:isExecutedIn
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  PlansLite:DecidednessTask
+                          ];
+        owl:disjointWith  PlansLite:ConsiderednessTask , PlansLite:DecidednessTask , PlansLite:PossibilityTask , PlansLite:PreparednessTask , PlansLite:ReadinessTask , PlansLite:RejectionTask .
+
+PlansLite:ConsiderednessTask
+        rdf:type          owl:Class;
+        rdfs:comment      "The task sequencing a decision activity, aiming at if action has to be taken in order to start a plan execution.";
+        rdfs:label        "Consideredness task"@en;
+        rdfs:subClassOf   PlansLite:PlanAssessmentTask;
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  PlansLite:DecisionActivity;
+                            owl:onProperty     dul:isExecutedIn
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  [ rdf:type     owl:Class;
+                                                  owl:unionOf  ( PlansLite:AcceptationTask PlansLite:RejectionTask )
+                                                ]
+                          ];
+        owl:disjointWith  PlansLite:DecidednessTask , PlansLite:PossibilityTask , PlansLite:PreparednessTask , PlansLite:ReadinessTask , PlansLite:RejectionTask .
+
+PlansLite:AnyOrderTask
+        rdf:type          owl:Class;
+        rdfs:comment      "An any order task is a branching task that defines no order in the successor tasks. Itís another way of defining a bag task, because any temporal relation can be expected between any two perdurants sequenced by the tasks that are direct successor to the any order task.";
+        rdfs:label        "Any order task"@en;
+        rdfs:subClassOf   PlansLite:BranchingTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  PlansLite:SynchroTask
+                          ];
+        owl:disjointWith  PlansLite:CaseTask , PlansLite:ConcurrencyTask , PlansLite:PartlyCaseTask .
+
+PlansLite:SuspensionTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A specialization of ending-task, aimed at sequencing events that end a plan execution without having reached its main-goal, but with the possibility or resurrecting the plan.";
+        rdfs:label       "Suspension task"@en;
+        rdfs:subClassOf  PlansLite:EndingTask .
+
+PlansLite:PreparednessTask
+        rdf:type          owl:Class;
+        rdfs:comment      "The task sequencing an assessment that the activities aiming at creating the prerequisites to start a plan execution are completed.";
+        rdfs:label        "Preparedness task"@en;
+        rdfs:subClassOf   PlansLite:PlanAssessmentTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  PlansLite:ReadinessTask
+                          ];
+        owl:disjointWith  PlansLite:ReadinessTask , PlansLite:RejectionTask .
+
+PlansLite:AlternateTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A case task branched to exactly 2 tasks, not executable in  parallel.";
+        rdfs:label       "Alternate task"@en;
+        rdfs:subClassOf  PlansLite:CaseTask;
+        rdfs:subClassOf  [ rdf:type         owl:Restriction;
+                           owl:cardinality  "2"^^xsd:nonNegativeInteger;
+                           owl:onProperty   dul:directlyPrecedes
+                         ] .
+
+PlansLite:CompletionTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A specialization of ending-task, aimed at sequencing events that end a plan execution having reached its main-goal.";
+        rdfs:label        "Completion task"@en;
+        rdfs:subClassOf   PlansLite:EndingTask;
+        owl:disjointWith  PlansLite:SuspensionTask .
+
+PlansLite:LoopFor  rdf:type  owl:Class;
+        rdfs:comment      "A loop task with a defined number -and possibly frequency- of iterations.";
+        rdfs:label        "Loop for"@en;
+        rdfs:subClassOf   PlansLite:LoopTask;
+        owl:disjointWith  PlansLite:LoopUntil .
+
+PlansLite:ControlTask
+        rdf:type             owl:Class;
+        rdfs:comment         "A control task is an elementary task that sequences a planning activity, e.g. an activity aimed at (cognitively or via simulation) anticipating other activities. Therefore, control tasks have usually at least one direct successor task (the controlled one), with the exception of ending tasks.The reification of control constructs allows to represent procedural knowledge into the same ontology including controlled action. Besides conceptual transparency and independency from a particular grounding system, a further advantage is enabling the representation of coordination tasks. For example, a manager that coordinates the execution of several related activities can be represented as a role with a responsibility (duty+right) towards some complex task.";
+        rdfs:label           "Control task"@en;
+        rdfs:subClassOf      PlansLite:ElementaryTask;
+        owl:equivalentClass  [ rdf:type            owl:Class;
+                               owl:intersectionOf  ( PlansLite:ElementaryTask
+                                                     [ rdf:type           owl:Restriction;
+                                                       owl:allValuesFrom  [ rdf:type     owl:Class;
+                                                                            owl:unionOf  ( PlansLite:DecisionState PlansLite:PlanningActivity )
+                                                                          ];
+                                                       owl:onProperty     dul:isExecutedIn
+                                                     ]
+                                                   )
+                             ] .
+
+PlansLite:SequentialTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A sequential task is a complex task that includes a successor relation among any two component tasks, and does not contain any control task.The first condition cannot be stated in OWL-DL, because it needs coreference.";
+        rdfs:label       "Sequential task"@en;
+        rdfs:subClassOf  PlansLite:ComplexTask;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  [ rdf:type          owl:Class;
+                                                owl:complementOf  PlansLite:ControlTask
+                                              ];
+                           owl:onProperty     dul:hasComponent
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:minCardinality  "2"^^xsd:nonNegativeInteger;
+                           owl:onProperty      dul:hasComponent
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:hasComponent;
+                           owl:someValuesFrom  PlansLite:ActionTask
+                         ] .
+
+PlansLite:MergingTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A task that joins a set of tasks after a branching.";
+        rdfs:label       "Merging task"@en;
+        rdfs:subClassOf  PlansLite:ControlTask .
+
+dul:Situation  rdf:type  owl:Class .
+
+PlansLite:GoalSituation
+        rdf:type             owl:Class;
+        rdfs:comment         "A goal situation is a situation that satisfies a goal.Opposite to the case of subplan executions, a goal situation is not part of a plan execution.In other words, it is not true in general that any situation satisfying a part of a description, is also part of the situation that satisfies the whole description. This helps to account for the following cases: a) Execution of plans containing abort or suspension conditions (the plan would be satisfied even if the goal has not been reached, see below), b) Incidental satisfaction, like when a situation satisfies a goal without being intentionally planned (but anyway desired).";
+        rdfs:label           "Goal situation"@en;
+        rdfs:subClassOf      dul:Situation;
+        owl:equivalentClass  [ rdf:type            owl:Class;
+                               owl:intersectionOf  ( dul:Situation
+                                                     [ rdf:type            owl:Restriction;
+                                                       owl:onProperty      dul:satisfies;
+                                                       owl:someValuesFrom  dul:Goal
+                                                     ]
+                                                   )
+                             ] .
+
+PlansLite:RejectionTask
+        rdf:type         owl:Class;
+        rdfs:comment     "The task sequencing a negative decision to adopt a plan execution.";
+        rdfs:label       "Rejection task"@en;
+        rdfs:subClassOf  PlansLite:PlanAssessmentTask;
+        rdfs:subClassOf  [ rdf:type           owl:Restriction;
+                           owl:allValuesFrom  PlansLite:DecisionActivity;
+                           owl:onProperty     dul:isExecutedIn
+                         ] .
+
+PlansLite:ConcurrencyTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A concurrent task is a task branched to a set of tasks executable concurrently -the sequenced perdurants can overlap-, which means that no deliberation task is performed in order to choose among them. A concurrent task has at least one successor synchronization task, which is aimed at waiting for the execution of all -except the optional ones- tasks direct successor to the concurrent -or any order, see below- one.The axioms cannot be expressed fully in OWL-DL (no value mapping available).";
+        rdfs:label        "Concurrency task"@en;
+        rdfs:subClassOf   PlansLite:BranchingTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:precedes;
+                            owl:someValuesFrom  PlansLite:SynchroTask
+                          ];
+        owl:disjointWith  PlansLite:PartlyCaseTask .
+
+PlansLite:isMainGoalIn
+        rdf:type            owl:ObjectProperty;
+        rdfs:comment        "A main goal can be defined as a goal that is part of a plan but not of one of its subplans. The characteristic axiom cannot be formalized in OWL-DL (it requires coreference).";
+        rdfs:domain         dul:Goal;
+        rdfs:label          "is main goal in"@en;
+        rdfs:range          dul:Plan;
+        rdfs:subPropertyOf  dul:isComponentOf .
+
+PlansLite:CaseTask  rdf:type  owl:Class;
+        rdfs:comment      "A case task is a task branched to a set of tasks that are not executable concurrently. In order to choose which task has to be undertaken, preliminary deliberation tasks should be executed, possibly based on information-gathering and decision rationales. BTW, the representation of decision making processes is not addressed in this ontology, and only a minimal formalization is provided as follows.\nA case task 'sequences' a decision-activity (a kind of mental event involving rationality) that has a deliberation-state as an outcome (i.e. it is 'sequenced-by' a deliberation-task).";
+        rdfs:label        "Case task"@en;
+        rdfs:subClassOf   PlansLite:BranchingTask;
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyPrecedes;
+                            owl:someValuesFrom  PlansLite:DeliberationTask
+                          ];
+        owl:disjointWith  PlansLite:ConcurrencyTask , PlansLite:PartlyCaseTask .
+
+PlansLite:ActionTask  rdf:type  owl:Class;
+        rdfs:comment      "An action task is an elementary task that sequences non-planning activities, like: moving, exercising forces, gathering information, etc. Planning activites are mental events involving some rational event.";
+        rdfs:label        "Action task"@en;
+        rdfs:subClassOf   PlansLite:ElementaryTask;
+        owl:disjointWith  PlansLite:ControlTask .
+
+PlansLite:AbstractPlan
+        rdf:type         owl:Class;
+        rdfs:comment     "An abstract plan is a plan whose roles and tasks do not classify specific entities. They only specify classes of entities that can be included in a plan execution.\nThis condition cannot be formalized in FOL, since we would like to express a condition by which an instance of an abstract plan specifies instances of plan components, but no instances of execution elements, e.g. that 'manager' classifies some (if any) instance of person, but not a specified (named) person.";
+        rdfs:label       "Abstract plan"@en;
+        rdfs:subClassOf  dul:Plan .
+
+PlansLite:MaximalTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A maximal task is a complex task that has all the tasks defined in a plan as components.In OWL-DL the axiom is defined as a concept axiom over plan component task.";
+        rdfs:label       "Maximal task"@en;
+        rdfs:subClassOf  PlansLite:ComplexTask .
+
+PlansLite:PartlyCaseTask
+        rdf:type         owl:Class;
+        rdfs:comment     "A control task that directly precedes both a case task and some other task.It specializes the branching task.";
+        rdfs:label       "Partly case task"@en;
+        rdfs:subClassOf  PlansLite:BranchingTask;
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:directlyPrecedes;
+                           owl:someValuesFrom  PlansLite:CaseTask
+                         ];
+        rdfs:subClassOf  [ rdf:type            owl:Restriction;
+                           owl:onProperty      dul:precedes;
+                           owl:someValuesFrom  PlansLite:SynchroTask
+                         ] .
+
+PlansLite:isOutputOf  rdf:type  owl:ObjectProperty;
+        rdfs:domain         dul:Object;
+        rdfs:label          "is output of"@en;
+        rdfs:range          dul:Event;
+        rdfs:subPropertyOf  dul:isParticipantIn;
+        owl:inverseOf       PlansLite:hasOutput .
+
+PlansLite:AbortionTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A specialization of ending-task, aimed at sequencing events that end a plan execution without having reached its main-goal for a certain time, and can be considered with no chance of resurrecting the original plan execution. While 'abortion' depends on external causes, 'abandonment' depends on decisions.";
+        rdfs:label        "Abortion task"@en;
+        rdfs:subClassOf   PlansLite:EndingTask;
+        owl:disjointWith  PlansLite:CompletionTask , PlansLite:SuspensionTask .
+
+PlansLite:DeliberationTask
+        rdf:type          owl:Class;
+        rdfs:comment      "A deliberation task is a control task that sequences deliberation states (decisions taken after a case task execution).";
+        rdfs:label        "Deliberation task"@en;
+        rdfs:subClassOf   PlansLite:ControlTask;
+        rdfs:subClassOf   [ rdf:type           owl:Restriction;
+                            owl:allValuesFrom  PlansLite:DecisionState;
+                            owl:onProperty     dul:isExecutedIn
+                          ];
+        rdfs:subClassOf   [ rdf:type            owl:Restriction;
+                            owl:onProperty      dul:directlyFollows;
+                            owl:someValuesFrom  PlansLite:CaseTask
+                          ];
+        owl:disjointWith  PlansLite:EndingTask , PlansLite:LoopTask , PlansLite:SynchroTask .
+
+<http://www.ontologydesignpatterns.org/ont/dul/PlansLite.owl>
+        rdf:type         owl:Ontology;
+        rdfs:comment     "The Plan Ontology with a lite axiomatization. OWL engineering by Aldo Gangemi.\nMost workflow patterns are captured by the task notions introduced in this ontology. Several other notions relevant for plan modelling, assessment and creation are also introduced." , "Imports: DOLCE Ultralite";
+        owl:imports      <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl>;
+        owl:versionInfo  "1.2" , "1.1 added English labels.\n1.2 changed name of CircumstantialPlan to GroundedPlan, as common in planning domain." .
