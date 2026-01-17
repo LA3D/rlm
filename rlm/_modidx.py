@@ -37,5 +37,7 @@ d = { 'settings': { 'branch': 'main',
                           'rlm.core.rlm_run': ('core.html#rlm_run', 'rlm/core.py'),
                           'rlm.core.rlm_step': ('core.html#rlm_step', 'rlm/core.py'),
                           'rlm.core.rlm_system_prompt': ('core.html#rlm_system_prompt', 'rlm/core.py'),
+                          'rlm.core.rlm_tool_info': ('core.html#rlm_tool_info', 'rlm/core.py'),
                           'rlm.core.run_coro': ('core.html#run_coro', 'rlm/core.py'),
-                          'rlm.core.symget': ('core.html#symget', 'rlm/core.py')}}}
+                          'rlm.core.symget': ('core.html#symget', 'rlm/core.py')},
+            'rlm.swtools': {}}}
