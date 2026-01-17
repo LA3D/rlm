@@ -1,0 +1,184 @@
+# Session Summary: FINAL_VAR Fix & Stage 1 Completion
+
+## Date: 2026-01-17
+
+## What We Accomplished
+
+### 1. Discovered and Fixed Critical RLM Issues
+
+#### Issue A: `llm_query()` Return Value
+**Problem**: Function returned summary string instead of actual result
+```python
+# Before (wrong):
+return f"Stored response in '{name}' ({len(result)} chars)"
+
+# After (correct):
+return result
+```
+
+**Impact**: Models can now use natural pattern `answer = llm_query(prompt)` and get the actual answer.
+
+#### Issue B: `FINAL_VAR` Not Executable
+**Problem**: `FINAL_VAR` was only a text pattern for signaling completion, not callable inside code blocks
+
+**Solution**: Added executable function following rlmpaper design
+```python
+def _final_var(variable_name: str) -> str:
+    variable_name = variable_name.strip().strip('"').strip("'")
+    if variable_name in ns:
+        return str(ns[variable_name])
+    return f"Error: Variable '{variable_name}' not found in namespace"
+
+ns['FINAL_VAR'] = _final_var
+```
+
+**Impact**:
+- Deterministic errors instead of silent failures
+- Model can test variable existence before committing
+- Can preview answers to verify correctness
+- Reduces hallucination by making state explicit
+
+### 2. Comprehensive Testing
+
+Created 5 new test files to verify fixes:
+
+1. **test_namespace_final_var.py**: 7 tests validating FINAL_VAR pattern matching
+   - ✅ All tests passed
+
+2. **test_namespace_persistence.py**: Verifies variables persist across RLM iterations
+   - ✅ Test passed
+
+3. **test_llm_query_final_var.py**: Tests llm_query with FINAL_VAR pattern
+   - ✅ Test passed (6 iterations, converged successfully)
+
+4. **test_progressive_disclosure_minimal.py**: Exact replication of progressive disclosure scenario
+   - ✅ Test passed (5 iterations, demonstrates handles-not-dumps principle)
+
+5. **test_comprehensive_final.py**: End-to-end verification of all Stage 1 features
+   - ✅ Test passed (6 iterations)
+   - ✓ Progressive disclosure works
+   - ✓ llm_query returns actual results
+   - ✓ FINAL_VAR is executable function
+   - ✓ Meta-graph scaffolding works
+   - ✓ System converges reliably
+
+### 3. Documentation
+
+#### Updated Files:
+1. **docs/rlm-ontology-solveit-trajectory.md**
+   - Added comprehensive "RLM Core Fixes" section
+   - Documented both llm_query and FINAL_VAR fixes
+   - Added progressive disclosure verification details
+   - Updated test file references
+
+2. **tests/FINAL_VAR_FIX_SUMMARY.md**
+   - Detailed explanation of both issues
+   - Before/after code comparisons
+   - Design rationale
+   - Testing results
+
+3. **tests/test_final_var_as_function.py**
+   - Decision point documentation
+   - Pros/cons analysis
+
+#### Code Changes:
+1. **nbs/00_core.ipynb**:
+   - Modified cell-9: `llm_query()` return value fix
+   - Modified cell-12: `llm_query_batched()` return value fix
+   - Modified cell-18: Added FINAL_VAR executable function
+   - Modified cell-23: Updated tests to verify FINAL_VAR
+
+2. **rlm/core.py**:
+   - Auto-generated from notebook export
+   - All changes propagated
+
+## Stage 1 Status: ✅ COMPLETED
+
+All Stage 1 requirements verified:
+
+### 1. Graph Loading & Meta-Graph Scaffolding
+- ✅ `load_ontology()` creates handles, not dumps
+- ✅ `GraphMeta` provides lazy-loaded navigation
+- ✅ All indexes working (by_label, subs, supers, doms, rngs)
+
+### 2. Bounded View Functions
+- ✅ `graph_stats()` - summary statistics
+- ✅ `search_by_label()` - substring search with limits
+- ✅ `describe_entity()` - bounded entity description
+
+### 3. Exploration Functions
+- ✅ `ont_describe()` - complete entity exploration
+- ✅ `ont_meta()` - ontology metadata extraction
+- ✅ `ont_roots()` - find root classes
+
+### 4. Ontology Sense Building
+- ✅ `build_sense()` - workflow pattern for structured summaries
+- ✅ Single LLM call synthesis (not agentic)
+- ✅ Comprehensive SPARQL hints and pattern detection
+
+### 5. RLM Integration
+- ✅ `setup_ontology_context()` - complete RLM setup
+- ✅ `llm_query()` returns actual results
+- ✅ `FINAL_VAR` executable for testing
+- ✅ Progressive disclosure works reliably
+
+### 6. Testing
+- ✅ PROV ontology (1,664 triples) - all features work
+- ✅ SIO ontology (15,734 triples) - all structures build
+- ✅ Progressive disclosure verified
+- ✅ Convergence demonstrated
+
+## Files Created/Modified
+
+### Created (10 files):
+1. tests/test_namespace_final_var.py
+2. tests/test_namespace_persistence.py
+3. tests/test_llm_query_final_var.py
+4. tests/test_progressive_disclosure_minimal.py
+5. tests/test_final_var_executable.py
+6. tests/test_comprehensive_final.py
+7. tests/test_final_var_as_function.py
+8. tests/debug_progressive_disclosure.py
+9. tests/FINAL_VAR_FIX_SUMMARY.md
+10. SESSION_SUMMARY.md (this file)
+
+### Modified (3 files):
+1. nbs/00_core.ipynb
+2. rlm/core.py (auto-generated)
+3. docs/rlm-ontology-solveit-trajectory.md
+
+## Key Learnings
+
+1. **fast.ai principles matter**: "Make the right thing easy" guided us to return actual results from llm_query()
+
+2. **rlmpaper has good reasons**: Their executable FINAL_VAR design is superior to text-only patterns for:
+   - Determinism (clear errors vs silent failures)
+   - Debuggability (test before commit)
+   - Reduced hallucination
+
+3. **Progressive disclosure works**: Starting with minimal context and exploring incrementally is effective:
+   - Iteration 0: Examine context
+   - Iteration 1: Search by label
+   - Iteration 2: Describe entities
+   - Iteration 3-4: Synthesize with llm_query
+   - Iteration 5: FINAL_VAR convergence
+
+4. **Testing is essential**: Targeted tests revealed issues that integration tests missed
+
+## Next Steps (Stage 2 candidates)
+
+1. **Dataset Memory**: Named graph support for agent memory
+2. **SPARQL Handles**: Bounded result viewing
+3. **Procedural Memory**: ReasoningBank-style trajectory learning
+4. **SHACL Integration**: Example-driven query discovery
+
+## Conclusion
+
+Stage 1 is complete and verified. The RLM + ontology integration is working as intended with:
+- Handles not dumps ✓
+- Progressive disclosure ✓
+- Bounded views ✓
+- Reliable convergence ✓
+- Proper error handling ✓
+
+The system is ready for Stage 2 work or production use in Solveit.

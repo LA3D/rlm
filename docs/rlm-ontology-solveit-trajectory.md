@@ -101,31 +101,114 @@ For each decision:
 **Decision**: Ontologies are exposed to RLM as **handles + meta-graph scaffolding**, not as graph dumps.
 
 **Implementation** (`nbs/01_ontology.ipynb`):
-1. `load_ontology()` loads RDF into rdflib Graph and stores it in namespace as a handle
-2. `GraphMeta` dataclass provides lazy-loaded navigation properties:
-   - `namespaces` - prefix bindings
-   - `classes` - sorted list of OWL/RDFS class URIs
-   - `properties` - sorted list of property URIs
-   - `labels` - URI → label mapping for search
-   - `summary()` - bounded summary string
-3. Bounded view functions (not methods) operate on GraphMeta:
-   - `graph_stats(meta)` - summary statistics
-   - `search_by_label(meta, search, limit=10)` - substring search with result limit
-   - `describe_entity(meta, uri, limit=20)` - bounded entity description
-4. `setup_ontology_context()` creates Graph + GraphMeta + bound helpers in namespace for RLM use
+
+#### 1. Graph Loading & Meta-Graph Scaffolding
+- `load_ontology(path, ns, name)` - loads RDF into rdflib Graph and stores as handle in namespace
+- `GraphMeta` dataclass provides lazy-loaded navigation properties:
+  - `namespaces` - prefix bindings
+  - `classes` - sorted list of OWL/RDFS class URIs
+  - `properties` - sorted list of property URIs
+  - `individuals` - sorted list of named individuals
+  - `labels` - URI → label mapping
+  - `by_label` - inverted index: label_text → list of URIs (discovered from dialogs exploration)
+  - `subs` - subclass relationships: superclass_uri → list of subclass_uris
+  - `supers` - superclass relationships: subclass_uri → list of superclass_uris
+  - `doms` - property domains: property_uri → domain_uri
+  - `rngs` - property ranges: property_uri → range_uri
+  - `summary()` - bounded summary string
+
+#### 2. Bounded View Functions
+Functions (not methods) operate on GraphMeta with result limits:
+- `graph_stats(meta)` - summary statistics
+- `search_by_label(meta, search, limit=10)` - substring search with result limit
+- `describe_entity(meta, uri, limit=20)` - bounded entity description
+
+#### 3. Exploration Functions
+Functions for deeper ontology analysis (discovered from dialogs/inspect_tools.ipynb):
+- `ont_describe(ont, uri, name, ns)` - get all triples about a URI (as subject and object)
+- `ont_meta(ont, name, ns)` - extract ontology metadata (prefixes, annotation predicates, imports)
+- `ont_roots(ont, name, ns)` - find root classes (no declared superclass)
+
+#### 4. Ontology Sense Building
+`build_sense(path, name, ns)` - **workflow pattern** (not agentic) for building structured sense documents:
+- Programmatically gathers: hierarchy (2 levels), properties with domains/ranges, OWL characteristics, URI patterns
+- Makes ONE LLM call to synthesize findings into narrative
+- Returns structured AttrDict with:
+  - Stats, prefixes, roots, hierarchy
+  - Top properties with domains/ranges
+  - Property characteristics (transitive, symmetric, inverse)
+  - LLM-generated summary covering:
+    - Domain/scope
+    - Key conceptual branches
+    - Important properties
+    - Detected patterns (reification, workflows, measurements, etc.)
+    - SPARQL navigation hints with concrete examples
+
+#### 5. RLM Integration
+- `setup_ontology_context(path, ns, name)` - creates Graph + GraphMeta + bound helpers in namespace for RLM use
 
 **Rationale**:
 - Graph handle prevents root model from accessing raw triples directly
 - Meta-graph properties are computed lazily and cached for efficiency
 - Bounded view functions enforce progressive disclosure (no unbounded queries)
 - Functions (not methods) follow fast.ai style and are easier to inject into REPL
+- Workflow pattern for sense building is faster than agentic exploration (single LLM call vs. many tool decisions)
+- Sense documents provide comprehensive ontology understanding for SPARQL query construction
 
 **Alternatives considered**:
 - GraphMeta as dict with bound methods → rejected (less inspectable, harder to serialize)
 - Expose rdflib Graph directly → rejected (violates "handles not dumps" principle)
 - Pre-compute all indexes at load time → rejected (wasteful for large ontologies)
+- Agentic sense building → rejected (slower, same quality output as workflow pattern)
 
-**Proof**: Tested with PROV ontology (1,664 triples, 59 classes, 89 properties). RLM successfully used `search_by_label()` and `describe_entity()` to explore and answer "What is the Activity class?" without accessing raw graph. See `tests/test_ontology_rlm.py`.
+**Testing**:
+- PROV ontology (1,664 triples, 59 classes, 89 properties):
+  - RLM successfully used `search_by_label()` and `describe_entity()` to answer "What is the Activity class?"
+  - `build_sense()` detected 4 property characteristics, 5 patterns, generated 6 SPARQL examples
+- SIO ontology (15,734 triples, 1,726 classes, 238 properties):
+  - All meta-structures build successfully
+  - 1,794 unique labels in inverted index, 523 superclasses with subclasses, 3 root classes
+
+**RLM Core Fixes** (2026-01-17):
+
+During testing, two critical issues were discovered and fixed in `nbs/00_core.ipynb`:
+
+1. **`llm_query()` return value fix**:
+   - **Before**: Returned summary string `"Stored response in 'llm_res' (4723 chars)"`
+   - **After**: Returns actual LLM response
+   - **Rationale**: Following fast.ai principle of "make the right thing easy" - natural usage `answer = llm_query(prompt)` should work
+   - **Impact**: Model can now directly use sub-LLM results without namespace lookup confusion
+
+2. **`FINAL_VAR` as executable function** (following rlmpaper design):
+   - **Before**: Only a text pattern for signaling completion
+   - **After**: Added executable function in namespace that model can call inside code blocks
+   - **Implementation**:
+     ```python
+     def _final_var(variable_name: str) -> str:
+         variable_name = variable_name.strip().strip('"').strip("'")
+         if variable_name in ns:
+             return str(ns[variable_name])
+         return f"Error: Variable '{variable_name}' not found in namespace"
+     ns['FINAL_VAR'] = _final_var
+     ```
+   - **Benefits**:
+     - Deterministic errors: Model gets explicit "Error: Variable 'x' not found" instead of silent None
+     - Testable: Model can verify variables exist before committing via `FINAL_VAR(var_name)` inside code blocks
+     - Debuggable: Model can preview answer to check it looks correct
+     - Matches rlmpaper reference implementation
+   - **Impact**: Reduces hallucination by making variable state explicit and testable
+
+**Progressive Disclosure Verification**:
+- Created `tests/test_progressive_disclosure_minimal.py` to verify the core pattern works
+- Model successfully:
+  1. Started with minimal context (just stats)
+  2. Used `search_by_label('influence')` to find relevant classes
+  3. Used `describe_entity()` to explore each class
+  4. Used `llm_query()` to synthesize findings (received actual result, not summary)
+  5. Called `FINAL_VAR(final_answer)` and converged in 5 iterations
+- Demonstrates "handles not dumps" principle in action
+
+**Output**: See `tests/test_ontology_rlm.py`, `tests/test_sio_ontology.py`, `tests/test_build_sense.py`, `tests/test_progressive_disclosure_minimal.py`, `tests/test_comprehensive_final.py`, `tests/FINAL_VAR_FIX_SUMMARY.md`
 
 ### Dataset Memory Model (core exploratory area)
 

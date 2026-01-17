@@ -47,11 +47,11 @@ def llm_query(prompt: str, ns: dict, name: str = 'llm_res',
         model: Claude model to use
         
     Returns:
-        Summary string describing what was stored
+        The LLM's response (also stored in ns[name])
     """
     result = contents(Chat(model)(prompt))
     ns[name] = result
-    return f"Stored response in '{name}' ({len(result)} chars)"
+    return result  # Return actual result, not summary
 
 # %% ../nbs/00_core.ipynb 11
 async def _query_one(prompt: str, model: str) -> str:
@@ -60,7 +60,7 @@ async def _query_one(prompt: str, model: str) -> str:
 
 # %% ../nbs/00_core.ipynb 12
 def llm_query_batched(prompts: list, ns: dict, name: str = 'batch_res',
-                      model: str = 'claude-sonnet-4-5') -> str:
+                      model: str = 'claude-sonnet-4-5') -> list:
     """Query LLM with multiple prompts concurrently.
     
     Much faster than sequential `llm_query` calls when you have multiple
@@ -73,7 +73,7 @@ def llm_query_batched(prompts: list, ns: dict, name: str = 'batch_res',
         model: Claude model to use
         
     Returns:
-        Summary string describing what was stored
+        List of LLM responses (also stored in ns[name])
     """
     try:
         loop = asyncio.get_running_loop()
@@ -87,8 +87,9 @@ def llm_query_batched(prompts: list, ns: dict, name: str = 'batch_res',
             asyncio.gather(*[_query_one(p, model) for p in prompts])
         )
     
-    ns[name] = list(results)
-    return f"Stored {len(results)} responses in '{name}'"
+    results = list(results)
+    ns[name] = results
+    return results  # Return actual results, not summary
 
 # %% ../nbs/00_core.ipynb 15
 def exec_code(code: str, ns: dict) -> REPLResult:
@@ -126,23 +127,23 @@ def exec_code(code: str, ns: dict) -> REPLResult:
     )
 
 # %% ../nbs/00_core.ipynb 18
-def rlm_run(query: str, context, ns: dict = None, 
-            model: str = 'claude-sonnet-4-5', 
+def rlm_run(query: str, context, ns: dict = None,
+            model: str = 'claude-sonnet-4-5',
             max_iters: int = 10) -> tuple:
     """Run RLM loop until FINAL or max iterations.
-    
+
     This implements the RLM protocol: the root LLM emits ```repl``` code blocks
-    which are executed in a namespace with `context`, `llm_query`, and 
-    `llm_query_batched` available. The loop continues until the model returns
-    FINAL(...) or FINAL_VAR(...).
-    
+    which are executed in a namespace with `context`, `llm_query`,
+    `llm_query_batched`, and `FINAL_VAR` available. The loop continues until
+    the model returns FINAL(...) or FINAL_VAR(...).
+
     Args:
         query: User's question to answer
         context: Context data (str, list of str, or dict)
         ns: Namespace dict (if None, creates fresh namespace)
         model: Claude model to use
         max_iters: Maximum iterations before giving up
-        
+
     Returns:
         (answer, iterations, namespace) tuple where:
         - answer: Final answer string or None if didn't converge
@@ -151,44 +152,66 @@ def rlm_run(query: str, context, ns: dict = None,
     """
     if ns is None:
         ns = {}
-    
+
+    # Define FINAL_VAR helper (following rlmpaper design)
+    def _final_var(variable_name: str) -> str:
+        """Return the value of a variable as a final answer.
+
+        This is an executable function that the model can call inside code blocks
+        to test if a variable exists and preview its value before committing to
+        using FINAL_VAR outside code blocks.
+
+        Args:
+            variable_name: Name of the variable to return
+
+        Returns:
+            The variable's value as a string, or an error message if not found
+        """
+        variable_name = variable_name.strip().strip('"').strip("'")
+        if variable_name in ns:
+            return str(ns[variable_name])
+        return f"Error: Variable '{variable_name}' not found in namespace"
+
     # Setup namespace with REPL environment
     meta = QueryMetadata(context)
     ns['context'] = context
-    
+
     # Bind llm_query functions to this namespace and model
     ns['llm_query'] = partial(llm_query, ns=ns, model=model)
     ns['llm_query_batched'] = partial(llm_query_batched, ns=ns, model=model)
-    
+
+    # Add FINAL_VAR as executable function (following rlmpaper design)
+    ns['FINAL_VAR'] = _final_var
+
     # Build initial messages with rlmpaper system prompt
     messages = build_rlm_system_prompt(query_metadata=meta)
     chat = Chat(model, sp=messages[0]['content'])
-    
+
     # Add metadata message if present
     if len(messages) > 1:
         chat.h.append(messages[1])
-    
+
     iterations = []
-    
+
     for i in range(max_iters):
         start = time.time()
-        
+
         # Build user prompt (includes first-iteration safeguard)
         user_msg = build_user_prompt(root_prompt=query, iteration=i)
-        
+
         # Get response from root LLM
         response = contents(chat(user_msg['content']))
-        
+
         # Extract and execute code blocks
         code_strs = find_code_blocks(response)
         code_blocks = []
         for code in code_strs:
             result = exec_code(code, ns)
             code_blocks.append(CodeBlock(code=code, result=result))
-        
+
         # Check for final answer
         answer = find_final_answer(response, ns=ns)
-        
+
         # Record iteration
         iteration = RLMIteration(
             prompt=user_msg['content'],
@@ -198,14 +221,14 @@ def rlm_run(query: str, context, ns: dict = None,
             iteration_time=time.time() - start
         )
         iterations.append(iteration)
-        
+
         # If we have an answer, we're done
         if answer is not None:
             return answer, iterations, ns
-        
+
         # Add iteration to chat history for next round
         for msg in format_iteration(iteration):
             chat.h.append(msg)
-    
+
     # Reached max iterations without final answer
     return None, iterations, ns
