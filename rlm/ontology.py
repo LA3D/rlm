@@ -4,7 +4,7 @@
 
 # %% auto 0
 __all__ = ['load_ontology', 'GraphMeta', 'graph_stats', 'search_by_label', 'describe_entity', 'ont_describe', 'ont_meta',
-           'ont_roots', 'setup_ontology_context']
+           'ont_roots', 'build_sense', 'setup_ontology_context']
 
 # %% ../nbs/01_ontology.ipynb 4
 from rdflib import Graph, Namespace, RDF, RDFS, OWL, URIRef, Literal
@@ -313,6 +313,131 @@ def ont_roots(ont: str, name: str = 'roots', ns: dict = None) -> str:
     return f"Stored {len(roots)} root classes into '{name}'"
 
 # %% ../nbs/01_ontology.ipynb 22
+def build_sense(path: str, name: str = 'sense', ns: dict = None) -> str:
+    """Build ontology sense document using workflow + LLM synthesis.
+    
+    This function:
+    1. Loads ontology and extracts metadata/roots programmatically
+    2. Builds hierarchy (2 levels), property info, characteristics
+    3. Makes one LLM call to synthesize domain/scope/patterns/hints
+    4. Returns structured AttrDict stored in namespace
+    
+    Args:
+        path: Path to ontology file
+        name: Variable name for sense document (default: 'sense')
+        ns: Namespace dict
+        
+    Returns:
+        Summary string
+    """
+    if ns is None: ns = {}
+    
+    # Derive ontology name from sense name
+    ont_name = name.replace('_sense', '').replace('sense', 'ont')
+    
+    # Setup ontology context (loads graph + creates GraphMeta)
+    setup_ontology_context(path, ns, name=ont_name)
+    
+    # Get metadata and roots
+    ont_meta(f'{ont_name}_meta', name=f'{ont_name}_metadata', ns=ns)
+    ont_roots(f'{ont_name}_meta', name=f'{ont_name}_roots', ns=ns)
+    
+    # Get references
+    meta_obj = ns[f'{ont_name}_meta']
+    metadata = ns[f'{ont_name}_metadata']
+    roots = ns[f'{ont_name}_roots']
+    
+    # Build hierarchy (2 levels deep from roots)
+    hier = {}
+    for r in roots[:10]:  # Limit to first 10 roots
+        lbl = meta_obj.labels.get(r, r)
+        children = meta_obj.subs.get(r, [])
+        hier[lbl] = {
+            meta_obj.labels.get(c, c): [
+                meta_obj.labels.get(gc, gc) 
+                for gc in meta_obj.subs.get(c, [])[:5]
+            ] 
+            for c in children[:10]
+        }
+    
+    # Extract top properties with domains/ranges
+    top_props = []
+    for p in meta_obj.properties[:20]:
+        if p.startswith('http'):
+            prop_label = meta_obj.labels.get(p, p)
+            dom_uri = meta_obj.doms.get(p, '')
+            rng_uri = meta_obj.rngs.get(p, '')
+            dom_label = meta_obj.labels.get(dom_uri, dom_uri) if dom_uri else ''
+            rng_label = meta_obj.labels.get(rng_uri, rng_uri) if rng_uri else ''
+            top_props.append((prop_label, dom_label, rng_label))
+    
+    # Detect property characteristics (OWL axioms)
+    prop_chars = {}
+    for p in meta_obj.properties[:50]:
+        if p.startswith('http'):
+            chars = []
+            p_uri = URIRef(p)
+            
+            # Check for transitive
+            if list(meta_obj.graph.triples((p_uri, RDF.type, OWL.TransitiveProperty))):
+                chars.append('transitive')
+            
+            # Check for symmetric
+            if list(meta_obj.graph.triples((p_uri, RDF.type, OWL.SymmetricProperty))):
+                chars.append('symmetric')
+            
+            # Check for inverse
+            if list(meta_obj.graph.triples((p_uri, OWL.inverseOf, None))):
+                chars.append('has_inverse')
+            
+            if chars:
+                prop_chars[p] = chars
+    
+    # Get URI pattern samples
+    uri_sample = [c for c in meta_obj.classes[:5] if c.startswith('http')]
+    uri_pattern = uri_sample[0].rsplit('/', 1)[0] if uri_sample else ''
+    
+    # Build prompt for LLM synthesis
+    prompt = f"""Analyze this ontology and provide a sense document:
+
+Stats: {len(meta_obj.classes)} classes, {len(meta_obj.properties)} properties, {len(meta_obj.labels)} labels
+Prefixes: {list(metadata.prefixes.keys())[:10]}
+Annotation predicates: {metadata.ann_preds[:10]}
+Root classes: {[meta_obj.labels.get(r, r) for r in roots[:10]]}
+Hierarchy (2 levels): {hier}
+Top properties (label, domain, range): {top_props[:10]}
+Property characteristics: {prop_chars}
+URI pattern examples: {uri_sample[:3]}
+
+Provide a concise sense document with:
+1. Domain/scope - what is this ontology about?
+2. Key branches - main conceptual areas in the hierarchy
+3. Important properties - key relationships to know
+4. Detected patterns - reification, measurement patterns, part-whole relationships, etc.
+5. SPARQL navigation hints - how to effectively query this ontology"""
+    
+    # Use llm_query from rlm.core (already in namespace from setup_ontology_context)
+    from rlm.core import llm_query
+    summary = llm_query(prompt, ns=ns, name='_sense_summary')
+    
+    # Build structured sense document
+    sense_doc = AttrDict(
+        ont=ont_name,
+        stats={'cls': len(meta_obj.classes), 'props': len(meta_obj.properties), 'lbls': len(meta_obj.labels)},
+        prefixes=metadata.prefixes,
+        ann_preds=metadata.ann_preds,
+        roots=roots,
+        hier=hier,
+        top_props=top_props,
+        prop_chars=prop_chars,
+        uri_pattern=uri_pattern,
+        summary=ns['_sense_summary']
+    )
+    
+    ns[name] = sense_doc
+    return f"Built sense document into '{name}' with {len(hier)} root branches, {len(top_props)} properties"
+
+# %% ../nbs/01_ontology.ipynb 25
 def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str:
     """Load ontology and create meta-graph for RLM use.
     
