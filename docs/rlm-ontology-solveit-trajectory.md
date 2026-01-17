@@ -94,7 +94,38 @@ This project is intentionally exploratory/literate. The agent should be able to 
 For each decision:
 - Record the choice and rationale (1–3 sentences).
 - Record the alternatives considered.
-- Record the “proof”: which experiment(s) or evaluation scenario(s) demonstrated the constraint.
+- Record the "proof": which experiment(s) or evaluation scenario(s) demonstrated the constraint.
+
+### Stage 1: Ontology Context Model (Completed 2026-01-17)
+
+**Decision**: Ontologies are exposed to RLM as **handles + meta-graph scaffolding**, not as graph dumps.
+
+**Implementation** (`nbs/01_ontology.ipynb`):
+1. `load_ontology()` loads RDF into rdflib Graph and stores it in namespace as a handle
+2. `GraphMeta` dataclass provides lazy-loaded navigation properties:
+   - `namespaces` - prefix bindings
+   - `classes` - sorted list of OWL/RDFS class URIs
+   - `properties` - sorted list of property URIs
+   - `labels` - URI → label mapping for search
+   - `summary()` - bounded summary string
+3. Bounded view functions (not methods) operate on GraphMeta:
+   - `graph_stats(meta)` - summary statistics
+   - `search_by_label(meta, search, limit=10)` - substring search with result limit
+   - `describe_entity(meta, uri, limit=20)` - bounded entity description
+4. `setup_ontology_context()` creates Graph + GraphMeta + bound helpers in namespace for RLM use
+
+**Rationale**:
+- Graph handle prevents root model from accessing raw triples directly
+- Meta-graph properties are computed lazily and cached for efficiency
+- Bounded view functions enforce progressive disclosure (no unbounded queries)
+- Functions (not methods) follow fast.ai style and are easier to inject into REPL
+
+**Alternatives considered**:
+- GraphMeta as dict with bound methods → rejected (less inspectable, harder to serialize)
+- Expose rdflib Graph directly → rejected (violates "handles not dumps" principle)
+- Pre-compute all indexes at load time → rejected (wasteful for large ontologies)
+
+**Proof**: Tested with PROV ontology (1,664 triples, 59 classes, 89 properties). RLM successfully used `search_by_label()` and `describe_entity()` to explore and answer "What is the Activity class?" without accessing raw graph. See `tests/test_ontology_rlm.py`.
 
 ### Dataset Memory Model (core exploratory area)
 

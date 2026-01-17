@@ -436,9 +436,9 @@ def format_execution_result(result: REPLResult) -> str:
     ]
 
     if important_vars:
-        result_parts.append(f"REPL variables: {important_vars}\n")
+        result_parts.append(f"REPL variables: {important_vars}")
 
-    return "\n\n".join(result_parts) if result_parts else "No output"
+    return "\n\n".join(result_parts).rstrip() if result_parts else "No output"
 
 
 def format_iteration(
@@ -470,7 +470,7 @@ def format_iteration(
 
         execution_message = {
             "role": "user",
-            "content": f"Code executed:\n```python\n{code}\n```\n\nREPL output:\n{result}",
+            "content": f"Code executed:\n```python\n{code}\n```\n\nREPL output:\n{result}".rstrip(),
         }
         messages.append(execution_message)
 
