@@ -1,11 +1,14 @@
 # Stage 4 SHACL Integration - Implementation Summary
 
 **Date:** 2026-01-18
-**Status:** ✅ Complete
+**Status:** 🔵 Partial - Shape Discovery/Introspection Complete
 
 ## Overview
 
-Successfully implemented Stage 4 of the RLM trajectory: **SHACL as Retrieval Scaffolding**. This enables the model to discover "how to query this dataset" by using SHACL shapes as examples.
+Implemented **SHACL shape discovery and introspection** functionality for Stage 4 of the RLM trajectory. This enables the model to discover "what properties/constraints exist" by using SHACL shapes as schema documentation.
+
+**Scope:** Shape indexing and bounded views (Dimension 2: "SHACL as Ontology/Schema")
+**Not Implemented:** Executable query extraction from sh:sparql/sh:rule (see Future Work section)
 
 ## What Was Implemented
 
@@ -198,7 +201,7 @@ ALL VERIFICATION TESTS PASSED ✓
 ## Architecture Decisions
 
 ### Why DCAT-AP 3.0?
-- **Modern Exemplar** - Paradigm 2 (SHACL-first) ontology modeling
+- **Modern Exemplar** - Pure validation SHACL (constraint shapes without dash:ShapeClass)
 - **Well-structured** - Clean shape definitions with comprehensive constraints
 - **Real-world** - Used at scale across European data portals
 - **Maintained** - Active development by SEMIC
@@ -217,19 +220,40 @@ ALL VERIFICATION TESTS PASSED ✓
 
 ## Integration with RLM Trajectory
 
-This implementation completes **Stage 4: SHACL as Retrieval Scaffolding**, enabling:
+This implementation provides **shape discovery/introspection** for Stage 4, enabling:
 
 1. **Discovery** - "What shapes are available?" via `search_shapes()`
 2. **Inspection** - "What does this shape constrain?" via `describe_shape()`
-3. **Adaptation** - Shape constraints guide query construction
-4. **Execution** - Queries built from shape examples run via SPARQL
-5. **Inspection** - Results analyzed, new queries formed
+3. **Schema Guidance** - Shape constraints inform what properties to query
+4. **Execution** - User constructs SPARQL queries based on shape documentation
+5. **Inspection** - Results analyzed via existing bounded view primitives
 
-### Next Stages
+**Stage 4 Trajectory Done Condition (Not Yet Met):**
+The trajectory specifies "For UniProt, the model can find a relevant example by keyword and adapt it iteratively" - this requires executable query template extraction (sh:sparql/sh:rule), which is not yet implemented.
 
-- **Stage 5** - Evaluation framework (use SHACL shapes as test scaffolding)
-- **Stage 6** - Query pattern library (extract common patterns from shapes)
-- **Stage 7** - Ontology alignment (map shapes across datasets)
+### Next Steps for Complete Stage 4
+
+- Extract and index sh:sparql constraint queries as executable templates
+- Extract and index sh:rule (SHACL-AF) inference rules
+- Demonstrate "retrieve example → adapt → run" workflow on UniProt dataset
+- Add `sparql_template()` function to adapt and execute sh:sparql examples
+
+### Future Work (Stage 5+)
+
+**Validation Layer (from design doc):**
+- `shacl_validate(data, shapes, ns)` - pySHACL validation with work/ storage
+- `validation_summary(handle)` - Bounded views on violations
+- Integration with dataset provenance graph
+
+**Inference Layer (from design doc):**
+- `shacl_infer(shapes, data, ds_meta)` - SHACL-AF rule execution
+- `work_to_mem()` promotion workflow for inferred triples
+- Provenance tracking for inference operations
+
+**Evaluation Framework:**
+- Use SHACL shapes as test scaffolding
+- Extract common query patterns from shapes
+- Ontology alignment across datasets
 
 ## Dependencies
 
