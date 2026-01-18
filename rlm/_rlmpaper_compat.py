@@ -384,8 +384,40 @@ def find_code_blocks(text: str) -> list[str]:
     return results
 
 
+def _extract_balanced_parens(text: str, start_pattern: str) -> str | None:
+    """Extract content within balanced parentheses after a pattern.
+
+    Args:
+        text: Text to search
+        start_pattern: Regex pattern for the start (e.g., 'FINAL', 'FINAL_VAR')
+
+    Returns:
+        Content within the balanced parentheses, or None if not found
+    """
+    match = re.search(rf'^\s*{start_pattern}\(', text, re.MULTILINE)
+    if not match:
+        return None
+
+    # Start after the opening parenthesis
+    start_idx = match.end() - 1
+    depth = 0
+
+    for i, char in enumerate(text[start_idx:], start_idx):
+        if char == '(':
+            depth += 1
+        elif char == ')':
+            depth -= 1
+            if depth == 0:
+                # Found the matching closing parenthesis
+                return text[start_idx + 1:i].strip()
+
+    return None
+
+
 def find_final_answer(text: str, ns: dict = None) -> str | None:
     """Find FINAL(...) or FINAL_VAR(...) statement in response.
+
+    Handles nested parentheses correctly (e.g., FINAL(func(x)) extracts func(x)).
 
     Args:
         text: The response text to parse
@@ -395,19 +427,17 @@ def find_final_answer(text: str, ns: dict = None) -> str | None:
         The final answer string, or None if no final answer pattern is found
     """
     # Check for FINAL_VAR pattern first - must be at start of line
-    final_var_pattern = r"^\s*FINAL_VAR\((.*?)\)"
-    match = re.search(final_var_pattern, text, re.MULTILINE | re.DOTALL)
-    if match:
-        variable_name = match.group(1).strip().strip('"').strip("'")
+    content = _extract_balanced_parens(text, 'FINAL_VAR')
+    if content is not None:
+        variable_name = content.strip().strip('"').strip("'")
         if ns is not None and variable_name in ns:
             return str(ns[variable_name])
         return None
 
     # Check for FINAL pattern - must be at start of line
-    final_pattern = r"^\s*FINAL\((.*?)\)"
-    match = re.search(final_pattern, text, re.MULTILINE | re.DOTALL)
-    if match:
-        return match.group(1).strip()
+    content = _extract_balanced_parens(text, 'FINAL')
+    if content is not None:
+        return content
 
     return None
 

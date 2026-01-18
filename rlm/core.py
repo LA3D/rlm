@@ -63,8 +63,9 @@ def llm_query_batched(prompts: list, ns: dict, name: str = 'batch_res',
                       model: str = 'claude-sonnet-4-5') -> list:
     """Query LLM with multiple prompts concurrently.
     
-    Much faster than sequential `llm_query` calls when you have multiple
-    independent queries. Results are returned in the same order as prompts.
+    NOTE: Currently executes sequentially due to claudette's synchronous API.
+    True concurrency pending claudette async API support. The async scaffolding
+    is in place for when that becomes available.
     
     Args:
         prompts: List of prompt strings
@@ -77,8 +78,11 @@ def llm_query_batched(prompts: list, ns: dict, name: str = 'batch_res',
     """
     try:
         loop = asyncio.get_running_loop()
-        import nest_asyncio
-        nest_asyncio.apply()
+        try:
+            import nest_asyncio
+            nest_asyncio.apply()
+        except ImportError:
+            pass  # Optional dependency for nested event loops
         results = loop.run_until_complete(
             asyncio.gather(*[_query_one(p, model) for p in prompts])
         )
@@ -129,6 +133,42 @@ def exec_code(code: str, ns: dict) -> REPLResult:
     )
 
 # %% ../nbs/00_core.ipynb 18
+def _synthesize_fallback_answer(iterations: list, ns: dict) -> str:
+    """Synthesize best-effort answer when max_iters reached.
+    
+    Tries to extract useful information from:
+    1. Common result variable names
+    2. Last REPL output
+    
+    Args:
+        iterations: List of RLMIteration objects
+        ns: Namespace dict with variables
+        
+    Returns:
+        Fallback answer string with [Max iterations] prefix
+    """
+    # Check for common result variable names
+    for var in ['result', 'answer', 'final', 'output', 'solution']:
+        if var in ns and ns[var] is not None:
+            value_str = str(ns[var])
+            # Truncate if too long
+            if len(value_str) > 500:
+                value_str = value_str[:500] + "..."
+            return f"[Max iterations] Partial result: {value_str}"
+    
+    # Get last REPL output with actual content
+    for iteration in reversed(iterations):
+        for cb in iteration.code_blocks:
+            if cb.result and cb.result.stdout.strip():
+                stdout = cb.result.stdout.strip()
+                # Truncate if too long
+                if len(stdout) > 500:
+                    stdout = stdout[:500] + "..."
+                return f"[Max iterations] Last output: {stdout}"
+    
+    return "[Max iterations] No answer produced"
+
+
 def rlm_run(query: str, context, ns: dict = None,
             model: str = 'claude-sonnet-4-5',
             max_iters: int = 10,
@@ -152,7 +192,7 @@ def rlm_run(query: str, context, ns: dict = None,
 
     Returns:
         (answer, iterations, namespace) tuple where:
-        - answer: Final answer string or None if didn't converge
+        - answer: Final answer string (or fallback if max_iters reached)
         - iterations: List of RLMIteration objects
         - namespace: The dict containing all REPL variables
     """
@@ -264,9 +304,10 @@ def rlm_run(query: str, context, ns: dict = None,
         for msg in format_iteration(iteration):
             chat.h.append(msg)
 
-    # Reached max iterations without final answer
+    # Reached max iterations - synthesize fallback answer
+    fallback = _synthesize_fallback_answer(iterations, ns)
     verbose_printer.print_summary(
         total_iterations=len(iterations),
         total_time=time.time() - start_time
     )
-    return None, iterations, ns
+    return fallback, iterations, ns

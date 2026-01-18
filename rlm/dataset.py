@@ -486,7 +486,8 @@ def res_head(result, n: int = 10) -> list:
     return result[:n]
 
 
-def res_where(result, column: str, pattern: str = None, value: str = None) -> list:
+def res_where(result, column: str, pattern: str = None, value: str = None,
+              limit: int = 100) -> list:
     """Filter result rows by column value or regex pattern.
 
     Args:
@@ -494,6 +495,7 @@ def res_where(result, column: str, pattern: str = None, value: str = None) -> li
         column: Column name to filter on
         pattern: Optional regex pattern to match
         value: Optional exact value to match
+        limit: Maximum matching rows to return (default: 100)
 
     Returns:
         List of matching rows
@@ -504,6 +506,10 @@ def res_where(result, column: str, pattern: str = None, value: str = None) -> li
     filtered = []
 
     for row in rows:
+        # Stop if we've reached the limit
+        if len(filtered) >= limit:
+            break
+            
         if column not in row:
             continue
 

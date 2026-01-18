@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from functools import partial
+from itertools import islice
 import random
 from typing import Optional
 
@@ -122,10 +123,13 @@ def sparql_query(
     
     elif hasattr(result, 'serialize'):
         # CONSTRUCT or DESCRIBE query - result is rdflib.Graph
-        triples = list(result)[:max_results]
+        # Capture original count before truncation
+        original_count = len(result)
+        
+        # Use islice to limit triples
         g = Graph()
-        for t in triples:
-            g.add(t)
+        for triple in islice(result, max_results):
+            g.add(triple)
         
         # Determine if CONSTRUCT or DESCRIBE
         query_upper = query.upper()
@@ -136,7 +140,7 @@ def sparql_query(
             result_type=result_type,
             query=query,
             endpoint=endpoint,
-            triple_count=len(g)
+            triple_count=original_count  # Store pre-truncation count
         )
         ns[name] = handle
         
@@ -164,14 +168,16 @@ def sparql_query(
             ds_meta.prov.add((event_uri, RLM_PROV.session, Literal(ds_meta.session_id)))
             
             return f"Graph with {len(g)} triples stored in '{name}' and work/{task_id}" + \
-                   (f" (truncated from {len(result)})" if len(result) > max_results else "")
+                   (f" (truncated from {original_count})" if original_count > max_results else "")
         
         return f"Graph with {len(g)} triples stored in '{name}'" + \
-               (f" (truncated from {len(result)})" if len(result) > max_results else "")
+               (f" (truncated from {original_count})" if original_count > max_results else "")
     
     else:
         # SELECT query - result is list of dicts
-        result = result[:max_results]
+        # Capture original count before truncation
+        original_count = len(result)
+        result = list(islice(result, max_results))
         cols = list(result[0].keys()) if result else []
         
         handle = SPARQLResultHandle(
@@ -180,7 +186,7 @@ def sparql_query(
             query=query,
             endpoint=endpoint,
             columns=cols,
-            total_rows=len(result)
+            total_rows=original_count  # Store pre-truncation count
         )
         ns[name] = handle
         
@@ -247,8 +253,14 @@ def sparql_local(
     elif 'CONSTRUCT' in query_upper or 'DESCRIBE' in query_upper:
         # CONSTRUCT or DESCRIBE query
         result_type = 'construct' if 'CONSTRUCT' in query_upper else 'describe'
+        
+        # Capture original count before truncation
+        result_list = list(result)
+        original_count = len(result_list)
+        
+        # Use islice to limit triples
         g = Graph()
-        for triple in list(result)[:max_results]:
+        for triple in islice(result_list, max_results):
             g.add(triple)
         
         handle = SPARQLResultHandle(
@@ -256,15 +268,19 @@ def sparql_local(
             result_type=result_type,
             query=query,
             endpoint='local',
-            triple_count=len(g)
+            triple_count=original_count  # Store pre-truncation count
         )
         ns[name] = handle
         return f"Graph with {len(g)} triples stored in '{name}'"
     
     else:
         # SELECT query
+        # Capture original count before truncation
+        result_list = list(result)
+        original_count = len(result_list)
+        
         rows = []
-        for row in list(result)[:max_results]:
+        for row in islice(result_list, max_results):
             row_dict = {}
             for var in result.vars:
                 row_dict[str(var)] = row[var] if row[var] else None
@@ -278,7 +294,7 @@ def sparql_local(
             query=query,
             endpoint='local',
             columns=cols,
-            total_rows=len(rows)
+            total_rows=original_count  # Store pre-truncation count
         )
         ns[name] = handle
         
