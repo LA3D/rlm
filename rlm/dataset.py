@@ -372,9 +372,15 @@ def snapshot_dataset(ds_meta: DatasetMeta, path: str = None,
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         ext = 'trig' if format == 'trig' else 'nq'
         path = f"snapshot_{ds_meta.name}_{timestamp}.{ext}"
-    
+
+    # Ensure session_id is stored in prov graph
+    from rdflib import Namespace
+    RLM_PROV = Namespace('urn:rlm:prov:')
+    session_uri = URIRef(f'urn:rlm:{ds_meta.name}:session')
+    ds_meta.prov.add((session_uri, RLM_PROV.sessionId, Literal(ds_meta.session_id)))
+
     ds_meta.dataset.serialize(destination=path, format=format)
-    
+
     return f"Snapshot saved to {path}"
 
 # %% ../nbs/02_dataset_memory.ipynb 19
@@ -424,9 +430,32 @@ def load_snapshot(path: str, ns: dict, name: str = 'ds') -> str:
     
     # Use detected name or provided name
     detected_name = original_name if original_name else name
-    
-    # Create meta with detected name so URIs match
-    ds_meta = DatasetMeta(ds, name=detected_name)
+
+    # Try to restore session_id from provenance graph
+    from rdflib import URIRef
+    prov_uri = URIRef(f'urn:rlm:{detected_name}:prov')
+    session_id = None
+    try:
+        prov_graph = ds.graph(prov_uri)
+        # Try new format first (explicit sessionId triple)
+        query = """SELECT ?session WHERE { ?s <urn:rlm:prov:sessionId> ?session } LIMIT 1"""
+        results = list(prov_graph.query(query))
+        if results:
+            session_id = str(results[0][0])
+        else:
+            # Fallback to old format (from prov events)
+            query = """SELECT ?session WHERE { ?event <urn:rlm:prov:session> ?session } LIMIT 1"""
+            results = list(prov_graph.query(query))
+            if results:
+                session_id = str(results[0][0])
+    except:
+        pass
+
+    # Create meta with detected name and restored session_id if found
+    if session_id:
+        ds_meta = DatasetMeta(ds, name=detected_name, session_id=session_id)
+    else:
+        ds_meta = DatasetMeta(ds, name=detected_name)
     
     # Store in namespace with provided name
     ns[name] = ds
