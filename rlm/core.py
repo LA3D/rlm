@@ -103,7 +103,7 @@ def exec_code(code: str, ns: dict) -> REPLResult:
         ns: Namespace dict for execution
         
     Returns:
-        REPLResult with stdout, stderr, locals, execution_time
+        REPLResult with stdout, stderr, locals snapshot, execution_time
     """
     stdout_capture = StringIO()
     stderr_capture = StringIO()
@@ -119,10 +119,12 @@ def exec_code(code: str, ns: dict) -> REPLResult:
     finally:
         sys.stdout, sys.stderr = old_stdout, old_stderr
     
+    # FIX: Create a snapshot copy of namespace instead of storing reference
+    # This prevents later modifications from affecting inspection of old iterations
     return REPLResult(
         stdout=stdout_capture.getvalue(),
         stderr=stderr_out,
-        locals=ns,
+        locals=dict(ns),  # Snapshot, not reference
         execution_time=time.time() - start
     )
 

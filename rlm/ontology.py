@@ -229,7 +229,7 @@ def describe_entity(meta: GraphMeta, uri: str, limit: int = 20) -> dict:
         'label': label,
         'types': types,
         'comment': comment,
-        'outgoing_sample': outgoing[:10]  # First 10 only
+        'outgoing_sample': outgoing[:limit]  # FIX: Use limit parameter, not hardcoded [:10]
     }
 
 # %% ../nbs/01_ontology.ipynb 18
@@ -459,8 +459,15 @@ def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str
     meta = GraphMeta(g, name=name)
     ns[f"{name}_meta"] = meta
     
-    # Add helper functions bound to this meta
+    # FIX: Namespace helper functions by ontology name to avoid overwriting
+    # This allows multiple ontologies to coexist
     from functools import partial
+    ns[f'{name}_graph_stats'] = partial(graph_stats, meta)
+    ns[f'{name}_search_by_label'] = partial(search_by_label, meta)
+    ns[f'{name}_describe_entity'] = partial(describe_entity, meta)
+    
+    # Also bind without prefix for single-ontology convenience
+    # (will be overwritten if multiple ontologies loaded, but prefixed versions persist)
     ns['graph_stats'] = partial(graph_stats, meta)
     ns['search_by_label'] = partial(search_by_label, meta)
     ns['describe_entity'] = partial(describe_entity, meta)

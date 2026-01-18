@@ -8,13 +8,45 @@ __all__ = ['DatasetMeta', 'setup_dataset_context', 'mem_add', 'mem_query', 'mem_
            'graph_sample', 'mount_ontology']
 
 # %% ../nbs/02_dataset_memory.ipynb 4
-from rdflib import Dataset, Graph, Namespace, RDF, RDFS, URIRef, Literal, XSD
+from rdflib import Dataset, Graph, Namespace, RDF, RDFS, URIRef, Literal, XSD, BNode
 from pathlib import Path
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from functools import partial
 from datetime import datetime
 import uuid
+
+# Helper function for URI/Literal conversion
+def _to_rdf_term(value):
+    """Convert value to appropriate RDF term.
+    
+    Handles URIs (any scheme), literals, and existing RDF terms.
+    """
+    # Already an RDF term
+    if isinstance(value, (URIRef, Literal, BNode)):
+        return value
+    
+    # String conversion
+    if isinstance(value, str):
+        # Check if it looks like a URI (has scheme like http:, urn:, https:, etc.)
+        # Exclude blank nodes (_:) which are handled separately
+        if ':' in value and not value.startswith('_:'):
+            # Could be URI - check if it's likely a URI vs a literal with colon
+            # Simple heuristic: if it starts with a known scheme or has :// it's a URI
+            if value.split(':', 1)[0].lower() in ['http', 'https', 'urn', 'ftp', 'mailto', 'file', 'data']:
+                return URIRef(value)
+            # Also handle URIs with ://
+            if '://' in value:
+                return URIRef(value)
+        # Otherwise treat as literal
+        return Literal(value)
+    
+    # Numbers and booleans become typed literals
+    if isinstance(value, (int, float, bool)):
+        return Literal(value)
+    
+    # Pass through anything else (shouldn't happen normally)
+    return value
 
 # %% ../nbs/02_dataset_memory.ipynb 6
 @dataclass
@@ -79,7 +111,7 @@ class DatasetMeta:
             f"mem: {len(self.mem)} triples",
             f"prov: {len(self.prov)} events",
             f"work graphs: {len(self.work_graphs)}",
-            f"onto graphs: {len([g for g in self.graph_stats.keys() if '/onto/' in g])}"
+            f"onto graphs: {len([g for g in self.graph_stats.keys() if ':onto/' in g])}"  # FIX: Use :onto/ not /onto/
         ]
         return '\n'.join(lines)
     
@@ -140,10 +172,10 @@ def mem_add(ds_meta: DatasetMeta, subject, predicate, obj,
     Returns:
         Summary string
     """
-    # Convert to RDF terms
-    s = URIRef(subject) if isinstance(subject, str) and subject.startswith('http') else subject
+    # Convert to RDF terms (handles all URI schemes: http, https, urn, etc.)
+    s = _to_rdf_term(subject)
     p = URIRef(predicate) if isinstance(predicate, str) else predicate
-    o = URIRef(obj) if isinstance(obj, str) and obj.startswith('http') else Literal(obj) if isinstance(obj, (str, int, float)) else obj
+    o = _to_rdf_term(obj)
     
     # Add to mem
     ds_meta.mem.add((s, p, o))
@@ -212,10 +244,10 @@ def mem_retract(ds_meta: DatasetMeta, subject=None, predicate=None, obj=None,
     Returns:
         Summary string
     """
-    # Convert to RDF terms or None
-    s = URIRef(subject) if subject and isinstance(subject, str) and subject.startswith('http') else subject
+    # Convert to RDF terms or None (handles all URI schemes)
+    s = _to_rdf_term(subject) if subject is not None else None
     p = URIRef(predicate) if predicate and isinstance(predicate, str) else predicate
-    o = URIRef(obj) if obj and isinstance(obj, str) and obj.startswith('http') else Literal(obj) if obj and isinstance(obj, (str, int, float)) else obj
+    o = _to_rdf_term(obj) if obj is not None else None
     
     # Find matching triples
     to_remove = list(ds_meta.mem.triples((s, p, o)))
@@ -398,7 +430,17 @@ def load_snapshot(path: str, ns: dict, name: str = 'ds') -> str:
     """
     # Detect format from extension
     ext = Path(path).suffix.lower()
-    format = 'trig' if ext in ['.trig', '.ttl'] else 'nquads'
+    
+    # FIX: Properly distinguish Turtle from TriG
+    if ext == '.trig':
+        format = 'trig'
+    elif ext == '.ttl':
+        format = 'turtle'  # Turtle is single-graph, not TriG!
+    elif ext in ['.nq', '.nquads']:
+        format = 'nquads'
+    else:
+        # Default to trig for unknown extensions (datasets are multi-graph)
+        format = 'trig'
     
     # Load dataset
     ds = Dataset()
