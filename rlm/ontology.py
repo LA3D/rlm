@@ -302,7 +302,7 @@ def describe_entity(meta: GraphMeta, uri: str, limit: int = 20) -> dict:
         'outgoing_sample': outgoing[:limit]  # FIX: Use limit parameter, not hardcoded [:10]
     }
 
-# %% ../nbs/01_ontology.ipynb 17
+# %% ../nbs/01_ontology.ipynb 18
 def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
                         direction: str = 'both', limit: int = 20) -> dict:
     """Get one-hop neighbors of an entity, optionally filtered by predicate.
@@ -383,7 +383,7 @@ def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
         'incoming_count': incoming_count
     }
 
-# %% ../nbs/01_ontology.ipynb 18
+# %% ../nbs/01_ontology.ipynb 19
 def find_path(meta: GraphMeta, source: str, target: str,
               max_depth: int = 2, limit: int = 10) -> list:
     """Find predicates connecting two entities using BFS.
@@ -454,7 +454,7 @@ def find_path(meta: GraphMeta, source: str, target: str,
 
     return paths_found
 
-# %% ../nbs/01_ontology.ipynb 19
+# %% ../nbs/01_ontology.ipynb 20
 def predicate_frequency(meta: GraphMeta, limit: int = 20,
                         predicate_type: str = None) -> list:
     """Get predicates ranked by frequency of use.
@@ -520,7 +520,7 @@ def predicate_frequency(meta: GraphMeta, limit: int = 20,
 
     return results
 
-# %% ../nbs/01_ontology.ipynb 23
+# %% ../nbs/01_ontology.ipynb 24
 def ont_describe(ont: str, uri: str, name: str = 'desc', ns: dict = None) -> str:
     """Get all triples about a URI, store in namespace.
     
@@ -552,7 +552,7 @@ def ont_describe(ont: str, uri: str, name: str = 'desc', ns: dict = None) -> str
     ns[name] = result
     return f"Stored {len(subj_triples)} + {len(obj_triples)} triples about '{uri}' into '{name}'"
 
-# %% ../nbs/01_ontology.ipynb 24
+# %% ../nbs/01_ontology.ipynb 25
 def ont_meta(ont: str, name: str = 'meta', ns: dict = None) -> str:
     """Extract ontology metadata (prefixes, annotation predicates, imports).
     
@@ -579,7 +579,7 @@ def ont_meta(ont: str, name: str = 'meta', ns: dict = None) -> str:
     ns[name] = res
     return f"Stored metadata into '{name}': {len(prefixes)} prefixes, {len(ann_preds)} annotation predicates, {len(imports)} imports"
 
-# %% ../nbs/01_ontology.ipynb 25
+# %% ../nbs/01_ontology.ipynb 26
 def ont_roots(ont: str, name: str = 'roots', ns: dict = None) -> str:
     """Find root classes (no declared superclass), store in namespace.
     
@@ -600,7 +600,7 @@ def ont_roots(ont: str, name: str = 'roots', ns: dict = None) -> str:
     ns[name] = roots
     return f"Stored {len(roots)} root classes into '{name}'"
 
-# %% ../nbs/01_ontology.ipynb 26
+# %% ../nbs/01_ontology.ipynb 27
 def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str:
     """Load ontology and create meta-graph for RLM use.
     
@@ -649,7 +649,7 @@ def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str
     
     return f"{load_msg}\nCreated meta-graph '{name}_meta' with {len(meta.classes)} classes, {len(meta.properties)} properties"
 
-# %% ../nbs/01_ontology.ipynb 28
+# %% ../nbs/01_ontology.ipynb 29
 def build_sense(path: str, name: str = 'sense', ns: dict = None) -> str:
     """Build ontology sense document using workflow + LLM synthesis.
     
@@ -872,7 +872,7 @@ Provide a concise sense document with:
     ns[name] = sense_doc
     return f"Built sense document into '{name}': {len(label_props)} label properties, {len(desc_props)} description properties, {len(hier)} root branches"
 
-# %% ../nbs/01_ontology.ipynb 31
+# %% ../nbs/01_ontology.ipynb 32
 def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str:
     """Load ontology and create meta-graph for RLM use.
     
