@@ -601,15 +601,19 @@ def ont_roots(ont: str, name: str = 'roots', ns: dict = None) -> str:
     return f"Stored {len(roots)} root classes into '{name}'"
 
 # %% ../nbs/01_ontology.ipynb 27
-def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str:
+def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont', dataset_meta=None) -> str:
     """Load ontology and create meta-graph for RLM use.
     
     This sets up both the Graph and GraphMeta in the namespace.
+    
+    NEW: Dataset integration - if dataset_meta provided, automatically mounts
+    the ontology into the dataset as onto/<name> graph.
     
     Args:
         path: Path to ontology file
         ns: Namespace dict
         name: Base name for graph handle
+        dataset_meta: Optional DatasetMeta for auto-mounting
         
     Returns:
         Summary string
@@ -621,6 +625,15 @@ def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str
     g = ns[name]
     meta = GraphMeta(g, name=name)
     ns[f"{name}_meta"] = meta
+    
+    # NEW: Auto-mount in dataset if provided
+    if dataset_meta is not None:
+        try:
+            from rlm.dataset import mount_ontology
+            mount_msg = mount_ontology(dataset_meta, ns, str(path), name)
+            load_msg += f"\n{mount_msg}"
+        except Exception as e:
+            print(f"Warning: Failed to mount ontology in dataset: {e}")
     
     # FIX: Namespace helper functions by ontology name to avoid overwriting
     # This allows multiple ontologies to coexist
@@ -871,40 +884,3 @@ Provide a concise sense document with:
     
     ns[name] = sense_doc
     return f"Built sense document into '{name}': {len(label_props)} label properties, {len(desc_props)} description properties, {len(hier)} root branches"
-
-# %% ../nbs/01_ontology.ipynb 32
-def setup_ontology_context(path: str | Path, ns: dict, name: str = 'ont') -> str:
-    """Load ontology and create meta-graph for RLM use.
-    
-    This sets up both the Graph and GraphMeta in the namespace.
-    
-    Args:
-        path: Path to ontology file
-        ns: Namespace dict
-        name: Base name for graph handle
-        
-    Returns:
-        Summary string
-    """
-    # Load graph
-    load_msg = load_ontology(path, ns, name=name)
-    
-    # Create meta-graph
-    g = ns[name]
-    meta = GraphMeta(g, name=name)
-    ns[f"{name}_meta"] = meta
-    
-    # FIX: Namespace helper functions by ontology name to avoid overwriting
-    # This allows multiple ontologies to coexist
-    from functools import partial
-    ns[f'{name}_graph_stats'] = partial(graph_stats, meta)
-    ns[f'{name}_search_by_label'] = partial(search_by_label, meta)
-    ns[f'{name}_describe_entity'] = partial(describe_entity, meta)
-    
-    # Also bind without prefix for single-ontology convenience
-    # (will be overwritten if multiple ontologies loaded, but prefixed versions persist)
-    ns['graph_stats'] = partial(graph_stats, meta)
-    ns['search_by_label'] = partial(search_by_label, meta)
-    ns['describe_entity'] = partial(describe_entity, meta)
-    
-    return f"{load_msg}\nCreated meta-graph '{name}_meta' with {len(meta.classes)} classes, {len(meta.properties)} properties"

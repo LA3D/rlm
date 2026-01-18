@@ -34,6 +34,7 @@ class MemoryItem:
         created_at: ISO timestamp
         access_count: Number of times retrieved (for future consolidation)
         tags: Keywords for BM25 retrieval
+        session_id: Optional session ID from DatasetMeta (links to dataset session)
     """
     id: str
     title: str
@@ -44,6 +45,7 @@ class MemoryItem:
     created_at: str
     access_count: int = 0
     tags: Optional[list[str]] = None
+    session_id: Optional[str] = None  # NEW: Links to DatasetMeta.session_id
     
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
@@ -288,6 +290,13 @@ def extract_memories(
     """
     source_type = 'success' if judgment['is_success'] else 'failure'
     
+    # Capture session_id if available in namespace
+    session_id = None
+    if ns is not None:
+        # Try to get session_id from DatasetMeta
+        if 'ds_meta' in ns and hasattr(ns['ds_meta'], 'session_id'):
+            session_id = ns['ds_meta'].session_id
+    
     # Format key steps for prompt
     steps_text = "\n".join([
         f"  {s['iteration']}. {s['action']} → {s['outcome']}"
@@ -344,7 +353,8 @@ Return ONLY valid JSON array (may have 1-3 items, or empty if no lessons):
                 source_type=source_type,
                 task_query=artifact['task'],
                 created_at=datetime.utcnow().isoformat(),
-                tags=item.get('tags', [])
+                tags=item.get('tags', []),
+                session_id=session_id  # NEW: Capture session_id from namespace
             )
             memories.append(memory)
         
@@ -459,6 +469,9 @@ def rlm_run_with_memory(
     memory_store: MemoryStore,
     ns: dict = None,
     enable_memory_extraction: bool = True,
+    # NEW: Dataset persistence
+    persist_dataset: bool = False,
+    dataset_path: Path = None,
     **kwargs
 ) -> tuple[str, list, dict, list[MemoryItem]]:
     """RLM run with procedural memory loop.
@@ -470,17 +483,32 @@ def rlm_run_with_memory(
     4. EXTRACT: Judge + extract new memories
     5. STORE: Persist new memories
     
+    NEW: Dataset persistence:
+    - If persist_dataset=True and dataset_path provided, loads snapshot before run
+    - After run, if dataset was modified, saves snapshot
+    - Stores snapshot path in extracted MemoryItem for lineage
+    
     Args:
         query: Task query string
         context: Context string (e.g., ontology summary)
         memory_store: MemoryStore instance for retrieval/storage
         ns: Optional namespace dict
         enable_memory_extraction: Whether to extract and store new memories (default True)
+        persist_dataset: Whether to persist dataset snapshots (default False)
+        dataset_path: Optional path for dataset snapshot
         **kwargs: Additional arguments for rlm_run()
     
     Returns:
         Tuple of (answer, iterations, ns, new_memories)
     """
+    # NEW: Load dataset snapshot if it exists
+    if persist_dataset and dataset_path is not None and dataset_path.exists():
+        try:
+            from rlm.dataset import load_snapshot
+            load_snapshot(str(dataset_path), ns)
+        except Exception as e:
+            print(f"Warning: Failed to load dataset snapshot: {e}")
+    
     # 1. RETRIEVE relevant memories
     relevant = retrieve_memories(memory_store, query, k=3)
     
@@ -493,6 +521,16 @@ def rlm_run_with_memory(
     
     # 3. INTERACT - run RLM
     answer, iterations, ns = rlm_run(query, enhanced_context, ns=ns, **kwargs)
+    
+    # NEW: Save dataset snapshot if dataset was modified
+    if persist_dataset and dataset_path is not None:
+        try:
+            from rlm.dataset import snapshot_dataset
+            if 'ds_meta' in ns:
+                result = snapshot_dataset(ns['ds_meta'], path=str(dataset_path))
+                print(f"Dataset snapshot: {result}")
+        except Exception as e:
+            print(f"Warning: Failed to save dataset snapshot: {e}")
     
     new_memories = []
     if enable_memory_extraction:
