@@ -630,11 +630,14 @@ def graph_sample(ds_meta: DatasetMeta, graph_uri: str, limit: int = 10) -> list:
 
 # %% ../nbs/02_dataset_memory.ipynb 28
 def mount_ontology(ds_meta: DatasetMeta, ns: dict, path: str, ont_name: str, 
-                   index_shacl: bool = True) -> str:
+                   index_shacl: bool = True, index_queries: bool = True) -> str:
     """Mount ontology into dataset as read-only onto/<name> graph.
     
     If index_shacl=True and SHACL content detected, also builds
     SHACLIndex and stores in ns['{ont_name}_shacl'].
+    
+    If index_queries=True and sh:SPARQLExecutable detected, also builds
+    QueryIndex and stores in ns['{ont_name}_queries'].
     
     Args:
         ds_meta: DatasetMeta containing the dataset
@@ -642,6 +645,7 @@ def mount_ontology(ds_meta: DatasetMeta, ns: dict, path: str, ont_name: str,
         path: Path to ontology file
         ont_name: Name for the ontology
         index_shacl: Whether to detect and index SHACL shapes (default: True)
+        index_queries: Whether to detect and index query templates (default: True)
         
     Returns:
         Summary string
@@ -663,6 +667,18 @@ def mount_ontology(ds_meta: DatasetMeta, ns: dict, path: str, ont_name: str,
                 index = build_shacl_index(graph)
                 ns[f'{ont_name}_shacl'] = index
                 result += f"\n  SHACL: {index.summary()}"
+        except ImportError:
+            pass  # shacl_examples not available
+    
+    # Optional query template indexing
+    if index_queries:
+        try:
+            from rlm.shacl_examples import detect_sparql_executables, build_query_index
+            detection = detect_sparql_executables(graph)
+            if detection['has_executables']:
+                index = build_query_index(graph, str(path))
+                ns[f'{ont_name}_queries'] = index
+                result += f"\n  Queries: {index.summary()}"
         except ImportError:
             pass  # shacl_examples not available
     
