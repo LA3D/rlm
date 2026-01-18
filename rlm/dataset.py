@@ -623,14 +623,19 @@ def graph_sample(ds_meta: DatasetMeta, graph_uri: str, limit: int = 10) -> list:
     return triples
 
 # %% ../nbs/02_dataset_memory.ipynb 28
-def mount_ontology(ds_meta: DatasetMeta, ns: dict, path: str, ont_name: str) -> str:
+def mount_ontology(ds_meta: DatasetMeta, ns: dict, path: str, ont_name: str, 
+                   index_shacl: bool = True) -> str:
     """Mount ontology into dataset as read-only onto/<name> graph.
+    
+    If index_shacl=True and SHACL content detected, also builds
+    SHACLIndex and stores in ns['{ont_name}_shacl'].
     
     Args:
         ds_meta: DatasetMeta containing the dataset
         ns: Namespace dict (for compatibility with setup_ontology_context)
         path: Path to ontology file
         ont_name: Name for the ontology
+        index_shacl: Whether to detect and index SHACL shapes (default: True)
         
     Returns:
         Summary string
@@ -641,10 +646,24 @@ def mount_ontology(ds_meta: DatasetMeta, ns: dict, path: str, ont_name: str) -> 
     # Parse ontology into the graph
     graph.parse(path)
     
+    result = f"Mounted {len(graph)} triples from {Path(path).name} into onto/{ont_name}"
+    
+    # Optional SHACL indexing
+    if index_shacl:
+        try:
+            from rlm.shacl_examples import detect_shacl, build_shacl_index
+            detection = detect_shacl(graph)
+            if detection['has_shacl']:
+                index = build_shacl_index(graph)
+                ns[f'{ont_name}_shacl'] = index
+                result += f"\n  SHACL: {index.summary()}"
+        except ImportError:
+            pass  # shacl_examples not available
+    
     # Invalidate caches
     ds_meta._invalidate_caches()
     
-    return f"Mounted {len(graph)} triples from {Path(path).name} into onto/{ont_name}"
+    return result
 
 # %% ../nbs/02_dataset_memory.ipynb 29
 def setup_dataset_context(ns: dict, name: str = 'ds') -> str:
