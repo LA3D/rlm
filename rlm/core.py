@@ -131,7 +131,9 @@ def exec_code(code: str, ns: dict) -> REPLResult:
 # %% ../nbs/00_core.ipynb 18
 def rlm_run(query: str, context, ns: dict = None,
             model: str = 'claude-sonnet-4-5',
-            max_iters: int = 10) -> tuple:
+            max_iters: int = 10,
+            logger=None,
+            verbose: bool = False) -> tuple:
     """Run RLM loop until FINAL or max iterations.
 
     This implements the RLM protocol: the root LLM emits ```repl``` code blocks
@@ -145,6 +147,8 @@ def rlm_run(query: str, context, ns: dict = None,
         ns: Namespace dict (if None, creates fresh namespace)
         model: Claude model to use
         max_iters: Maximum iterations before giving up
+        logger: RLMLogger instance for JSON-lines logging (optional)
+        verbose: Enable Rich console output (default: False)
 
     Returns:
         (answer, iterations, namespace) tuple where:
@@ -154,6 +158,10 @@ def rlm_run(query: str, context, ns: dict = None,
     """
     if ns is None:
         ns = {}
+
+    # Initialize verbose printer
+    from rlm.logger import VerbosePrinter
+    verbose_printer = VerbosePrinter(enabled=verbose)
 
     # Define FINAL_VAR helper (following rlmpaper design)
     def _final_var(variable_name: str) -> str:
@@ -185,6 +193,19 @@ def rlm_run(query: str, context, ns: dict = None,
     # Add FINAL_VAR as executable function (following rlmpaper design)
     ns['FINAL_VAR'] = _final_var
 
+    # Log metadata
+    if logger:
+        logger.log_metadata({
+            'query': query,
+            'context_type': meta.context_type,
+            'context_length': meta.context_total_length,
+            'model': model,
+            'max_iters': max_iters
+        })
+
+    # Print header
+    verbose_printer.print_header(query=query, context=str(context)[:100], max_iters=max_iters)
+
     # Build initial messages with rlmpaper system prompt
     messages = build_rlm_system_prompt(query_metadata=meta)
     chat = Chat(model, sp=messages[0]['content'])
@@ -194,9 +215,10 @@ def rlm_run(query: str, context, ns: dict = None,
         chat.h.append(messages[1])
 
     iterations = []
+    start_time = time.time()
 
     for i in range(max_iters):
-        start = time.time()
+        iter_start = time.time()
 
         # Build user prompt (includes first-iteration safeguard)
         user_msg = build_user_prompt(root_prompt=query, iteration=i)
@@ -220,12 +242,22 @@ def rlm_run(query: str, context, ns: dict = None,
             response=response,
             code_blocks=code_blocks,
             final_answer=answer,
-            iteration_time=time.time() - start
+            iteration_time=time.time() - iter_start
         )
         iterations.append(iteration)
 
+        # Log iteration
+        if logger:
+            logger.log(iteration, i + 1)
+        verbose_printer.print_iteration(iteration, i + 1)
+
         # If we have an answer, we're done
         if answer is not None:
+            verbose_printer.print_final_answer(answer)
+            verbose_printer.print_summary(
+                total_iterations=len(iterations),
+                total_time=time.time() - start_time
+            )
             return answer, iterations, ns
 
         # Add iteration to chat history for next round
@@ -233,4 +265,8 @@ def rlm_run(query: str, context, ns: dict = None,
             chat.h.append(msg)
 
     # Reached max iterations without final answer
+    verbose_printer.print_summary(
+        total_iterations=len(iterations),
+        total_time=time.time() - start_time
+    )
     return None, iterations, ns
