@@ -147,6 +147,25 @@ Design documents and the project trajectory are in `docs/`. See
 [docs/planning/trajectory.md](https://github.com/LA3D/rlm/blob/main/docs/planning/trajectory.md)
 for the implementation roadmap.
 
+## Tutorial
+
+For a complete walkthrough with working examples, see
+[91_tutorial.ipynb](91_tutorial.html). The tutorial demonstrates:
+
+- Core RLM loop with
+  [`llm_query()`](https://LA3D.github.io/rlm/core.html#llm_query) and
+  [`rlm_run()`](https://LA3D.github.io/rlm/core.html#rlm_run)
+- Ontology loading with bounded views
+- Progressive disclosure over RDF graphs
+- Dataset memory for fact persistence
+- SPARQL result handles
+- Procedural memory with BM25 retrieval
+- SHACL shape indexing
+- Multi-ontology integration
+
+All cells are executed with real Claude API calls showing actual
+outputs.
+
 ## Testing
 
 The project includes a comprehensive test suite with 100+ tests covering

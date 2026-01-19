@@ -11,3 +11,4 @@ website:
       - 05_procedural_memory.ipynb
       - 06_shacl_examples.ipynb
       - 90_eval_reports.ipynb
+      - 91_tutorial.ipynb
