@@ -1,44 +1,51 @@
 # RLM Test Suite
 
-Comprehensive testing campaign for the RLM (Recursive Language Models) system with ontology and SPARQL integration.
-
-## Overview
-
-This test suite validates:
-
-1. **Recently implemented features** (Stages 1.5, 2.5, & 3)
-2. **Cross-component integration** (Dataset + Memory + SPARQL)
-3. **Trajectory requirements** from `docs/planning/trajectory.md` (Stage 6)
+Comprehensive testing for the RLM (Recursive Language Models) system with ontology, SPARQL, and procedural memory integration.
 
 ## Test Organization
 
+The test suite is organized by test type and API dependency:
+
 ```
 tests/
-├── unit/                    # Unit tests for individual components
-│   ├── test_sparql_handles.py       # SPARQLResultHandle, res_sample
-│   ├── test_session_tracking.py     # Session ID generation & persistence
-│   └── test_memory_store.py         # MemoryStore CRUD operations
+├── helpers/                 # Test utilities and assertions
+│   ├── protocol_assertions.py   # RLM protocol invariant checks
+│   └── __init__.py
 │
-├── integration/             # Cross-component integration tests
-│   ├── test_dataset_memory.py       # Dataset + Memory + Session ID flow (P0)
-│   ├── test_sparql_dataset.py       # SPARQL + Work graphs (P0)
-│   ├── test_memory_closed_loop.py   # Procedural memory cycle (P0)
-│   └── test_full_stack.py           # End-to-end smoke tests (P0)
+├── unit/                    # Deterministic unit tests (NO API calls)
+│   ├── test_shacl_examples.py   # SHACL indexing and detection
+│   ├── test_sparql_handles.py   # SPARQL result handles
+│   ├── test_session_tracking.py # Session ID generation
+│   └── test_memory_store.py     # MemoryStore CRUD operations
 │
-├── trajectory/              # Stage 6 scenario tests (future)
-│   ├── test_prov_trajectories.py
-│   ├── test_dataset_trajectories.py
-│   └── test_procedural_trajectories.py
+├── integration/             # Deterministic integration tests (NO API calls)
+│   ├── test_memory_closed_loop.py   # Procedural memory cycle (mocked)
+│   ├── test_sparql_dataset.py       # SPARQL + Dataset integration
+│   ├── test_full_stack.py           # End-to-end smoke tests (mocked)
+│   └── test_dataset_memory.py       # Dataset + Memory integration
 │
-├── live/                    # Tests requiring API calls (future)
-│   └── test_live_memory_loop.py
+├── live/                    # Live tests (REQUIRE API key)
+│   ├── test_quick_e2e.py                    # Fast sanity check
+│   ├── test_rlm_ontology_integration.py     # RLM + ontology w/ assertions
+│   ├── test_rlm_with_memory.py              # RLM + dataset memory
+│   ├── test_rlm_with_memory_closed_loop.py  # Full memory loop
+│   ├── test_judge_trajectory_live.py        # Trajectory judging
+│   ├── test_extract_memories_live.py        # Memory extraction
+│   ├── test_llm_query_final_var.py          # FINAL_VAR patterns
+│   ├── test_comprehensive_final.py          # Comprehensive features
+│   ├── test_final_var_executable.py         # FINAL_VAR as function
+│   ├── test_final_var_as_function.py        # FINAL_VAR testing
+│   ├── test_namespace_persistence.py        # Namespace persistence
+│   └── test_progressive_disclosure_minimal.py # Progressive disclosure
 │
 └── conftest.py              # Shared fixtures
 ```
 
 ## Running Tests
 
-### Quick Start
+### CI-Safe Tests (No API Calls Required)
+
+These tests are **fast and deterministic** - suitable for CI/CD pipelines:
 
 ```bash
 # Activate environment
@@ -47,91 +54,130 @@ source ~/uvws/.venv/bin/activate
 # Install test dependencies
 uv pip install pytest pytest-cov
 
-# Run all tests (excluding live API tests)
-pytest tests/ --ignore=tests/live/
+# Run all deterministic tests (unit + integration)
+pytest tests/ --ignore=tests/live/ -v
 
-# Run specific test categories
-pytest tests/unit/           # Unit tests only
-pytest tests/integration/    # Integration tests only
-pytest tests/trajectory/     # Trajectory tests only
-```
+# Run unit tests only
+pytest tests/unit/ -v
 
-### Test Markers
-
-Tests are marked by priority and category:
-
-```bash
-# P0 Critical Path Tests (blocking)
-pytest -m p0
-
-# P1 High Priority Tests (quality)
-pytest -m p1
-
-# P2 Medium Priority Tests (hardening)
-pytest -m p2
-
-# By category
-pytest -m unit
-pytest -m integration
-pytest -m trajectory
-```
-
-### Coverage Reports
-
-```bash
-# Generate coverage report
-pytest tests/ --cov=rlm --cov-report=html --ignore=tests/live/
-
-# View report
-open htmlcov/index.html
-```
-
-### Verbose Output
-
-```bash
-# Detailed output with test names
-pytest tests/ -v
-
-# Very verbose with full diff
-pytest tests/ -vv
-
-# Show local variables on failure
-pytest tests/ -l
-```
-
-## Test Priority Levels
-
-### P0: Critical Path (Blocking)
-
-**Must pass before deployment**
-
-- `test_dataset_memory.py::TestSessionIDPropagation` - Session ID flows correctly
-- `test_sparql_dataset.py::TestSPARQLWorkGraphIntegration` - Work graphs created with provenance
-- `test_memory_closed_loop.py::TestMemoryClosedLoopCycle` - Memory loop completes
-- `test_full_stack.py::TestFullStackIntegration::test_end_to_end_minimal` - Smoke test
-
-**Run with:**
-```bash
+# Run integration tests only
 pytest tests/integration/ -v
+
+# With coverage
+pytest tests/ --ignore=tests/live/ --cov=rlm --cov-report=html
 ```
 
-### P1: High Priority (Quality)
+**These tests should always pass without an API key.**
 
-**Should complete for production quality**
+### Live Tests (Require API Key)
 
-- Session ID JSON roundtrip
-- Trajectory artifact bounds
-- Dataset snapshot roundtrip
-- LLM JSON parsing edge cases
+These tests make **real API calls** to Claude and are **opt-in only**:
 
-### P2: Medium Priority (Hardening)
+```bash
+# Set API key
+export ANTHROPIC_API_KEY=your-key-here
 
-**Nice to have for robustness**
+# Run all live tests
+pytest tests/live/ -v
 
-- View function polymorphism
-- Error recovery
-- BM25 retrieval relevance
-- Edge case handling
+# Run specific live test file
+pytest tests/live/test_quick_e2e.py -v
+
+# Run with protocol assertions
+pytest tests/live/test_rlm_ontology_integration.py -v
+```
+
+**Live tests are marked with `@pytest.mark.live`** and are automatically **skipped** in CI unless the API key is present.
+
+## Protocol Assertions
+
+All live RLM tests verify **protocol invariants** using helper functions from `tests/helpers/protocol_assertions.py`:
+
+### Available Assertions
+
+- `assert_code_blocks_present(iterations, min_blocks=1)` - Verifies REPL usage
+- `assert_converged_properly(answer, iterations)` - Verifies FINAL/FINAL_VAR convergence
+- `assert_bounded_views(iterations, max_output_chars=10000)` - Verifies no full graph dumps
+- `assert_grounded_answer(answer, iterations, min_score=0.3)` - Verifies answer grounding
+- `assert_tool_called(iterations, function_pattern, at_least=1)` - Verifies tool usage
+
+### Example Usage
+
+```python
+from tests.helpers.protocol_assertions import (
+    assert_code_blocks_present,
+    assert_converged_properly,
+    assert_bounded_views,
+)
+
+# After running rlm_run()
+answer, iterations, ns = rlm_run(query, context, ns=ns, max_iters=5)
+
+# Verify protocol invariants
+assert_code_blocks_present(iterations, min_blocks=1)
+assert_converged_properly(answer, iterations)
+assert_bounded_views(iterations)
+```
+
+## Test Categories
+
+### Unit Tests
+
+**Fast, isolated component tests with no external dependencies:**
+
+- SPARQL result handle operations
+- Session ID generation and persistence
+- Memory store CRUD operations
+- SHACL shape detection and indexing
+
+### Integration Tests
+
+**Cross-component tests with mocked LLM calls:**
+
+- Dataset + Memory integration
+- SPARQL + Work graphs
+- Procedural memory cycle (extract, judge, store)
+- Full stack workflows
+
+### Live Tests
+
+**End-to-end tests with real LLM calls:**
+
+- RLM + ontology exploration
+- RLM + dataset memory integration
+- Memory closed loop (retrieve, inject, interact, extract, store)
+- Trajectory judging and memory extraction
+- Progressive disclosure patterns
+
+## Running Specific Test Scenarios
+
+### Quick Smoke Test
+
+```bash
+# Fast sanity check (requires API key)
+ANTHROPIC_API_KEY=... pytest tests/live/test_quick_e2e.py -v
+```
+
+### Protocol Compliance Tests
+
+```bash
+# Verify RLM follows protocol invariants
+ANTHROPIC_API_KEY=... pytest tests/live/test_rlm_ontology_integration.py -v
+```
+
+### Memory Loop Tests
+
+```bash
+# Test full procedural memory closed loop
+ANTHROPIC_API_KEY=... pytest tests/live/test_rlm_with_memory_closed_loop.py -v
+```
+
+### Deterministic Tests Only
+
+```bash
+# Run without API key (CI-safe)
+pytest tests/unit/ tests/integration/ -v
+```
 
 ## Test Fixtures
 
@@ -143,23 +189,36 @@ Common fixtures are defined in `tests/conftest.py`:
 - `dataset_meta` - DatasetMeta with empty dataset
 - `dataset_with_data` - DatasetMeta with sample triples
 
-### SPARQL Fixtures
-
-- `select_result_handle` - SELECT result with 3 rows
-- `ask_result_handle` - ASK result (True)
-- `construct_result_handle` - CONSTRUCT result with 2 triples
-
 ### Memory Fixtures
 
 - `empty_memory_store` - Empty MemoryStore
-- `memory_store_with_items` - Store with 2 sample memories
+- `memory_store_with_items` - Store with sample memories
 - `memory_item_sample` - Single MemoryItem
+
+### Ontology Fixtures
+
+- `prov_ontology_path` - Path to PROV ontology (returns Path object)
 
 ### Utility Fixtures
 
 - `tmp_test_dir` - Temporary directory for test artifacts
-- `prov_ontology_path` - Path to PROV ontology (if available)
 - `test_namespace` - Empty namespace dict for REPL simulation
+
+## Success Criteria
+
+### CI Tests (Deterministic)
+
+✅ All unit tests pass
+✅ All integration tests pass
+✅ Test suite runs in <2 minutes
+✅ Coverage ≥70% for core modules
+
+### Live Tests (Opt-in)
+
+✅ Quick E2E test passes
+✅ Protocol invariants hold across all tests
+✅ Memory closed loop completes successfully
+✅ No hallucinations detected (grounding checks)
 
 ## Writing New Tests
 
@@ -179,104 +238,66 @@ class TestFeatureName:
         """Feature works in basic case."""
         result = function()
         assert result is not None
-
-    def test_edge_case(self):
-        """Feature handles edge case."""
-        result = function(edge_input)
-        assert result == expected
 ```
 
-### Integration Test Template
+### Live Test Template
 
 ```python
-"""Integration tests for <component1> + <component2>."""
+"""Live tests for <feature> with real LLM calls."""
 
 import pytest
-from rlm.component1 import func1
-from rlm.component2 import func2
+from rlm.core import rlm_run
+from tests.helpers.protocol_assertions import (
+    assert_code_blocks_present,
+    assert_converged_properly,
+)
 
 
-class TestCrossComponentFlow:
-    """Tests data flow between components."""
+@pytest.mark.live
+class TestFeatureLive:
+    """Live tests for <feature>."""
 
-    def test_component1_to_component2(self, fixture1, fixture2):
-        """Data flows correctly from component1 to component2."""
-        # Setup
-        data = func1(fixture1)
+    def test_feature_works(self):
+        """Feature works with real LLM."""
+        answer, iterations, ns = rlm_run(query, context, max_iters=5)
 
-        # Execute
-        result = func2(data, fixture2)
+        # Protocol invariants
+        assert_code_blocks_present(iterations)
+        assert_converged_properly(answer, iterations)
 
-        # Verify
-        assert result.contains_expected_data
+        # Feature-specific checks
+        assert 'expected_result' in answer
 ```
-
-## Success Criteria
-
-The test campaign is **successful** when:
-
-- ✅ All P0 tests pass (4 critical path tests)
-- ✅ ≥80% of P1 tests pass (at least 7 of 9 high-priority tests)
-- ✅ Test suite runs in <5 minutes (excluding live API tests)
-- ✅ Zero regressions in existing tests
-- ✅ Coverage ≥70% for new modules
-
-## Current Test Coverage
-
-### Implemented Tests
-
-**Unit Tests:**
-- ✅ `test_sparql_handles.py` - 25+ tests for SPARQLResultHandle
-- ✅ `test_session_tracking.py` - 15+ tests for session ID tracking
-- ✅ `test_memory_store.py` - 25+ tests for MemoryStore
-
-**Integration Tests (P0):**
-- ✅ `test_dataset_memory.py` - 10+ tests for Dataset + Memory
-- ✅ `test_sparql_dataset.py` - 10+ tests for SPARQL + Dataset
-- ✅ `test_memory_closed_loop.py` - 10+ tests for memory loop
-- ✅ `test_full_stack.py` - 5+ tests for end-to-end workflows
-
-**Total: 100+ tests implemented**
-
-### Coverage Gaps (Future Work)
-
-- ❌ Trajectory tests (Stage 6 scenarios)
-- ❌ Live API tests with real LLM calls
-- ❌ Error recovery edge cases
-- ❌ Performance/load tests
 
 ## Troubleshooting
 
-### Test Failures
+### Import Errors
 
-**Import Errors:**
 ```bash
-# Ensure dependencies installed
+# Ensure all dependencies are installed
 source ~/uvws/.venv/bin/activate
 uv pip install fastcore claudette dialoghelper mistletoe rdflib sparqlx rank-bm25
 ```
 
-**Missing Fixtures:**
+### Live Tests Failing
+
 ```bash
-# Check conftest.py is in tests/ directory
-ls tests/conftest.py
+# Check API key is set
+echo $ANTHROPIC_API_KEY
+
+# Verify network connectivity
+curl -I https://api.anthropic.com/
 ```
 
-**PROV Ontology Tests Skipped:**
-```bash
-# PROV ontology tests skip if ontology/prov.ttl not found
-# This is expected if ontology files not yet added
-```
+### Skipped Tests
 
-### Performance Issues
+If tests are being skipped:
 
-If tests are slow:
+- **"PROV ontology not available"** - Expected if `ontology/prov.ttl` doesn't exist
+- **"SIO ontology not available"** - Expected if `ontology/sio/` doesn't exist
+- **Live tests skipped** - Expected if `ANTHROPIC_API_KEY` not set
 
-1. Run unit tests only: `pytest tests/unit/`
-2. Skip trajectory tests: `pytest tests/ --ignore=tests/trajectory/`
-3. Run with `-n auto` for parallel execution (requires pytest-xdist)
-
-### Debugging Tests
+### Debugging
 
 ```bash
 # Drop into debugger on failure
@@ -287,50 +308,53 @@ pytest tests/ -x
 
 # Show print statements
 pytest tests/ -s
+
+# Very verbose output
+pytest tests/ -vv
 ```
+
+## Environment Variables
+
+- `ANTHROPIC_API_KEY` - Required for live tests (tests/live/)
+- No API key needed for unit/integration tests
 
 ## Continuous Integration
 
-### GitHub Actions (Future)
+### GitHub Actions
 
-```yaml
-# .github/workflows/test.yml
-name: Test Suite
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: |
-          pytest tests/ --ignore=tests/live/ --cov=rlm
-```
-
-### Pre-commit Hook (Future)
+The CI pipeline should run:
 
 ```bash
-# .git/hooks/pre-commit
-#!/bin/bash
-pytest tests/unit/ -x || exit 1
+# In CI (no API key)
+pytest tests/ --ignore=tests/live/ --cov=rlm -v
+```
+
+### Local Pre-commit
+
+Before committing:
+
+```bash
+# Quick check (deterministic tests only)
+pytest tests/unit/ tests/integration/ -x
 ```
 
 ## References
 
-- [Testing Campaign Plan](../docs/testing-campaign-plan.md)
 - [pytest Documentation](https://docs.pytest.org/)
-- [Coverage.py Documentation](https://coverage.readthedocs.io/)
-- [nbdev Testing](https://nbdev.fast.ai/tutorials/tutorial.html#tests)
+- [RLM Protocol Specification](../docs/design/rlm-protocol.md)
+- [Procedural Memory Design](../docs/design/procedural-memory.md)
+- [Testing Best Practices](https://docs.pytest.org/en/stable/goodpractices.html)
 
 ## Contributing
 
 When adding new features:
 
-1. Write tests **before** implementation (TDD)
-2. Ensure P0 tests pass before merging
-3. Update this README with new test files
-4. Add fixtures to conftest.py for reuse
+1. **Write unit tests first** (deterministic, no API calls)
+2. **Add integration tests** if multiple components interact
+3. **Add live tests** if LLM behavior needs verification
+4. **Use protocol assertions** in all RLM live tests
+5. **Update this README** if new test categories are added
 
 ## Questions?
 
-See test docstrings for detailed test descriptions and expected behavior.
+See individual test file docstrings for detailed test descriptions and expected behavior.

@@ -201,3 +201,26 @@ def test_namespace():
 def valid_session_id():
     """Generate a valid 8-character session ID."""
     return str(uuid.uuid4())[:8]
+
+
+# ============================================================================
+# Pytest Configuration: Auto-skip live tests without API key
+# ============================================================================
+
+def pytest_configure(config):
+    """Register the 'live' marker for tests requiring API calls."""
+    config.addinivalue_line(
+        "markers",
+        "live: tests that require ANTHROPIC_API_KEY and make real API calls"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Automatically skip live tests when ANTHROPIC_API_KEY is not set."""
+    import os
+
+    if not os.environ.get('ANTHROPIC_API_KEY'):
+        skip_live = pytest.mark.skip(reason="ANTHROPIC_API_KEY not set - use 'export ANTHROPIC_API_KEY=...' to run live tests")
+        for item in items:
+            if "live" in item.keywords:
+                item.add_marker(skip_live)
