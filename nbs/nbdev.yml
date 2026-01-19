@@ -4,6 +4,6 @@ project:
 website:
   title: "rlm"
   site-url: "https://LA3D.github.io/rlm"
-  description: "Experiments with recusrsive language models"
+  description: "Recursive Language Models for ontology-based query construction with progressive disclosure"
   repo-branch: main
   repo-url: "https://github.com/LA3D/rlm"

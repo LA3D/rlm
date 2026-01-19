@@ -1,0 +1,12 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_core.ipynb
+      - 01_ontology.ipynb
+      - 02_dataset_memory.ipynb
+      - 03_logger.ipynb
+      - 03_sparql_handles.ipynb
+      - 03_test_memory_solveit.ipynb
+      - 05_procedural_memory.ipynb
+      - 06_shacl_examples.ipynb
