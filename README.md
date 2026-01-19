@@ -147,6 +147,46 @@ Design documents and the project trajectory are in `docs/`. See
 [docs/planning/trajectory.md](https://github.com/LA3D/rlm/blob/main/docs/planning/trajectory.md)
 for the implementation roadmap.
 
+## Testing
+
+The project includes a comprehensive test suite with 100+ tests covering
+all components:
+
+    tests/
+    ├── unit/                    # Component-level tests
+    │   ├── test_sparql_handles.py
+    │   ├── test_session_tracking.py
+    │   └── test_memory_store.py
+    ├── integration/             # Cross-component tests
+    │   ├── test_dataset_memory.py
+    │   ├── test_sparql_dataset.py
+    │   ├── test_memory_closed_loop.py
+    │   └── test_full_stack.py
+    └── test_quick_e2e.py        # End-to-end validation
+
+### Running Tests
+
+``` bash
+# Activate environment
+source ~/uvws/.venv/bin/activate
+
+# Run all tests (no API calls)
+pytest tests/unit/ tests/integration/ -v
+
+# Run quick end-to-end test (with API calls)
+python tests/test_quick_e2e.py
+
+# Run notebook tests
+nbdev_test
+```
+
+All tests pass, validating: - Core RLM loop with Claude API - Ontology
+loading and exploration - Dataset memory persistence - SPARQL result
+handles - Procedural memory closed loop - SHACL shape indexing -
+End-to-end integration workflows
+
+See `tests/README.md` for detailed test documentation.
+
 ## Status
 
 This is preliminary research code under active development. The current
