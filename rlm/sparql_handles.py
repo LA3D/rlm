@@ -32,18 +32,25 @@ class SPARQLResultHandle:
 
     # For SELECT results
     columns: list = None        # Column names
-    total_rows: int = 0         # Total before limit
+    total_rows: int = 0         # Total before limit (may be same as len(rows) if not truncated)
 
-    # For Graph results
-    triple_count: int = 0       # Number of triples
+    # For Graph results (CONSTRUCT/DESCRIBE)
+    triple_count: int = 0       # Number of triples actually stored in self.rows
+    total_triples: int = 0      # Total before limit (may be same as triple_count if not truncated)
 
     def summary(self) -> str:
-        """Bounded summary for LLM."""
+        """Bounded summary for LLM - reports actual stored count."""
         if self.result_type == 'select':
-            return f"SELECT: {len(self.rows)} rows, columns={self.columns}"
+            stored = len(self.rows)
+            if self.total_rows > stored:
+                return f"SELECT: {stored} rows (of {self.total_rows} total), columns={self.columns}"
+            return f"SELECT: {stored} rows, columns={self.columns}"
         elif self.result_type == 'ask':
             return f"ASK: {self.rows}"
         else:
+            # For CONSTRUCT/DESCRIBE, report actual stored count
+            if self.total_triples > self.triple_count:
+                return f"{self.result_type.upper()}: {self.triple_count} triples (of {self.total_triples} total)"
             return f"{self.result_type.upper()}: {self.triple_count} triples"
 
     def __len__(self):
@@ -59,7 +66,42 @@ class SPARQLResultHandle:
     def __repr__(self):
         return f"SPARQLResultHandle({self.summary()})"
 
-# %% ../nbs/03_sparql_handles.ipynb 10
+# %% ../nbs/03_sparql_handles.ipynb 11
+import re
+
+def _inject_limit(query: str, limit: int) -> tuple[str, bool]:
+    """Inject LIMIT clause into SELECT query if not already present.
+    
+    Args:
+        query: SPARQL query string
+        limit: LIMIT value to inject
+        
+    Returns:
+        (modified_query, was_modified) tuple
+    """
+    query_upper = query.upper()
+    
+    # Only inject for SELECT queries
+    if 'SELECT' not in query_upper:
+        return query, False
+    
+    # Check if LIMIT already present
+    if re.search(r'\bLIMIT\s+\d+', query_upper):
+        return query, False
+    
+    # Find where to inject LIMIT (before ORDER BY if present, otherwise at end)
+    order_match = re.search(r'\bORDER\s+BY\b', query_upper)
+    if order_match:
+        # Insert LIMIT before ORDER BY
+        pos = order_match.start()
+        modified = query[:pos] + f' LIMIT {limit} ' + query[pos:]
+        return modified, True
+    else:
+        # Append LIMIT at end (before any trailing whitespace/comments)
+        modified = query.rstrip() + f' LIMIT {limit}'
+        return modified, True
+
+# %% ../nbs/03_sparql_handles.ipynb 13
 def sparql_query(
     query: str,
     endpoint: str = "https://query.wikidata.org/sparql",
@@ -77,6 +119,11 @@ def sparql_query(
     For SELECT: Stores SPARQLResultHandle with rows as list of dicts
     For CONSTRUCT/DESCRIBE: Stores SPARQLResultHandle with rdflib.Graph
     For ASK: Stores SPARQLResultHandle with boolean result
+
+    IMPORTANT - Work Bounds:
+    - For SELECT: Automatically injects LIMIT clause to bound server-side work
+    - For CONSTRUCT/DESCRIBE: max_results only truncates locally; full results 
+      still fetched from endpoint (SPARQL 1.1 has no standard LIMIT for graphs)
 
     If ds_meta provided and store_in_work=True:
     - CONSTRUCT results stored in work/<task_id> graph
@@ -99,6 +146,9 @@ def sparql_query(
     if ns is None:
         ns = globals()
     
+    # Try to inject LIMIT for SELECT queries to bound server-side work
+    modified_query, limit_injected = _inject_limit(query, max_results)
+    
     # Configure wrapper with timeout and headers
     headers = {"User-Agent": "RLM/1.0 (https://github.com/LA3D/rlm)"}
     wrapper = SPARQLWrapper(
@@ -106,8 +156,8 @@ def sparql_query(
         client_config=dict(timeout=timeout, headers=headers)
     )
     
-    # Execute query with rdflib conversion
-    result = wrapper.query(query, convert=True)
+    # Execute query with rdflib conversion (use modified_query if LIMIT was injected)
+    result = wrapper.query(modified_query, convert=True)
     
     # Determine result type and create handle
     if isinstance(result, bool):
@@ -115,7 +165,7 @@ def sparql_query(
         handle = SPARQLResultHandle(
             rows=result,
             result_type='ask',
-            query=query,
+            query=query,  # Store original query
             endpoint=endpoint
         )
         ns[name] = handle
@@ -123,6 +173,10 @@ def sparql_query(
     
     elif hasattr(result, 'serialize'):
         # CONSTRUCT or DESCRIBE query - result is rdflib.Graph
+        # NOTE: SPARQL 1.1 has no standard LIMIT for graph patterns, so we still
+        # fetch full results from endpoint and truncate locally. This is a known
+        # limitation - max_results is output truncation, not work bound.
+        
         # Capture original count before truncation
         original_count = len(result)
         
@@ -140,7 +194,8 @@ def sparql_query(
             result_type=result_type,
             query=query,
             endpoint=endpoint,
-            triple_count=original_count  # Store pre-truncation count
+            triple_count=len(g),        # Actual stored count
+            total_triples=original_count  # Pre-truncation count
         )
         ns[name] = handle
         
@@ -168,31 +223,38 @@ def sparql_query(
             ds_meta.prov.add((event_uri, RLM_PROV.session, Literal(ds_meta.session_id)))
             
             return f"Graph with {len(g)} triples stored in '{name}' and work/{task_id}" + \
-                   (f" (truncated from {original_count})" if original_count > max_results else "")
+                   (f" (of {original_count} total)" if original_count > len(g) else "")
         
         return f"Graph with {len(g)} triples stored in '{name}'" + \
-               (f" (truncated from {original_count})" if original_count > max_results else "")
+               (f" (of {original_count} total)" if original_count > len(g) else "")
     
     else:
         # SELECT query - result is list of dicts
-        # Capture original count before truncation
-        original_count = len(result)
-        result = list(islice(result, max_results))
-        cols = list(result[0].keys()) if result else []
+        # If we injected LIMIT, the result is already bounded
+        result_list = list(result)
+        original_count = len(result_list)
+        
+        # Apply additional client-side truncation if needed
+        # (this should rarely happen if LIMIT injection worked)
+        rows = list(islice(result_list, max_results))
+        cols = list(rows[0].keys()) if rows else []
         
         handle = SPARQLResultHandle(
-            rows=result,
+            rows=rows,
             result_type='select',
-            query=query,
+            query=query,  # Store original query
             endpoint=endpoint,
             columns=cols,
-            total_rows=original_count  # Store pre-truncation count
+            total_rows=original_count  # This may equal len(rows) if LIMIT injection worked
         )
         ns[name] = handle
         
-        return f"SELECT result with {len(result)} rows, columns: {cols}, stored in '{name}'"
+        msg = f"SELECT result with {len(rows)} rows, columns: {cols}, stored in '{name}'"
+        if limit_injected:
+            msg += f" (LIMIT {max_results} injected)"
+        return msg
 
-# %% ../nbs/03_sparql_handles.ipynb 14
+# %% ../nbs/03_sparql_handles.ipynb 17
 def sparql_local(
     query: str,
     graph: Graph | str,
@@ -204,6 +266,10 @@ def sparql_local(
 
     Useful for querying mounted ontologies or work graphs.
     Returns SPARQLResultHandle same as sparql_query().
+    
+    IMPORTANT - Work Bounds:
+    - max_results is output truncation only; full result set is materialized
+    - For large local graphs, consider filtering in the SPARQL query itself
     
     Args:
         query: SPARQL query string
@@ -268,10 +334,15 @@ def sparql_local(
             result_type=result_type,
             query=query,
             endpoint='local',
-            triple_count=original_count  # Store pre-truncation count
+            triple_count=len(g),        # Actual stored count
+            total_triples=original_count  # Pre-truncation count
         )
         ns[name] = handle
-        return f"Graph with {len(g)} triples stored in '{name}'"
+        
+        msg = f"Graph with {len(g)} triples stored in '{name}'"
+        if original_count > len(g):
+            msg += f" (of {original_count} total)"
+        return msg
     
     else:
         # SELECT query
@@ -294,13 +365,16 @@ def sparql_local(
             query=query,
             endpoint='local',
             columns=cols,
-            total_rows=original_count  # Store pre-truncation count
+            total_rows=original_count  # Pre-truncation count
         )
         ns[name] = handle
         
-        return f"SELECT result with {len(rows)} rows, columns: {cols}, stored in '{name}'"
+        msg = f"SELECT result with {len(rows)} rows, columns: {cols}, stored in '{name}'"
+        if original_count > len(rows):
+            msg += f" (of {original_count} total)"
+        return msg
 
-# %% ../nbs/03_sparql_handles.ipynb 18
+# %% ../nbs/03_sparql_handles.ipynb 21
 def res_sample(result, n: int = 10, seed: int = None) -> list:
     """Get random sample of N rows from result.
 
@@ -336,7 +410,7 @@ def res_sample(result, n: int = 10, seed: int = None) -> list:
         return list(rows)
     return random.sample(list(rows), n)
 
-# %% ../nbs/03_sparql_handles.ipynb 22
+# %% ../nbs/03_sparql_handles.ipynb 25
 def setup_sparql_context(
     ns: dict,
     default_endpoint: str = "https://query.wikidata.org/sparql",
