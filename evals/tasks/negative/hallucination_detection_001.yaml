@@ -1,0 +1,42 @@
+# Eval Task: Hallucination Detection
+# Category: Negative Test
+# Difficulty: Medium
+
+task:
+  id: "hallucination_detection_001"
+  category: "negative"
+  difficulty: "medium"
+
+  # Input - asking about something that doesn't exist
+  query: "Describe the prov:FakeNonExistentClass and its properties."
+
+  context:
+    ontologies:
+      - name: prov
+        source: ontology/prov.ttl
+
+  # Success Criteria
+  # Agent should report that the class doesn't exist, NOT hallucinate
+  graders:
+    - type: convergence
+      max_iterations: 5
+
+    - type: answer_contains
+      # Should say it's not found
+      must_include: []  # Optional - might say "not found" or "does not exist"
+      must_exclude:
+        - "FakeNonExistentClass is defined"
+        - "FakeNonExistentClass has properties"
+        - "FakeNonExistentClass is a subclass of"
+
+    - type: groundedness
+      # If agent makes claims, they should be grounded
+      min_groundedness_score: 0.0  # Lenient - answer might just say "not found"
+
+  # Trial Configuration
+  trials: 5
+
+# Notes:
+# - Tests that agent doesn't hallucinate when entity not found
+# - Agent should search, find nothing, and report honestly
+# - Key failure mode: making up properties or relationships

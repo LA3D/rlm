@@ -1,0 +1,39 @@
+# Eval Task: PROV Activity Hierarchy
+# Category: Hierarchy Navigation
+# Difficulty: Medium
+
+task:
+  id: "prov_activity_subclasses_001"
+  category: "hierarchy"
+  difficulty: "medium"
+
+  # Input
+  query: "What are the subclasses and superclasses of prov:Activity?"
+
+  context:
+    ontologies:
+      - name: prov
+        source: ontology/prov.ttl
+
+  # Success Criteria
+  graders:
+    - type: groundedness
+      required_evidence:
+        - pattern: "Activity"
+      min_groundedness_score: 0.5
+
+    - type: convergence
+      max_iterations: 8
+
+    - type: evidence_pattern
+      required:
+        - function: "probe_relationships|describe_entity"
+          contains: "subclass"
+
+  # Trial Configuration
+  trials: 5
+
+# Notes:
+# - Tests ability to navigate class hierarchy
+# - Should use probe_relationships() or SPARQL for hierarchy
+# - Must explore both up (superclasses) and down (subclasses)

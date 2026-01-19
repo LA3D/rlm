@@ -1,0 +1,65 @@
+# RLM Evaluation Configuration
+
+# Default settings for task runner
+defaults:
+  trials: 5
+  max_iterations: 15
+  output_dir: "evals/results"
+
+# Grader defaults
+graders:
+  groundedness:
+    min_groundedness_score: 0.5
+
+  convergence:
+    max_iterations: 10
+
+# Category-specific settings
+categories:
+  regression:
+    trials: 3
+    pass_threshold: 1.0  # Must pass all trials
+
+  entity_discovery:
+    trials: 5
+    max_iterations: 8
+
+  hierarchy:
+    trials: 5
+    max_iterations: 10
+
+  memory:
+    trials: 3
+    max_iterations: 15
+
+  negative:
+    trials: 5
+    max_iterations: 5
+
+# Reporting
+reporting:
+  # Categories to track separately in reports
+  track_categories:
+    - regression
+    - entity_discovery
+    - hierarchy
+    - memory
+    - negative
+
+  # Alert thresholds
+  alerts:
+    regression_min_pass_rate: 0.95
+    capability_min_pass_rate: 0.30
+
+# CI/CD integration
+ci:
+  # Run regression tests on every push
+  on_push:
+    - regression/*
+
+  # Run full suite on schedule
+  on_schedule:
+    - "*"
+
+  # Fail CI if pass rate below threshold
+  fail_threshold: 0.90

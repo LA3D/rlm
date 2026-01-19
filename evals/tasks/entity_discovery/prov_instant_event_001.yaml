@@ -1,0 +1,40 @@
+# Eval Task: PROV InstantaneousEvent Discovery
+# Category: Entity Discovery
+# Difficulty: Easy
+
+task:
+  id: "prov_instant_event_001"
+  category: "entity_discovery"
+  difficulty: "easy"
+
+  # Input
+  query: "What is prov:InstantaneousEvent and what are its properties?"
+
+  context:
+    ontologies:
+      - name: prov
+        source: ontology/prov.ttl
+
+  # Success Criteria
+  graders:
+    - type: groundedness
+      required_evidence:
+        - pattern: "InstantaneousEvent"
+      min_groundedness_score: 0.5
+
+    - type: convergence
+      max_iterations: 5
+
+    - type: answer_contains
+      must_include:
+        - "event"
+      # At least one of these should appear
+      # The answer should mention it's related to time/instants
+
+  # Trial Configuration
+  trials: 5
+
+# Notes:
+# - This is a basic entity lookup task
+# - Agent should use search_entity() then describe_entity()
+# - Answer should be grounded in REPL output

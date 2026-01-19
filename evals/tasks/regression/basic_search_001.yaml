@@ -1,0 +1,37 @@
+# Eval Task: Basic Search Functionality
+# Category: Regression
+# Difficulty: Trivial (must pass 100%)
+
+task:
+  id: "basic_search_001"
+  category: "regression"
+  difficulty: "trivial"
+
+  # Input
+  query: "Search for 'Activity' in the PROV ontology and tell me what you find."
+
+  context:
+    ontologies:
+      - name: prov
+        source: ontology/prov.ttl
+
+  # Success Criteria - MUST ALL PASS
+  graders:
+    - type: tool_called
+      required:
+        - search_entity
+
+    - type: convergence
+      max_iterations: 3
+
+    - type: groundedness
+      min_groundedness_score: 0.3
+
+  # Trial Configuration
+  trials: 3
+  pass_threshold: 1.0  # All trials must pass
+
+# Notes:
+# - This is a regression test - must maintain 100% pass rate
+# - Tests that basic search_entity() functionality works
+# - Very low iteration limit - should be fast
