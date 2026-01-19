@@ -97,8 +97,6 @@ ns['mount_ontology']('ontology/dcat-ap/dcat-ap-SHACL.ttl', 'dcat')
 print(ns['dcat_shacl'].summary())
 ```
 
-    SHACLIndex: 42 shapes, 146 keywords, paradigm=validation
-
 ``` python
 from rlm.shacl_examples import search_shapes, describe_shape
 
@@ -108,10 +106,6 @@ for r in results:
     print(f"{r['uri'].split('#')[-1]}: targets {r['targets']}")
 ```
 
-    dcat:CatalogShape: targets ['http://www.w3.org/ns/dcat#Catalog']
-    dcat:DatasetShape: targets ['http://www.w3.org/ns/dcat#Dataset']
-    dcat:DataServiceShape: targets ['http://www.w3.org/ns/dcat#DataService']
-
 ``` python
 # Get bounded description of a shape (first 10 properties)
 desc = describe_shape(ns['dcat_shacl'], results[0]['uri'], limit=10)
@@ -119,13 +113,6 @@ print(f"Properties: {desc['property_count']} (showing {len(desc['properties'])})
 for p in desc['properties'][:5]:
     print(f"  {p['path'].split('/')[-1]}: min={p.get('minCount')}")
 ```
-
-    Properties: 44 (showing 10)
-      spatial: min=None
-      hasPart: min=None
-      dcat#dataset: min=None
-      dcat#themeTaxonomy: min=None
-      applicableLegislation: min=None
 
 Query templates can be loaded from SHACL-AF examples and searched by
 keyword:
@@ -142,10 +129,6 @@ queries = search_queries(ns['nxq'], 'phosphorylation', limit=2)
 for q in queries:
     print(f"{q['uri'].split('/')[-1]}: {q['comment'][:60]}...")
 ```
-
-    QueryIndex: 776 queries, 1507 keywords
-    NXQ_00216: Phosphorylation sites from PeptideAtlas Phosphoproteome...
-    NXQ_00001: Proteins phosphorylated and located in the cytoplasm...
 
 ## Project Structure
 
