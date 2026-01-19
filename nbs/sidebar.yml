@@ -10,4 +10,4 @@ website:
       - 03_test_memory_solveit.ipynb
       - 05_procedural_memory.ipynb
       - 06_shacl_examples.ipynb
-      - eval_reports.ipynb
+      - 90_eval_reports.ipynb
