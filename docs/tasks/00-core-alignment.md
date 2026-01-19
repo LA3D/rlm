@@ -4,7 +4,7 @@ This document describes the work needed to align `nbs/00_core.ipynb` with the `r
 
 ## Background
 
-The trajectory document (`rlm-ontology-solveit-trajectory.md`) specifies that `00_core.ipynb` should be:
+The trajectory document (`../planning/trajectory.md`) specifies that `00_core.ipynb` should be:
 
 > **Thin glue over `rlmpaper`**
 > - Goal: expose a stable interface for Solveit usage without re-implementing the RLM algorithm.

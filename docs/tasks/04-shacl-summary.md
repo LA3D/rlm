@@ -275,7 +275,7 @@ Optional future:
 
 - [DCAT-AP 3.0 Specification](https://github.com/SEMICeu/DCAT-AP/tree/master/releases/3.0.0)
 - [SHACL Specification](https://www.w3.org/TR/shacl/)
-- [RLM Trajectory Document](docs/rlm-ontology-solveit-trajectory.md)
+- [RLM Trajectory Document](../planning/trajectory.md)
 - [nbdev Documentation](https://nbdev.fast.ai/)
 
 ---

@@ -8,7 +8,7 @@ This test suite validates:
 
 1. **Recently implemented features** (Stages 1.5, 2.5, & 3)
 2. **Cross-component integration** (Dataset + Memory + SPARQL)
-3. **Trajectory requirements** from `docs/rlm-ontology-solveit-trajectory.md` (Stage 6)
+3. **Trajectory requirements** from `docs/planning/trajectory.md` (Stage 6)
 
 ## Test Organization
 

@@ -230,4 +230,4 @@ ds_meta._invalidate_caches() # Called automatically on mutations
 
 - `nbs/02_dataset_memory.ipynb` - Implementation notebook
 - `tests/test_dataset_integration.py` - Integration tests
-- `docs/rlm-ontology-solveit-trajectory.md` - Architecture overview
+- `../planning/trajectory.md` - Architecture overview

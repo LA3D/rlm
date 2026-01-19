@@ -43,8 +43,10 @@ rlm/
 │   └── ...
 ├── rlmpaper/               # Git submodule (reference implementation)
 ├── docs/                   # Project documentation
-│   ├── rlm-ontology-solveit-trajectory.md  # Master plan
-│   ├── 00-core-rlmpaper-alignment.md       # Current task
+│   ├── planning/trajectory.md              # Master plan
+│   ├── tasks/00-core-alignment.md          # Implementation tasks
+│   ├── design/                             # Architecture & design
+│   ├── guides/                             # Usage guides
 │   └── ...
 ├── ontology/               # RDF/OWL ontologies
 ├── settings.ini            # nbdev configuration
@@ -151,10 +153,12 @@ git commit -m "Update rlmpaper submodule"
 
 The project follows a documentation-driven approach:
 
-1. **Trajectory document** (`docs/rlm-ontology-solveit-trajectory.md`) - Master plan
-2. **Task documents** (`docs/00-core-rlmpaper-alignment.md`) - Specific implementation tasks
-3. **Notebook markdown cells** - Inline documentation
-4. **Docstrings** - Fast.ai style docstrings in exported functions
+1. **Trajectory document** (`docs/planning/trajectory.md`) - Master plan
+2. **Task documents** (`docs/tasks/`) - Specific implementation tasks
+3. **Design documents** (`docs/design/`) - Architecture and patterns
+4. **Usage guides** (`docs/guides/`) - How-to documentation
+5. **Notebook markdown cells** - Inline documentation
+6. **Docstrings** - Fast.ai style docstrings in exported functions
 
 ## Code Style
 
