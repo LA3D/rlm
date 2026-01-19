@@ -28,7 +28,7 @@ class SPARQLResultHandle:
     # Metadata
     query: str                  # Original SPARQL query
     endpoint: str               # Where executed (URL or 'local')
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat() + 'Z')
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     # For SELECT results
     columns: list = None        # Column names
