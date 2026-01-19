@@ -123,7 +123,7 @@ class TestQuickE2E:
             query,
             context,
             ns=ns,
-            max_iters=3,
+            max_iters=5,  # Ontology exploration requires 4-5 iterations
             verbose=False
         )
 

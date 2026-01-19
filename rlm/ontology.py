@@ -291,43 +291,69 @@ def search_by_label(meta: GraphMeta, search: str, limit: int = 10) -> list:
     return [(r['uri'], r['label']) for r in results]
 
 # %% ../nbs/01_ontology.ipynb 15
+def _expand_uri(meta: GraphMeta, uri: str) -> URIRef:
+    """Expand prefixed URI (e.g., 'prov:Activity') to full URI.
+
+    Args:
+        meta: GraphMeta containing namespace bindings
+        uri: URI string (may be prefixed like 'prov:Activity' or full URI)
+
+    Returns:
+        URIRef with expanded URI
+    """
+    from rdflib import URIRef
+
+    # If already a full URI, return as-is
+    if uri.startswith('http://') or uri.startswith('https://'):
+        return URIRef(uri)
+
+    # Try to expand as CURIE (prefix:localname)
+    if ':' in uri:
+        try:
+            return meta.graph.namespace_manager.expand_curie(uri)
+        except:
+            pass  # Fall through to URIRef if expansion fails
+
+    return URIRef(uri)
+
 def describe_entity(meta: GraphMeta, uri: str, limit: int = 20) -> dict:
     """Get bounded description of an entity.
-    
+
     Args:
         meta: GraphMeta containing the entity
-        uri: URI of entity to describe
+        uri: URI of entity to describe (supports prefixed forms like 'prov:Activity')
         limit: Max number of triples to include
-        
+
     Returns:
         Dict with label, types, and sample triples
     """
-    from rdflib import URIRef
-    
-    entity = URIRef(uri)
-    
+    # Expand URI (handles prefixed forms like 'prov:Activity')
+    entity = _expand_uri(meta, uri)
+    uri_str = str(entity)
+
     # Get label
-    label = meta.labels.get(uri, uri)
-    
+    label = meta.labels.get(uri_str, uri_str)
+
     # Get types
     types = [str(t) for t in meta.graph.objects(entity, RDF.type)]
-    
+
     # Get sample of outgoing triples using islice
     outgoing = []
     for p, o in islice(meta.graph.predicate_objects(entity), limit):
         outgoing.append((str(p), str(o)))
-    
+
     # Get comment if available
     comments = list(meta.graph.objects(entity, RDFS.comment))
     comment = str(comments[0]) if comments else None
-    
+
     return {
-        'uri': uri,
+        'uri': uri_str,
         'label': label,
         'types': types,
         'comment': comment,
         'outgoing_sample': outgoing
     }
+
 
 # %% ../nbs/01_ontology.ipynb 18
 def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
@@ -336,8 +362,8 @@ def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
 
     Args:
         meta: GraphMeta containing the entity
-        uri: URI of entity to probe
-        predicate: Optional predicate URI to filter by
+        uri: URI of entity to probe (supports prefixed forms like 'prov:Activity')
+        predicate: Optional predicate URI to filter by (supports prefixed forms)
         direction: 'out', 'in', or 'both' (default: 'both')
         limit: Maximum neighbors to return per direction
 
@@ -353,15 +379,17 @@ def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
     """
     from rdflib import URIRef
 
-    entity = URIRef(uri)
-    entity_label = meta.labels.get(uri, uri)
+    # Expand URIs (handles prefixed forms)
+    entity = _expand_uri(meta, uri)
+    uri_str = str(entity)
+    entity_label = meta.labels.get(uri_str, uri_str)
 
     outgoing = []
     incoming = []
 
     # Get outgoing triples (entity as subject)
     if direction in ('out', 'both'):
-        pred_filter = URIRef(predicate) if predicate else None
+        pred_filter = _expand_uri(meta, predicate) if predicate else None
         triples = list(meta.graph.triples((entity, pred_filter, None)))
 
         for s, p, o in triples[:limit]:
@@ -376,7 +404,7 @@ def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
 
     # Get incoming triples (entity as object)
     if direction in ('in', 'both'):
-        pred_filter = URIRef(predicate) if predicate else None
+        pred_filter = _expand_uri(meta, predicate) if predicate else None
         triples = list(meta.graph.triples((None, pred_filter, entity)))
 
         for s, p, o in triples[:limit]:
@@ -390,7 +418,7 @@ def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
             })
 
     # Count total (not just limited sample)
-    pred_filter = URIRef(predicate) if predicate else None
+    pred_filter = _expand_uri(meta, predicate) if predicate else None
     if direction in ('out', 'both'):
         outgoing_count = sum(1 for _ in meta.graph.triples((entity, pred_filter, None)))
     else:
@@ -402,13 +430,14 @@ def probe_relationships(meta: GraphMeta, uri: str, predicate: str = None,
         incoming_count = 0
 
     return {
-        'uri': uri,
+        'uri': uri_str,
         'label': entity_label,
         'outgoing': outgoing,
         'incoming': incoming,
         'outgoing_count': outgoing_count,
         'incoming_count': incoming_count
     }
+
 
 # %% ../nbs/01_ontology.ipynb 19
 def find_path(meta: GraphMeta, source: str, target: str,
@@ -419,8 +448,8 @@ def find_path(meta: GraphMeta, source: str, target: str,
 
     Args:
         meta: GraphMeta to search
-        source: Source entity URI
-        target: Target entity URI
+        source: Source entity URI (supports prefixed forms like 'prov:Activity')
+        target: Target entity URI (supports prefixed forms like 'prov:Entity')
         max_depth: Maximum path length (default: 2)
         limit: Maximum paths to return
 
@@ -431,8 +460,9 @@ def find_path(meta: GraphMeta, source: str, target: str,
     from rdflib import URIRef
     from collections import deque
 
-    source_uri = URIRef(source)
-    target_uri = URIRef(target)
+    # Expand URIs (handles prefixed forms)
+    source_uri = _expand_uri(meta, source)
+    target_uri = _expand_uri(meta, target)
 
     # BFS to find paths
     queue = deque([(source_uri, [])])  # (current_node, path_so_far)
@@ -480,6 +510,7 @@ def find_path(meta: GraphMeta, source: str, target: str,
                 queue.append((s, path + [step]))
 
     return paths_found
+
 
 # %% ../nbs/01_ontology.ipynb 20
 def predicate_frequency(meta: GraphMeta, limit: int = 20,
