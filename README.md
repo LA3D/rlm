@@ -144,8 +144,8 @@ The implementation follows nbdev conventions. Source notebooks are in
     └── 06_shacl_examples.ipynb # SHACL indexing and query templates
 
 Design documents and the project trajectory are in `docs/`. See
-[docs/planning/trajectory.md](docs/planning/trajectory.md) for the
-implementation roadmap.
+[docs/planning/trajectory.md](https://github.com/LA3D/rlm/blob/main/docs/planning/trajectory.md)
+for the implementation roadmap.
 
 ## Status
 

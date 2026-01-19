@@ -9,7 +9,7 @@ __all__ = ['SPARQLResultHandle', 'sparql_query', 'sparql_local', 'res_sample', '
 from sparqlx import SPARQLWrapper
 from rdflib import Graph, URIRef, Literal
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from functools import partial
 from itertools import islice
@@ -28,7 +28,7 @@ class SPARQLResultHandle:
     # Metadata
     query: str                  # Original SPARQL query
     endpoint: str               # Where executed (URL or 'local')
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat() + 'Z')
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat() + 'Z')
 
     # For SELECT results
     columns: list = None        # Column names

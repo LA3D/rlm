@@ -13,7 +13,7 @@ from pathlib import Path
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from functools import partial
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 # Helper function for URI/Literal conversion
@@ -153,7 +153,7 @@ def mem_add(ds_meta: DatasetMeta, subject, predicate, obj,
     ds_meta.prov.add((event_uri, RLM_PROV.subject, s))
     ds_meta.prov.add((event_uri, RLM_PROV.predicate, p))
     ds_meta.prov.add((event_uri, RLM_PROV.object, o))
-    ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))
+    ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.now(timezone.utc).isoformat() + 'Z', datatype=XSD.dateTime)))
     ds_meta.prov.add((event_uri, RLM_PROV.source, Literal(source)))
     ds_meta.prov.add((event_uri, RLM_PROV.session, Literal(ds_meta.session_id)))
     
@@ -228,7 +228,7 @@ def mem_retract(ds_meta: DatasetMeta, subject=None, predicate=None, obj=None,
         ds_meta.prov.add((event_uri, RLM_PROV.subject, triple[0]))
         ds_meta.prov.add((event_uri, RLM_PROV.predicate, triple[1]))
         ds_meta.prov.add((event_uri, RLM_PROV.object, triple[2]))
-        ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))
+        ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.now(timezone.utc).isoformat() + 'Z', datatype=XSD.dateTime)))
         ds_meta.prov.add((event_uri, RLM_PROV.source, Literal(source)))
         ds_meta.prov.add((event_uri, RLM_PROV.session, Literal(ds_meta.session_id)))
         
@@ -343,7 +343,7 @@ def work_to_mem(ds_meta: DatasetMeta, task_id: str,
     ds_meta.prov.add((event_uri, RDF.type, RLM_PROV.PromoteEvent))
     ds_meta.prov.add((event_uri, RLM_PROV.fromGraph, graph_uri))
     ds_meta.prov.add((event_uri, RLM_PROV.tripleCount, Literal(len(triples))))
-    ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))
+    ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.now(timezone.utc).isoformat() + 'Z', datatype=XSD.dateTime)))
     ds_meta.prov.add((event_uri, RLM_PROV.source, Literal(source)))
     ds_meta.prov.add((event_uri, RLM_PROV.session, Literal(ds_meta.session_id)))
     
@@ -369,7 +369,7 @@ def snapshot_dataset(ds_meta: DatasetMeta, path: str = None,
         Path to snapshot file
     """
     if path is None:
-        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
         ext = 'trig' if format == 'trig' else 'nq'
         path = f"snapshot_{ds_meta.name}_{timestamp}.{ext}"
 

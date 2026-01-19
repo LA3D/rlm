@@ -10,7 +10,7 @@ __all__ = ['MemoryItem', 'MemoryStore', 'extract_trajectory_artifact', 'judge_tr
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import uuid
 from rank_bm25 import BM25Okapi
@@ -352,7 +352,7 @@ Return ONLY valid JSON array (may have 1-3 items, or empty if no lessons):
                 content=item['content'],
                 source_type=source_type,
                 task_query=artifact['task'],
-                created_at=datetime.utcnow().isoformat(),
+                created_at=datetime.now(timezone.utc).isoformat(),
                 tags=item.get('tags', []),
                 session_id=session_id  # NEW: Capture session_id from namespace
             )
