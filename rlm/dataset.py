@@ -91,7 +91,7 @@ class DatasetMeta:
         """Get statistics for all graphs (cached)."""
         if self._graph_stats is None:
             stats = {}
-            for ctx in self.dataset.contexts():
+            for ctx in self.dataset.graphs():
                 graph_uri = ctx.identifier
                 stats[str(graph_uri)] = len(ctx)
             self._graph_stats = stats
@@ -101,7 +101,7 @@ class DatasetMeta:
     def work_graphs(self) -> list:
         """List all work/* scratch graphs."""
         work_prefix = f'urn:rlm:{self.name}:work/'
-        return [str(ctx.identifier) for ctx in self.dataset.contexts() 
+        return [str(ctx.identifier) for ctx in self.dataset.graphs() 
                 if str(ctx.identifier).startswith(work_prefix)]
     
     def summary(self) -> str:
@@ -419,7 +419,7 @@ def load_snapshot(path: str, ns: dict, name: str = 'ds') -> str:
     
     # Try to detect original name from graph URIs
     original_name = None
-    for ctx in ds.contexts():
+    for ctx in ds.graphs():
         uri = str(ctx.identifier)
         if ':mem' in uri:
             # Extract name from urn:rlm:{name}:mem
@@ -462,7 +462,7 @@ def load_snapshot(path: str, ns: dict, name: str = 'ds') -> str:
     ns[f"{name}_meta"] = ds_meta
     
     # Count graphs
-    graph_count = len(list(ds.contexts()))
+    graph_count = len(list(ds.graphs()))
     
     msg = f"Loaded snapshot from {path}: {graph_count} graphs"
     if original_name and original_name != name:
@@ -605,7 +605,7 @@ def list_graphs(ds_meta: DatasetMeta, pattern: str = None) -> list:
         List of (graph_uri, triple_count) tuples
     """
     graphs = []
-    for ctx in ds_meta.dataset.contexts():
+    for ctx in ds_meta.dataset.graphs():
         uri = str(ctx.identifier)
         if pattern is None or pattern in uri:
             graphs.append((uri, len(ctx)))
