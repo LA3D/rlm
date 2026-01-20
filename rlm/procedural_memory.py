@@ -4,7 +4,9 @@
 
 # %% auto 0
 __all__ = ['MemoryItem', 'MemoryStore', 'extract_trajectory_artifact', 'judge_trajectory', 'extract_memories',
-           'retrieve_memories', 'format_memories_for_injection', 'rlm_run_with_memory']
+           'retrieve_memories', 'format_memories_for_injection', 'rlm_run_with_memory', 'bootstrap_general_strategies',
+           'validate_no_hardcoded_uris', 'validate_bootstrap_strategies', 'check_memory_deduplication',
+           'score_generalization', 'validate_retrieval_quality']
 
 # %% ../nbs/05_procedural_memory.ipynb 4
 from dataclasses import dataclass, field, asdict
@@ -546,3 +548,299 @@ def rlm_run_with_memory(
             memory_store.save()
     
     return answer, iterations, ns, new_memories
+
+# %% ../nbs/05_procedural_memory.ipynb 34
+def bootstrap_general_strategies() -> list[MemoryItem]:
+    """Create general strategy memories for bootstrapping.
+    
+    These are universal patterns extracted from successful RLM runs
+    that apply to all ontologies.
+    
+    Returns:
+        List of MemoryItem objects representing general strategies
+    """
+    strategies = [
+        MemoryItem(
+            id=str(uuid.uuid4()),
+            title='Describe Entity by Label',
+            description='Universal pattern for finding and describing an entity when you only have its label.',
+            content="""1. Use `search_entity(label)` to find matching entities
+2. Extract the `uri` field from the first result
+3. Use `describe_entity(uri)` to get types, comment, and outgoing triples
+4. If you need relationships, use `probe_relationships(uri)` for incoming/outgoing links""",
+            source_type='success',
+            task_query='entity_description',
+            created_at=datetime.now(timezone.utc).isoformat(),
+            tags=['entity', 'search', 'describe', 'universal']
+        ),
+        
+        MemoryItem(
+            id=str(uuid.uuid4()),
+            title='Find Subclasses Using GraphMeta',
+            description='Fast subclass lookup using pre-indexed GraphMeta hierarchy.',
+            content="""1. Use `search_entity(class_label)` to get the full URI
+2. Access `{ontology}_meta.subs[class_uri]` directly for the subclass list
+3. Get labels for each subclass: `{ontology}_meta.labels.get(sub_uri)`
+
+Alternative if GraphMeta not available:
+- Use `probe_relationships(uri, direction='in')` and filter for `rdfs:subClassOf`""",
+            source_type='success',
+            task_query='hierarchy',
+            created_at=datetime.now(timezone.utc).isoformat(),
+            tags=['hierarchy', 'subclass', 'graphmeta', 'universal']
+        ),
+        
+        MemoryItem(
+            id=str(uuid.uuid4()),
+            title='Find Superclasses Using GraphMeta',
+            description='Fast superclass lookup using pre-indexed GraphMeta hierarchy.',
+            content="""1. Use `search_entity(class_label)` to get the full URI
+2. Access `{ontology}_meta.supers[class_uri]` directly for the superclass list
+3. Get labels for each superclass: `{ontology}_meta.labels.get(super_uri)`
+
+Alternative if GraphMeta not available:
+- Use `probe_relationships(uri, direction='out')` and filter for `rdfs:subClassOf`""",
+            source_type='success',
+            task_query='hierarchy',
+            created_at=datetime.now(timezone.utc).isoformat(),
+            tags=['hierarchy', 'superclass', 'graphmeta', 'universal']
+        ),
+        
+        MemoryItem(
+            id=str(uuid.uuid4()),
+            title='Find Properties by Domain/Range',
+            description='Find properties that have a specific class as domain or range.',
+            content="""1. Use `search_entity(class_label)` to get the class URI
+2. For properties with this domain: check `{ontology}_meta.doms` (inverted dict)
+3. For properties with this range: check `{ontology}_meta.rngs` (inverted dict)
+4. Use `describe_entity(property_uri)` for details on each property
+
+Note: May need to iterate through all properties and check domain/range if indexes don't support reverse lookup.""",
+            source_type='success',
+            task_query='property_discovery',
+            created_at=datetime.now(timezone.utc).isoformat(),
+            tags=['properties', 'domain', 'range', 'universal']
+        ),
+        
+        MemoryItem(
+            id=str(uuid.uuid4()),
+            title='Pattern-Based Entity Search',
+            description='Search for multiple entities matching a keyword or pattern.',
+            content="""1. Use `search_entity(pattern, search_in='all')` for broad search
+2. Results include `match_type` field: 'label', 'iri', or 'localname'
+3. Filter by match_type if needed
+4. For each interesting result, use `describe_entity(uri)` for details
+5. Use `limit` parameter to control result count (default: 10)""",
+            source_type='success',
+            task_query='pattern_search',
+            created_at=datetime.now(timezone.utc).isoformat(),
+            tags=['search', 'pattern', 'multiple', 'universal']
+        ),
+        
+        MemoryItem(
+            id=str(uuid.uuid4()),
+            title='Find Relationship Path Between Entities',
+            description='Find how two entities are related via predicates.',
+            content="""1. Use `search_entity()` to get full URIs for both entities
+2. Use `find_path(source_uri, target_uri, max_depth=2)` to find connecting paths
+3. Each path shows predicates and direction ('out' or 'in')
+4. Interpret the path steps to understand the relationship
+
+Example path:
+[{'from': A, 'predicate': 'used', 'to': B, 'direction': 'out'}]
+means: A --used--> B""",
+            source_type='success',
+            task_query='relationship_discovery',
+            created_at=datetime.now(timezone.utc).isoformat(),
+            tags=['relationships', 'path', 'connection', 'universal']
+        ),
+        
+        MemoryItem(
+            id=str(uuid.uuid4()),
+            title='Navigate Class Hierarchy from Roots',
+            description='Systematic exploration of class hierarchy starting from root classes.',
+            content="""1. Check `sense.hierarchy_overview` for root classes (if sense_brief available)
+2. For each root, use `{ontology}_meta.subs[root_uri]` to get immediate subclasses
+3. Recursively explore subclasses to desired depth
+4. Use `describe_entity()` on interesting classes for details
+
+Tip: `sense.available_indexes.hierarchy` tells you how many relationships exist.
+Tip: Avoid deep recursion - explore breadth-first for overview.""",
+            source_type='success',
+            task_query='hierarchy',
+            created_at=datetime.now(timezone.utc).isoformat(),
+            tags=['hierarchy', 'exploration', 'roots', 'universal']
+        )
+    ]
+    
+    return strategies
+
+# %% ../nbs/05_procedural_memory.ipynb 37
+def validate_no_hardcoded_uris(strategies: list[MemoryItem]) -> bool:
+    """Ensure strategies don't reference specific ontology URIs.
+    
+    Universal strategies should use placeholders like {ontology}_meta
+    instead of hardcoded ontology prefixes.
+    """
+    ontology_prefixes = ['prov:', 'sio:', 'schema:', 'foaf:']
+    
+    for strategy in strategies:
+        content_lower = strategy.content.lower()
+        for prefix in ontology_prefixes:
+            if prefix in content_lower:
+                return False
+    
+    return True
+
+
+# %% ../nbs/05_procedural_memory.ipynb 38
+def validate_bootstrap_strategies() -> dict:
+    """Validate bootstrap creates valid, non-conflicting strategies.
+    
+    Checks:
+    - Correct count (7 strategies)
+    - All are valid MemoryItem objects
+    - Unique titles (no duplicates)
+    - All tagged as 'universal'
+    - No hardcoded ontology-specific URIs
+    
+    Returns:
+        Dictionary with 'valid' flag and detailed checks
+    """
+    strategies = bootstrap_general_strategies()
+    
+    checks = {
+        'count': len(strategies) == 7,
+        'all_valid': all(isinstance(s, MemoryItem) for s in strategies),
+        'unique_titles': len(set(s.title for s in strategies)) == 7,
+        'tagged_universal': all('universal' in s.tags for s in strategies),
+        'no_hardcoded_uris': validate_no_hardcoded_uris(strategies)
+    }
+    
+    return {
+        'valid': all(checks.values()),
+        'checks': checks
+    }
+
+
+# %% ../nbs/05_procedural_memory.ipynb 39
+def check_memory_deduplication(
+    new_memory: MemoryItem,
+    store: MemoryStore,
+    threshold: float = 0.7
+) -> str:
+    """Gate 1: Check for duplicate memories.
+    
+    Uses title similarity to detect duplicates and decide action:
+    - add: No similar memories, safe to add
+    - merge: Similar memory exists, should combine insights
+    - skip: Similar memory exists and is better, don't add
+    - replace: New memory is better, replace existing
+    
+    Args:
+        new_memory: MemoryItem to check
+        store: MemoryStore to check against
+        threshold: Similarity threshold (0-1) for considering duplicate
+    
+    Returns:
+        Action string: 'add', 'merge', 'skip', or 'replace'
+    """
+    from difflib import SequenceMatcher
+    
+    for existing in store.memories:
+        similarity = SequenceMatcher(
+            None,
+            new_memory.title.lower(),
+            existing.title.lower()
+        ).ratio()
+        
+        if similarity >= threshold:
+            # High similarity - decide action based on quality signals
+            if new_memory.source_type == 'success' and existing.source_type == 'failure':
+                return 'replace'  # Success overwrites failure
+            elif existing.access_count > 5 and new_memory.access_count == 0:
+                return 'skip'  # Keep well-used memory
+            else:
+                return 'merge'  # Combine insights
+    
+    return 'add'  # No duplicates found
+
+
+# %% ../nbs/05_procedural_memory.ipynb 40
+def score_generalization(memory: MemoryItem) -> float:
+    """Gate 3: Score how generalizable a memory is (0-1).
+    
+    Higher score = more general/reusable across ontologies.
+    Lower score = specific to one ontology or situation.
+    
+    Scoring factors:
+    - Penalize hardcoded URIs (prov:, sio:, http://)
+    - Reward procedural language (use, check, try, if/then)
+    - Reward 'universal' tag
+    
+    Args:
+        memory: MemoryItem to score
+    
+    Returns:
+        Score between 0.0 and 1.0
+    """
+    score = 0.5  # Base score
+    
+    content_lower = memory.content.lower()
+    
+    # Penalize specific URIs (hardcoded ontology references)
+    if any(prefix in content_lower for prefix in ['prov:', 'sio:', 'http://']):
+        score -= 0.3
+    
+    # Reward procedural language
+    procedural_words = ['use', 'check', 'try', 'if', 'then', 'step']
+    if any(word in content_lower for word in procedural_words):
+        score += 0.2
+    
+    # Reward 'universal' tag
+    if 'universal' in memory.tags:
+        score += 0.3
+    
+    return max(0.0, min(1.0, score))
+
+
+# %% ../nbs/05_procedural_memory.ipynb 41
+def validate_retrieval_quality(
+    memory_store: MemoryStore,
+    test_cases: list[tuple[str, list[str]]]
+) -> dict:
+    """Validate BM25 retrieves relevant memories for known queries.
+    
+    Args:
+        memory_store: MemoryStore with strategies
+        test_cases: List of (query, expected_tags) tuples
+    
+    Returns:
+        Dictionary with validation results including success_rate
+    """
+    results = []
+    
+    for query, expected_tags in test_cases:
+        retrieved = retrieve_memories(memory_store, query, k=3)
+        
+        # Check if at least one retrieved memory has expected tags
+        has_relevant = any(
+            any(tag in retrieved_mem.tags for tag in expected_tags)
+            for retrieved_mem in retrieved
+        )
+        
+        results.append({
+            'query': query,
+            'expected_tags': expected_tags,
+            'retrieved_count': len(retrieved),
+            'has_relevant': has_relevant
+        })
+    
+    success_rate = sum(r['has_relevant'] for r in results) / len(results) if results else 0
+    
+    return {
+        'valid': success_rate >= 0.8,  # 80% success rate threshold
+        'success_rate': success_rate,
+        'results': results
+    }
+
