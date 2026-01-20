@@ -362,7 +362,21 @@ class SQLiteMemoryBackend:
             LIMIT ?
         """
 
-        cursor.execute(query, (task, k))
+        # Tokenize query and join with OR for flexible matching
+        # Remove common stop words and punctuation
+        import re
+        tokens = re.findall(r'\b\w+\b', task.lower())
+        stop_words = {'what', 'is', 'the', 'how', 'to', 'a', 'an', 'and', 'or', 'for', 'in', 'on', 'at'}
+        tokens = [t for t in tokens if t not in stop_words and len(t) > 2]
+
+        if not tokens:
+            # If no tokens after filtering, return empty
+            return []
+
+        # Build FTS5 query: token1 OR token2 OR token3
+        fts_query = ' OR '.join(tokens)
+
+        cursor.execute(query, (fts_query, k))
         return [self._row_to_memory(row) for row in cursor.fetchall()]
 
     def _retrieve_fallback(
