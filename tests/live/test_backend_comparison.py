@@ -19,11 +19,14 @@ from tests.helpers.protocol_assertions import (
 )
 
 
-# Mark all tests to skip if API key not available
-pytestmark = pytest.mark.skipif(
-    not os.environ.get("ANTHROPIC_API_KEY"),
-    reason="ANTHROPIC_API_KEY not set (required for backend comparison)",
-)
+# Mark all tests as live (API calls) and skip if API key not available
+pytestmark = [
+    pytest.mark.live,
+    pytest.mark.skipif(
+        not os.environ.get("ANTHROPIC_API_KEY"),
+        reason="ANTHROPIC_API_KEY not set (required for backend comparison)",
+    ),
+]
 
 
 @pytest.fixture

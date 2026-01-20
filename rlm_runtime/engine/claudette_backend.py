@@ -76,15 +76,21 @@ class ClaudetteBackend:
         self.namespace.update(final_ns)
 
         # Convert iterations to trajectory dicts
+        # RLMIteration has code_blocks (list of CodeBlock), not flat code/output
         trajectory = []
         for iteration in iterations:
-            trajectory.append(
-                {
-                    "code": getattr(iteration, "code", ""),
-                    "output": getattr(iteration, "output", ""),
-                    "status": getattr(iteration, "status", ""),
-                }
-            )
+            # Extract code and output from each code block
+            for cb in iteration.code_blocks:
+                code_str = cb.code if hasattr(cb, 'code') else str(cb)
+                output_str = ""
+                if hasattr(cb, 'result') and cb.result:
+                    # REPLResult has stdout attribute
+                    output_str = cb.result.stdout if hasattr(cb.result, 'stdout') else str(cb.result)
+
+                trajectory.append({
+                    "code": code_str,
+                    "output": output_str,
+                })
 
         # Check convergence (converged if not at max iterations or if has valid answer)
         converged = len(iterations) < max_iterations or (answer and answer.strip())

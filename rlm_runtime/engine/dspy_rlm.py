@@ -86,9 +86,31 @@ def run_dspy_rlm(
     dspy.configure(lm=dspy.LM(model, temperature=0.2, max_tokens=1400, cache=False))
     sub_lm = dspy.LM(sub_model, temperature=0.2, max_tokens=1200, cache=False)
 
-    # Load ontology
+    # Load ontology with format auto-detection
     g = Graph()
-    g.parse(ontology_path, format="turtle")
+
+    # Detect format from file extension
+    format_map = {
+        '.ttl': 'turtle',
+        '.rdf': 'xml',
+        '.owl': 'xml',
+        '.nt': 'ntriples',
+        '.n3': 'n3',
+        '.jsonld': 'json-ld',
+        '.trig': 'trig',
+        '.nq': 'nquads',
+    }
+
+    suffix = ontology_path.suffix.lower()
+    fmt = format_map.get(suffix)
+
+    # Parse with detected format or let rdflib auto-detect
+    if fmt:
+        g.parse(ontology_path, format=fmt)
+    else:
+        # Let rdflib auto-detect from file extension
+        g.parse(ontology_path)
+
     onto_name = ontology_path.stem
     meta = GraphMeta(graph=g, name=onto_name)
 

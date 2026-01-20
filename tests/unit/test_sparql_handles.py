@@ -282,7 +282,8 @@ class TestHandleMetadata:
         """Handle has timestamp in ISO format."""
         assert select_result_handle.timestamp is not None
         assert 'T' in select_result_handle.timestamp
-        assert 'Z' in select_result_handle.timestamp
+        # Accept both 'Z' and '+00:00' as valid UTC timezone indicators (ISO 8601)
+        assert 'Z' in select_result_handle.timestamp or '+00:00' in select_result_handle.timestamp
 
     def test_query_stored(self, select_result_handle):
         """Original query stored in handle."""

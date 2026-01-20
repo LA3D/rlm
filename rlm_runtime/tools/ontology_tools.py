@@ -79,28 +79,28 @@ def make_describe_entity_tool(meta: GraphMeta) -> Callable:
     """
 
     def describe_entity_tool(uri: str, limit: int = 15) -> dict:
-        """Get bounded description of an entity with its types and properties.
+        """Get bounded description of an entity with its types and outgoing relationships.
 
         Use this to inspect a specific entity's structure, types, and relationships.
         Supports prefixed URIs like 'prov:Activity' or full URIs.
 
         Args:
             uri: URI of entity to describe (supports prefixed forms like 'prov:Activity')
-            limit: Max number of triples to include (1-25, default 15)
+            limit: Max number of outgoing triples to sample (1-25, default 15)
 
         Returns:
             Dict with:
                 - 'uri': str - Entity URI
                 - 'label': str - Human-readable label
                 - 'types': list[str] - RDF types of entity
-                - 'properties': list[dict] - Sample properties/relationships
-                - 'total_triples': int - Total number of triples (may exceed limit)
+                - 'comment': str | None - rdfs:comment value if present
+                - 'outgoing_sample': list[tuple] - Sample outgoing triples as (predicate, object) pairs
 
         Example:
             info = describe_entity('prov:Activity', limit=10)
             print(info['label'])
-            for prop in info['properties']:
-                print(f"  {prop['predicate']}: {prop['value']}")
+            for predicate, obj in info['outgoing_sample']:
+                print(f"  {predicate} -> {obj}")
         """
         # Clamp limit to safe bounds
         clamped_limit = max(1, min(25, limit))
