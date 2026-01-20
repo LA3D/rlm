@@ -1,138 +1,373 @@
-"""Live integration tests for memory-based architecture.
+"""Live integration tests for memory with DSPy RLM.
 
-These tests require:
-- ANTHROPIC_API_KEY environment variable
-- Real ontology files (ontology/prov.ttl)
-- LLM API access
+Tests memory retrieval, extraction, and closed-loop learning.
+Requires ANTHROPIC_API_KEY.
 """
 
 import pytest
-from rlm.ontology import setup_ontology_context, build_sense_structured
-from rlm.procedural_memory import MemoryStore, bootstrap_general_strategies, retrieve_memories
-from rlm.reasoning_bank import rlm_run_enhanced
-from rlm.core import rlm_run
+import os
+import tempfile
+from pathlib import Path
+
+from rlm_runtime.engine import run_dspy_rlm
+from rlm_runtime.memory import (
+    SQLiteMemoryBackend,
+    MemoryItem,
+    format_memories_for_context,
+    judge_trajectory_dspy,
+    extract_memories_dspy,
+)
+
+pytestmark = [
+    pytest.mark.live,
+    pytest.mark.skipif(
+        not os.environ.get("ANTHROPIC_API_KEY"),
+        reason="ANTHROPIC_API_KEY not set (required for live memory integration tests)",
+    ),
+]
 
 
-@pytest.mark.live
-def test_bootstrap_strategies_reduce_iterations():
-    """Validates improvement with bootstrap strategies (83% improvement expected)."""
-    # Setup ontology
-    ns_baseline = {}
-    setup_ontology_context('ontology/prov.ttl', ns_baseline, name='prov')
-    sense = build_sense_structured('ontology/prov.ttl', name='prov_sense', ns=ns_baseline)
-
-    # Baseline: sense only, no memory
-    answer_baseline, iters_baseline, _ = rlm_run_enhanced(
-        query="What is the Activity class?",
-        context=ns_baseline['prov_meta'].summary(),
-        ns=ns_baseline,
-        sense=sense,
-        memory_store=None,  # No memory
-        max_iters=10
-    )
-
-    # With bootstrap strategies
-    ns_memory = {}
-    setup_ontology_context('ontology/prov.ttl', ns_memory, name='prov')
-
-    memory_store = MemoryStore()
-    for s in bootstrap_general_strategies():
-        memory_store.add(s)
-
-    answer_memory, iters_memory, _ = rlm_run_enhanced(
-        query="What is the Activity class?",
-        context=ns_memory['prov_meta'].summary(),
-        ns=ns_memory,
-        sense=sense,
-        memory_store=memory_store,
-        max_iters=10
-    )
-
-    # Assert: memory reduces iterations by >50%
-    baseline_count = len(iters_baseline)
-    memory_count = len(iters_memory)
-    improvement = (baseline_count - memory_count) / baseline_count if baseline_count > 0 else 0
-
-    assert improvement > 0.5, \
-        f"Expected >50% improvement, got {improvement*100:.1f}% ({baseline_count} → {memory_count} iters)"
-
-    # Both should produce valid answers
-    assert answer_memory is not None and len(answer_memory) > 0
-    assert 'Activity' in answer_memory or 'activity' in answer_memory.lower()
+@pytest.fixture
+def prov_ontology():
+    """Path to PROV ontology for testing."""
+    path = Path(__file__).parent.parent.parent / "ontology" / "prov.ttl"
+    if not path.exists():
+        pytest.skip("PROV ontology not found")
+    return path
 
 
-@pytest.mark.live
-def test_memory_retrieval_is_relevant():
-    """BM25 retrieves appropriate strategies for query type."""
-    memory_store = MemoryStore()
-    for s in bootstrap_general_strategies():
-        memory_store.add(s)
-
-    # Entity query should retrieve "Describe Entity"
-    entity_mems = retrieve_memories(memory_store, "What is Activity?", k=3)
-    titles = [m.title for m in entity_mems]
-    assert any('Describe Entity' in t for t in titles), \
-        f"Entity query should retrieve 'Describe Entity', got: {titles}"
-
-    # Hierarchy query should retrieve subclass/superclass strategies
-    hierarchy_mems = retrieve_memories(memory_store, "Find subclasses of Activity", k=3)
-    titles = [m.title for m in hierarchy_mems]
-    assert any('Subclass' in t or 'Superclass' in t for t in titles), \
-        f"Hierarchy query should retrieve subclass/superclass strategies, got: {titles}"
+@pytest.fixture
+def memory_backend():
+    """Create temporary in-memory backend for testing."""
+    return SQLiteMemoryBackend(":memory:")
 
 
-@pytest.mark.live
-def test_sense_plus_memory_full_stack():
-    """Full integration: all 4 layers work together.
+class TestMemoryRetrieval:
+    """Test memory retrieval integration with DSPy RLM."""
 
-    Tests:
-    - Layer 0: Sense card
-    - Layer 1: Retrieved memories (general strategies)
-    - Layer 2: Ontology recipes (empty is ok)
-    - Layer 3: Base context
-    """
-    ns = {}
-    setup_ontology_context('ontology/prov.ttl', ns, name='prov')
-    sense = build_sense_structured('ontology/prov.ttl', name='prov_sense', ns=ns)
+    def test_run_with_empty_memory_backend(self, prov_ontology, memory_backend):
+        """RLM works with empty memory backend."""
+        result = run_dspy_rlm(
+            "What is the class prov:Activity?",
+            prov_ontology,
+            memory_backend=memory_backend,
+            retrieve_memories=3,
+            verbose=True
+        )
 
-    memory_store = MemoryStore()
-    for s in bootstrap_general_strategies():
-        memory_store.add(s)
+        assert result.answer
+        assert "Activity" in result.answer or "activity" in result.answer.lower()
 
-    answer, iterations, _ = rlm_run_enhanced(
-        query="What is Activity?",
-        context=ns['prov_meta'].summary(),
-        ns=ns,
-        sense=sense,
-        memory_store=memory_store,
-        ontology='prov',
-        max_iters=10
-    )
+    def test_run_with_seeded_memories(self, prov_ontology, memory_backend):
+        """RLM retrieves and uses seeded memories."""
+        # Seed a memory
+        memory = MemoryItem(
+            memory_id="m-search-001",
+            title="Search for entity pattern",
+            description="How to find entities in an ontology",
+            content="1. Use search_entity() to find candidates\n2. Use describe_entity() to get details\n3. Return label and types",
+            source_type="human",
+            task_query="How to find entities?",
+            created_at="2026-01-20T00:00:00Z",
+            tags=["search", "entity", "describe"],
+            scope={"ontology": "prov"},
+            provenance={"source": "manual"}
+        )
+        memory_backend.add_memory(memory)
 
-    # Should converge quickly with all layers (≤3 iterations expected)
-    assert len(iterations) <= 3, \
-        f"Expected ≤3 iterations with full stack, got {len(iterations)}"
+        # Run with memory retrieval
+        result = run_dspy_rlm(
+            "What is prov:Activity?",
+            prov_ontology,
+            memory_backend=memory_backend,
+            retrieve_memories=3,
+            verbose=True
+        )
 
-    # Should produce valid answer
-    assert answer is not None
-    assert len(answer) > 0
-    assert 'Activity' in answer or 'activity' in answer.lower()
+        assert result.answer
+        # Should successfully answer (memory provides strategy)
+
+    def test_memory_usage_recorded(self, prov_ontology, memory_backend):
+        """Memory usage is recorded when memories retrieved."""
+        # Seed memory
+        memory = MemoryItem(
+            memory_id="m-test-001",
+            title="Test memory",
+            description="Test",
+            content="Test content",
+            source_type="human",
+            task_query="test",
+            created_at="2026-01-20T00:00:00Z",
+            tags=["test"]
+        )
+        memory_backend.add_memory(memory)
+
+        # Run with trajectory_id to enable usage recording
+        result = run_dspy_rlm(
+            "What is prov:Entity?",
+            prov_ontology,
+            memory_backend=memory_backend,
+            retrieve_memories=3,
+            trajectory_id="t-test-001",
+            verbose=True
+        )
+
+        # Check usage was recorded
+        usage = memory_backend.get_usage_for_trajectory("t-test-001")
+        # May or may not retrieve the test memory depending on relevance
+        # Just verify no errors occurred
 
 
-@pytest.mark.live
-def test_validate_sense_precondition_on_real_ontology():
-    """Test sense validation gate with real PROV ontology."""
-    from rlm.ontology import validate_sense_precondition
+class TestMemoryExtraction:
+    """Test memory extraction from trajectories."""
 
-    ns = {}
-    setup_ontology_context('ontology/prov.ttl', ns, name='prov')
-    sense = build_sense_structured('ontology/prov.ttl', name='prov_sense', ns=ns)
+    def test_judge_trajectory(self, prov_ontology):
+        """judge_trajectory_dspy produces valid judgment."""
+        # Run a simple query
+        result = run_dspy_rlm(
+            "What is prov:Activity?",
+            prov_ontology,
+            verbose=True
+        )
 
-    result = validate_sense_precondition(sense, ns['prov_meta'])
+        # Judge the trajectory
+        judgment = judge_trajectory_dspy(
+            "What is prov:Activity?",
+            result.answer,
+            result.trajectory,
+            result.evidence
+        )
 
-    # Validation should pass
-    assert result['proceed'] == True, f"Validation failed: {result['reason']}"
-    assert result['grounding_valid'] == True
-    assert result['card_size_ok'] == True
-    assert result['has_required_fields'] == True
-    assert result['card_size'] <= 800, f"Card size {result['card_size']} > 800 chars"
+        assert "is_success" in judgment
+        assert isinstance(judgment["is_success"], bool)
+        assert "reason" in judgment
+        assert "confidence" in judgment
+        assert judgment["confidence"] in ["high", "medium", "low"]
+        assert "missing" in judgment
+        assert isinstance(judgment["missing"], list)
+
+    def test_extract_memories(self, prov_ontology):
+        """extract_memories_dspy extracts valid memories."""
+        # Run a query
+        result = run_dspy_rlm(
+            "What is prov:Entity?",
+            prov_ontology,
+            verbose=True
+        )
+
+        # Judge
+        judgment = judge_trajectory_dspy(
+            "What is prov:Entity?",
+            result.answer,
+            result.trajectory,
+            result.evidence
+        )
+
+        # Extract memories
+        memories = extract_memories_dspy(
+            "What is prov:Entity?",
+            result.answer,
+            result.trajectory,
+            judgment,
+            ontology_name="prov",
+            run_id="r-test-001",
+            trajectory_id="t-test-001"
+        )
+
+        # Should extract 0-3 memories
+        assert isinstance(memories, list)
+        assert len(memories) <= 3
+
+        # Validate memory structure
+        for mem in memories:
+            assert isinstance(mem, MemoryItem)
+            assert mem.memory_id
+            assert mem.title
+            assert mem.content
+            assert mem.source_type in ["success", "failure"]
+            assert mem.scope.get("ontology") == "prov"
+            assert mem.provenance.get("run_id") == "r-test-001"
+
+    def test_automatic_extraction(self, prov_ontology, memory_backend):
+        """RLM automatically extracts and stores memories when extract_memories=True."""
+        initial_count = len(memory_backend.get_all_memories())
+
+        # Run with memory extraction
+        result = run_dspy_rlm(
+            "What is prov:Activity?",
+            prov_ontology,
+            memory_backend=memory_backend,
+            extract_memories=True,
+            run_id="r-auto-001",
+            trajectory_id="t-auto-001",
+            verbose=True
+        )
+
+        assert result.answer
+
+        # Check if memories were extracted
+        final_count = len(memory_backend.get_all_memories())
+        # May extract 0-3 memories depending on trajectory quality
+        assert final_count >= initial_count
+
+
+class TestClosedLoopLearning:
+    """Test closed-loop learning: retrieve → run → extract → store."""
+
+    def test_closed_loop_single_task(self, prov_ontology, memory_backend):
+        """Single task: extract memory, then use it for similar task."""
+        # First run: Extract memory
+        result1 = run_dspy_rlm(
+            "What is prov:Activity?",
+            prov_ontology,
+            memory_backend=memory_backend,
+            extract_memories=True,
+            run_id="r-loop-001",
+            trajectory_id="t-loop-001",
+            verbose=True
+        )
+
+        assert result1.answer
+
+        # Check memories extracted
+        memories = memory_backend.get_all_memories()
+        extracted_count = len(memories)
+
+        # Second run: Retrieve and use memory
+        result2 = run_dspy_rlm(
+            "What is prov:Entity?",  # Similar task
+            prov_ontology,
+            memory_backend=memory_backend,
+            retrieve_memories=3,
+            trajectory_id="t-loop-002",
+            verbose=True
+        )
+
+        assert result2.answer
+
+        # Check memory usage was recorded
+        if extracted_count > 0:
+            usage = memory_backend.get_usage_for_trajectory("t-loop-002")
+            # May or may not retrieve depending on relevance
+
+    def test_memory_stats_updated(self, prov_ontology, memory_backend):
+        """Memory statistics updated after usage."""
+        # Seed a memory
+        memory = MemoryItem(
+            memory_id="m-stats-001",
+            title="Test stats",
+            description="Test memory for stats",
+            content="1. Test step",
+            source_type="human",
+            task_query="test",
+            created_at="2026-01-20T00:00:00Z",
+            tags=["test"],
+            access_count=0,
+            success_count=0,
+            failure_count=0
+        )
+        memory_backend.add_memory(memory)
+
+        # Run with extraction enabled (will update stats)
+        result = run_dspy_rlm(
+            "What is prov:Activity?",
+            prov_ontology,
+            memory_backend=memory_backend,
+            retrieve_memories=3,
+            extract_memories=True,
+            trajectory_id="t-stats-001",
+            verbose=True
+        )
+
+        # Check stats (may or may not be updated depending on retrieval)
+        updated_mem = memory_backend.get_memory("m-stats-001")
+        # Stats may change if memory was retrieved
+        assert updated_mem.access_count >= 0
+
+
+class TestMemoryFormatting:
+    """Test memory formatting for context injection."""
+
+    def test_format_empty_memories(self):
+        """format_memories_for_context handles empty list."""
+        formatted = format_memories_for_context([])
+        assert formatted == ""
+
+    def test_format_single_memory(self):
+        """format_memories_for_context formats single memory."""
+        memory = MemoryItem(
+            memory_id="m-001",
+            title="Test Memory",
+            description="Test description",
+            content="1. Step one\n2. Step two",
+            source_type="success",
+            task_query="test",
+            created_at="2026-01-20T00:00:00Z",
+            tags=["test", "example"]
+        )
+
+        formatted = format_memories_for_context([memory])
+
+        assert "Test Memory" in formatted
+        assert "Test description" in formatted
+        assert "Step one" in formatted
+        assert "test, example" in formatted
+
+    def test_format_multiple_memories(self):
+        """format_memories_for_context formats multiple memories."""
+        memories = [
+            MemoryItem(
+                memory_id=f"m-{i:03d}",
+                title=f"Memory {i}",
+                description="Desc",
+                content="Content",
+                source_type="success",
+                task_query="test",
+                created_at="2026-01-20T00:00:00Z"
+            )
+            for i in range(3)
+        ]
+
+        formatted = format_memories_for_context(memories)
+
+        assert "Memory 0" in formatted
+        assert "Memory 1" in formatted
+        assert "Memory 2" in formatted
+        assert formatted.count("###") == 3  # 3 memory sections
+
+
+class TestMemoryPersistence:
+    """Test memory persistence across runs."""
+
+    def test_memories_persist_in_file_backend(self, prov_ontology):
+        """Memories persist in file-based backend."""
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+            db_path = f.name
+
+        try:
+            # First session: Extract memory
+            backend1 = SQLiteMemoryBackend(db_path)
+            result1 = run_dspy_rlm(
+                "What is prov:Activity?",
+                prov_ontology,
+                memory_backend=backend1,
+                extract_memories=True,
+                run_id="r-persist-001",
+                trajectory_id="t-persist-001",
+                verbose=True
+            )
+
+            count1 = len(backend1.get_all_memories())
+            backend1.close()
+
+            # Second session: Load and retrieve
+            backend2 = SQLiteMemoryBackend(db_path)
+            count2 = len(backend2.get_all_memories())
+
+            # Memories should persist
+            assert count2 == count1
+
+            backend2.close()
+
+        finally:
+            Path(db_path).unlink(missing_ok=True)

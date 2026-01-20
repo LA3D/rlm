@@ -1,15 +1,18 @@
 """DSPy RLM engine for ontology query construction.
 
 Provides structured query construction with typed outputs, bounded tools,
-and host-Python code execution.
+and host-Python code execution with optional memory integration.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, TYPE_CHECKING
 import os
+
+if TYPE_CHECKING:
+    from rlm_runtime.memory import MemoryBackend
 
 
 @dataclass
@@ -48,8 +51,13 @@ def run_dspy_rlm(
     verbose: bool = False,
     model: str = "anthropic/claude-sonnet-4-5-20250929",
     sub_model: str = "anthropic/claude-3-5-haiku-20241022",
+    memory_backend: Optional["MemoryBackend"] = None,
+    retrieve_memories: int = 3,
+    extract_memories: bool = False,
+    run_id: Optional[str] = None,
+    trajectory_id: Optional[str] = None,
 ) -> DSPyRLMResult:
-    """Run DSPy RLM for ontology query construction.
+    """Run DSPy RLM for ontology query construction with optional memory integration.
 
     Args:
         query: User question to answer
@@ -59,6 +67,11 @@ def run_dspy_rlm(
         verbose: Whether to print execution trace (default False)
         model: Root model for RLM (default Sonnet 4.5)
         sub_model: Sub-model for delegated reasoning (default Haiku)
+        memory_backend: Optional MemoryBackend for retrieval/extraction
+        retrieve_memories: Number of memories to retrieve if backend provided (default 3)
+        extract_memories: Whether to extract and store memories after execution (default False)
+        run_id: Optional run ID for provenance tracking
+        trajectory_id: Optional trajectory ID for provenance tracking
 
     Returns:
         DSPyRLMResult with answer, sparql, evidence, trajectory
@@ -66,6 +79,28 @@ def run_dspy_rlm(
     Raises:
         ValueError: If ANTHROPIC_API_KEY not set
         FileNotFoundError: If ontology_path doesn't exist
+
+    Example:
+        from rlm_runtime.memory import SQLiteMemoryBackend
+
+        # With memory retrieval
+        backend = SQLiteMemoryBackend("memory.db")
+        result = run_dspy_rlm(
+            "What is Activity?",
+            "prov.ttl",
+            memory_backend=backend,
+            retrieve_memories=3
+        )
+
+        # With memory extraction
+        result = run_dspy_rlm(
+            "What is Entity?",
+            "prov.ttl",
+            memory_backend=backend,
+            extract_memories=True,
+            run_id="r-001",
+            trajectory_id="t-001"
+        )
     """
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise ValueError("ANTHROPIC_API_KEY must be set in environment")
@@ -117,17 +152,37 @@ def run_dspy_rlm(
     # Create bounded tools
     tools = make_ontology_tools(meta, include_sparql=True)
 
+    # Retrieve memories if backend provided
+    memory_context = ""
+    retrieved_memories = []
+    if memory_backend and retrieve_memories > 0:
+        from rlm_runtime.memory.extraction import format_memories_for_context
+
+        retrieved_memories = memory_backend.retrieve(query, k=retrieve_memories)
+        if retrieved_memories:
+            memory_context = format_memories_for_context(retrieved_memories)
+            if verbose:
+                print(f"Retrieved {len(retrieved_memories)} memories")
+
     # Build context
-    context = "\n".join(
-        [
-            "You are exploring an RDF ontology via bounded tools.",
-            "Do not dump large structures. Use tools to discover entities, then SUBMIT your answer.",
-            "",
-            meta.summary(),
-            "",
-            "Goal: Answer the query grounded in retrieved evidence.",
-        ]
-    )
+    context_parts = [
+        "You are exploring an RDF ontology via bounded tools.",
+        "Do not dump large structures. Use tools to discover entities, then SUBMIT your answer.",
+        "",
+        meta.summary(),
+    ]
+
+    # Inject memories if available
+    if memory_context:
+        context_parts.append("")
+        context_parts.append(memory_context)
+
+    context_parts.extend([
+        "",
+        "Goal: Answer the query grounded in retrieved evidence.",
+    ])
+
+    context = "\n".join(context_parts)
 
     # Define typed signature
     class QueryConstructionSig(dspy.Signature):
@@ -175,7 +230,7 @@ def run_dspy_rlm(
             )
 
     # Build result
-    return DSPyRLMResult(
+    result = DSPyRLMResult(
         answer=pred.answer,
         sparql=pred.sparql if hasattr(pred, "sparql") else None,
         evidence=pred.evidence if hasattr(pred, "evidence") else {},
@@ -183,3 +238,60 @@ def run_dspy_rlm(
         iteration_count=len(trajectory),
         converged=True,  # DSPy RLM always returns something
     )
+
+    # Record memory usage if memories were retrieved
+    if memory_backend and retrieved_memories and trajectory_id:
+        for i, mem in enumerate(retrieved_memories, 1):
+            memory_backend.record_usage(
+                trajectory_id=trajectory_id,
+                memory_id=mem.memory_id,
+                rank=i,
+                score=None  # BM25 score not currently exposed
+            )
+            # Update access count
+            memory_backend.update_memory_stats(mem.memory_id, accessed=True)
+
+    # Extract and store memories if requested
+    if memory_backend and extract_memories:
+        from rlm_runtime.memory.extraction import judge_trajectory_dspy, extract_memories_dspy
+
+        # Judge trajectory
+        judgment = judge_trajectory_dspy(
+            query,
+            result.answer,
+            result.trajectory,
+            result.evidence,
+            model=sub_model
+        )
+
+        if verbose:
+            print(f"Judgment: {'Success' if judgment['is_success'] else 'Failure'} ({judgment['confidence']})")
+            print(f"Reason: {judgment['reason']}")
+
+        # Extract memories
+        new_memories = extract_memories_dspy(
+            query,
+            result.answer,
+            result.trajectory,
+            judgment,
+            ontology_name=onto_name,
+            run_id=run_id,
+            trajectory_id=trajectory_id,
+            model=sub_model
+        )
+
+        # Store memories
+        for mem in new_memories:
+            memory_backend.add_memory(mem)
+            if verbose:
+                print(f"Extracted memory: {mem.title}")
+
+        # Update memory stats based on judgment
+        if retrieved_memories and trajectory_id:
+            for mem in retrieved_memories:
+                if judgment["is_success"]:
+                    memory_backend.update_memory_stats(mem.memory_id, success=True)
+                else:
+                    memory_backend.update_memory_stats(mem.memory_id, failure=True)
+
+    return result
