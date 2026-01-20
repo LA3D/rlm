@@ -158,3 +158,6 @@ evals/results/
 node_modules/
 package-lock.json
 package.json
+
+# Exploratory/temporary scripts
+scripts/exploratory/
