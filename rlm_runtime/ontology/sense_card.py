@@ -4,11 +4,18 @@ Sense cards describe HOW to read an ontology (metadata conventions, formalism le
 not WHAT is in it (specific classes/properties). The LLM discovers content via tools.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
-from rdflib import Graph, RDF, RDFS, OWL, URIRef
+from rdflib import Graph, RDF, RDFS, OWL, URIRef, Namespace
 from rdflib.namespace import SKOS, DCTERMS, VOID, FOAF
 from pathlib import Path
+
+# Additional metadata vocabularies from Widoco guide
+PAV = Namespace("http://purl.org/pav/")
+PROV = Namespace("http://www.w3.org/ns/prov#")
+VANN = Namespace("http://purl.org/vocab/vann/")
+BIBO = Namespace("http://purl.org/ontology/bibo/")
+VS = Namespace("http://www.w3.org/2003/06/sw-vocab-status/ns#")
 
 
 @dataclass
@@ -69,6 +76,25 @@ class MetadataProfile:
     skos_concept_count: int = 0
     skos_scheme_count: int = 0
 
+    # NEW: Widoco metadata patterns
+    # Imports (owl:imports)
+    imports_count: int = 0
+    imported_ontologies: list[str] = field(default_factory=list)
+
+    # Version metadata
+    has_version_info: bool = False
+    version_string: Optional[str] = None
+    has_version_iri: bool = False
+
+    # Maturity/Status
+    deprecated_term_count: int = 0
+    status_value: Optional[str] = None
+
+    # Provenance vocabularies
+    uses_pav: bool = False
+    uses_prov: bool = False
+    uses_vann: bool = False
+
     def primary_label_prop(self) -> str:
         """Get short name of primary label property."""
         if not self.label_properties:
@@ -96,6 +122,12 @@ class MetadataProfile:
             vocabs.append("schema.org")
         if self.uses_void:
             vocabs.append("VOID")
+        if self.uses_pav:
+            vocabs.append("PAV")
+        if self.uses_prov:
+            vocabs.append("PROV")
+        if self.uses_vann:
+            vocabs.append("VANN")
 
         if not vocabs:
             return "Basic RDFS annotations"
@@ -169,6 +201,127 @@ def detect_formalism(graph: Graph) -> FormalismProfile:
     )
 
 
+def detect_imports(graph: Graph) -> tuple[int, list[str]]:
+    """Detect owl:imports declarations.
+
+    Args:
+        graph: RDF graph to analyze
+
+    Returns:
+        Tuple of (import_count, list of imported ontology names)
+    """
+    imports = list(graph.objects(predicate=OWL.imports))
+    import_names = []
+    for imp in imports:
+        # Extract short name from URI
+        uri_str = str(imp)
+        if '/' in uri_str:
+            name = uri_str.rsplit('/', 1)[-1]
+        elif '#' in uri_str:
+            name = uri_str.rsplit('#', 1)[-1]
+        else:
+            name = uri_str
+        import_names.append(name)
+    return len(imports), import_names
+
+
+def detect_version_info(graph: Graph) -> tuple[bool, Optional[str], bool]:
+    """Detect version metadata (owl:versionInfo, owl:versionIRI).
+
+    Args:
+        graph: RDF graph to analyze
+
+    Returns:
+        Tuple of (has_version_info, version_string, has_version_iri)
+    """
+    # Find ontology URI
+    ont_uri = None
+    for s in graph.subjects(RDF.type, OWL.Ontology):
+        ont_uri = s
+        break
+
+    has_version_info = False
+    version_string = None
+    has_version_iri = False
+
+    if ont_uri:
+        # Check owl:versionInfo
+        version_infos = list(graph.objects(ont_uri, OWL.versionInfo))
+        if version_infos:
+            has_version_info = True
+            version_string = str(version_infos[0])
+
+        # Check owl:versionIRI
+        version_iris = list(graph.objects(ont_uri, OWL.versionIRI))
+        has_version_iri = len(version_iris) > 0
+
+    return has_version_info, version_string, has_version_iri
+
+
+def count_deprecated_terms(graph: Graph) -> int:
+    """Count terms marked with owl:deprecated true.
+
+    Args:
+        graph: RDF graph to analyze
+
+    Returns:
+        Count of deprecated terms
+    """
+    deprecated = list(graph.subjects(OWL.deprecated, URIRef("true")))
+    # Also check for boolean literal True
+    from rdflib import Literal
+    deprecated += list(graph.subjects(OWL.deprecated, Literal(True)))
+    return len(set(deprecated))
+
+
+def detect_status(graph: Graph) -> Optional[str]:
+    """Detect ontology status (bibo:status, vs:term_status).
+
+    Args:
+        graph: RDF graph to analyze
+
+    Returns:
+        Status string if found, None otherwise
+    """
+    # Find ontology URI
+    ont_uri = None
+    for s in graph.subjects(RDF.type, OWL.Ontology):
+        ont_uri = s
+        break
+
+    if ont_uri:
+        # Check bibo:status
+        statuses = list(graph.objects(ont_uri, BIBO.status))
+        if statuses:
+            return str(statuses[0])
+
+        # Check vs:term_status
+        statuses = list(graph.objects(ont_uri, VS.term_status))
+        if statuses:
+            return str(statuses[0])
+
+    return None
+
+
+def detect_provenance_vocabs(graph: Graph) -> tuple[bool, bool, bool]:
+    """Detect usage of PAV, PROV, and VANN provenance vocabularies.
+
+    Args:
+        graph: RDF graph to analyze
+
+    Returns:
+        Tuple of (uses_pav, uses_prov, uses_vann)
+    """
+    uses_pav = any("purl.org/pav" in str(s) or "purl.org/pav" in str(p)
+                   for s, p, o in graph)
+    uses_prov = any("www.w3.org/ns/prov" in str(s) or "www.w3.org/ns/prov" in str(p)
+                    for s, p, o in graph)
+    uses_vann = any("purl.org/vocab/vann" in str(s) or "purl.org/vocab/vann" in str(p)
+                    for s, p, o in graph)
+
+    return uses_pav, uses_prov, uses_vann
+
+
 def detect_metadata_profile(graph: Graph) -> MetadataProfile:
     """Detect metadata vocabularies and annotation properties used.
 
@@ -205,6 +358,13 @@ def detect_metadata_profile(graph: Graph) -> MetadataProfile:
     uses_void = any("rdfs.org/ns/void" in str(s) or "rdfs.org/ns/void" in str(p)
                     for s, p, o in graph)
 
+    # NEW: Detect Widoco metadata patterns
+    imports_count, imported_ontologies = detect_imports(graph)
+    has_version_info, version_string, has_version_iri = detect_version_info(graph)
+    deprecated_count = count_deprecated_terms(graph)
+    status = detect_status(graph)
+    uses_pav, uses_prov, uses_vann = detect_provenance_vocabs(graph)
+
     return MetadataProfile(
         label_properties=label_props,
         description_properties=desc_props,
@@ -214,7 +374,18 @@ def detect_metadata_profile(graph: Graph) -> MetadataProfile:
         uses_schema_org=uses_schema_org,
         uses_foaf=uses_foaf,
         skos_concept_count=len(skos_concepts),
-        skos_scheme_count=len(skos_schemes)
+        skos_scheme_count=len(skos_schemes),
+        # NEW: Widoco metadata
+        imports_count=imports_count,
+        imported_ontologies=imported_ontologies,
+        has_version_info=has_version_info,
+        version_string=version_string,
+        has_version_iri=has_version_iri,
+        deprecated_term_count=deprecated_count,
+        status_value=status,
+        uses_pav=uses_pav,
+        uses_prov=uses_prov,
+        uses_vann=uses_vann
     )
 
 
@@ -289,10 +460,10 @@ def build_sense_card(ontology_path: str, ontology_name: Optional[str] = None) ->
 
 
 def format_sense_card(card: SenseCard) -> str:
-    """Format sense card as compact markdown (~500 chars).
+    """Format sense card as compact markdown (~600-700 chars with Widoco metadata).
 
     Focus on HOW to read the ontology: formalism level, metadata conventions,
-    annotation properties to use for navigation.
+    annotation properties to use for navigation, versioning, maturity, and dependencies.
 
     Args:
         card: SenseCard to format
@@ -314,6 +485,26 @@ def format_sense_card(card: SenseCard) -> str:
     # Metadata profile
     lines.append(f"**Metadata**: {card.metadata.vocabulary_summary()}")
 
+    # NEW: Version and maturity indicators
+    maturity_parts = []
+    if card.metadata.has_version_info and card.metadata.version_string:
+        maturity_parts.append(f"v{card.metadata.version_string}")
+    if card.metadata.status_value:
+        maturity_parts.append(f"status: {card.metadata.status_value}")
+    if card.metadata.deprecated_term_count > 0:
+        maturity_parts.append(f"{card.metadata.deprecated_term_count} deprecated terms")
+
+    if maturity_parts:
+        lines.append(f"**Maturity**: {', '.join(maturity_parts)}")
+
+    # NEW: Imports/dependencies (highest priority for navigation)
+    if card.metadata.imports_count > 0:
+        import_summary = f"{card.metadata.imports_count} imported ontologies"
+        if len(card.metadata.imported_ontologies) <= 3:
+            import_names = ', '.join(card.metadata.imported_ontologies)
+            import_summary = f"Imports: {import_names}"
+        lines.append(f"**Dependencies**: {import_summary}")
+
     # Annotation guidance
     lines.append("")
     lines.append("**Navigation:**")
@@ -329,5 +520,9 @@ def format_sense_card(card: SenseCard) -> str:
 
     if card.formalism.rdfs_subclass_count > 20:
         lines.append(f"- Rich hierarchy: {card.formalism.rdfs_subclass_count} subclass relationships")
+
+    # NEW: Deprecation warning (if present)
+    if card.metadata.deprecated_term_count > 0:
+        lines.append(f"- ⚠️  Check `owl:deprecated` before using terms ({card.metadata.deprecated_term_count} marked)")
 
     return '\n'.join(lines)
