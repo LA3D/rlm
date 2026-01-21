@@ -143,6 +143,18 @@ def test_memory_event_logging(prov_ontology, temp_db, temp_log):
 
     event_types = [e["event"] for e in events]
 
+    # Should have run creation
+    assert "run_creation" in event_types
+    run_event = next(e for e in events if e["event"] == "run_creation")
+    assert run_event["run_id"] == "test-run-001"
+    assert run_event["ontology_name"] == "prov"
+
+    # Should have trajectory creation
+    assert "trajectory_creation" in event_types
+    traj_event = next(e for e in events if e["event"] == "trajectory_creation")
+    assert traj_event["trajectory_id"] == "test-traj-001"
+    assert traj_event["run_id"] == "test-run-001"
+
     # Should have memory retrieval
     assert "memory_retrieval" in event_types
     retrieval_event = next(e for e in events if e["event"] == "memory_retrieval")
@@ -226,3 +238,187 @@ def test_auto_generated_ids(prov_ontology, temp_db, temp_log):
     stats = backend.get_stats()
     assert stats["runs"] >= 1
     assert stats["trajectories"] >= 1
+
+
+def test_mlflow_logs_parameters(prov_ontology, temp_log):
+    """Test that parameters are logged to MLflow."""
+    mlflow = pytest.importorskip("mlflow")
+
+    # Reset tracking URI to default
+    mlflow.set_tracking_uri("")
+
+    result = run_dspy_rlm(
+        "What is Entity?",
+        prov_ontology,
+        max_iterations=5,
+        enable_mlflow=True,
+        mlflow_experiment="test-params",
+        log_path=temp_log,
+    )
+
+    # Query the run
+    runs = mlflow.search_runs(experiment_names=["test-params"])
+    assert len(runs) >= 1
+
+    # Check logged params
+    latest_run = runs.iloc[0]
+    assert latest_run["params.ontology"] == "prov"
+    assert latest_run["params.max_iterations"] == "5"
+    assert latest_run["params.query"] == "What is Entity?"
+
+
+def test_mlflow_logs_metrics(prov_ontology, temp_log):
+    """Test that metrics are logged to MLflow."""
+    mlflow = pytest.importorskip("mlflow")
+
+    # Reset tracking URI to default
+    mlflow.set_tracking_uri("")
+
+    result = run_dspy_rlm(
+        "What is Activity?",
+        prov_ontology,
+        max_iterations=5,
+        enable_mlflow=True,
+        mlflow_experiment="test-metrics",
+        log_path=temp_log,
+    )
+
+    runs = mlflow.search_runs(experiment_names=["test-metrics"])
+    latest_run = runs.iloc[0]
+
+    # Check metrics
+    assert "metrics.iteration_count" in latest_run
+    assert "metrics.converged" in latest_run
+    assert latest_run["metrics.converged"] == 1.0  # Should be 1 for True
+
+
+def test_mlflow_search_runs_programmatic(prov_ontology, temp_log):
+    """Test programmatic querying of MLflow runs."""
+    mlflow = pytest.importorskip("mlflow")
+
+    # Reset tracking URI to default
+    mlflow.set_tracking_uri("")
+
+    # Run multiple queries
+    for query in ["What is Entity?", "What is Activity?"]:
+        run_dspy_rlm(
+            query,
+            prov_ontology,
+            max_iterations=3,
+            enable_mlflow=True,
+            mlflow_experiment="test-search",
+        )
+
+    # Search with filter
+    runs = mlflow.search_runs(
+        experiment_names=["test-search"],
+        filter_string="params.ontology = 'prov'",
+        order_by=["metrics.iteration_count ASC"]
+    )
+
+    assert len(runs) >= 2
+    assert "params.query" in runs.columns
+    assert "metrics.iteration_count" in runs.columns
+
+
+def test_mlflow_custom_tracking_uri(prov_ontology, temp_log, tmp_path):
+    """Test custom SQLite tracking URI."""
+    mlflow = pytest.importorskip("mlflow")
+
+    db_path = tmp_path / "mlflow.db"
+
+    result = run_dspy_rlm(
+        "What is Entity?",
+        prov_ontology,
+        max_iterations=3,
+        enable_mlflow=True,
+        mlflow_tracking_uri=f"sqlite:///{db_path}",
+        mlflow_experiment="test-uri",
+    )
+
+    # Verify database was created
+    assert db_path.exists()
+
+    # Verify we can query it
+    mlflow.set_tracking_uri(f"sqlite:///{db_path}")
+    runs = mlflow.search_runs(experiment_names=["test-uri"])
+    assert len(runs) >= 1
+
+
+def test_mlflow_with_memory_extraction(prov_ontology, temp_db, temp_log):
+    """Test MLflow metrics with memory extraction."""
+    mlflow = pytest.importorskip("mlflow")
+    from datetime import datetime, timezone
+
+    # Reset tracking URI to default to avoid interference from other tests
+    mlflow.set_tracking_uri("")
+
+    backend = SQLiteMemoryBackend(temp_db)
+
+    # Seed with a memory
+    from rlm_runtime.memory import MemoryItem
+
+    seed_memory = MemoryItem(
+        memory_id="test-mlflow-001",
+        title="Activity is a core PROV class",
+        description="Activity represents things that occur over time",
+        content="Use describe_entity('prov:Activity') to get details",
+        source_type="manual",
+        task_query="What is Activity?",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        tags=["prov", "entity-discovery"],
+        scope={"ontology": "prov", "task_types": ["entity-discovery"]},
+        provenance={"source": "test"},
+    )
+    backend.add_memory(seed_memory)
+
+    result = run_dspy_rlm(
+        "What is Activity?",
+        prov_ontology,
+        max_iterations=5,
+        memory_backend=backend,
+        retrieve_memories=3,
+        extract_memories=True,
+        enable_mlflow=True,
+        mlflow_experiment="test-memory-extraction",
+        log_path=temp_log,
+    )
+
+    # Query the run
+    runs = mlflow.search_runs(experiment_names=["test-memory-extraction"])
+    assert len(runs) > 0, "No MLflow runs found for experiment"
+    latest_run = runs.iloc[0]
+
+    # Check memory-related metrics
+    assert "metrics.memories_retrieved" in latest_run
+    assert "metrics.memories_extracted" in latest_run
+    assert "metrics.judgment_success" in latest_run
+    assert latest_run["metrics.memories_retrieved"] >= 1
+
+
+def test_mlflow_with_custom_tags(prov_ontology, temp_log):
+    """Test MLflow custom tags."""
+    mlflow = pytest.importorskip("mlflow")
+
+    # Reset tracking URI to default to avoid interference from other tests
+    mlflow.set_tracking_uri("")
+
+    result = run_dspy_rlm(
+        "What is Entity?",
+        prov_ontology,
+        max_iterations=3,
+        enable_mlflow=True,
+        mlflow_experiment="test-tags",
+        mlflow_tags={"experiment": "v2", "user": "test-user"},
+        log_path=temp_log,
+    )
+
+    # Query the run
+    runs = mlflow.search_runs(experiment_names=["test-tags"])
+    assert len(runs) > 0, "No MLflow runs found for experiment"
+    latest_run = runs.iloc[0]
+
+    # Check custom tags
+    assert latest_run["tags.experiment"] == "v2"
+    assert latest_run["tags.user"] == "test-user"
+    assert latest_run["tags.ontology"] == "prov"

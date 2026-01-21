@@ -4,7 +4,13 @@ This document provides context about this project's development environment and 
 
 ## Project Overview
 
-This is an nbdev-based project implementing RLM (Recursive Language Models) integration with RDF ontologies and SPARQL queries. The goal is to enable progressive disclosure over large RDF graphs while staying faithful to the rlmpaper protocol but using claudette as the LLM backend.
+This is a **hybrid nbdev project** implementing RLM (Recursive Language Models) integration with RDF ontologies and SPARQL queries. The goal is to enable progressive disclosure over large RDF graphs using ontology "affordances" (sense cards, meta-graphs, SHACL examples) to construct and execute SPARQL queries.
+
+**Architecture (v2):**
+- **Hybrid codebase**: nbdev notebooks for research/docs; stable runtime in handwritten `rlm_runtime/` package
+- **DSPy RLM** for execution loop (typed `SUBMIT`, structured trajectories, tool-surface validation)
+- **SQLite-backed ReasoningBank** for durable procedural memory with git-shipped memory packs
+- Faithful to RLM progressive disclosure philosophy (handles-not-dumps)
 
 ## Development Environment
 
@@ -33,22 +39,37 @@ uv pip install -e .
 
 ```
 rlm/
-├── nbs/                    # nbdev notebooks (source of truth)
+├── nbs/                    # nbdev notebooks (docs/experiments)
 │   ├── 00_core.ipynb       # Core RLM implementation
-│   ├── 01_repl_views.ipynb # (planned) Bounded view primitives
+│   ├── 01_ontology.ipynb   # GraphMeta + bounded views
+│   ├── 02_dataset_memory.ipynb  # RDF Dataset memory
+│   ├── 05_procedural_memory.ipynb  # ReasoningBank loop
+│   ├── 06_shacl_examples.ipynb  # SHACL indexing
 │   └── ...
-├── rlm/                    # Generated Python library (DO NOT EDIT)
-│   ├── core.py             # Generated from 00_core.ipynb
+├── rlm/                    # Generated Python library (nbdev-generated)
+│   ├── core.py             # RLM loop (claudette-backed, legacy)
+│   ├── ontology.py         # GraphMeta + bounded views
+│   ├── dataset.py          # RDF Dataset memory
+│   ├── procedural_memory.py # ReasoningBank (being migrated)
+│   ├── shacl_examples.py   # SHACL shape/query indexing
 │   ├── _rlmpaper_compat.py # Protocol artifacts (manually maintained)
 │   └── ...
+├── rlm_runtime/            # (v2) Handwritten runtime package
+│   ├── engine/             # DSPy RLM execution engine
+│   ├── memory/             # SQLite-backed ReasoningBank
+│   ├── tools/              # Bounded tool surface wrappers
+│   ├── logging/            # Observability (trajectory logs, MLflow integration)
+│   └── cli.py              # CLI entrypoint
 ├── rlmpaper/               # Git submodule (reference implementation)
 ├── docs/                   # Project documentation
-│   ├── planning/trajectory.md              # Master plan
-│   ├── tasks/00-core-alignment.md          # Implementation tasks
+│   ├── planning/trajectory_v2.md           # Master plan (v2, active)
+│   ├── planning/trajectory.md              # Original plan (superseded)
 │   ├── design/                             # Architecture & design
-│   ├── guides/                             # Usage guides
-│   └── ...
-├── ontology/               # RDF/OWL ontologies
+│   ├── tasks/                              # Implementation tasks
+│   └── guides/                             # Usage guides
+├── evals/                  # Evaluation framework
+├── ontology/               # RDF/OWL ontologies (32 files)
+├── tests/                  # Unit/integration/live tests
 ├── settings.ini            # nbdev configuration
 └── pyproject.toml          # Build configuration
 ```
@@ -223,31 +244,155 @@ git commit -m "Update documentation"
 
 ## Architecture Decisions
 
+### Non-Negotiable Invariants
+
+These principles from the RLM paper must be preserved across all implementations:
+
+1. **Context externalization** - Large context (graphs, results) stays in REPL; model sees bounded summaries
+2. **REPL-first discovery** - Agent explores via bounded view functions before answering
+3. **Recursive delegation** - Sub-LLM calls for meaning extraction; root model orchestrates
+4. **Handles-not-dumps** - Results/graphs stored as handles; inspection via bounded views
+5. **Bounded iteration** - Max iterations and call budgets enforced; fallback behaviors explicit
+
+### v2 Architecture (DSPy + SQLite ReasoningBank)
+
+**Execution Engine:**
+- Migrating from claudette-backed `rlm_run()` to **DSPy RLM** with typed `SUBMIT`
+- Custom `NamespaceCodeInterpreter` executes code in host Python with persistent state
+- Tool-only access pattern: bounded view functions exposed, raw graphs hidden
+
+**Query Construction Contract:**
+Every run must produce structured output via `SUBMIT(sparql=..., answer=..., evidence=...)`:
+- `sparql: str` - Exact executed query
+- `answer: str` - Grounded answer
+- `evidence: dict` - URIs used, result samples, handle summaries
+
+**ReasoningBank (Procedural Memory):**
+- SQLite-backed storage replacing JSON/in-memory store
+- FTS5 BM25 retrieval (replaces `rank-bm25` dependency)
+- Memory packs: JSONL files with stable IDs, committed to git
+- Closed loop: retrieve → inject → run → judge → extract → store
+
+**Four-Layer Context Injection:**
+1. Sense card (~600 chars) - Compact ontology metadata with 100% URI grounding
+2. Procedural memories - Retrieved strategies from SQLite
+3. Ontology-specific recipes - Curated patterns (optional)
+4. Base context - GraphMeta summary/stats
+
+**Observability & Experiment Tracking:**
+- **Dual logging**: JSONL trajectory logs (real-time debugging) + MLflow (structured analysis)
+- **MLflow integration**: Parameters, metrics, tags, and artifacts for programmatic querying
+- **DSPy callbacks**: Capture LLM calls, module execution, and tool usage
+- **Memory event logging**: Track retrieval, extraction, judgment, and storage operations
+- Optional custom tracking URIs for isolated experiment databases
+
+See design documents in `docs/design/` for details.
+
 ### RLM Implementation Strategy
 
 We **do not** directly use the rlmpaper package as a dependency because:
 
 1. **Name conflict**: Both packages are named `rlm`
-2. **LLM backend choice**: We use **claudette** instead of rlmpaper's anthropic/openai clients
-3. **Solveit compatibility**: We need local REPL execution compatible with Solveit
+2. **LLM backend choice**: Migrating from claudette to DSPy RLM
+3. **Solveit compatibility**: Need local REPL execution compatible with Solveit
 
 Instead, we:
 - **Follow rlmpaper's protocol** (prompts, types, parsing, iteration semantics)
-- **Replace LLM clients** with claudette `Chat`
 - **Copy protocol artifacts** into `rlm/_rlmpaper_compat.py`
 - **Reference rlmpaper** as a git submodule for consultation
-
-See `docs/00-core-rlmpaper-alignment.md` for details.
 
 ### Key Dependencies
 
 From `settings.ini`:
 - `fastcore` - Fast.ai utilities
-- `claudette` - Claude API wrapper (our LLM backend)
+- `claudette` - Claude API wrapper (legacy backend)
+- `dspy-ai` - DSPy framework (v2 backend)
 - `dialoghelper` - Solveit inspection tools
 - `mistletoe` - Markdown parsing
 - `rdflib` - RDF graph manipulation
 - `sparqlx` - SPARQL query execution
+- `mlflow` - (Optional) Experiment tracking and observability
+
+## Observability and Experiment Tracking
+
+The project provides comprehensive observability through dual logging systems:
+
+### JSONL Trajectory Logs (Real-time)
+
+Real-time event stream for debugging and inspection:
+
+```python
+from rlm_runtime.engine.dspy_rlm import run_dspy_rlm
+
+result = run_dspy_rlm(
+    "What is Activity?",
+    "ontology/prov.ttl",
+    log_path="trajectory.jsonl",  # JSONL event stream
+    log_llm_calls=True             # Include LLM calls in log
+)
+```
+
+**Logged events:**
+- `session_start` / `session_end` - Run boundaries
+- `module_start` / `module_end` - DSPy module execution
+- `llm_call` / `llm_response` - LLM interactions
+- `run_creation` / `trajectory_creation` - Memory backend provenance
+- `memory_retrieval` / `memory_extraction` / `memory_storage` - Memory operations
+- `trajectory_judgment` - Success/failure assessment
+
+### MLflow Integration (Structured Analysis)
+
+Structured experiment tracking for programmatic querying and comparison:
+
+```python
+# Basic MLflow tracking
+result = run_dspy_rlm(
+    "What is Activity?",
+    "ontology/prov.ttl",
+    enable_mlflow=True
+)
+
+# With experiment organization
+result = run_dspy_rlm(
+    "What is Activity?",
+    "ontology/prov.ttl",
+    enable_mlflow=True,
+    mlflow_experiment="PROV Ontology Queries",
+    mlflow_run_name="activity-discovery-v1",
+    mlflow_tags={"experiment": "v2", "user": "researcher"}
+)
+
+# Custom SQLite tracking backend
+result = run_dspy_rlm(
+    "What is Activity?",
+    "ontology/prov.ttl",
+    enable_mlflow=True,
+    mlflow_tracking_uri="sqlite:///experiments/mlflow.db"
+)
+
+# Query results programmatically
+import mlflow
+runs = mlflow.search_runs(
+    filter_string="params.ontology = 'prov' AND metrics.converged = 1",
+    order_by=["metrics.iteration_count ASC"]
+)
+```
+
+**Logged data:**
+
+- **Parameters** (searchable): `query`, `ontology`, `max_iterations`, `model`, `sub_model`, `has_memory`
+- **Metrics** (aggregatable): `iteration_count`, `converged`, `memories_retrieved`, `memories_extracted`, `judgment_success`
+- **Tags** (filterable): `ontology`, custom tags
+- **Artifacts**: Trajectory JSONL, SPARQL queries, evidence JSON
+
+**MLflow features:**
+- Graceful degradation (warnings on failure, never crashes)
+- Opt-in (disabled by default)
+- Custom tracking URIs for isolated experiments
+- Integration with DSPy autolog for optimizer traces
+- UI available via `mlflow ui` command
+
+See `rlm_runtime/logging/mlflow_integration.py` for implementation details.
 
 ## Testing
 
@@ -298,9 +443,14 @@ git commit -m "Update rlmpaper submodule"
 
 The project follows a documentation-driven approach:
 
-1. **Trajectory document** (`docs/planning/trajectory.md`) - Master plan
-2. **Task documents** (`docs/tasks/`) - Specific implementation tasks
-3. **Design documents** (`docs/design/`) - Architecture and patterns
+1. **Trajectory document** (`docs/planning/trajectory_v2.md`) - Master plan (active)
+2. **Design documents** (`docs/design/`) - Architecture and patterns:
+   - `reasoningbank-sqlite-architecture.md` - SQLite memory store design
+   - `claudette-to-dspy-migration.md` - DSPy migration plan
+   - `dspy-migration-system-analysis.md` - Module-by-module impact
+   - `ontology-query-construction-with-rlm-reasoningbank-dspy.md` - Query construction requirements
+   - `hybrid-nbdev-runtime-refactor.md` - Hybrid codebase approach
+3. **Task documents** (`docs/tasks/`) - Specific implementation tasks
 4. **Usage guides** (`docs/guides/`) - How-to documentation
 5. **Notebook markdown cells** - Inline documentation
 6. **Docstrings** - Fast.ai style docstrings in exported functions
@@ -364,12 +514,32 @@ Eval reports are generated in notebooks (`nbs/eval_reports.ipynb`) for GitHub Pa
 
 See section "Executing Notebooks with Outputs" for workflow details.
 
-## Current Work
+## Current Work (v2 Trajectory)
 
-The project has completed Stage 4 (SHACL query template indexing). Current focus:
-- Building evaluation framework in `evals/`
-- Creating eval report notebooks for GitHub Pages deployment
-- See `docs/planning/trajectory.md` for overall roadmap
+The project is implementing trajectory v2. See `docs/planning/trajectory_v2.md` for the full roadmap.
+
+**Completed (v1):**
+- Ontology handles + GraphMeta scaffolding + bounded views
+- Dataset memory model with mem/prov graphs, provenance, snapshots
+- SPARQL result handles + bounded sampling/view patterns
+- SHACL shape/query template indexing
+- Procedural memory closed loop (notebook form)
+- Evaluation framework in `evals/`
+
+**v2 Phases:**
+
+| Phase | Goal | Status |
+|-------|------|--------|
+| **A** | Stable runtime surface (`rlm_runtime/`) | Completed |
+| **B** | DSPy RLM with typed outputs | Completed |
+| **C** | SQLite ReasoningBank + memory packs | Completed |
+| **D** | SHACL-driven query construction | Planned |
+| **E** | Observability (MLflow + JSONL logs) | Completed |
+
+**Known Gaps to Address:**
+- Dataset snapshot `session_id` restoration incomplete
+- Replace `rank-bm25` with SQLite FTS5
+- Enforce query-construction output contract (`{sparql, answer, evidence}`)
 
 ## References
 

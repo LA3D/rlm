@@ -58,6 +58,11 @@ def run_dspy_rlm(
     trajectory_id: Optional[str] = None,
     log_path: Optional[str | Path] = None,
     enable_mlflow: bool = False,
+    mlflow_experiment: Optional[str] = None,
+    mlflow_run_name: Optional[str] = None,
+    mlflow_tracking_uri: Optional[str] = None,
+    mlflow_log_compilation: bool = False,
+    mlflow_tags: Optional[dict[str, str]] = None,
     log_llm_calls: bool = True,
 ) -> DSPyRLMResult:
     """Run DSPy RLM for ontology query construction with optional memory integration and logging.
@@ -76,7 +81,12 @@ def run_dspy_rlm(
         run_id: Optional run ID for provenance tracking
         trajectory_id: Optional trajectory ID for provenance tracking
         log_path: Optional path to JSONL log file for trajectory logging
-        enable_mlflow: Whether to enable MLflow auto-tracing (default False)
+        enable_mlflow: Whether to enable MLflow tracking (default False)
+        mlflow_experiment: Optional MLflow experiment name (creates if doesn't exist)
+        mlflow_run_name: Optional name for this MLflow run
+        mlflow_tracking_uri: Optional MLflow tracking URI (e.g., "sqlite:///mlflow.db")
+        mlflow_log_compilation: Whether to log optimizer compilation traces (default False)
+        mlflow_tags: Optional dict of custom tags for filtering runs
         log_llm_calls: Whether to log LLM calls in trajectory log (default True)
 
     Returns:
@@ -86,10 +96,10 @@ def run_dspy_rlm(
         ValueError: If ANTHROPIC_API_KEY not set
         FileNotFoundError: If ontology_path doesn't exist
 
-    Example:
+    Examples:
         from rlm_runtime.memory import SQLiteMemoryBackend
 
-        # With memory retrieval and logging
+        # Basic usage with memory retrieval and logging
         backend = SQLiteMemoryBackend("memory.db")
         result = run_dspy_rlm(
             "What is Activity?",
@@ -99,16 +109,38 @@ def run_dspy_rlm(
             log_path="trajectory.jsonl"
         )
 
-        # With memory extraction and MLflow
+        # With memory extraction and basic MLflow
         result = run_dspy_rlm(
             "What is Entity?",
             "prov.ttl",
             memory_backend=backend,
             extract_memories=True,
-            run_id="r-001",
-            trajectory_id="t-001",
-            log_path="trajectory.jsonl",
             enable_mlflow=True
+        )
+
+        # MLflow with experiment organization
+        result = run_dspy_rlm(
+            "What is Activity?",
+            "prov.ttl",
+            enable_mlflow=True,
+            mlflow_experiment="PROV Ontology Queries",
+            mlflow_run_name="activity-discovery-v1"
+        )
+
+        # MLflow with custom SQLite backend and tags
+        result = run_dspy_rlm(
+            "What is Activity?",
+            "prov.ttl",
+            enable_mlflow=True,
+            mlflow_tracking_uri="sqlite:///experiments/mlflow.db",
+            mlflow_tags={"experiment": "v2", "user": "researcher"}
+        )
+
+        # Query results programmatically
+        import mlflow
+        runs = mlflow.search_runs(
+            filter_string="params.ontology = 'prov' AND metrics.converged = 1",
+            order_by=["metrics.iteration_count ASC"]
         )
     """
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -117,6 +149,9 @@ def run_dspy_rlm(
     ontology_path = Path(ontology_path)
     if not ontology_path.exists():
         raise FileNotFoundError(f"Ontology not found: {ontology_path}")
+
+    # Extract ontology name early (needed for MLflow setup)
+    onto_name = ontology_path.stem
 
     # Import DSPy (deferred to allow testing without API key)
     import dspy
@@ -163,20 +198,48 @@ def run_dspy_rlm(
         if verbose:
             print(f"Logging trajectory to: {log_path}")
 
-    # Enable MLflow auto-tracing if requested
+    # Setup MLflow tracking if requested
+    mlflow_active = False
+    mlflow_run_id = None
+
     if enable_mlflow:
-        try:
-            import mlflow
-            mlflow.dspy.autolog()
+        from rlm_runtime.logging.mlflow_integration import (
+            setup_mlflow_tracking,
+            log_run_params,
+            log_run_tags,
+        )
+
+        mlflow_active, mlflow_run_id = setup_mlflow_tracking(
+            experiment_name=mlflow_experiment,
+            run_name=mlflow_run_name or f"query-{trajectory_id[:8]}",
+            tracking_uri=mlflow_tracking_uri,
+            log_compilation=mlflow_log_compilation,
+        )
+
+        if mlflow_active:
+            # Log parameters immediately (before execution)
+            log_run_params(
+                query=query,
+                ontology_name=onto_name,
+                max_iterations=max_iterations,
+                model=model,
+                sub_model=sub_model,
+                has_memory=memory_backend is not None,
+            )
+
+            # Log tags for filtering
+            log_run_tags(
+                ontology_name=onto_name,
+                custom_tags=mlflow_tags,
+            )
+
             if verbose:
-                print("MLflow auto-tracing enabled")
-        except ImportError:
-            print("Warning: MLflow not installed, skipping auto-tracing")
+                print(f"MLflow tracking active: experiment={mlflow_experiment or 'default'}, run={mlflow_run_id}")
 
     # Configure DSPy models and callbacks
     dspy.configure(
         lm=dspy.LM(model, temperature=0.2, max_tokens=1400, cache=False),
-        callbacks=callbacks if callbacks else None
+        callbacks=callbacks  # Always pass list (empty or populated)
     )
     sub_lm = dspy.LM(sub_model, temperature=0.2, max_tokens=1200, cache=False)
 
@@ -205,7 +268,6 @@ def run_dspy_rlm(
         # Let rdflib auto-detect from file extension
         g.parse(ontology_path)
 
-    onto_name = ontology_path.stem
     meta = GraphMeta(graph=g, name=onto_name)
 
     # Record run in memory backend if provided
@@ -217,6 +279,10 @@ def run_dspy_rlm(
             ontology_path=str(ontology_path),
             notes=f"Query: {query}"
         )
+
+        # Log run creation
+        if memory_logger:
+            memory_logger.log_run_creation(run_id, model, onto_name)
 
     # Create bounded tools
     tools = make_ontology_tools(meta, include_sparql=True)
@@ -312,6 +378,16 @@ def run_dspy_rlm(
         converged=True,  # DSPy RLM always returns something
     )
 
+    # Log initial metrics to MLflow (before memory extraction)
+    if mlflow_active:
+        from rlm_runtime.logging.mlflow_integration import log_run_metrics
+
+        log_run_metrics(
+            iteration_count=result.iteration_count,
+            converged=result.converged,
+            memories_retrieved=len(retrieved_memories) if retrieved_memories else 0,
+        )
+
     # Store trajectory in memory backend
     if memory_backend and trajectory_id and run_id:
         memory_backend.add_trajectory(
@@ -328,6 +404,16 @@ def run_dspy_rlm(
             },
             rlm_log_path=str(log_path) if log_path else None,
         )
+
+        # Log trajectory creation
+        if memory_logger:
+            memory_logger.log_trajectory_creation(
+                trajectory_id,
+                run_id,
+                query,
+                result.iteration_count,
+                result.converged
+            )
 
     # Record memory usage if memories were retrieved
     if memory_backend and retrieved_memories and trajectory_id:
@@ -410,6 +496,31 @@ def run_dspy_rlm(
                     memory_backend.update_memory_stats(mem.memory_id, failure=True)
                     if memory_logger:
                         memory_logger.log_stats_update(mem.memory_id, failure=True)
+
+        # Update MLflow metrics with extraction results
+        if mlflow_active:
+            from rlm_runtime.logging.mlflow_integration import log_run_metrics
+
+            log_run_metrics(
+                iteration_count=result.iteration_count,
+                converged=result.converged,
+                memories_retrieved=len(retrieved_memories) if retrieved_memories else 0,
+                memories_extracted=len(new_memories),
+                judgment_success=judgment["is_success"],
+            )
+
+    # Log artifacts to MLflow before closing
+    if mlflow_active:
+        from rlm_runtime.logging.mlflow_integration import log_artifacts, end_mlflow_run
+
+        log_artifacts(
+            log_path=Path(log_path) if log_path else None,
+            sparql_query=result.sparql,
+            evidence=result.evidence,
+        )
+
+        # End the MLflow run
+        end_mlflow_run()
 
     # Close callbacks to write session_end
     if callbacks:
