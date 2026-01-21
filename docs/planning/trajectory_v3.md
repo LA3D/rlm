@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-21
 
-**Status:** 🚧 **Planning / kickoff** (v2 delivered the foundation; v3 completes DSPy-only + remote SPARQL + UniProt eval harness + SHACL tools)
+**Status:** ✅ **Phases 1-2 COMPLETE** | 🚧 **Phases 3-7 planned** (v2 delivered the foundation; v3 completes DSPy-only + remote SPARQL + UniProt eval harness + SHACL tools)
 
 This document supersedes `docs/planning/trajectory_v2.md` as the active trajectory for *finishing the DSPy migration*, especially the missing SPARQL/graph-navigation capabilities required for UniProt-style endpoint evaluation.
 
@@ -448,7 +448,18 @@ UniProt evaluation is inherently "live" (networked). The harness must support:
 
 ## v3 Phases (with "done" criteria)
 
-### Phase 1 — Define DSPy "Graph REPL" contract (parity with legacy ergonomics)
+**Phase Status:**
+- ✅ Phase 1: Foundation correctness — **COMPLETED** (Jan 18-21, 2026)
+- ✅ Phase 2: Remote SPARQL integration — **COMPLETED** (Jan 21, 2026)
+- 🔄 Phase 3: Procedural memory model — **PLANNED**
+- 🔄 Phase 4: Eval harness & learning metrics — **PLANNED**
+- 🔄 Phase 5: Human feedback integration — **PLANNED**
+- 🔄 Phase 6: Retire claudette — **PLANNED**
+- 🔄 Phase 7: SHACL-driven query construction — **PLANNED**
+
+### Phase 1 — Define DSPy "Graph REPL" contract (parity with legacy ergonomics) ✅
+
+**Status:** ✅ **COMPLETED** (Jan 18-21, 2026)
 
 **Problem:** claudette-backed RLM implicitly provided a graph-friendly namespace; DSPy needs an explicit bootstrap contract.
 
@@ -464,37 +475,77 @@ Deliverables:
   - errors/retries
   - SPARQL executions and result handle summaries
 
-**v2 correctness items (must address):**
+**What was delivered:**
 
-- **Dataset snapshot `session_id` restoration**: Fix the incomplete restoration logic in `rlm/dataset.py::load_snapshot`. Tests currently flag that `session_id` is not properly restored when loading snapshots. This affects provenance tracking and memory continuity.
+- ✅ **Dataset snapshot `session_id` restoration** (commit 97be6a6, Jan 18):
+  - Fixed `rlm/dataset.py::load_snapshot` to properly restore session_id
+  - Supports both new format (explicit sessionId triple) and old format (from prov events)
+  - All 15 session tracking tests passing
 
-- **Tool output bounding enforcement**: Audit all DSPy-exposed tools to ensure they clamp limits and do not dump large outputs. Specifically:
-  - All SPARQL tools must inject/enforce `LIMIT` clauses
-  - Result handle views must return bounded samples, not full result sets
-  - Graph exploration tools must return bounded neighborhoods, not full serializations
-  - Add explicit tests that verify bounding behavior (e.g., "tool X never returns more than N rows/triples")
+- ✅ **Tool output bounding enforcement** (commits df5a8a6, Jan 21):
+  - All `ontology_tools.py` tools clamp limits:
+    - `search_entity`: [1, 10]
+    - `describe_entity`: [1, 25]
+    - `probe_relationships`: [1, 15]
+    - `sparql_select`: injects LIMIT with max_limit (default 100)
+  - All `sparql_tools.py` tools clamp limits:
+    - `res_head`, `res_sample`: [1, 100]
+    - `res_where`: [1, 200]
+    - `res_group`: [1, 50]
+    - `res_distinct`: [1, 100]
+  - Explicit tests added (31 tests in test_sparql_tools.py, all passing)
 
-Done when:
-- A DSPy run can perform "graph navigation" in the REPL the same way as before (iterative discovery, bounded views).
-- Trajectories are rich enough to drive graders and memory extraction without scraping ad hoc text.
-- Dataset snapshots correctly restore `session_id` (verified by existing tests passing).
-- All exposed tools have documented and tested output bounds.
+**Done criteria satisfied:**
+- ✅ DSPy runs perform graph navigation with iterative discovery and bounded views
+- ✅ Trajectories include structured events (code, outputs, errors, SPARQL executions)
+- ✅ Dataset snapshots correctly restore `session_id` (verified by passing tests)
+- ✅ All exposed tools have documented and tested output bounds
 
-### Phase 2 — Remote SPARQL tool integration (DSPy ↔ `sparql_handles`)
+### Phase 2 — Remote SPARQL tool integration (DSPy ↔ `sparql_handles`) ✅
+
+**Status:** ✅ **COMPLETED** (Jan 21, 2026)
 
 **Problem:** current DSPy tool surface only supports local `rdflib.Graph.query()`; UniProt tasks require endpoint execution with `GRAPH` + `SERVICE`.
 
-Deliverables:
-- A bounded remote SPARQL tool exposed to DSPy runs (conceptually: `sparql_query(...)`):
-  - delegates to `rlm/sparql_handles.py` for remote execution
-  - enforces timeouts and bounded outputs
-  - requires/injects `LIMIT` where appropriate
-  - returns a **handle summary** + stores a handle for later views
-- A minimal set of handle view operations available in DSPy runs (conceptually: `res_sample`, `res_head`, etc.).
-- Evidence contract update: `evidence` must include endpoint + query + bounded sample rows (or handle summary references).
+**What was delivered:**
 
-Done when:
-- A DSPy run can execute a UniProt exemplar query containing `GRAPH` and/or `SERVICE`, store a result handle, and answer from bounded samples.
+- ✅ **Remote SPARQL tool factory** (`rlm_runtime/tools/sparql_tools.py`, commit 06adbd1):
+  - `make_sparql_query_tool()`: wraps `sparql_query()` for remote endpoints
+  - Enforces timeouts (default 30s, configurable)
+  - Enforces bounded outputs (default 100 rows, configurable)
+  - Injects LIMIT clauses where missing
+  - Returns handle summary, stores handle in namespace
+
+- ✅ **Result handle view tools**:
+  - `res_head`, `res_sample`, `res_where`, `res_group`, `res_distinct`
+  - All tools take string handle names (consistent API)
+  - All tools enforce safety bounds (documented in Phase 1)
+
+- ✅ **DSPy engine support** (`rlm_runtime/engine/dspy_rlm.py`, commit 06adbd1):
+  - `run_dspy_rlm_with_tools()`: accepts pre-built tools and context
+  - Supports remote SPARQL without local ontology files
+  - Full memory integration, MLflow logging, trajectory tracking
+
+- ✅ **Eval harness integration** (`evals/runners/task_runner.py`, commit 06adbd1):
+  - `_execute_dspy_rlm()`: runs tasks with DSPy backend
+  - `_serialize_dspy_trajectory()`: converts trajectories for graders
+  - Reads config from task YAML (max_results, timeout, ontology_name)
+  - CLI `--dspy` flag to select backend
+
+- ✅ **UniProt eval tasks** (commit 3d6b932):
+  - 8 tasks across 5 categories (complex, federated, multigraph, multihop, taxonomy)
+  - Tasks test `GRAPH`, `SERVICE`, hierarchy patterns
+
+- ✅ **Code review fixes** (commit df5a8a6):
+  - Fixed interpreter.namespace crash
+  - Added safety bounds to all view tools
+  - Clarified API documentation
+
+**Done criteria satisfied:**
+- ✅ DSPy runs can execute UniProt queries with `GRAPH` and `SERVICE`
+- ✅ Result handles stored and inspected via bounded views
+- ✅ `--dspy` flag works without crashes
+- ✅ Evidence contract includes endpoint, query, bounded samples
 
 ### Phase 3 — Procedural memory model + dynamic affordance discovery
 
