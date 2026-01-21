@@ -2,6 +2,13 @@
 
 Provides structured experiment tracking, parameter/metric logging,
 and artifact storage with graceful degradation when MLflow unavailable.
+
+Requirements:
+    - mlflow >= 2.17.0 (for DSPy integration with mlflow.dspy.autolog)
+    - Optional dependency - system degrades gracefully if not installed
+
+Install:
+    uv pip install mlflow
 """
 
 from __future__ import annotations
@@ -40,19 +47,21 @@ def setup_mlflow_tracking(
     try:
         import mlflow
 
+        # Check for DSPy integration (requires mlflow >= 2.17.0)
+        if not hasattr(mlflow, 'dspy'):
+            warnings.warn(
+                "MLflow DSPy integration not available. "
+                "Please upgrade to mlflow >= 2.17.0 for full DSPy support. "
+                "Install: uv pip install 'mlflow>=2.17.0'",
+                UserWarning
+            )
+            return False, None
+
         # Set tracking URI if provided
         if tracking_uri:
             mlflow.set_tracking_uri(tracking_uri)
 
-        # Set or create experiment
-        if experiment_name:
-            mlflow.set_experiment(experiment_name)
-
-        # Start a new run
-        mlflow.start_run(run_name=run_name)
-        run_id = mlflow.active_run().info.run_id
-
-        # Configure DSPy autolog with enhanced settings
+        # Configure DSPy autolog BEFORE starting run to avoid leaking runs on failure
         mlflow.dspy.autolog(
             log_traces=True,                           # Inference traces
             log_traces_from_compile=log_compilation,   # Optimizer traces (opt-in)
@@ -62,6 +71,14 @@ def setup_mlflow_tracking(
             silent=False,                              # Show what's being logged
         )
 
+        # Set or create experiment
+        if experiment_name:
+            mlflow.set_experiment(experiment_name)
+
+        # Start a new run (after autolog configuration)
+        mlflow.start_run(run_name=run_name)
+        run_id = mlflow.active_run().info.run_id
+
         return True, run_id
 
     except ImportError:
@@ -69,6 +86,13 @@ def setup_mlflow_tracking(
         return False, None
     except Exception as e:
         warnings.warn(f"MLflow setup failed: {e}", UserWarning)
+        # End any active run to avoid leaks
+        try:
+            import mlflow
+            if mlflow.active_run():
+                mlflow.end_run()
+        except:
+            pass
         return False, None
 
 
@@ -239,21 +263,38 @@ def log_artifacts(
         if log_path and log_path.exists():
             mlflow.log_artifact(str(log_path), artifact_path="trajectory")
 
-        # Log SPARQL query as text file
+        # Log SPARQL query using mlflow.log_text (no temp files needed)
         if sparql_query:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".sparql", delete=False) as f:
-                f.write(sparql_query)
-                temp_sparql = f.name
-            mlflow.log_artifact(temp_sparql, artifact_path="queries")
-            Path(temp_sparql).unlink()  # Cleanup temp file
+            try:
+                mlflow.log_text(sparql_query, "queries/query.sparql")
+            except AttributeError:
+                # Fallback for older MLflow versions without log_text
+                temp_sparql = None
+                try:
+                    with tempfile.NamedTemporaryFile(mode="w", suffix=".sparql", delete=False) as f:
+                        f.write(sparql_query)
+                        temp_sparql = f.name
+                    mlflow.log_artifact(temp_sparql, artifact_path="queries")
+                finally:
+                    if temp_sparql and Path(temp_sparql).exists():
+                        Path(temp_sparql).unlink()
 
-        # Log evidence as JSON
+        # Log evidence using mlflow.log_dict (no temp files needed)
         if evidence:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-                json.dump(evidence, f, indent=2)
-                temp_evidence = f.name
-            mlflow.log_artifact(temp_evidence, artifact_path="evidence")
-            Path(temp_evidence).unlink()  # Cleanup temp file
+            try:
+                mlflow.log_dict(evidence, "evidence/evidence.json")
+            except (AttributeError, TypeError):
+                # Fallback: AttributeError for older MLflow, TypeError for non-serializable objects
+                temp_evidence = None
+                try:
+                    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+                        # Use default=str to handle non-JSON-serializable objects
+                        json.dump(evidence, f, indent=2, default=str)
+                        temp_evidence = f.name
+                    mlflow.log_artifact(temp_evidence, artifact_path="evidence")
+                finally:
+                    if temp_evidence and Path(temp_evidence).exists():
+                        Path(temp_evidence).unlink()
 
     except Exception as e:
         warnings.warn(f"Failed to log MLflow artifacts: {e}", UserWarning)

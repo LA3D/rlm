@@ -14,6 +14,16 @@ from rlm_runtime.engine.dspy_rlm import run_dspy_rlm
 from rlm_runtime.memory import SQLiteMemoryBackend
 
 
+# Mark all tests as live (API calls) and skip if API key not available
+pytestmark = [
+    pytest.mark.live,
+    pytest.mark.skipif(
+        not os.environ.get("ANTHROPIC_API_KEY"),
+        reason="ANTHROPIC_API_KEY not set (required for live tests)",
+    ),
+]
+
+
 @pytest.fixture
 def prov_ontology():
     """Path to PROV ontology."""
@@ -40,6 +50,31 @@ def temp_log():
     # Cleanup
     if os.path.exists(log_path):
         os.unlink(log_path)
+
+
+@pytest.fixture
+def isolated_mlflow():
+    """Isolate MLflow tracking to a temporary directory."""
+    mlflow = pytest.importorskip("mlflow")
+
+    # Save original tracking URI
+    original_uri = mlflow.get_tracking_uri()
+
+    # Create temp directory for MLflow
+    import tempfile
+    import shutil
+    temp_dir = tempfile.mkdtemp()
+    temp_uri = f"file:{temp_dir}/mlruns"
+
+    # Set temp tracking URI
+    mlflow.set_tracking_uri(temp_uri)
+
+    yield temp_uri
+
+    # Restore original URI and cleanup
+    mlflow.set_tracking_uri(original_uri)
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
 
 
 def test_trajectory_logging_basic(prov_ontology, temp_log):
@@ -240,12 +275,9 @@ def test_auto_generated_ids(prov_ontology, temp_db, temp_log):
     assert stats["trajectories"] >= 1
 
 
-def test_mlflow_logs_parameters(prov_ontology, temp_log):
+def test_mlflow_logs_parameters(prov_ontology, temp_log, isolated_mlflow):
     """Test that parameters are logged to MLflow."""
     mlflow = pytest.importorskip("mlflow")
-
-    # Reset tracking URI to default
-    mlflow.set_tracking_uri("")
 
     result = run_dspy_rlm(
         "What is Entity?",
@@ -267,12 +299,9 @@ def test_mlflow_logs_parameters(prov_ontology, temp_log):
     assert latest_run["params.query"] == "What is Entity?"
 
 
-def test_mlflow_logs_metrics(prov_ontology, temp_log):
+def test_mlflow_logs_metrics(prov_ontology, temp_log, isolated_mlflow):
     """Test that metrics are logged to MLflow."""
     mlflow = pytest.importorskip("mlflow")
-
-    # Reset tracking URI to default
-    mlflow.set_tracking_uri("")
 
     result = run_dspy_rlm(
         "What is Activity?",
@@ -292,12 +321,9 @@ def test_mlflow_logs_metrics(prov_ontology, temp_log):
     assert latest_run["metrics.converged"] == 1.0  # Should be 1 for True
 
 
-def test_mlflow_search_runs_programmatic(prov_ontology, temp_log):
+def test_mlflow_search_runs_programmatic(prov_ontology, temp_log, isolated_mlflow):
     """Test programmatic querying of MLflow runs."""
     mlflow = pytest.importorskip("mlflow")
-
-    # Reset tracking URI to default
-    mlflow.set_tracking_uri("")
 
     # Run multiple queries
     for query in ["What is Entity?", "What is Activity?"]:
@@ -345,13 +371,10 @@ def test_mlflow_custom_tracking_uri(prov_ontology, temp_log, tmp_path):
     assert len(runs) >= 1
 
 
-def test_mlflow_with_memory_extraction(prov_ontology, temp_db, temp_log):
+def test_mlflow_with_memory_extraction(prov_ontology, temp_db, temp_log, isolated_mlflow):
     """Test MLflow metrics with memory extraction."""
     mlflow = pytest.importorskip("mlflow")
     from datetime import datetime, timezone
-
-    # Reset tracking URI to default to avoid interference from other tests
-    mlflow.set_tracking_uri("")
 
     backend = SQLiteMemoryBackend(temp_db)
 
@@ -396,12 +419,9 @@ def test_mlflow_with_memory_extraction(prov_ontology, temp_db, temp_log):
     assert latest_run["metrics.memories_retrieved"] >= 1
 
 
-def test_mlflow_with_custom_tags(prov_ontology, temp_log):
+def test_mlflow_with_custom_tags(prov_ontology, temp_log, isolated_mlflow):
     """Test MLflow custom tags."""
     mlflow = pytest.importorskip("mlflow")
-
-    # Reset tracking URI to default to avoid interference from other tests
-    mlflow.set_tracking_uri("")
 
     result = run_dspy_rlm(
         "What is Entity?",

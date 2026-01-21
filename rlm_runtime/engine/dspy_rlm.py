@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, TYPE_CHECKING
 import os
+import warnings
 
 if TYPE_CHECKING:
     from rlm_runtime.memory import MemoryBackend
@@ -350,154 +351,37 @@ def run_dspy_rlm(
     )
 
     # Execute
-    pred = rlm(query=query, context=context)
+    # Wrap execution in try/finally to ensure cleanup
+    try:
+        pred = rlm(query=query, context=context)
 
-    # Extract trajectory
-    trajectory = getattr(pred, "trajectory", [])
-    # Convert trajectory steps to dicts (they may be custom objects)
-    trajectory_dicts = []
-    for step in trajectory:
-        if isinstance(step, dict):
-            trajectory_dicts.append(step)
-        else:
-            # Try to convert to dict
-            trajectory_dicts.append(
-                {
-                    "code": getattr(step, "code", ""),
-                    "output": str(getattr(step, "output", "")),
-                }
-            )
+        # Extract trajectory
+        trajectory = getattr(pred, "trajectory", [])
+        # Convert trajectory steps to dicts (they may be custom objects)
+        trajectory_dicts = []
+        for step in trajectory:
+            if isinstance(step, dict):
+                trajectory_dicts.append(step)
+            else:
+                # Try to convert to dict
+                trajectory_dicts.append(
+                    {
+                        "code": getattr(step, "code", ""),
+                        "output": str(getattr(step, "output", "")),
+                    }
+                )
 
-    # Build result
-    result = DSPyRLMResult(
-        answer=pred.answer,
-        sparql=pred.sparql if hasattr(pred, "sparql") else None,
-        evidence=pred.evidence if hasattr(pred, "evidence") else {},
-        trajectory=trajectory_dicts,
-        iteration_count=len(trajectory),
-        converged=True,  # DSPy RLM always returns something
-    )
-
-    # Log initial metrics to MLflow (before memory extraction)
-    if mlflow_active:
-        from rlm_runtime.logging.mlflow_integration import log_run_metrics
-
-        log_run_metrics(
-            iteration_count=result.iteration_count,
-            converged=result.converged,
-            memories_retrieved=len(retrieved_memories) if retrieved_memories else 0,
+        # Build result
+        result = DSPyRLMResult(
+            answer=pred.answer,
+            sparql=pred.sparql if hasattr(pred, "sparql") else None,
+            evidence=pred.evidence if hasattr(pred, "evidence") else {},
+            trajectory=trajectory_dicts,
+            iteration_count=len(trajectory),
+            converged=True,  # DSPy RLM always returns something
         )
 
-    # Store trajectory in memory backend
-    if memory_backend and trajectory_id and run_id:
-        memory_backend.add_trajectory(
-            trajectory_id=trajectory_id,
-            run_id=run_id,
-            task_query=query,
-            final_answer=result.answer,
-            iteration_count=result.iteration_count,
-            converged=result.converged,
-            artifact={
-                "sparql": result.sparql,
-                "evidence": result.evidence,
-                "trajectory": result.trajectory,
-            },
-            rlm_log_path=str(log_path) if log_path else None,
-        )
-
-        # Log trajectory creation
-        if memory_logger:
-            memory_logger.log_trajectory_creation(
-                trajectory_id,
-                run_id,
-                query,
-                result.iteration_count,
-                result.converged
-            )
-
-    # Record memory usage if memories were retrieved
-    if memory_backend and retrieved_memories and trajectory_id:
-        for i, mem in enumerate(retrieved_memories, 1):
-            memory_backend.record_usage(
-                trajectory_id=trajectory_id,
-                memory_id=mem.memory_id,
-                rank=i,
-                score=None  # BM25 score not currently exposed
-            )
-
-            # Log usage recording
-            if memory_logger:
-                memory_logger.log_usage_record(trajectory_id, mem.memory_id, i, None)
-
-            # Update access count
-            memory_backend.update_memory_stats(mem.memory_id, accessed=True)
-
-            # Log stats update
-            if memory_logger:
-                memory_logger.log_stats_update(mem.memory_id, accessed=True)
-
-    # Extract and store memories if requested
-    if memory_backend and extract_memories:
-        from rlm_runtime.memory.extraction import judge_trajectory_dspy, extract_memories_dspy
-
-        # Judge trajectory
-        judgment = judge_trajectory_dspy(
-            query,
-            result.answer,
-            result.trajectory,
-            result.evidence,
-            model=sub_model
-        )
-
-        if verbose:
-            print(f"Judgment: {'Success' if judgment['is_success'] else 'Failure'} ({judgment['confidence']})")
-            print(f"Reason: {judgment['reason']}")
-
-        # Log judgment
-        if memory_logger:
-            memory_logger.log_judgment(trajectory_id, judgment)
-
-        # Extract memories
-        new_memories = extract_memories_dspy(
-            query,
-            result.answer,
-            result.trajectory,
-            judgment,
-            ontology_name=onto_name,
-            run_id=run_id,
-            trajectory_id=trajectory_id,
-            model=sub_model
-        )
-
-        # Log extraction
-        if memory_logger:
-            source_type = "success" if judgment["is_success"] else "failure"
-            memory_logger.log_extraction(trajectory_id, new_memories, source_type)
-
-        # Store memories
-        for mem in new_memories:
-            was_duplicate = memory_backend.has_memory(mem.memory_id)
-            memory_backend.add_memory(mem)
-            if verbose:
-                print(f"Extracted memory: {mem.title}")
-
-            # Log storage
-            if memory_logger:
-                memory_logger.log_storage(mem.memory_id, mem.title, was_duplicate)
-
-        # Update memory stats based on judgment
-        if retrieved_memories and trajectory_id:
-            for mem in retrieved_memories:
-                if judgment["is_success"]:
-                    memory_backend.update_memory_stats(mem.memory_id, success=True)
-                    if memory_logger:
-                        memory_logger.log_stats_update(mem.memory_id, success=True)
-                else:
-                    memory_backend.update_memory_stats(mem.memory_id, failure=True)
-                    if memory_logger:
-                        memory_logger.log_stats_update(mem.memory_id, failure=True)
-
-        # Update MLflow metrics with extraction results
+        # Log initial metrics to MLflow (before memory extraction)
         if mlflow_active:
             from rlm_runtime.logging.mlflow_integration import log_run_metrics
 
@@ -505,30 +389,149 @@ def run_dspy_rlm(
                 iteration_count=result.iteration_count,
                 converged=result.converged,
                 memories_retrieved=len(retrieved_memories) if retrieved_memories else 0,
-                memories_extracted=len(new_memories),
-                judgment_success=judgment["is_success"],
             )
 
-    # Log artifacts to MLflow before closing
-    if mlflow_active:
-        from rlm_runtime.logging.mlflow_integration import log_artifacts, end_mlflow_run
+        # Store trajectory in memory backend
+        if memory_backend and trajectory_id and run_id:
+            memory_backend.add_trajectory(
+                trajectory_id=trajectory_id,
+                run_id=run_id,
+                task_query=query,
+                final_answer=result.answer,
+                iteration_count=result.iteration_count,
+                converged=result.converged,
+                artifact={
+                    "sparql": result.sparql,
+                    "evidence": result.evidence,
+                    "trajectory": result.trajectory,
+                },
+                rlm_log_path=str(log_path) if log_path else None,
+            )
 
-        log_artifacts(
-            log_path=Path(log_path) if log_path else None,
-            sparql_query=result.sparql,
-            evidence=result.evidence,
-        )
+            # Log trajectory creation
+            if memory_logger:
+                memory_logger.log_trajectory_creation(
+                    trajectory_id,
+                    run_id,
+                    query,
+                    result.iteration_count,
+                    result.converged
+                )
 
-        # End the MLflow run
-        end_mlflow_run()
+        # Record memory usage if memories were retrieved
+        if memory_backend and retrieved_memories and trajectory_id:
+            for i, mem in enumerate(retrieved_memories, 1):
+                memory_backend.record_usage(
+                    trajectory_id=trajectory_id,
+                    memory_id=mem.memory_id,
+                    rank=i,
+                    score=None  # BM25 score not currently exposed
+                )
 
-    # Close callbacks to write session_end
-    if callbacks:
-        for callback in callbacks:
-            if hasattr(callback, 'close'):
-                callback.close()
+                # Log usage recording
+                if memory_logger:
+                    memory_logger.log_usage_record(trajectory_id, mem.memory_id, i, None)
 
-    if memory_logger:
-        memory_logger.close()
+                # Update access count
+                memory_backend.update_memory_stats(mem.memory_id, accessed=True)
+
+                # Log stats update
+                if memory_logger:
+                    memory_logger.log_stats_update(mem.memory_id, accessed=True)
+
+        # Extract and store memories if requested
+        if memory_backend and extract_memories:
+            from rlm_runtime.memory.extraction import judge_trajectory_dspy, extract_memories_dspy
+
+            # Judge trajectory
+            judgment = judge_trajectory_dspy(
+                query,
+                result.answer,
+                result.trajectory,
+                result.evidence,
+                model=sub_model
+            )
+
+            if verbose:
+                print(f"Judgment: {'Success' if judgment['is_success'] else 'Failure'} ({judgment['confidence']})")
+                print(f"Reason: {judgment['reason']}")
+
+            # Log judgment
+            if memory_logger:
+                memory_logger.log_judgment(trajectory_id, judgment)
+
+            # Extract memories
+            new_memories = extract_memories_dspy(
+                query,
+                result.answer,
+                result.trajectory,
+                judgment,
+                ontology_name=onto_name,
+                run_id=run_id,
+                trajectory_id=trajectory_id,
+                model=sub_model
+            )
+
+            # Log extraction
+            if memory_logger:
+                source_type = "success" if judgment["is_success"] else "failure"
+                memory_logger.log_extraction(trajectory_id, new_memories, source_type)
+
+            # Store memories
+            for mem in new_memories:
+                was_duplicate = memory_backend.has_memory(mem.memory_id)
+                memory_backend.add_memory(mem)
+                if verbose:
+                    print(f"Extracted memory: {mem.title}")
+
+                # Log storage
+                if memory_logger:
+                    memory_logger.log_storage(mem.memory_id, mem.title, was_duplicate)
+
+            # Update memory stats based on judgment
+            if retrieved_memories and trajectory_id:
+                for mem in retrieved_memories:
+                    if judgment["is_success"]:
+                        memory_backend.update_memory_stats(mem.memory_id, success=True)
+                        if memory_logger:
+                            memory_logger.log_stats_update(mem.memory_id, success=True)
+                    else:
+                        memory_backend.update_memory_stats(mem.memory_id, failure=True)
+                        if memory_logger:
+                            memory_logger.log_stats_update(mem.memory_id, failure=True)
+
+            # Update MLflow metrics with extraction results
+            if mlflow_active:
+                from rlm_runtime.logging.mlflow_integration import log_run_metrics
+
+                log_run_metrics(
+                    iteration_count=result.iteration_count,
+                    converged=result.converged,
+                    memories_retrieved=len(retrieved_memories) if retrieved_memories else 0,
+                    memories_extracted=len(new_memories),
+                    judgment_success=judgment["is_success"],
+                )
+
+
+    finally:
+        # Always cleanup callbacks and MLflow, even on exceptions
+        if callbacks:
+            for callback in callbacks:
+                if hasattr(callback, 'close'):
+                    try:
+                        callback.close()
+                    except Exception as e:
+                        warnings.warn(f"Failed to close callback: {e}", UserWarning)
+
+        if memory_logger:
+            try:
+                memory_logger.close()
+            except Exception as e:
+                warnings.warn(f"Failed to close memory logger: {e}", UserWarning)
+
+        # End MLflow run if active
+        if mlflow_active:
+            from rlm_runtime.logging.mlflow_integration import end_mlflow_run
+            end_mlflow_run()
 
     return result

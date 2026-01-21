@@ -311,7 +311,13 @@ From `settings.ini`:
 - `mistletoe` - Markdown parsing
 - `rdflib` - RDF graph manipulation
 - `sparqlx` - SPARQL query execution
-- `mlflow` - (Optional) Experiment tracking and observability
+
+**Optional dependencies:**
+- `mlflow` >= 2.17.0 - Experiment tracking and observability
+  - Provides structured tracking, programmatic querying, artifact storage
+  - Requires DSPy integration (mlflow.dspy.autolog)
+  - Install: `uv pip install mlflow`
+  - The system gracefully degrades if MLflow is not installed
 
 ## Observability and Experiment Tracking
 
