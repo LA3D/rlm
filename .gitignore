@@ -166,3 +166,7 @@ scripts/exploratory/
 mlflow.db
 mlruns/
 *.db-journal
+
+# Test trajectory logs
+test_*.jsonl
+*.jsonl
