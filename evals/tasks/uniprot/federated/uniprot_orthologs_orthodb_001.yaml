@@ -1,0 +1,34 @@
+# Eval Task: UniProt Federated - Orthologous proteins via OrthoDB
+# Source exemplar: ontology/uniprot/examples/UniProt/36_orthologous_proteins_via_orthodb.ttl
+
+task:
+  id: "uniprot_orthologs_orthodb_001"
+  category: "uniprot/federated"
+  difficulty: "hard"
+
+  query: "Find orthologous proteins for UniProtKB entry P05067 via OrthoDB."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/UniProt/36_orthologous_proteins_via_orthodb.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 12
+    - type: evidence_pattern
+      required:
+        - function: "BIND(uniprotkb:P05067 AS ?protein)"
+        - function: "SERVICE <https://sparql.orthodb.org/sparql/>"
+        - function: "orthodb:hasMember"
+        - function: "up:encodedBy"
+        - function: "up:sequence/rdf:value"
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
+

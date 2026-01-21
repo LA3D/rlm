@@ -1,0 +1,34 @@
+# Eval Task: UniProt Taxonomy - E. coli K12 strains and sequences
+# Source exemplar: ontology/uniprot/examples/UniProt/3_entry_sequences_organism.ttl
+
+task:
+  id: "uniprot_ecoli_k12_sequences_001"
+  category: "uniprot/taxonomy"
+  difficulty: "medium"
+
+  query: "Select UniProtKB proteins (and their amino acid sequences) for E. coli K12 and all its strains."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/UniProt/3_entry_sequences_organism.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 10
+    - type: evidence_pattern
+      required:
+        - function: "taxon:83333"
+        - function: "up:organism"
+        - function: "rdfs:subClassOf taxon:83333"
+        - function: "up:sequence"
+        - function: "rdf:value"
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
+

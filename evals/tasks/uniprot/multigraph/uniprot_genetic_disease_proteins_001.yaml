@@ -1,0 +1,35 @@
+# Eval Task: UniProt Multi-graph - Genetic disease related proteins
+# Source exemplar: ontology/uniprot/examples/UniProt/78_genetic_disease_related_proteins.ttl
+
+task:
+  id: "uniprot_genetic_disease_proteins_001"
+  category: "uniprot/multigraph"
+  difficulty: "medium"
+
+  query: "List UniProtKB proteins related to a genetic disease, including disease comment and optional MIM cross-reference."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/UniProt/78_genetic_disease_related_proteins.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 10
+    - type: evidence_pattern
+      required:
+        # Named graph joins are the point of this task.
+        - function: "GRAPH <http://sparql.uniprot.org/uniprot>"
+        - function: "GRAPH <http://sparql.uniprot.org/diseases>"
+        - function: "up:Disease"
+        - function: "up:disease"
+        - function: "rdfs:comment"
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
+

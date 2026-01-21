@@ -1,0 +1,35 @@
+# Eval Task: UniProt Federated - Human enzymes metabolizing sphingolipids with ChEMBL xrefs
+# Source exemplar: ontology/uniprot/examples/UniProt/40_human_enzymes_that_metabolize_sphingolipids.ttl
+
+task:
+  id: "uniprot_sphingolipids_chembl_001"
+  category: "uniprot/federated"
+  difficulty: "hard"
+
+  query: "Retrieve human enzymes that metabolize sphingolipids and are annotated in ChEMBL."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/UniProt/40_human_enzymes_that_metabolize_sphingolipids.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 12
+    - type: evidence_pattern
+      required:
+        - function: "SERVICE <https://sparql.rhea-db.org/sparql>"
+        - function: "CHEBI:26739"
+        - function: "rdfs:subClassOf+"
+        - function: "up:organism taxon:9606"
+        - function: "rdfs:seeAlso ?chemblEntry"
+        - function: "<http://purl.uniprot.org/database/ChEMBL>"
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
+

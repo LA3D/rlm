@@ -1,5 +1,8 @@
 # RLM + Ontologies (rdflib) in Solveit: Exploratory Trajectory
 
+> **Status:** Deprecated as the active implementation plan.  
+> **Use instead:** `docs/planning/trajectory_v2.md` (DSPy RLM + SQLite ReasoningBank + affordance-driven query construction).  
+
 This document is the source of truth for implementing an `rlmpaper`-faithful Recursive Language Model (RLM) workflow in this repo, extended to support ontology (RDF/OWL/SHACL) exploration and SPARQL result management in a REPL using `rdflib`, developed via nbdev (exploratory + literate programming) on the Solveit platform.
 
 ## Problem Statement

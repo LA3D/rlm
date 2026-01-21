@@ -77,6 +77,52 @@ class MemoryEventLogger:
         except Exception as e:
             print(f"Warning: Failed to write memory event: {e}")
 
+    def log_run_creation(
+        self,
+        run_id: str,
+        model: Optional[str],
+        ontology_name: Optional[str],
+    ) -> None:
+        """Log run creation event.
+
+        Args:
+            run_id: Run identifier
+            model: Model used for run
+            ontology_name: Ontology name
+        """
+        self._write_event({
+            "event": "run_creation",
+            "run_id": run_id,
+            "model": model,
+            "ontology_name": ontology_name,
+        })
+
+    def log_trajectory_creation(
+        self,
+        trajectory_id: str,
+        run_id: str,
+        task_query: str,
+        iteration_count: int,
+        converged: bool,
+    ) -> None:
+        """Log trajectory creation event.
+
+        Args:
+            trajectory_id: Trajectory identifier
+            run_id: Parent run identifier
+            task_query: Task query
+            iteration_count: Number of iterations
+            converged: Whether execution converged
+        """
+        self._write_event({
+            "event": "trajectory_creation",
+            "trajectory_id": trajectory_id,
+            "run_id": run_id,
+            "task_query": task_query,
+            "iteration_count": iteration_count,
+            "converged": converged,
+        })
+
     def log_retrieval(
         self,
         query: str,

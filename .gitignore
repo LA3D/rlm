@@ -161,3 +161,8 @@ package.json
 
 # Exploratory/temporary scripts
 scripts/exploratory/
+
+# MLflow tracking artifacts
+mlflow.db
+mlruns/
+*.db-journal

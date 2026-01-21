@@ -1,0 +1,35 @@
+# Eval Task: UniProt Taxonomy - Bacterial taxa
+# Source exemplar: ontology/uniprot/examples/UniProt/2_bacteria_taxa_and_their_scientific_name.ttl
+
+task:
+  id: "uniprot_bacteria_taxa_001"
+  category: "uniprot/taxonomy"
+  difficulty: "easy"
+
+  query: "Select all bacterial taxa and their scientific name from UniProt taxonomy."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/UniProt/2_bacteria_taxa_and_their_scientific_name.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 8
+    - type: evidence_pattern
+      required:
+        # Ensure taxonomy scoping is used (materialized hierarchy pattern).
+        - function: "PREFIX taxon:"
+        - function: "PREFIX up:"
+        - function: "up:scientificName"
+        - function: "rdfs:subClassOf taxon:2"
+    - type: tool_called
+      # Requires remote SPARQL execution tooling (to be integrated via sparql_handles).
+      required: ["sparql_query"]
+
+  trials: 3
+

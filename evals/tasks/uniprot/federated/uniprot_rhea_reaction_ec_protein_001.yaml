@@ -1,0 +1,32 @@
+# Eval Task: Rhea → UniProt Federated - (reaction, ec, protein) for a given Rhea reaction
+# Source exemplar: ontology/uniprot/examples/Rhea/110_Select_reaction_ec_protein_for_a_given_reaction.ttl
+
+task:
+  id: "uniprot_rhea_reaction_ec_protein_001"
+  category: "uniprot/federated"
+  difficulty: "hard"
+
+  query: "For a given Rhea reaction, retrieve the EC and reviewed UniProt proteins (federated from Rhea to UniProt)."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.rhea-db.org/sparql"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/Rhea/110_Select_reaction_ec_protein_for_a_given_reaction.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 12
+    - type: evidence_pattern
+      required:
+        - function: "SERVICE <http://sparql.uniprot.org/sparql>"
+        - function: "rh:ec ?enzyme"
+        - function: "up:reviewed true"
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
+

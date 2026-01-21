@@ -1,0 +1,36 @@
+# Eval Task: UniProt Multi-hop - Gene → Protein → Catalyzed Rhea reaction sets
+# Source exemplar: ontology/uniprot/examples/UniProt/61_Gene_Protein_Reaction_sets.ttl
+
+task:
+  id: "uniprot_gene_protein_rhea_sets_001"
+  category: "uniprot/multihop"
+  difficulty: "hard"
+
+  query: "For human reviewed proteins, return Ensembl gene → UniProtKB protein → catalyzed Rhea reaction."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/UniProt/61_Gene_Protein_Reaction_sets.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 12
+    - type: evidence_pattern
+      required:
+        - function: "taxon:9606"
+        - function: "up:reviewed true"
+        - function: "up:annotation"
+        - function: "up:catalyticActivity"
+        - function: "up:catalyzedReaction"
+        - function: "up:transcribedFrom"
+        - function: "http://purl.uniprot.org/database/Ensembl"
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
+

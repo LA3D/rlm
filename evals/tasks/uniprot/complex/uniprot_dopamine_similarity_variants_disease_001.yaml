@@ -1,0 +1,35 @@
+# Eval Task: UniProt Complex Multi-hop - Dopamine-like molecules → reactions → enzymes → variants → disease
+# Source exemplar: ontology/uniprot/examples/UniProt/71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease.ttl
+
+task:
+  id: "uniprot_dopamine_similarity_variants_disease_001"
+  category: "uniprot/complex"
+  difficulty: "very_hard"
+
+  query: "Find reviewed proteins catalyzing reactions involving dopamine-like molecules, with natural variants related to a disease."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+      prefixes: "ontology/uniprot/examples/prefixes.ttl"
+      exemplar: "ontology/uniprot/examples/UniProt/71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease.ttl"
+
+  graders:
+    - type: convergence
+      max_iterations: 14
+    - type: evidence_pattern
+      required:
+        - function: "SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/chebi>"
+        - function: "sachem:similarCompoundSearch"
+        - function: "rh:side/rh:contains/rh:compound"
+        - function: "up:Natural_Variant_Annotation"
+        - function: "skos:related ?disease"
+        - function: "up:Disease_Annotation"
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
+
