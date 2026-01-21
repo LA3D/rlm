@@ -56,8 +56,11 @@ def run_dspy_rlm(
     extract_memories: bool = False,
     run_id: Optional[str] = None,
     trajectory_id: Optional[str] = None,
+    log_path: Optional[str | Path] = None,
+    enable_mlflow: bool = False,
+    log_llm_calls: bool = True,
 ) -> DSPyRLMResult:
-    """Run DSPy RLM for ontology query construction with optional memory integration.
+    """Run DSPy RLM for ontology query construction with optional memory integration and logging.
 
     Args:
         query: User question to answer
@@ -72,6 +75,9 @@ def run_dspy_rlm(
         extract_memories: Whether to extract and store memories after execution (default False)
         run_id: Optional run ID for provenance tracking
         trajectory_id: Optional trajectory ID for provenance tracking
+        log_path: Optional path to JSONL log file for trajectory logging
+        enable_mlflow: Whether to enable MLflow auto-tracing (default False)
+        log_llm_calls: Whether to log LLM calls in trajectory log (default True)
 
     Returns:
         DSPyRLMResult with answer, sparql, evidence, trajectory
@@ -83,23 +89,26 @@ def run_dspy_rlm(
     Example:
         from rlm_runtime.memory import SQLiteMemoryBackend
 
-        # With memory retrieval
+        # With memory retrieval and logging
         backend = SQLiteMemoryBackend("memory.db")
         result = run_dspy_rlm(
             "What is Activity?",
             "prov.ttl",
             memory_backend=backend,
-            retrieve_memories=3
+            retrieve_memories=3,
+            log_path="trajectory.jsonl"
         )
 
-        # With memory extraction
+        # With memory extraction and MLflow
         result = run_dspy_rlm(
             "What is Entity?",
             "prov.ttl",
             memory_backend=backend,
             extract_memories=True,
             run_id="r-001",
-            trajectory_id="t-001"
+            trajectory_id="t-001",
+            log_path="trajectory.jsonl",
+            enable_mlflow=True
         )
     """
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -117,8 +126,58 @@ def run_dspy_rlm(
     from rlm_runtime.interpreter import NamespaceCodeInterpreter
     from rlm_runtime.tools import make_ontology_tools
 
-    # Configure DSPy models
-    dspy.configure(lm=dspy.LM(model, temperature=0.2, max_tokens=1400, cache=False))
+    # Auto-generate run_id if not provided and memory backend exists
+    if memory_backend and not run_id:
+        import uuid
+        run_id = f"run-{uuid.uuid4().hex[:8]}"
+
+    # Auto-generate trajectory_id if not provided
+    if not trajectory_id:
+        import uuid
+        trajectory_id = f"traj-{uuid.uuid4().hex[:8]}"
+
+    # Setup logging callbacks
+    callbacks = []
+    memory_logger = None
+
+    if log_path:
+        from rlm_runtime.logging import TrajectoryCallback, MemoryEventLogger
+
+        # Trajectory callback for DSPy events
+        traj_callback = TrajectoryCallback(
+            log_path,
+            run_id or "unknown",
+            trajectory_id,
+            log_llm_calls=log_llm_calls
+        )
+        callbacks.append(traj_callback)
+
+        # Memory event logger (if using memory backend)
+        if memory_backend:
+            memory_logger = MemoryEventLogger(
+                log_path,
+                run_id or "unknown",
+                trajectory_id
+            )
+
+        if verbose:
+            print(f"Logging trajectory to: {log_path}")
+
+    # Enable MLflow auto-tracing if requested
+    if enable_mlflow:
+        try:
+            import mlflow
+            mlflow.dspy.autolog()
+            if verbose:
+                print("MLflow auto-tracing enabled")
+        except ImportError:
+            print("Warning: MLflow not installed, skipping auto-tracing")
+
+    # Configure DSPy models and callbacks
+    dspy.configure(
+        lm=dspy.LM(model, temperature=0.2, max_tokens=1400, cache=False),
+        callbacks=callbacks if callbacks else None
+    )
     sub_lm = dspy.LM(sub_model, temperature=0.2, max_tokens=1200, cache=False)
 
     # Load ontology with format auto-detection
@@ -149,6 +208,16 @@ def run_dspy_rlm(
     onto_name = ontology_path.stem
     meta = GraphMeta(graph=g, name=onto_name)
 
+    # Record run in memory backend if provided
+    if memory_backend and run_id:
+        memory_backend.add_run(
+            run_id,
+            model=model,
+            ontology_name=onto_name,
+            ontology_path=str(ontology_path),
+            notes=f"Query: {query}"
+        )
+
     # Create bounded tools
     tools = make_ontology_tools(meta, include_sparql=True)
 
@@ -163,6 +232,10 @@ def run_dspy_rlm(
             memory_context = format_memories_for_context(retrieved_memories)
             if verbose:
                 print(f"Retrieved {len(retrieved_memories)} memories")
+
+            # Log memory retrieval event
+            if memory_logger:
+                memory_logger.log_retrieval(query, retrieved_memories, retrieve_memories)
 
     # Build context
     context_parts = [
@@ -239,6 +312,23 @@ def run_dspy_rlm(
         converged=True,  # DSPy RLM always returns something
     )
 
+    # Store trajectory in memory backend
+    if memory_backend and trajectory_id and run_id:
+        memory_backend.add_trajectory(
+            trajectory_id=trajectory_id,
+            run_id=run_id,
+            task_query=query,
+            final_answer=result.answer,
+            iteration_count=result.iteration_count,
+            converged=result.converged,
+            artifact={
+                "sparql": result.sparql,
+                "evidence": result.evidence,
+                "trajectory": result.trajectory,
+            },
+            rlm_log_path=str(log_path) if log_path else None,
+        )
+
     # Record memory usage if memories were retrieved
     if memory_backend and retrieved_memories and trajectory_id:
         for i, mem in enumerate(retrieved_memories, 1):
@@ -248,8 +338,17 @@ def run_dspy_rlm(
                 rank=i,
                 score=None  # BM25 score not currently exposed
             )
+
+            # Log usage recording
+            if memory_logger:
+                memory_logger.log_usage_record(trajectory_id, mem.memory_id, i, None)
+
             # Update access count
             memory_backend.update_memory_stats(mem.memory_id, accessed=True)
+
+            # Log stats update
+            if memory_logger:
+                memory_logger.log_stats_update(mem.memory_id, accessed=True)
 
     # Extract and store memories if requested
     if memory_backend and extract_memories:
@@ -268,6 +367,10 @@ def run_dspy_rlm(
             print(f"Judgment: {'Success' if judgment['is_success'] else 'Failure'} ({judgment['confidence']})")
             print(f"Reason: {judgment['reason']}")
 
+        # Log judgment
+        if memory_logger:
+            memory_logger.log_judgment(trajectory_id, judgment)
+
         # Extract memories
         new_memories = extract_memories_dspy(
             query,
@@ -280,18 +383,41 @@ def run_dspy_rlm(
             model=sub_model
         )
 
+        # Log extraction
+        if memory_logger:
+            source_type = "success" if judgment["is_success"] else "failure"
+            memory_logger.log_extraction(trajectory_id, new_memories, source_type)
+
         # Store memories
         for mem in new_memories:
+            was_duplicate = memory_backend.has_memory(mem.memory_id)
             memory_backend.add_memory(mem)
             if verbose:
                 print(f"Extracted memory: {mem.title}")
+
+            # Log storage
+            if memory_logger:
+                memory_logger.log_storage(mem.memory_id, mem.title, was_duplicate)
 
         # Update memory stats based on judgment
         if retrieved_memories and trajectory_id:
             for mem in retrieved_memories:
                 if judgment["is_success"]:
                     memory_backend.update_memory_stats(mem.memory_id, success=True)
+                    if memory_logger:
+                        memory_logger.log_stats_update(mem.memory_id, success=True)
                 else:
                     memory_backend.update_memory_stats(mem.memory_id, failure=True)
+                    if memory_logger:
+                        memory_logger.log_stats_update(mem.memory_id, failure=True)
+
+    # Close callbacks to write session_end
+    if callbacks:
+        for callback in callbacks:
+            if hasattr(callback, 'close'):
+                callback.close()
+
+    if memory_logger:
+        memory_logger.close()
 
     return result

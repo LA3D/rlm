@@ -141,6 +141,10 @@ Respond in JSON:
     import json
     import re
 
+    # DSPy LM returns a list of completions, take the first one
+    if isinstance(response, list):
+        response = response[0] if response else ""
+
     # Extract JSON from response (may have markdown code blocks)
     json_match = re.search(r'\{[^}]+\}', response, re.DOTALL)
     if json_match:
@@ -267,6 +271,10 @@ Focus on:
     # Parse JSON response
     import json
     import re
+
+    # DSPy LM returns a list of completions, take the first one
+    if isinstance(response, list):
+        response = response[0] if response else ""
 
     # Extract JSON array from response
     json_match = re.search(r'\[.*\]', response, re.DOTALL)
