@@ -85,12 +85,25 @@ class NamespaceCodeInterpreter:
         # Inject tools
         self._globals.update(self.tools)
 
-        # Define SUBMIT function
+        # Define SUBMIT function with helpful error messages
         def SUBMIT(*args, **kwargs):
+            """Submit final output. Use keyword arguments matching output fields.
+
+            Correct usage:
+                SUBMIT(answer="Your answer", sparql="SELECT ...", evidence={"key": "value"})
+                SUBMIT({"answer": "...", "sparql": "...", "evidence": {...}})
+
+            Wrong usage (will error):
+                SUBMIT(answer, sparql, evidence)  # Positional args - use keyword args!
+            """
             if args:
                 if len(args) == 1 and isinstance(args[0], dict) and not kwargs:
                     raise _SubmitCalled(args[0])
-                raise CodeInterpreterError("SUBMIT only supports keyword args or a single dict argument.")
+                raise CodeInterpreterError(
+                    "SUBMIT requires keyword arguments. "
+                    "Use: SUBMIT(answer='...', sparql='...', evidence={...}) "
+                    "NOT: SUBMIT(answer, sparql, evidence)"
+                )
             raise _SubmitCalled(dict(kwargs))
 
         self._globals["SUBMIT"] = SUBMIT

@@ -329,6 +329,9 @@ def run_dspy_rlm(
         "You are exploring an RDF ontology via bounded tools.",
         "Do not dump large structures. Use tools to discover entities, then SUBMIT your answer.",
         "",
+        "IMPORTANT: When calling SUBMIT, use keyword arguments with literal values or inline expressions.",
+        "Example: SUBMIT(answer='The answer is...', sparql='SELECT...', evidence={'key': value})",
+        "",
         meta.summary(),
     ]
 
@@ -397,6 +400,11 @@ def run_dspy_rlm(
                     }
                 )
 
+        # Detect convergence: DSPy RLM sets final_reasoning="Extract forced final output"
+        # when max iterations are reached without successful SUBMIT call
+        final_reasoning = getattr(pred, "final_reasoning", "")
+        converged = final_reasoning != "Extract forced final output"
+
         # Build result
         result = DSPyRLMResult(
             answer=pred.answer,
@@ -404,7 +412,7 @@ def run_dspy_rlm(
             evidence=pred.evidence if hasattr(pred, "evidence") else {},
             trajectory=trajectory_dicts,
             iteration_count=len(trajectory),
-            converged=True,  # DSPy RLM always returns something
+            converged=converged,
         )
 
         # Log initial metrics to MLflow (before memory extraction)
@@ -851,6 +859,11 @@ def run_dspy_rlm_with_tools(
                     }
                 )
 
+        # Detect convergence: DSPy RLM sets final_reasoning="Extract forced final output"
+        # when max iterations are reached without successful SUBMIT call
+        final_reasoning = getattr(pred, "final_reasoning", "")
+        converged = final_reasoning != "Extract forced final output"
+
         # Build result
         result = DSPyRLMResult(
             answer=pred.answer,
@@ -858,7 +871,7 @@ def run_dspy_rlm_with_tools(
             evidence=pred.evidence if hasattr(pred, "evidence") else {},
             trajectory=trajectory_dicts,
             iteration_count=len(trajectory),
-            converged=True,  # DSPy RLM always returns something
+            converged=converged,
         )
 
         # Log initial metrics to MLflow (before memory extraction)
