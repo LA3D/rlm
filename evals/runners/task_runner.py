@@ -339,16 +339,18 @@ class TaskRunner:
         if not endpoint:
             raise ValueError("DSPy backend requires SPARQL endpoint in task context")
 
+        # Extract configuration with defaults
+        max_results = sparql_cfg.get('max_results', 100)
+        timeout = sparql_cfg.get('timeout', 30.0)
+        ontology_name = sparql_cfg.get('name', 'remote')
+
         # Build tools for remote SPARQL
         tools = make_sparql_tools(
             endpoint=endpoint,
             ns=ns,
-            max_results=100,
-            timeout=30.0
+            max_results=max_results,
+            timeout=timeout
         )
-
-        # Extract ontology name from context (for tracking)
-        ontology_name = sparql_cfg.get('name', 'remote')
 
         # Run DSPy RLM with tools
         result = run_dspy_rlm_with_tools(

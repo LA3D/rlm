@@ -82,13 +82,14 @@ def make_res_head_tool(ns: dict) -> Callable:
 
         Args:
             result_name: Name of result handle variable in namespace
-            n: Number of rows to return (default 10)
+            n: Number of rows to return (1-100, default 10)
 
         Returns:
             List of first N rows (dicts for SELECT, triples for CONSTRUCT)
 
         Example:
             # After running sparql_query(..., name='proteins')
+            # Note: Pass the string name, not the handle object
             first_rows = res_head('proteins', n=5)
             for row in first_rows:
                 print(row)
@@ -99,7 +100,9 @@ def make_res_head_tool(ns: dict) -> Callable:
         # Extract rows from SPARQLResultHandle if needed
         if hasattr(result, 'rows'):
             result = result.rows
-        return res_head(result, n=n)
+        # Clamp n to safe bounds
+        clamped_n = max(1, min(100, n))
+        return res_head(result, n=clamped_n)
 
     return res_head_tool
 
@@ -123,7 +126,7 @@ def make_res_sample_tool(ns: dict) -> Callable:
 
         Args:
             result_name: Name of result handle variable in namespace
-            n: Number of rows to sample (default 10)
+            n: Number of rows to sample (1-100, default 10)
             seed: Optional random seed for reproducibility
 
         Returns:
@@ -131,6 +134,7 @@ def make_res_sample_tool(ns: dict) -> Callable:
 
         Example:
             # After running sparql_query(..., name='proteins')
+            # Note: Pass the string name, not the handle object
             sample_rows = res_sample('proteins', n=10)
             for row in sample_rows:
                 print(row)
@@ -138,8 +142,10 @@ def make_res_sample_tool(ns: dict) -> Callable:
         if result_name not in ns:
             raise ValueError(f"Result handle '{result_name}' not found in namespace")
         result = ns[result_name]
+        # Clamp n to safe bounds
+        clamped_n = max(1, min(100, n))
         # res_sample already handles SPARQLResultHandle internally
-        return res_sample(result, n=n, seed=seed)
+        return res_sample(result, n=clamped_n, seed=seed)
 
     return res_sample_tool
 
@@ -165,13 +171,14 @@ def make_res_where_tool(ns: dict) -> Callable:
             column: Column name to filter on
             pattern: Optional regex pattern to match (case-insensitive)
             value: Optional exact value to match
-            limit: Maximum matching rows to return (default 100)
+            limit: Maximum matching rows to return (1-200, default 100)
 
         Returns:
             List of matching rows
 
         Example:
             # Find all proteins with "kinase" in name
+            # Note: Pass the string name, not the handle object
             kinases = res_where('proteins', 'name', pattern='kinase', limit=20)
 
             # Find exact match
@@ -183,7 +190,9 @@ def make_res_where_tool(ns: dict) -> Callable:
         if result_name not in ns:
             raise ValueError(f"Result handle '{result_name}' not found in namespace")
         result = ns[result_name]
-        return res_where(result, column=column, pattern=pattern, value=value, limit=limit)
+        # Clamp limit to safe bounds
+        clamped_limit = max(1, min(200, limit))
+        return res_where(result, column=column, pattern=pattern, value=value, limit=clamped_limit)
 
     return res_where_tool
 
@@ -207,13 +216,14 @@ def make_res_group_tool(ns: dict) -> Callable:
         Args:
             result_name: Name of result handle variable in namespace
             column: Column to group by
-            limit: Maximum groups to return (default 20)
+            limit: Maximum groups to return (1-50, default 20)
 
         Returns:
             List of (value, count) tuples, sorted by count descending
 
         Example:
             # Count proteins by organism
+            # Note: Pass the string name, not the handle object
             organism_counts = res_group('proteins', 'organism', limit=10)
             for organism, count in organism_counts:
                 print(f"{organism}: {count} proteins")
@@ -221,7 +231,9 @@ def make_res_group_tool(ns: dict) -> Callable:
         if result_name not in ns:
             raise ValueError(f"Result handle '{result_name}' not found in namespace")
         result = ns[result_name]
-        return res_group(result, column=column, limit=limit)
+        # Clamp limit to safe bounds
+        clamped_limit = max(1, min(50, limit))
+        return res_group(result, column=column, limit=clamped_limit)
 
     return res_group_tool
 
@@ -245,13 +257,14 @@ def make_res_distinct_tool(ns: dict) -> Callable:
         Args:
             result_name: Name of result handle variable in namespace
             column: Column to get distinct values from
-            limit: Maximum distinct values to return (default 50)
+            limit: Maximum distinct values to return (1-100, default 50)
 
         Returns:
             Sorted list of distinct values
 
         Example:
             # Get all unique organisms in results
+            # Note: Pass the string name, not the handle object
             organisms = res_distinct('proteins', 'organism', limit=30)
             for org in organisms:
                 print(org)
@@ -259,7 +272,9 @@ def make_res_distinct_tool(ns: dict) -> Callable:
         if result_name not in ns:
             raise ValueError(f"Result handle '{result_name}' not found in namespace")
         result = ns[result_name]
-        return res_distinct(result, column=column, limit=limit)
+        # Clamp limit to safe bounds
+        clamped_limit = max(1, min(100, limit))
+        return res_distinct(result, column=column, limit=clamped_limit)
 
     return res_distinct_tool
 

@@ -776,11 +776,10 @@ def run_dspy_rlm_with_tools(
             desc="Grounding evidence: URIs, result samples, tool outputs."
         )
 
-    # Create interpreter with optional namespace merge
+    # Create interpreter
+    # Note: The tools already capture `ns` in their closures and write results back to it.
+    # The interpreter doesn't need to know about the namespace dict.
     interpreter = NamespaceCodeInterpreter()
-    if ns is not None:
-        # Merge provided namespace into interpreter
-        interpreter.namespace.update(ns)
 
     # Create RLM
     rlm = dspy.RLM(
