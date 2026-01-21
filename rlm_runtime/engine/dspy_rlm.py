@@ -52,6 +52,7 @@ def run_dspy_rlm(
     verbose: bool = False,
     model: str = "anthropic/claude-sonnet-4-5-20250929",
     sub_model: str = "anthropic/claude-3-5-haiku-20241022",
+    sense_card: Optional[str] = None,
     memory_backend: Optional["MemoryBackend"] = None,
     retrieve_memories: int = 3,
     extract_memories: bool = False,
@@ -76,6 +77,9 @@ def run_dspy_rlm(
         verbose: Whether to print execution trace (default False)
         model: Root model for RLM (default Sonnet 4.5)
         sub_model: Sub-model for delegated reasoning (default Haiku)
+        sense_card: Optional pre-built sense card (~500 chars) for ontology affordances.
+                    Use rlm.ontology.format_sense_card() to generate. Enables ablation
+                    experiments comparing baseline vs sense-augmented context.
         memory_backend: Optional MemoryBackend for retrieval/extraction
         retrieve_memories: Number of memories to retrieve if backend provided (default 3)
         extract_memories: Whether to extract and store memories after execution (default False)
@@ -96,6 +100,11 @@ def run_dspy_rlm(
     Raises:
         ValueError: If ANTHROPIC_API_KEY not set
         FileNotFoundError: If ontology_path doesn't exist
+
+    Thread Safety:
+        Not thread-safe due to NamespaceCodeInterpreter (shared _globals dict).
+        For concurrent runs, call this function from separate threads/processes,
+        not by sharing RLM instances. Each call creates a fresh RLM instance internally.
 
     Examples:
         from rlm_runtime.memory import SQLiteMemoryBackend
@@ -142,6 +151,17 @@ def run_dspy_rlm(
         runs = mlflow.search_runs(
             filter_string="params.ontology = 'prov' AND metrics.converged = 1",
             order_by=["metrics.iteration_count ASC"]
+        )
+
+        # With sense card for ablation experiments
+        from rlm.ontology import build_sense_structured, format_sense_card
+        sense = build_sense_structured("prov.ttl", name="prov_sense", ns={})
+        card = format_sense_card(sense)
+        result = run_dspy_rlm(
+            "What is Activity?",
+            "prov.ttl",
+            sense_card=card,
+            memory_backend=backend
         )
     """
     if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -311,6 +331,12 @@ def run_dspy_rlm(
         "",
         meta.summary(),
     ]
+
+    # Inject sense card if provided
+    if sense_card:
+        context_parts.append("")
+        context_parts.append("## Ontology Affordances (Sense Card)")
+        context_parts.append(sense_card)
 
     # Inject memories if available
     if memory_context:
@@ -549,6 +575,7 @@ def run_dspy_rlm_with_tools(
     verbose: bool = False,
     model: str = "anthropic/claude-sonnet-4-5-20250929",
     sub_model: str = "anthropic/claude-3-5-haiku-20241022",
+    sense_card: Optional[str] = None,
     memory_backend: Optional["MemoryBackend"] = None,
     retrieve_memories: int = 3,
     extract_memories: bool = False,
@@ -580,6 +607,8 @@ def run_dspy_rlm_with_tools(
         verbose: Whether to print execution trace (default False)
         model: Root model for RLM (default Sonnet 4.5)
         sub_model: Sub-model for delegated reasoning (default Haiku)
+        sense_card: Optional pre-built sense card to append to context. If provided,
+                    will be injected after the main context string.
         memory_backend: Optional MemoryBackend for retrieval/extraction
         retrieve_memories: Number of memories to retrieve if backend provided (default 3)
         extract_memories: Whether to extract and store memories after execution (default False)
@@ -599,6 +628,11 @@ def run_dspy_rlm_with_tools(
 
     Raises:
         ValueError: If ANTHROPIC_API_KEY not set
+
+    Thread Safety:
+        Not thread-safe due to NamespaceCodeInterpreter (shared _globals dict).
+        For concurrent runs, call this function from separate threads/processes.
+        Each call creates a fresh RLM instance internally.
 
     Examples:
         from rlm_runtime.tools import make_sparql_tools
@@ -756,6 +790,10 @@ def run_dspy_rlm_with_tools(
             # Log memory retrieval event
             if memory_logger:
                 memory_logger.log_retrieval(query, retrieved_memories, retrieve_memories)
+
+    # Inject sense card if provided
+    if sense_card:
+        context = context + "\n\n## Ontology Affordances (Sense Card)\n" + sense_card
 
     # Inject memories into context if available
     if memory_context:

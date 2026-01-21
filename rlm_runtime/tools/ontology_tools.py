@@ -79,7 +79,7 @@ def make_describe_entity_tool(meta: GraphMeta) -> Callable:
     """
 
     def describe_entity_tool(uri: str, limit: int = 15) -> dict:
-        """Get bounded description of an entity with its types and outgoing relationships.
+        """Get entity description with types and outgoing relationships.
 
         Use this to inspect a specific entity's structure, types, and relationships.
         Supports prefixed URIs like 'prov:Activity' or full URIs.

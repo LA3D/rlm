@@ -27,6 +27,11 @@ class NamespaceCodeInterpreter:
     State persists across execute() calls (DSPy iterations).
     Tools are injected as globals each iteration by DSPy.
 
+    Thread Safety:
+        NOT thread-safe. Each RLM instance reuses the same interpreter with shared
+        _globals dict. For concurrent runs, create separate RLM instances per thread.
+        See: docs/design/dspy-rlm-architecture-review.md
+
     Attributes:
         tools: Dictionary of tool functions to inject into execution namespace
         output_fields: Optional list of output field definitions for DSPy
