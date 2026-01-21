@@ -137,8 +137,18 @@ class TaskRunner:
         Returns:
             EvalResult with all trial results and metrics
         """
-        task = yaml.safe_load(task_path.read_text())
-        trials = num_trials or task.get('trials', 5)
+        raw = yaml.safe_load(task_path.read_text())
+        # Support both formats:
+        # - {task: {...}} (preferred)
+        # - {...} (legacy)
+        task = raw.get('task', raw) if isinstance(raw, dict) else raw
+
+        if num_trials is not None:
+            if num_trials < 1:
+                raise ValueError(f"num_trials must be >= 1, got {num_trials}")
+            trials = num_trials
+        else:
+            trials = task.get('trials', 5)
 
         # Run trials
         trial_results = []
@@ -174,14 +184,20 @@ class TaskRunner:
     def _run_single_trial(self, task: dict, trial_num: int) -> TrialResult:
         """Execute one trial of a task."""
         try:
-            # Setup namespace with ontologies
-            ns = self._setup_namespace(task)
+            # Setup namespace and build context
+            ns, context = self._setup_namespace_and_context(task)
 
-            # Run RLM
-            answer, iterations = self._execute_rlm(task, ns)
+            # Check if DSPy backend should be used
+            use_dspy = self.config.get('use_dspy', False)
 
-            # Convert iterations to serializable format
-            transcript = self._serialize_transcript(iterations)
+            if use_dspy:
+                # Run DSPy RLM
+                answer, iterations = self._execute_dspy_rlm(task, ns, context)
+                transcript = self._serialize_dspy_trajectory(iterations)
+            else:
+                # Run legacy claudette-backed RLM
+                answer, iterations = self._execute_rlm(task, ns, context)
+                transcript = self._serialize_transcript(iterations)
 
             # Grade with all configured graders
             grader_results = {}
@@ -219,60 +235,155 @@ class TaskRunner:
                 error=str(e)
             )
 
-    def _setup_namespace(self, task: dict) -> dict:
-        """Setup namespace with ontologies and tools."""
-        ns = {}
+    def _setup_namespace_and_context(self, task: dict) -> tuple[dict, str]:
+        """Setup namespace and build the context string for the run."""
+        ns: dict = {}
 
-        # Import and setup ontology tools if configured
-        context = task.get('context', {})
-        ontologies = context.get('ontologies', [])
+        # Setup ontology context (local schema/affordances)
+        ctx = task.get('context', {}) or {}
+        ontologies = ctx.get('ontologies', []) or []
 
+        ontology_summaries: list[str] = []
         if ontologies:
-            try:
-                from rdflib import Dataset
-                from rlm.dataset import DatasetMeta, mount_ontology
-                from rlm.ontology import setup_ontology_context
+            from rlm.ontology import setup_ontology_context
 
-                # Create dataset
-                ds = Dataset()
-                ds_meta = DatasetMeta(ds, name='eval_ds')
-                ns['ds_meta'] = ds_meta
+            for onto in ontologies:
+                name = onto.get('name', 'ont')
+                source = onto.get('source', '')
+                if source and Path(source).exists():
+                    setup_ontology_context(source, ns, name=name)
+                    meta = ns.get(f"{name}_meta")
+                    if meta is not None and hasattr(meta, "summary"):
+                        ontology_summaries.append(meta.summary())
 
-                # Mount ontologies
-                for onto in ontologies:
-                    name = onto.get('name', 'onto')
-                    source = onto.get('source', '')
+        # Setup SPARQL context (remote execution)
+        sparql_cfg = ctx.get('sparql', {}) or {}
+        endpoint = sparql_cfg.get('endpoint')
+        if endpoint:
+            from rlm.sparql_handles import setup_sparql_context
+            setup_sparql_context(ns, default_endpoint=endpoint)
 
-                    if source and Path(source).exists():
-                        mount_ontology(ds_meta, name, source)
+        # Build context string
+        context_parts = [
+            "You are constructing and executing SPARQL queries.",
+            "Use progressive disclosure: inspect schema first, then run bounded queries.",
+        ]
 
-                # Setup ontology context
-                setup_ontology_context(ns, ds_meta=ds_meta)
+        if endpoint:
+            context_parts.extend([
+                "",
+                f"SPARQL endpoint: {endpoint}",
+                "You can call sparql_query(query, max_results=..., name=..., timeout=...) to execute remote SPARQL.",
+                "Remote queries may include GRAPH and SERVICE clauses when needed.",
+            ])
 
-            except ImportError as e:
-                print(f"Warning: Could not setup ontology context: {e}")
+        if ontology_summaries:
+            context_parts.extend(["", "Loaded ontology summaries:"])
+            context_parts.extend(ontology_summaries)
 
-        return ns
+        # Add task-specific context hints (if present)
+        hints = ctx.get('hints')
+        if hints:
+            context_parts.extend(["", "Hints:", str(hints)])
 
-    def _execute_rlm(self, task: dict, ns: dict) -> tuple[str, list]:
-        """Execute RLM run for task."""
-        try:
-            from rlm.core import rlm_run
+        return ns, "\n".join(context_parts)
 
-            max_iters = task.get('max_iterations', 15)
-            query = task.get('query', '')
+    def _execute_rlm(self, task: dict, ns: dict, context: str) -> tuple[str, list]:
+        """Execute an RLM run for a task (claudette-backed)."""
+        from rlm.core import rlm_run
 
-            answer, iterations = rlm_run(
-                task=query,
-                ns=ns,
-                max_iterations=max_iters
-            )
+        # Prefer explicit max_iterations, otherwise infer from convergence grader config.
+        max_iters = task.get('max_iterations')
+        if max_iters is None:
+            for grader in task.get('graders', []) or []:
+                if grader.get('type') == 'convergence' and grader.get('max_iterations') is not None:
+                    max_iters = grader.get('max_iterations')
+                    break
+        if max_iters is None:
+            max_iters = 10
 
-            return answer, iterations
+        query = task.get('query', '')
 
-        except ImportError:
-            # Fallback for testing without full RLM
-            return "Mock answer", []
+        answer, iterations, _final_ns = rlm_run(
+            query=query,
+            context=context,
+            ns=ns,
+            max_iters=max_iters,
+            verbose=False,
+        )
+
+        return answer, iterations
+
+    def _execute_dspy_rlm(self, task: dict, ns: dict, context: str) -> tuple[str, list]:
+        """Execute an RLM run using DSPy backend."""
+        from rlm_runtime.engine.dspy_rlm import run_dspy_rlm_with_tools
+        from rlm_runtime.tools import make_sparql_tools
+
+        # Prefer explicit max_iterations, otherwise infer from convergence grader config.
+        max_iters = task.get('max_iterations')
+        if max_iters is None:
+            for grader in task.get('graders', []) or []:
+                if grader.get('type') == 'convergence' and grader.get('max_iterations') is not None:
+                    max_iters = grader.get('max_iterations')
+                    break
+        if max_iters is None:
+            max_iters = 10
+
+        query = task.get('query', '')
+
+        # Extract SPARQL endpoint from task context
+        ctx = task.get('context', {}) or {}
+        sparql_cfg = ctx.get('sparql', {}) or {}
+        endpoint = sparql_cfg.get('endpoint')
+
+        if not endpoint:
+            raise ValueError("DSPy backend requires SPARQL endpoint in task context")
+
+        # Build tools for remote SPARQL
+        tools = make_sparql_tools(
+            endpoint=endpoint,
+            ns=ns,
+            max_results=100,
+            timeout=30.0
+        )
+
+        # Extract ontology name from context (for tracking)
+        ontology_name = sparql_cfg.get('name', 'remote')
+
+        # Run DSPy RLM with tools
+        result = run_dspy_rlm_with_tools(
+            query=query,
+            context=context,
+            tools=tools,
+            ontology_name=ontology_name,
+            ns=ns,
+            max_iterations=max_iters,
+            verbose=False,
+        )
+
+        return result.answer, result.trajectory
+
+    def _serialize_dspy_trajectory(self, trajectory: list) -> list:
+        """Convert DSPy trajectory to transcript format for graders."""
+        transcript = []
+
+        for i, step in enumerate(trajectory, 1):
+            if isinstance(step, dict):
+                # DSPy trajectory steps are already dicts with 'code' and 'output'
+                iter_dict = {
+                    'iteration': i,
+                    'response': '',  # DSPy doesn't have separate response text
+                    'code_blocks': [{
+                        'code': step.get('code', ''),
+                        'result': {
+                            'stdout': step.get('output', ''),
+                            'stderr': ''
+                        }
+                    }]
+                }
+                transcript.append(iter_dict)
+
+        return transcript
 
     def _serialize_transcript(self, iterations: list) -> list:
         """Convert RLMIteration objects to serializable dicts."""

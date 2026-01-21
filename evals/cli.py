@@ -43,7 +43,11 @@ def find_tasks(pattern: str = '*') -> list[Path]:
     # Handle patterns like 'entity_discovery/*' or '*'
     if '/' in pattern:
         category, task_pattern = pattern.split('/', 1)
-        search_pattern = f'{category}/{task_pattern}.yaml'
+        # Support nested categories (e.g., 'uniprot/*' should match 'uniprot/**/X.yaml')
+        if '/' in task_pattern:
+            search_pattern = f'{category}/{task_pattern}.yaml'
+        else:
+            search_pattern = f'{category}/**/{task_pattern}.yaml'
     else:
         search_pattern = f'**/{pattern}.yaml'
 
@@ -62,12 +66,20 @@ def run_command(args):
     print(f"Found {len(tasks)} tasks")
     print("-" * 50)
 
-    runner = TaskRunner()
+    # Configure runner with backend choice
+    config = {'use_dspy': args.dspy}
+    runner = TaskRunner(config=config)
     results = []
     output_dir = Path(args.output)
 
+    if args.dspy:
+        print("Using DSPy backend")
+    else:
+        print("Using claudette backend")
+
     for task_path in tasks:
-        print(f"\nRunning: {task_path.relative_to(task_path.parent.parent)}")
+        tasks_dir = Path(__file__).parent / 'tasks'
+        print(f"\nRunning: {task_path.relative_to(tasks_dir)}")
 
         try:
             result = runner.run_task(task_path, num_trials=args.trials)
@@ -111,12 +123,14 @@ def run_command(args):
 def list_command(args):
     """List available eval tasks."""
     tasks = find_tasks('*')
+    tasks_dir = Path(__file__).parent / 'tasks'
 
     print(f"Found {len(tasks)} tasks:\n")
 
     current_category = None
     for task_path in tasks:
-        category = task_path.parent.name
+        rel = task_path.relative_to(tasks_dir)
+        category = rel.parent.as_posix()
 
         if category != current_category:
             print(f"\n{category}/")
@@ -216,6 +230,8 @@ def main():
                            help='Output directory for results')
     run_parser.add_argument('--min-pass-rate', type=float, default=None,
                            help='Minimum pass rate to succeed (0.0-1.0)')
+    run_parser.add_argument('--dspy', action='store_true',
+                           help='Use DSPy backend instead of claudette')
 
     # List command
     list_parser = subparsers.add_parser('list', help='List available tasks')
