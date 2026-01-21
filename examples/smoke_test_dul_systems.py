@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from rlm_runtime.engine.dspy_rlm import run_dspy_rlm
-from rlm.ontology import build_sense_structured, format_sense_card
+from rlm_runtime.ontology import build_sense_card, format_sense_card
 from rlm_runtime.memory import SQLiteMemoryBackend
 
 
@@ -95,8 +95,8 @@ def main():
 
     # Build sense card
     print("\n1. Building sense card for SystemsLite...")
-    sense = build_sense_structured(str(ontology_path), name="systems_sense", ns={})
-    card = format_sense_card(sense['sense_card'])
+    sense_card = build_sense_card(str(ontology_path), "SystemsLite")
+    card = format_sense_card(sense_card)
     print(f"   ✓ Sense card generated ({len(card)} chars)")
     print(f"   Preview: {card[:250]}...")
 

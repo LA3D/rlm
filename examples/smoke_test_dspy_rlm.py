@@ -19,7 +19,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from rlm_runtime.engine.dspy_rlm import run_dspy_rlm
-from rlm.ontology import build_sense_structured, format_sense_card
+from rlm_runtime.ontology import build_sense_card, format_sense_card
 from rlm_runtime.memory import SQLiteMemoryBackend
 
 
@@ -43,9 +43,8 @@ def main():
         print(f"   ERROR: {ontology_path} not found")
         return 1
 
-    sense = build_sense_structured(str(ontology_path), name="prov_sense", ns={})
-    # format_sense_card expects the inner 'sense_card' dict
-    card = format_sense_card(sense['sense_card'])
+    sense_card = build_sense_card(str(ontology_path), "PROV")
+    card = format_sense_card(sense_card)
     print(f"   ✓ Sense card generated ({len(card)} chars)")
     print(f"   Preview: {card[:200]}...")
 
