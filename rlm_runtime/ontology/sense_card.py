@@ -459,7 +459,7 @@ def build_sense_card(ontology_path: str, ontology_name: Optional[str] = None) ->
     )
 
 
-def format_sense_card(card: SenseCard) -> str:
+def format_sense_card(card: SenseCard, include_sparql_templates: bool = False) -> str:
     """Format sense card as compact markdown (~600-700 chars with Widoco metadata).
 
     Focus on HOW to read the ontology: formalism level, metadata conventions,
@@ -467,6 +467,7 @@ def format_sense_card(card: SenseCard) -> str:
 
     Args:
         card: SenseCard to format
+        include_sparql_templates: If True, include SPARQL query templates for common tasks
 
     Returns:
         Markdown string for context injection
@@ -524,5 +525,30 @@ def format_sense_card(card: SenseCard) -> str:
     # NEW: Deprecation warning (if present)
     if card.metadata.deprecated_term_count > 0:
         lines.append(f"- ⚠️  Check `owl:deprecated` before using terms ({card.metadata.deprecated_term_count} marked)")
+
+    # NEW: SPARQL query templates (optional for minimal tool surface)
+    if include_sparql_templates:
+        lines.append("")
+        lines.append("**SPARQL Templates:**")
+
+        # Get entity description template
+        desc_prop = card.metadata.primary_desc_prop()
+        label_prop = card.metadata.primary_label_prop()
+        lines.append(f"```sparql")
+        lines.append(f"# Get entity description")
+        lines.append(f"SELECT ?label ?desc WHERE {{")
+        lines.append(f"  <entity_uri> {label_prop} ?label ;")
+        lines.append(f"               {desc_prop} ?desc .")
+        lines.append(f"}}")
+        lines.append(f"```")
+
+        # Find relationships template
+        lines.append(f"```sparql")
+        lines.append(f"# Find properties with domain/range")
+        lines.append(f"SELECT ?prop ?range WHERE {{")
+        lines.append(f"  ?prop rdfs:domain <entity_uri> ;")
+        lines.append(f"        rdfs:range ?range .")
+        lines.append(f"}}")
+        lines.append(f"```")
 
     return '\n'.join(lines)
