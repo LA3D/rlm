@@ -332,14 +332,23 @@ def run_dspy_rlm(
         "IMPORTANT: When calling SUBMIT, use keyword arguments with literal values or inline expressions.",
         "Example: SUBMIT(answer='The answer is...', sparql='SELECT...', evidence={'key': value})",
         "",
-        meta.summary(),
     ]
 
-    # Inject sense card if provided
+    # Inject sense card FIRST (before meta summary) if provided
     if sense_card:
-        context_parts.append("")
         context_parts.append("## Ontology Affordances (Sense Card)")
+        context_parts.append("")
+        context_parts.append("CONSULT THE SENSE CARD to understand:")
+        context_parts.append("- Which annotation properties to use for labels/descriptions")
+        context_parts.append("- What metadata vocabulary is present (SKOS, DCTERMS, etc.)")
+        context_parts.append("- What OWL constructs are available (restrictions, disjoints, etc.)")
+        context_parts.append("- Maturity indicators (version, deprecations, imports)")
+        context_parts.append("")
         context_parts.append(sense_card)
+        context_parts.append("")
+
+    # Then add graph summary
+    context_parts.append(meta.summary())
 
     # Inject memories if available
     if memory_context:
@@ -358,7 +367,7 @@ def run_dspy_rlm(
         """Construct answer using bounded ontology tools, optionally via SPARQL."""
 
         query: str = dspy.InputField(desc="User question to answer using the ontology.")
-        context: str = dspy.InputField(desc="Ontology summary and tool instructions.")
+        context: str = dspy.InputField(desc="Ontology metadata (sense card), statistics, and navigation guidance. Consult the sense card to understand annotation conventions and formalism level.")
 
         answer: str = dspy.OutputField(desc="Final grounded answer in natural language.")
         sparql: str = dspy.OutputField(
@@ -812,7 +821,7 @@ def run_dspy_rlm_with_tools(
         """Construct answer using bounded tools, optionally via SPARQL."""
 
         query: str = dspy.InputField(desc="User question to answer.")
-        context: str = dspy.InputField(desc="Task instructions and tool descriptions.")
+        context: str = dspy.InputField(desc="Task instructions, tool descriptions, and navigation guidance. If a sense card is provided, consult it to understand annotation conventions.")
 
         answer: str = dspy.OutputField(desc="Final grounded answer in natural language.")
         sparql: str = dspy.OutputField(
