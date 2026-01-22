@@ -16,6 +16,7 @@ from ..graders import (
     ToolCalledGrader,
     SparqlStructuralGrader,
     AffordanceUtilizationGrader,
+    OutcomeVerificationGrader,
 )
 from ..graders.base import GradeResult
 
@@ -125,6 +126,7 @@ class TaskRunner:
         'tool_called': ToolCalledGrader,
         'sparql_structural': SparqlStructuralGrader,
         'affordance_utilization': AffordanceUtilizationGrader,
+        'outcome_verification': OutcomeVerificationGrader,
     }
 
     def __init__(self, config: dict = None):
