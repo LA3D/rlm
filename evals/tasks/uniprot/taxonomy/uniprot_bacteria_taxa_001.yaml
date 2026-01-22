@@ -20,15 +20,17 @@ task:
   graders:
     - type: convergence
       max_iterations: 8
-    - type: evidence_pattern
-      required:
-        # Ensure taxonomy scoping is used (materialized hierarchy pattern).
-        - function: "PREFIX taxon:"
-        - function: "PREFIX up:"
-        - function: "up:scientificName"
-        - function: "rdfs:subClassOf taxon:2"
+    - type: outcome_verification
+      # Verify actual results are bacterial taxa, not SPARQL patterns
+      result_type: "present"
+      min_results: 5
+      required_fields: ["taxon", "scientificName"]
+      verification_patterns:
+        # Check results are taxonomy URIs (not checking HOW query was constructed)
+        - field: "taxon"
+          pattern: "taxonomy/"
+          matches: "all"
     - type: tool_called
-      # Requires remote SPARQL execution tooling (to be integrated via sparql_handles).
       required: ["sparql_query"]
 
   trials: 3

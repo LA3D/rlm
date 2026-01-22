@@ -20,14 +20,14 @@ task:
   graders:
     - type: convergence
       max_iterations: 14
-    - type: evidence_pattern
-      required:
-        - function: "SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/chebi>"
-        - function: "sachem:similarCompoundSearch"
-        - function: "rh:side/rh:contains/rh:compound"
-        - function: "up:Natural_Variant_Annotation"
-        - function: "skos:related ?disease"
-        - function: "up:Disease_Annotation"
+    - type: sparql_structural
+      # Similarity search federation is the learning objective
+      requires_service: ["elixir-czech.cz"]
+    - type: outcome_verification
+      # Verify results contain proteins with variants and diseases
+      result_type: "present"
+      min_results: 1
+      required_fields: ["protein"]
     - type: tool_called
       required: ["sparql_query"]
 

@@ -20,14 +20,20 @@ task:
   graders:
     - type: convergence
       max_iterations: 10
-    - type: evidence_pattern
-      required:
-        # Named graph joins are the point of this task.
-        - function: "GRAPH <http://sparql.uniprot.org/uniprot>"
-        - function: "GRAPH <http://sparql.uniprot.org/diseases>"
-        - function: "up:Disease"
-        - function: "up:disease"
-        - function: "rdfs:comment"
+    - type: sparql_structural
+      # Named graph joins are the learning objective for this task
+      requires_graph: true
+      required_patterns: ["up:disease"]
+    - type: outcome_verification
+      # Verify results contain disease-related proteins
+      result_type: "present"
+      min_results: 3
+      required_fields: ["protein", "disease"]
+      verification_patterns:
+        # Proteins are UniProt URIs
+        - field: "protein"
+          pattern: "uniprot.org/uniprot/"
+          matches: "all"
     - type: tool_called
       required: ["sparql_query"]
 

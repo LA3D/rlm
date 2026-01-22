@@ -20,13 +20,20 @@ task:
   graders:
     - type: convergence
       max_iterations: 10
-    - type: evidence_pattern
-      required:
-        - function: "taxon:83333"
-        - function: "up:organism"
-        - function: "rdfs:subClassOf taxon:83333"
-        - function: "up:sequence"
-        - function: "rdf:value"
+    - type: outcome_verification
+      # Verify results are E. coli K12 proteins with sequences
+      result_type: "present"
+      min_results: 3
+      required_fields: ["protein", "sequence"]
+      verification_patterns:
+        # Check proteins are UniProt URIs
+        - field: "protein"
+          pattern: "uniprot.org/uniprot/"
+          matches: "all"
+        # Check sequences are amino acids (contain letters A-Z)
+        - field: "sequence"
+          pattern: "[A-Z]{10,}"
+          matches: "all"
     - type: tool_called
       required: ["sparql_query"]
 

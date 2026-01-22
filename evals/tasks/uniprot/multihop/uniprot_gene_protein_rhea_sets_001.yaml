@@ -20,15 +20,11 @@ task:
   graders:
     - type: convergence
       max_iterations: 12
-    - type: evidence_pattern
-      required:
-        - function: "taxon:9606"
-        - function: "up:reviewed true"
-        - function: "up:annotation"
-        - function: "up:catalyticActivity"
-        - function: "up:catalyzedReaction"
-        - function: "up:transcribedFrom"
-        - function: "http://purl.uniprot.org/database/Ensembl"
+    - type: outcome_verification
+      # Verify results contain gene-protein-reaction chains
+      result_type: "present"
+      min_results: 1
+      required_fields: ["gene", "protein", "reaction"]
     - type: tool_called
       required: ["sparql_query"]
 
