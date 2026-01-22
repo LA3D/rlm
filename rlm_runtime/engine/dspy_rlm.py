@@ -27,6 +27,9 @@ class DSPyRLMResult:
         trajectory: List of execution steps
         iteration_count: Number of iterations taken
         converged: Whether execution converged successfully
+        thinking: Final thinking from the reasoning cycle (what was learned)
+        verification: Final verification checks performed
+        reflection: Final self-critique before submitting
     """
 
     answer: str
@@ -35,6 +38,10 @@ class DSPyRLMResult:
     trajectory: list[dict] = None
     iteration_count: int = 0
     converged: bool = True
+    # Reasoning fields from Think-Act-Verify-Reflect cycles
+    thinking: str | None = None
+    verification: str | None = None
+    reflection: str | None = None
 
     def __post_init__(self):
         if self.trajectory is None:
@@ -338,6 +345,29 @@ def run_dspy_rlm(
         "IMPORTANT: When calling SUBMIT, use keyword arguments with literal values or inline expressions.",
         "Example: SUBMIT(answer='The answer is...', sparql='SELECT...', evidence={'key': value})",
         "",
+        "## Reasoning Process",
+        "",
+        "Each iteration should follow THINK → ACT → VERIFY → REFLECT cycles:",
+        "",
+        "**THINK**: State what you learned and what you'll do next.",
+        "- 'I found Protein class with organism property linking to Taxon...'",
+        "- 'E. coli K-12 strains are siblings (materialized), so I'll use VALUES clause...'",
+        "",
+        "**ACT**: Execute code (search, query, describe).",
+        "",
+        "**VERIFY**: Check results match expectations (like running tests).",
+        "- 'Results have protein field ✓'",
+        "- 'Results have sequence field with amino acids ✓' (NOT just sequence_length!)",
+        "- 'Query returned expected columns ✓'",
+        "",
+        "**REFLECT**: Self-critique before SUBMIT.",
+        "- 'Evidence includes actual sequences, not just metadata'",
+        "- 'All required fields are present with correct types'",
+        "- 'URIs are valid and grounded in results'",
+        "",
+        "When you SUBMIT, include your final thinking, verification, and reflection.",
+        "Evidence MUST include actual data samples (sequences, labels, descriptions) NOT just counts or lengths.",
+        "",
     ]
 
     # Auto-generate sense card with SPARQL templates if not provided
@@ -375,19 +405,35 @@ def run_dspy_rlm(
 
     context = "\n".join(context_parts)
 
-    # Define typed signature
+    # Define typed signature with explicit reasoning fields (Think-Act-Verify-Reflect)
     class QueryConstructionSig(dspy.Signature):
-        """Construct answer using bounded ontology tools, optionally via SPARQL."""
+        """Construct answer using bounded ontology tools with explicit reasoning cycles.
+
+        Follow THINK → ACT → VERIFY → REFLECT cycles to ensure grounded answers
+        with consistent evidence formats.
+        """
 
         query: str = dspy.InputField(desc="User question to answer using the ontology.")
         context: str = dspy.InputField(desc="Ontology metadata (sense card), statistics, and navigation guidance. Consult the sense card to understand annotation conventions and formalism level.")
 
+        # Reasoning fields for explicit think-act-verify-reflect cycles
+        thinking: str = dspy.OutputField(
+            desc="THINK: What you learned from exploration, what patterns/entities you found, what you'll do next. State discoveries and next steps."
+        )
+        verification: str = dspy.OutputField(
+            desc="VERIFY: Check results match expectations. Do fields have correct types? Are URIs valid? Did query return expected columns?"
+        )
+        reflection: str = dspy.OutputField(
+            desc="REFLECT: Self-critique before SUBMIT. Is answer grounded? Does evidence include actual data (not just metadata like lengths/counts)?"
+        )
+
+        # Final outputs
         answer: str = dspy.OutputField(desc="Final grounded answer in natural language.")
         sparql: str = dspy.OutputField(
             desc="SPARQL query executed (if used), otherwise empty string."
         )
         evidence: dict = dspy.OutputField(
-            desc="Grounding evidence: URIs, result samples, tool outputs."
+            desc="Grounding evidence: URIs, result samples with actual data (sequences, labels, descriptions - not just counts or lengths)."
         )
 
     # Create RLM
@@ -427,7 +473,7 @@ def run_dspy_rlm(
         final_reasoning = getattr(pred, "final_reasoning", "")
         converged = final_reasoning != "Extract forced final output"
 
-        # Build result
+        # Build result with reasoning fields
         result = DSPyRLMResult(
             answer=pred.answer,
             sparql=pred.sparql if hasattr(pred, "sparql") else None,
@@ -435,6 +481,10 @@ def run_dspy_rlm(
             trajectory=trajectory_dicts,
             iteration_count=len(trajectory),
             converged=converged,
+            # Reasoning fields from Think-Act-Verify-Reflect cycles
+            thinking=getattr(pred, "thinking", None),
+            verification=getattr(pred, "verification", None),
+            reflection=getattr(pred, "reflection", None),
         )
 
         # Log initial metrics to MLflow (before memory extraction)
@@ -499,12 +549,15 @@ def run_dspy_rlm(
         if memory_backend and extract_memories:
             from rlm_runtime.memory.extraction import judge_trajectory_dspy, extract_memories_dspy
 
-            # Judge trajectory
+            # Judge trajectory with Think-Act-Verify-Reflect reasoning fields
             judgment = judge_trajectory_dspy(
                 query,
                 result.answer,
                 result.trajectory,
                 result.evidence,
+                thinking=result.thinking,
+                verification=result.verification,
+                reflection=result.reflection,
                 model=sub_model
             )
 
@@ -821,6 +874,33 @@ def run_dspy_rlm_with_tools(
             if memory_logger:
                 memory_logger.log_retrieval(query, retrieved_memories, retrieve_memories)
 
+    # Inject reasoning process guidance
+    reasoning_guidance = """
+## Reasoning Process
+
+Each iteration should follow THINK → ACT → VERIFY → REFLECT cycles:
+
+**THINK**: State what you learned and what you'll do next.
+- 'I found Protein class with organism property linking to Taxon...'
+- 'E. coli K-12 strains are siblings (materialized), so I'll use VALUES clause...'
+
+**ACT**: Execute code (search, query, describe).
+
+**VERIFY**: Check results match expectations (like running tests).
+- 'Results have protein field ✓'
+- 'Results have sequence field with amino acids ✓' (NOT just sequence_length!)
+- 'Query returned expected columns ✓'
+
+**REFLECT**: Self-critique before SUBMIT.
+- 'Evidence includes actual sequences, not just metadata'
+- 'All required fields are present with correct types'
+- 'URIs are valid and grounded in results'
+
+When you SUBMIT, include your final thinking, verification, and reflection.
+Evidence MUST include actual data samples (sequences, labels, descriptions) NOT just counts or lengths.
+"""
+    context = context + "\n" + reasoning_guidance
+
     # Inject sense card if provided
     if sense_card:
         context = context + "\n\n## Ontology Affordances (Sense Card)\n" + sense_card
@@ -829,19 +909,35 @@ def run_dspy_rlm_with_tools(
     if memory_context:
         context = context + "\n\n" + memory_context
 
-    # Define typed signature
+    # Define typed signature with explicit reasoning fields (Think-Act-Verify-Reflect)
     class QueryConstructionSig(dspy.Signature):
-        """Construct answer using bounded tools, optionally via SPARQL."""
+        """Construct answer using bounded tools with explicit reasoning cycles.
+
+        Follow THINK → ACT → VERIFY → REFLECT cycles to ensure grounded answers
+        with consistent evidence formats.
+        """
 
         query: str = dspy.InputField(desc="User question to answer.")
         context: str = dspy.InputField(desc="Task instructions, tool descriptions, and navigation guidance. If a sense card is provided, consult it to understand annotation conventions.")
 
+        # Reasoning fields for explicit think-act-verify-reflect cycles
+        thinking: str = dspy.OutputField(
+            desc="THINK: What you learned from exploration, what patterns/entities you found, what you'll do next. State discoveries and next steps."
+        )
+        verification: str = dspy.OutputField(
+            desc="VERIFY: Check results match expectations. Do fields have correct types? Are URIs valid? Did query return expected columns?"
+        )
+        reflection: str = dspy.OutputField(
+            desc="REFLECT: Self-critique before SUBMIT. Is answer grounded? Does evidence include actual data (not just metadata like lengths/counts)?"
+        )
+
+        # Final outputs
         answer: str = dspy.OutputField(desc="Final grounded answer in natural language.")
         sparql: str = dspy.OutputField(
             desc="SPARQL query executed (if used), otherwise empty string."
         )
         evidence: dict = dspy.OutputField(
-            desc="Grounding evidence: URIs, result samples, tool outputs."
+            desc="Grounding evidence: URIs, result samples with actual data (sequences, labels, descriptions - not just counts or lengths)."
         )
 
     # Create interpreter
@@ -886,7 +982,7 @@ def run_dspy_rlm_with_tools(
         final_reasoning = getattr(pred, "final_reasoning", "")
         converged = final_reasoning != "Extract forced final output"
 
-        # Build result
+        # Build result with reasoning fields
         result = DSPyRLMResult(
             answer=pred.answer,
             sparql=pred.sparql if hasattr(pred, "sparql") else None,
@@ -894,6 +990,10 @@ def run_dspy_rlm_with_tools(
             trajectory=trajectory_dicts,
             iteration_count=len(trajectory),
             converged=converged,
+            # Reasoning fields from Think-Act-Verify-Reflect cycles
+            thinking=getattr(pred, "thinking", None),
+            verification=getattr(pred, "verification", None),
+            reflection=getattr(pred, "reflection", None),
         )
 
         # Log initial metrics to MLflow (before memory extraction)
@@ -958,12 +1058,15 @@ def run_dspy_rlm_with_tools(
         if memory_backend and extract_memories:
             from rlm_runtime.memory.extraction import judge_trajectory_dspy, extract_memories_dspy
 
-            # Judge trajectory
+            # Judge trajectory with Think-Act-Verify-Reflect reasoning fields
             judgment = judge_trajectory_dspy(
                 query,
                 result.answer,
                 result.trajectory,
                 result.evidence,
+                thinking=result.thinking,
+                verification=result.verification,
+                reflection=result.reflection,
                 model=sub_model
             )
 
