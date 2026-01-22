@@ -20,7 +20,9 @@ echo "   ✓ All CLI commands registered"
 
 echo ""
 echo "2. Testing task discovery..."
-TASK_COUNT=$(python -m evals.cli list 2>/dev/null | grep -c "\.yaml" || true)
+# Count tasks from the "Found X tasks" line
+TASK_OUTPUT=$(python -m evals.cli list 2>/dev/null | head -1)
+TASK_COUNT=$(echo "$TASK_OUTPUT" | grep -o "[0-9]\+" | head -1)
 echo "   Found $TASK_COUNT tasks"
 if [ "$TASK_COUNT" -gt 0 ]; then
     echo "   ✓ Task discovery works"
