@@ -6,6 +6,7 @@ from .sense_card import (
     MetadataProfile,
     build_sense_card,
     format_sense_card,
+    format_sense_card_parametric,
     detect_formalism,
     detect_metadata_profile
 )
@@ -16,6 +17,7 @@ __all__ = [
     'MetadataProfile',
     'build_sense_card',
     'format_sense_card',
+    'format_sense_card_parametric',
     'detect_formalism',
     'detect_metadata_profile'
 ]

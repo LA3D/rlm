@@ -552,3 +552,101 @@ def format_sense_card(card: SenseCard, include_sparql_templates: bool = False) -
         lines.append(f"```")
 
     return '\n'.join(lines)
+
+
+def format_sense_card_parametric(card: SenseCard, features: dict) -> str:
+    """Format sense card with selective feature inclusion for ablation experiments.
+
+    Args:
+        card: SenseCard to format
+        features: Dict mapping feature names to bool (enable/disable)
+                 Expected keys: basic_stats, labeling_predicates, description_predicates,
+                 hierarchy, domain_range, property_characteristics, materialization_hints,
+                 owl_constructs, sparql_templates, uri_patterns
+
+    Returns:
+        Markdown string with only requested features included
+    """
+    lines = [f"# Ontology: {card.ontology_name}", ""]
+
+    # Domain description (always included)
+    lines.append(f"**Domain**: {card.domain_description}")
+    lines.append("")
+
+    # Basic stats (minimal baseline)
+    if features.get('basic_stats', True):
+        lines.append(f"**Size**: {card.triple_count:,} triples, {card.class_count} classes, {card.property_count} properties")
+        lines.append("")
+
+    # Formalism level (includes owl_constructs check)
+    if features.get('owl_constructs', False):
+        lines.append(f"**Formalism**: {card.formalism.description()}")
+        lines.append("")
+
+    # Metadata vocabularies
+    lines.append(f"**Metadata**: {card.metadata.vocabulary_summary()}")
+    lines.append("")
+
+    # Labeling predicates
+    if features.get('labeling_predicates', False):
+        lines.append("**Navigation:**")
+        lines.append(f"- Labels: Use `{card.metadata.primary_label_prop()}` property")
+
+        # Description predicates
+        if features.get('description_predicates', False):
+            lines.append(f"- Descriptions: Use `{card.metadata.primary_desc_prop()}` property")
+
+        lines.append("")
+
+    # Hierarchy information
+    if features.get('hierarchy', False) and card.formalism.rdfs_subclass_count > 0:
+        lines.append(f"**Hierarchy**: {card.formalism.rdfs_subclass_count} subclass relationships")
+
+        # Materialization hints
+        if features.get('materialization_hints', False):
+            # Heuristic: if hierarchy is rich but transitive properties exist, likely not materialized
+            if card.formalism.owl_transitive_count > 0:
+                lines.append("- Hierarchy likely NOT materialized (transitive properties present)")
+            else:
+                lines.append("- Hierarchy may be materialized (no transitive closure operators found)")
+
+        lines.append("")
+
+    # Domain/Range information
+    if features.get('domain_range', False) and card.formalism.rdfs_domain_count > 0:
+        lines.append(f"**Type Constraints**: {card.formalism.rdfs_domain_count} domain axioms, {card.formalism.rdfs_range_count} range axioms")
+        lines.append("")
+
+    # Property characteristics
+    if features.get('property_characteristics', False):
+        characteristics = []
+        if card.formalism.owl_functional_count > 0:
+            characteristics.append(f"{card.formalism.owl_functional_count} functional")
+        if card.formalism.owl_transitive_count > 0:
+            characteristics.append(f"{card.formalism.owl_transitive_count} transitive")
+        if card.formalism.owl_inverse_count > 0:
+            characteristics.append(f"{card.formalism.owl_inverse_count} inverse pairs")
+
+        if characteristics:
+            lines.append(f"**Property Characteristics**: {', '.join(characteristics)}")
+            lines.append("")
+
+    # URI patterns
+    if features.get('uri_patterns', False) and card.uri_namespace:
+        lines.append(f"**URI Namespace**: `{card.uri_namespace}`")
+        lines.append("")
+
+    # SPARQL templates
+    if features.get('sparql_templates', False):
+        lines.append("**SPARQL Templates:**")
+        desc_prop = card.metadata.primary_desc_prop()
+        label_prop = card.metadata.primary_label_prop()
+        lines.append(f"```sparql")
+        lines.append(f"# Get entity description")
+        lines.append(f"SELECT ?label ?desc WHERE {{")
+        lines.append(f"  <entity_uri> {label_prop} ?label ;")
+        lines.append(f"               {desc_prop} ?desc .")
+        lines.append(f"}}")
+        lines.append(f"```")
+
+    return '\n'.join(lines)

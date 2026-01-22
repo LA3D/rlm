@@ -36,6 +36,11 @@ categories:
     trials: 5
     max_iterations: 5
 
+  # Reasoning boundary tasks (Rung 6)
+  reasoning:
+    trials: 3
+    max_iterations: 15
+
 # Reporting
 reporting:
   # Categories to track separately in reports
@@ -45,6 +50,7 @@ reporting:
     - hierarchy
     - memory
     - negative
+    - reasoning
 
   # Alert thresholds
   alerts:

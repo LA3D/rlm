@@ -1,10 +1,12 @@
 # Trajectory v3: DSPy-only RLM (Graph REPL parity + Remote SPARQL + UniProt Evals)
 
-**Last Updated:** 2026-01-21
+**Last Updated:** 2026-01-22
 
-**Status:** ✅ **Phases 1-2 COMPLETE** | 🚧 **Phases 3-7 planned** (v2 delivered the foundation; v3 completes DSPy-only + remote SPARQL + UniProt eval harness + SHACL tools)
+**Status:** ✅ **Phases 1-3 COMPLETE** | 🚧 **Phases 4-7 planned** (v2 delivered the foundation; v3 completes DSPy-only + remote SPARQL + UniProt eval harness + SHACL tools)
 
 This document supersedes `docs/planning/trajectory_v2.md` as the active trajectory for *finishing the DSPy migration*, especially the missing SPARQL/graph-navigation capabilities required for UniProt-style endpoint evaluation.
+
+**Phase 4 Update (2026-01-22):** Extended to include research dimensions for (1) granular affordance ablation—testing which specific knowledge representations help LM-based query construction, and (2) reasoning boundary experiments—identifying where LM capabilities end and what new RLM tools might be needed.
 
 ---
 
@@ -108,6 +110,43 @@ We measure whether ReasoningBank accumulation produces measurable improvement:
 - **Feedback value**: How much does human correction accelerate learning?
 
 This requires longitudinal experiments where the same system instance runs many tasks in sequence, with memory persisting across runs.
+
+### RQ5 — Representation utility: what level of knowledge representation helps LM-based query construction?
+
+LMs are not symbolic reasoners, but if reasoning is materialized in graph structure, understanding that structure may help. The question is: **which specific forms of materialized reasoning help LM-based agents construct correct SPARQL queries?**
+
+We test this by measuring:
+
+- **Feature-level ablation**: Does domain/range info help with JOINs? Do materialization hints help with closure operators?
+- **Information density**: Is there an optimal amount of affordance information, beyond which LMs get confused or ignore it?
+- **Task-type specificity**: Do different query patterns (hierarchy, federation, multi-hop) benefit from different affordance features?
+- **Utilization rate**: What fraction of provided affordances actually appear in the final SPARQL?
+
+This extends RQ1 from binary (affordances on/off) to granular (which specific affordances, for which tasks).
+
+### RQ6 — Reasoning boundaries: where do LM capabilities end, and what tools would extend them?
+
+Some questions fundamentally require reasoning beyond what SPARQL can express. Understanding where LMs succeed and fail on this spectrum informs whether additional RLM tools are needed.
+
+We define a reasoning complexity spectrum:
+
+| Level | Description | SPARQL Alone? |
+|-------|-------------|---------------|
+| L0-L2 | Direct patterns, joins, property paths | ✅ Yes |
+| L3 | Relies on materialized inference | ✅ If materialized |
+| L4 | Cross-endpoint federation | ✅ With SERVICE |
+| L5 | External computation (similarity) | ❌ Needs external service |
+| L6 | Epistemic (open-world semantics) | ❌ Needs reasoning about absence |
+| L7 | Abductive (explanation generation) | ❌ Needs hypothesis synthesis |
+
+We test this by measuring:
+
+- **Capability cliff**: At which reasoning level does pass_rate drop significantly?
+- **Boundary recognition**: Can LMs learn to recognize when they're at a reasoning boundary?
+- **Delegation learning**: Can LMs learn when to delegate to external services vs attempt in SPARQL?
+- **Tool gap identification**: Which L5-L7 failures could be addressed by new RLM tools?
+
+This research question directly informs the tool surface: if we observe systematic failures at L5 (similarity) or L6 (epistemic), we know new tools are needed.
 
 ---
 
@@ -269,9 +308,9 @@ These are intentionally not "exact count" tests. They focus on whether the agent
 
 ## Testing matrix (ablation study design)
 
-To attribute performance to specific components, we test combinations systematically.
+To attribute performance to specific components, we test combinations systematically. The matrix has three dimensions: (1) context/memory configuration, (2) affordance feature granularity, and (3) reasoning complexity level.
 
-### Component toggles
+### Dimension 1: Component toggles (context and memory)
 
 | Component | Off | On | Notes |
 |-----------|-----|-----|-------|
@@ -282,6 +321,49 @@ To attribute performance to specific components, we test combinations systematic
 | `human_feedback` | Automatic judgment only | Human correction on ambiguous | Tests value of feedback |
 | `shacl_tools` | No template access | Query/shape index tools available | Tests value of template-guided construction (Phase 7) |
 
+### Dimension 2: Affordance feature granularity (new)
+
+**Motivation:** LMs are not symbolic reasoners, but if reasoning is materialized in graph structure, understanding that structure may help. The question is: **which specific forms of materialized reasoning help LM-based agents construct correct SPARQL queries?**
+
+| Feature Set | Includes | Tests |
+|-------------|----------|-------|
+| `minimal` | basic_stats only | Baseline without schema knowledge |
+| `structural` | + domain_range, hierarchy | Value of type constraints |
+| `semantic` | + materialization_hints, property_characteristics | Value of inference hints |
+| `navigational` | + labeling_predicates, uri_patterns | Value of access patterns |
+| `full` | all features + endpoint_semantics + examples | Upper bound with full affordances |
+
+Individual feature toggles for fine-grained ablation:
+
+```python
+sense_features: {
+    'basic_stats': bool,           # Triple count, class count, property count
+    'domain_range': bool,          # Property domain/range constraints
+    'hierarchy': bool,             # Class hierarchy depth
+    'property_characteristics': bool,  # Transitive, symmetric, inverse
+    'materialization_hints': bool, # Which inferences are pre-computed
+    'labeling_predicates': bool,   # How to get human-readable labels
+    'uri_patterns': bool,          # URI structure conventions
+    'endpoint_semantics': bool,    # Named graphs, federation patterns
+    'examples': bool               # Example SPARQL snippets
+}
+```
+
+### Dimension 3: Reasoning complexity levels (new)
+
+**Motivation:** Some questions fundamentally require reasoning beyond what SPARQL can express. Understanding where LMs succeed and fail on this spectrum informs whether additional RLM tools are needed.
+
+| Level | Description | SPARQL Alone? | Tests |
+|-------|-------------|---------------|-------|
+| `L0_direct` | Single triple pattern | ✅ Yes | Baseline competence |
+| `L1_join` | Multi-hop joins | ✅ Yes | Join construction |
+| `L2_closure` | Property path traversal | ✅ Yes | Closure operator selection |
+| `L3_materialized` | Relies on pre-computed inference | ✅ If materialized | Materialization awareness |
+| `L4_federation` | Cross-endpoint reasoning | ✅ With SERVICE | Federation planning |
+| `L5_external` | Requires non-SPARQL computation | ❌ External service | Delegation recognition |
+| `L6_epistemic` | Open-world / uncertainty | ❌ Reasoning needed | Epistemic awareness |
+| `L7_explanation` | Abductive synthesis | ❌ Hypothesis generation | Beyond query construction |
+
 ### Primary comparisons (minimum viable experiment)
 
 1. **Baseline**: sense_card=off, memory=off
@@ -289,17 +371,32 @@ To attribute performance to specific components, we test combinations systematic
 3. **Memory only**: sense_card=off, memory=on (retrieve+store)
 4. **Full system**: sense_card=on, memory=on
 
-### Extended comparisons (if resources permit)
+### Extended comparisons (affordance granularity)
 
-5. **Seeded vs zero-shot**: memory=on with/without exemplar seeding
-6. **Curriculum effect**: structured vs random task ordering
-7. **Feedback value**: with/without human correction on ambiguous cases
-8. **SHACL tools value** (Phase 7): full system vs full system + shacl_tools — measures incremental value of template-guided construction after baseline is established
+5. **Minimal affordances**: sense_features=minimal, memory=off
+6. **Structural affordances**: sense_features=structural, memory=off
+7. **Semantic affordances**: sense_features=semantic, memory=off
+8. **Full affordances**: sense_features=full, memory=off
+9. **Full + memory**: sense_features=full, memory=closed_loop
+
+### Extended comparisons (reasoning boundaries)
+
+10. **By reasoning level**: Run same affordance config across L0-L7 tasks
+11. **Capability boundary detection**: Find level where pass_rate drops significantly
+12. **Tool gap analysis**: Identify which L5-L7 failures could be addressed by new tools
+
+### Extended comparisons (original + Phase 7)
+
+13. **Seeded vs zero-shot**: memory=on with/without exemplar seeding
+14. **Curriculum effect**: structured vs random task ordering
+15. **Feedback value**: with/without human correction on ambiguous cases
+16. **SHACL tools value** (Phase 7): full system vs full system + shacl_tools
 
 ### Sample size considerations
 
 - Per condition: minimum 3 trials per task
 - For learning curves: 20+ sequential runs to observe trends
+- For reasoning level analysis: minimum 5 tasks per level
 - Statistical test: paired comparisons (same tasks across conditions)
 
 ---
@@ -657,11 +754,12 @@ Done when:
 - ~~Retrieval returns relevant procedures for test queries~~
 - ~~DSPy runs can generate sense cards dynamically from schema exploration~~
 
-### Phase 4 — Eval harness: DSPy-only execution + learning metrics
+### Phase 4 — Eval harness: DSPy-only execution + learning metrics + representation ablation
 
-**Problem:** current evaluation code paths were originally oriented around the claudette loop and do not reliably inspect structured DSPy artifacts.
+**Problem:** current evaluation code paths were originally oriented around the claudette loop and do not reliably inspect structured DSPy artifacts. Additionally, the current testing matrix uses binary toggles (sense_card on/off) but cannot answer the deeper question: **what level of knowledge representation is useful for LM-based agents to construct correct SPARQL queries?**
 
-Deliverables:
+#### Core Deliverables (Eval Infrastructure)
+
 - Eval runner supports DSPy backend as the default executor and collects:
   - `answer`, `sparql`, `evidence`, `trajectory` artifacts
 - Graders are updated (or new graders added) to inspect:
@@ -669,11 +767,169 @@ Deliverables:
   - structural operator usage (`GRAPH`, `SERVICE`, property paths)
   - bounded evidence presence
 - UniProt task suite (already staged under `evals/tasks/uniprot/**`) becomes runnable under DSPy-only.
-- A "matrix runner" to execute cohorts:
-  - baseline vs `ont_sense` vs `shacl_exemplars` vs combined
-  - ReasoningBank off vs retrieve-only vs closed-loop
+- A "matrix runner" to execute cohorts across multiple experimental dimensions (see below).
 
-**Additional deliverables for learning measurement:**
+#### Extended Research Dimension 1: Granular Affordance Ablation
+
+**Motivation:** LMs are not symbolic reasoners, but if reasoning is materialized in the graph structure, understanding that structure may help. The question is not just "do affordances help?" but "**which specific affordances help, and for which query patterns?**"
+
+**Move from binary to granular ablation:**
+
+Instead of `sense_card: [off, on]`, implement feature-level toggles:
+
+```python
+sense_features: {
+    'basic_stats': bool,           # Triple count, class count, property count
+    'domain_range': bool,          # Property domain/range constraints
+    'hierarchy': bool,             # Class hierarchy (2-level, full, or none)
+    'property_characteristics': bool,  # Transitive, symmetric, inverse
+    'materialization_hints': bool, # Which inferences are pre-computed
+    'labeling_predicates': bool,   # How to get human-readable labels
+    'uri_patterns': bool,          # URI structure conventions
+    'endpoint_semantics': bool,    # Named graphs, federation patterns
+    'examples': bool               # Example SPARQL snippets
+}
+```
+
+**Parametric sense card builder:**
+
+Extend `format_sense_card()` to accept feature toggles:
+
+```python
+def format_sense_card(
+    card: dict,
+    include_domain_range: bool = True,
+    include_hierarchy: bool = True,
+    include_materialization_hints: bool = True,
+    include_property_characteristics: bool = True,
+    verbosity: str = 'standard'  # 'minimal', 'standard', 'detailed'
+) -> str:
+```
+
+**Ablation cohorts for representation research:**
+
+| Cohort | Features Included | Tests |
+|--------|-------------------|-------|
+| `minimal` | basic_stats only | Baseline without schema knowledge |
+| `structural` | + domain_range, hierarchy | Value of type constraints |
+| `semantic` | + materialization_hints, property_chars | Value of inference hints |
+| `navigational` | + labeling, uri_patterns | Value of access patterns |
+| `full` | all features | Upper bound with full affordances |
+
+**Correlation analysis:**
+
+For each task run, log:
+- Which sense card features were present (`sense_features` dict)
+- Which features the agent referenced in reasoning (if traceable via trajectory)
+- Whether the agent used correct structural operators
+
+Then analyze: "Did including domain/range info correlate with correct JOIN construction?"
+
+#### Extended Research Dimension 2: Reasoning Complexity and LLM Boundaries
+
+**Motivation:** Some questions fundamentally require reasoning beyond what SPARQL can express. Understanding where LMs succeed and fail on this spectrum informs whether additional RLM tools (external reasoners, similarity services, explanation generators) are needed.
+
+**Reasoning complexity levels:**
+
+| Level | Description | Example | SPARQL Alone? |
+|-------|-------------|---------|---------------|
+| `L0_direct` | Single triple pattern | "What is the label of P12345?" | ✅ Yes |
+| `L1_join` | Multi-hop joins | "Proteins → Annotations → Diseases" | ✅ Yes |
+| `L2_closure` | Property path traversal | "All E. coli descendants" | ✅ Yes (if supported) |
+| `L3_materialized` | Relies on pre-computed inference | "All enzymes" (OWL class) | ✅ If materialized |
+| `L4_federation` | Cross-endpoint reasoning | "UniProt + Rhea + ChEBI" | ✅ With SERVICE |
+| `L5_external` | Requires non-SPARQL computation | "Molecules similar to dopamine" | ❌ Needs external service |
+| `L6_epistemic` | Open-world / uncertainty | "Proteins with unknown function" | ❌ Needs reasoning about absence |
+| `L7_explanation` | Abductive synthesis | "Why are these proteins linked to Parkinson's?" | ❌ Needs hypothesis generation |
+
+**New task categories for reasoning boundaries:**
+
+1. **`reasoning/materialization_detection`** — Can the agent determine when closure operators are needed vs when hierarchies are materialized?
+   ```yaml
+   question: "Find all proteins in the E. coli taxonomic lineage"
+   grading:
+     structural_check: "closure_operator_appropriate"
+     # PASS if uses rdfs:subClassOf (materialized in UniProt)
+     # FAIL if uses rdfs:subClassOf+ unnecessarily
+   ```
+
+2. **`reasoning/similarity_delegation`** — Can the agent recognize when to invoke external similarity services?
+   ```yaml
+   question: "Find proteins that interact with molecules structurally similar to aspirin"
+   grading:
+     requires: "SERVICE_to_similarity_endpoint"
+     fail_if: "attempts_similarity_in_sparql_alone"
+   ```
+
+3. **`reasoning/epistemic_awareness`** — Can the agent handle open-world semantics?
+   ```yaml
+   question: "Find proteins where function is uncertain or unknown"
+   grading:
+     checks: "distinguishes_no_annotation_from_annotated_unknown"
+     # Must understand absence of triple ≠ false in OWL
+   ```
+
+4. **`reasoning/explanation_required`** — Can the agent synthesize explanations from SPARQL evidence?
+   ```yaml
+   question: "Why might these proteins all be associated with neurodegeneration?"
+   grading:
+     requires_both:
+       sparql_evidence: "shared_annotations_pathways_or_domains"
+       natural_language: "hypothesis_about_mechanism"
+   ```
+
+5. **`reasoning/federation_planning`** — Can the agent determine correct endpoint routing?
+   ```yaml
+   question: "Find human enzymes catalyzing reactions involving dopamine-like compounds with disease variants"
+   grading:
+     requires_services: ["chebi_similarity", "rhea", "uniprot"]
+     checks: "correct_query_planning_order"
+   ```
+
+6. **`reasoning/property_chain_inference`** — Can the agent handle non-materialized property chains?
+   ```yaml
+   question: "Find proteins that participate in pathways associated with cancer"
+   grading:
+     # If pathway→disease link isn't materialized, agent must construct multi-hop
+     checks: "constructs_correct_join_pattern"
+   ```
+
+**Research questions these tasks address:**
+
+- **RQ-Representation**: At which reasoning levels do LLMs start failing without affordances?
+- **RQ-Boundaries**: Can LLMs learn to recognize when they're at a reasoning boundary?
+- **RQ-Delegation**: Can LLMs learn when to delegate to external services vs attempt in SPARQL?
+- **RQ-Tools**: Which reasoning levels require new RLM tools (reasoners, similarity services, explanation generators)?
+
+#### Extended Research Dimension 3: Information Utilization Metrics
+
+**Motivation:** Providing affordances doesn't guarantee the LM uses them. We need to measure actual utilization.
+
+**New metrics:**
+
+- `affordance_utilization_rate`: (URIs/classes/properties from sense card appearing in final SPARQL) / (total provided)
+- `relevant_affordance_rate`: (useful affordances provided) / (affordances that would have helped)
+- `hallucination_rate`: URIs in SPARQL that don't exist in the ontology
+- `over_specification_rate`: Unnecessary constraints that narrow results incorrectly
+
+**Grader additions:**
+
+```python
+class AffordanceUtilizationGrader:
+    """Measure whether agent used provided affordances."""
+
+    def grade(self, result, task, sense_card):
+        provided_uris = extract_uris(sense_card)
+        used_uris = extract_uris(result.sparql)
+
+        return {
+            'utilization_rate': len(used_uris & provided_uris) / len(provided_uris),
+            'hallucinated_uris': list(used_uris - valid_ontology_uris),
+            'missed_relevant': list(relevant_uris - used_uris)
+        }
+```
+
+#### Deliverables for Learning Measurement (Original)
 
 - **Longitudinal run mode:**
   - Single system instance runs task sequence with persistent memory
@@ -685,17 +941,47 @@ Deliverables:
   - `memory_size`: number of procedures in ReasoningBank
   - `retrieval_hit`: whether retrieved procedures were relevant (human-judged or heuristic)
   - `novel_extraction`: whether this run produced a new procedure
+  - `reasoning_level`: complexity level of the task (L0-L7)
+  - `sense_features`: dict of which affordance features were provided
+  - `affordance_utilization`: rate at which provided affordances were used
 
 - **Learning curve visualization:**
   - Plot: iterations vs cumulative_tasks (should trend down)
   - Plot: pass_rate vs cumulative_tasks (should trend up)
   - Plot: memory_size vs cumulative_tasks (should plateau)
+  - Plot: pass_rate vs reasoning_level (should show capability boundary)
+  - Plot: pass_rate vs sense_features (should show which features help)
 
-Done when:
+#### Summary: Extended Testing Matrix
+
+The full testing matrix now has three dimensions:
+
+**Dimension 1: Context/Memory (original)**
+- baseline / sense_card / shacl_exemplars / combined
+- memory: none / retrieve_only / closed_loop
+
+**Dimension 2: Affordance Features (new)**
+- minimal / structural / semantic / navigational / full
+
+**Dimension 3: Reasoning Complexity (new)**
+- L0_direct through L7_explanation
+
+This enables questions like:
+- "At what reasoning level does sense_card start helping?"
+- "Does domain/range info specifically help with JOIN construction?"
+- "Can procedural memory help LMs learn when to delegate to external services?"
+- "What new tools would address the capability gaps we observe?"
+
+#### Done Criteria
+
 - `python -m evals.cli run 'uniprot/*'` runs via DSPy-only and produces artifacts suitable for analysis (even if pass rate is initially low).
-- The matrix can be run reproducibly, and MLflow allows cohort comparisons.
+- The matrix can be run reproducibly across all three dimensions, and MLflow allows cohort comparisons.
 - Longitudinal runs produce interpretable learning curves.
-- We can answer: "Does the system get better with experience?"
+- Reasoning boundary tasks exist and can be graded.
+- We can answer:
+  - "Does the system get better with experience?"
+  - "Which affordances help, and for which query patterns?"
+  - "Where are the LLM reasoning boundaries, and what tools would extend them?"
 
 ### Phase 5 — Human feedback integration + curriculum runner
 
@@ -810,6 +1096,57 @@ Across cohorts, measure:
 - higher structural compliance
 - higher pass rates on "operator-sensitive" tasks
 
+### Affordance granularity experiments (Phase 4 extension)
+
+**Research question:** What level of knowledge representation is useful for LM-based agents?
+
+Across affordance cohorts (minimal → structural → semantic → navigational → full), measure:
+
+- **Feature-specific impact:** Does domain/range info specifically help with JOIN construction?
+- **Correlation analysis:** Which features correlate with correct structural operators?
+- **Diminishing returns:** At what point do additional affordances stop helping?
+- **Task-type specificity:** Do different query patterns benefit from different features?
+
+Specific feature ablations:
+
+| Feature | Hypothesis | Measured By |
+|---------|------------|-------------|
+| `domain_range` | Helps with JOIN construction | Correct multi-hop patterns |
+| `hierarchy` | Helps with subclass queries | Correct closure operators |
+| `materialization_hints` | Helps with closure vs direct | `rdfs:subClassOf` vs `rdfs:subClassOf+` |
+| `endpoint_semantics` | Helps with federation | Correct `GRAPH`/`SERVICE` usage |
+
+### Reasoning boundary experiments (Phase 4 extension)
+
+**Research question:** Where are the LLM reasoning boundaries, and what tools would extend them?
+
+**Task categories by reasoning level:**
+
+| Level | Task Type | Example Task | Success Criteria |
+|-------|-----------|--------------|------------------|
+| L0-L2 | Basic SPARQL | Entity lookup, joins, paths | Correct SPARQL + grounded answer |
+| L3 | Materialization | Enzyme lookup (OWL class) | Uses materialized vs closure correctly |
+| L4 | Federation | UniProt + Rhea + ChEBI | Correct SERVICE clauses |
+| L5 | External service | Similarity search | Recognizes need to delegate |
+| L6 | Epistemic | "Unknown function" queries | Handles open-world semantics |
+| L7 | Explanation | "Why are these linked?" | Synthesizes hypothesis from evidence |
+
+**Boundary detection experiments:**
+
+- **Capability cliff:** At which level does pass_rate drop below 50%?
+- **Affordance rescue:** Can additional affordances push the boundary higher?
+- **Memory rescue:** Can procedural memory help at boundary levels?
+- **Tool gap identification:** Which L5-L7 failures could be addressed by new RLM tools?
+
+**New RLM tool candidates (informed by boundary experiments):**
+
+| Gap Observed | Potential Tool | Description |
+|--------------|----------------|-------------|
+| L5 similarity failures | `similarity_service_router` | Dispatch to ChEBI/other similarity endpoints |
+| L6 epistemic failures | `uncertainty_annotator` | Mark absence vs unknown vs false |
+| L7 explanation failures | `hypothesis_generator` | Synthesize explanations from query results |
+| Federation planning failures | `endpoint_catalog` | Structured endpoint metadata |
+
 ### SHACL tools value experiments (Phase 7)
 
 After baseline experiments complete, measure incremental value of SHACL tools:
@@ -827,6 +1164,8 @@ Across longitudinal runs, measure:
 - Memory growth and plateau
 - Effect of curriculum vs random ordering
 - Effect of human feedback vs automatic-only
+- **Learning by reasoning level:** Does memory help more at higher complexity levels?
+- **Affordance discovery:** Can the system learn which affordances to request?
 
 ## Known risks / constraints
 

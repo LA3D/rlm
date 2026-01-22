@@ -14,6 +14,8 @@ from ..graders import (
     AnswerContainsGrader,
     EvidencePatternGrader,
     ToolCalledGrader,
+    SparqlStructuralGrader,
+    AffordanceUtilizationGrader,
 )
 from ..graders.base import GradeResult
 
@@ -29,6 +31,10 @@ class TrialResult:
     transcript: list
     error: Optional[str] = None
     timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat() + 'Z')
+    # New fields for artifact capture (Rung 1)
+    sparql: Optional[str] = None
+    evidence: Optional[dict] = None
+    converged: bool = True
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -117,6 +123,8 @@ class TaskRunner:
         'answer_contains': AnswerContainsGrader,
         'evidence_pattern': EvidencePatternGrader,
         'tool_called': ToolCalledGrader,
+        'sparql_structural': SparqlStructuralGrader,
+        'affordance_utilization': AffordanceUtilizationGrader,
     }
 
     def __init__(self, config: dict = None):
@@ -150,6 +158,42 @@ class TaskRunner:
         else:
             trials = task.get('trials', 5)
 
+        # Setup MLflow run for this task if enabled (Rung 3)
+        enable_mlflow = self.config.get('enable_mlflow', False)
+        mlflow_run_active = False
+
+        if enable_mlflow:
+            try:
+                import mlflow
+                from rlm_runtime.logging.mlflow_integration import log_run_params, log_run_tags, log_run_metrics
+
+                # Start nested run for this task
+                task_id = task.get('id', task_path.stem)
+                mlflow.start_run(run_name=f"task-{task_id}", nested=True)
+                mlflow_run_active = True
+
+                # Log task parameters
+                log_run_params(
+                    query=task.get('query', ''),
+                    task_id=task_id,
+                    category=task.get('category', 'unknown'),
+                    difficulty=task.get('difficulty', 'unknown'),
+                    max_iterations=task.get('max_iterations', 10)
+                )
+
+                # Log task tags for filtering
+                log_run_tags(
+                    task_id=task_id,
+                    custom_tags={
+                        'category': task.get('category', 'unknown'),
+                        'difficulty': task.get('difficulty', 'unknown')
+                    }
+                )
+            except Exception as e:
+                import warnings
+                warnings.warn(f"MLflow logging failed: {e}", UserWarning)
+                mlflow_run_active = False
+
         # Run trials
         trial_results = []
         for trial_num in range(trials):
@@ -169,7 +213,7 @@ class TaskRunner:
 
         avg_groundedness = sum(groundedness_scores) / len(groundedness_scores) if groundedness_scores else 0.0
 
-        return EvalResult(
+        result = EvalResult(
             task_id=task.get('id', task_path.stem),
             task_query=task.get('query', ''),
             trial_results=trial_results,
@@ -181,6 +225,33 @@ class TaskRunner:
             passed_trials=sum(passes)
         )
 
+        # Log metrics to MLflow if active (Rung 3)
+        if mlflow_run_active:
+            try:
+                from rlm_runtime.logging.mlflow_integration import log_run_metrics
+                import mlflow
+
+                # Calculate convergence rate
+                converged_count = sum(1 for r in trial_results if r.converged)
+                convergence_rate = converged_count / len(trial_results) if trial_results else 0
+
+                # Log aggregated metrics
+                log_run_metrics(
+                    iteration_count=result.avg_iterations,
+                    converged=convergence_rate,
+                    pass_at_k=result.pass_at_k,
+                    pass_power_k=result.pass_power_k,
+                    groundedness=avg_groundedness
+                )
+
+                # End nested run
+                mlflow.end_run()
+            except Exception as e:
+                import warnings
+                warnings.warn(f"MLflow metrics logging failed: {e}", UserWarning)
+
+        return result
+
     def _run_single_trial(self, task: dict, trial_num: int) -> TrialResult:
         """Execute one trial of a task."""
         try:
@@ -190,10 +261,21 @@ class TaskRunner:
             # Check if DSPy backend should be used
             use_dspy = self.config.get('use_dspy', False)
 
+            # Variables to capture artifacts
+            sparql = None
+            evidence = None
+            converged = True
+
             if use_dspy:
-                # Run DSPy RLM
-                answer, iterations = self._execute_dspy_rlm(task, ns, context)
+                # Run DSPy RLM - returns DSPyRLMResult with full artifacts
+                result = self._execute_dspy_rlm(task, ns, context)
+                answer = result.answer
+                iterations = result.trajectory
                 transcript = self._serialize_dspy_trajectory(iterations)
+                # Capture artifacts (Rung 1)
+                sparql = result.sparql
+                evidence = result.evidence
+                converged = result.converged
             else:
                 # Run legacy claudette-backed RLM
                 answer, iterations = self._execute_rlm(task, ns, context)
@@ -221,7 +303,10 @@ class TaskRunner:
                 answer=answer,
                 iterations=len(iterations),
                 grader_results=grader_results,
-                transcript=transcript
+                transcript=transcript,
+                sparql=sparql,
+                evidence=evidence,
+                converged=converged
             )
 
         except Exception as e:
@@ -314,8 +399,12 @@ class TaskRunner:
 
         return answer, iterations
 
-    def _execute_dspy_rlm(self, task: dict, ns: dict, context: str) -> tuple[str, list]:
-        """Execute an RLM run using DSPy backend."""
+    def _execute_dspy_rlm(self, task: dict, ns: dict, context: str):
+        """Execute an RLM run using DSPy backend.
+
+        Returns:
+            DSPyRLMResult with answer, sparql, evidence, trajectory, converged
+        """
         from rlm_runtime.engine.dspy_rlm import run_dspy_rlm_with_tools
         from rlm_runtime.tools import make_sparql_tools
 
@@ -352,7 +441,7 @@ class TaskRunner:
             timeout=timeout
         )
 
-        # Run DSPy RLM with tools
+        # Run DSPy RLM with tools - returns full result object
         result = run_dspy_rlm_with_tools(
             query=query,
             context=context,
@@ -363,7 +452,7 @@ class TaskRunner:
             verbose=False,
         )
 
-        return result.answer, result.trajectory
+        return result
 
     def _serialize_dspy_trajectory(self, trajectory: list) -> list:
         """Convert DSPy trajectory to transcript format for graders."""

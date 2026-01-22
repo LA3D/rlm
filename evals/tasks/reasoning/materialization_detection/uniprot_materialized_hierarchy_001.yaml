@@ -1,0 +1,30 @@
+# Eval Task: Reasoning Level L3 - Materialization Detection
+# Tests if agent can detect whether hierarchy is materialized or requires transitive closure
+
+task:
+  id: "uniprot_materialized_hierarchy_001"
+  category: "reasoning/materialization_detection"
+  difficulty: "hard"
+  reasoning_level: "L3_materialized"
+
+  query: "Find all protein kinases (including subclasses) in UniProt. The hierarchy is materialized."
+
+  context:
+    ontologies:
+      - name: uniprot_core
+        source: ontology/uniprot/core.ttl
+    sparql:
+      endpoint: "https://sparql.uniprot.org/sparql/"
+    hints: "UniProt Core materializes enzyme hierarchies - use rdfs:subClassOf directly, not property paths"
+
+  graders:
+    - type: convergence
+      max_iterations: 12
+    - type: sparql_structural
+      # Should NOT use transitive closure (+) since hierarchy is materialized
+      forbids_closure: ["rdfs:subClassOf+", "rdfs:subClassOf*"]
+      required_patterns: ["rdfs:subClassOf", "up:enzyme"]
+    - type: tool_called
+      required: ["sparql_query"]
+
+  trials: 3
