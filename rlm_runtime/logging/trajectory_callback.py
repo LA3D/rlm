@@ -223,8 +223,9 @@ class TrajectoryCallback(BaseCallback):
         if not self.log_llm_calls:
             return
 
-        # Extract token usage from LM instance history
+        # Extract token usage and raw response from LM instance history
         usage = None
+        raw_response_text = None
         instance = self.lm_instances.get(call_id)
         if instance and hasattr(instance, 'history') and instance.history:
             # Get the most recent history entry (just added by LM)
@@ -238,6 +239,9 @@ class TrajectoryCallback(BaseCallback):
                         'completion_tokens': raw_usage.get('completion_tokens', 0),
                         'total_tokens': raw_usage.get('total_tokens', 0),
                     }
+            # Also capture the raw response text (before DSPy parsing)
+            if 'response' in latest_entry:
+                raw_response_text = str(latest_entry['response'])[:2000]  # First 2000 chars
 
         self._write_event({
             "event": "llm_response",
@@ -245,6 +249,7 @@ class TrajectoryCallback(BaseCallback):
             "llm_call_number": self.lm_call_count,
             "usage": usage,  # Token usage stats
             "outputs": self._serialize_value(outputs, max_length=1000) if outputs else None,
+            "raw_response": raw_response_text,  # Raw API response before DSPy parsing
             "exception": str(exception) if exception else None,
             "success": exception is None,
         })

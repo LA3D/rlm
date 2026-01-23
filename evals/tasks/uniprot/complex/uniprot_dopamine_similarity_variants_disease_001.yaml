@@ -6,7 +6,7 @@ task:
   category: "uniprot/complex"
   difficulty: "very_hard"
 
-  query: "Find reviewed proteins catalyzing reactions involving dopamine-like molecules, with natural variants related to a disease."
+  query: "Find reviewed proteins catalyzing reactions involving catecholamine-like molecules (similar to neurotransmitters), with natural variants related to a disease."
 
   context:
     ontologies:

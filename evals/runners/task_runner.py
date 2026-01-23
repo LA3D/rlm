@@ -351,6 +351,8 @@ class TaskRunner:
             )
 
         except Exception as e:
+            import traceback
+            error_msg = f"{str(e)}\n\nStack trace:\n{traceback.format_exc()}"
             return TrialResult(
                 trial_number=trial_num,
                 passed=False,
@@ -358,7 +360,7 @@ class TaskRunner:
                 iterations=0,
                 grader_results={},
                 transcript=[],
-                error=str(e)
+                error=error_msg
             )
 
     def _setup_namespace_and_context(self, task: dict) -> tuple[dict, str]:
@@ -533,16 +535,15 @@ class TaskRunner:
         run_id = f"eval-{task.get('id', 'unknown')}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         trajectory_id = f"t-{uuid.uuid4().hex[:8]}"
 
-        # Enable trajectory logging if configured
+        # Enable trajectory logging for debugging (TEMPORARY)
         log_path = None
-        if self.config.get('enable_trajectory_logging', False):
-            # Create trajectories directory
-            traj_dir = Path(self.config.get('trajectory_dir', 'evals/trajectories'))
-            traj_dir.mkdir(parents=True, exist_ok=True)
-            # Generate trajectory log path
-            task_id = task.get('id', 'unknown')
-            timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
-            log_path = traj_dir / f"{task_id}_{trajectory_id}_{timestamp}.jsonl"
+        # Create trajectories directory
+        traj_dir = Path(self.config.get('trajectory_dir', 'evals/trajectories'))
+        traj_dir.mkdir(parents=True, exist_ok=True)
+        # Generate trajectory log path
+        task_id = task.get('id', 'unknown')
+        timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+        log_path = traj_dir / f"{task_id}_{trajectory_id}_{timestamp}.jsonl"
 
         # Run DSPy RLM with tools - returns full result object
         result = run_dspy_rlm_with_tools(

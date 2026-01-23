@@ -452,7 +452,20 @@ def run_dspy_rlm(
     # Execute
     # Wrap execution in try/finally to ensure cleanup
     try:
-        pred = rlm(query=query, context=context)
+        try:
+            pred = rlm(query=query, context=context)
+        except AttributeError as e:
+            # Check if this is a refusal error (DSPy tries to call .strip() on None)
+            if "'NoneType' object has no attribute 'strip'" in str(e):
+                # This is likely a model refusal - provide a better error message
+                raise ValueError(
+                    "Model refused to generate code for this query. "
+                    "This may be due to content safety filters. "
+                    "Try rephrasing the query to avoid potentially sensitive terms. "
+                    f"Original error: {e}"
+                ) from e
+            # Re-raise other AttributeErrors
+            raise
 
         # Extract trajectory
         trajectory = getattr(pred, "trajectory", [])
@@ -963,7 +976,20 @@ Evidence MUST include actual data samples (sequences, labels, descriptions) NOT 
     # Execute
     # Wrap execution in try/finally to ensure cleanup
     try:
-        pred = rlm(query=query, context=context)
+        try:
+            pred = rlm(query=query, context=context)
+        except AttributeError as e:
+            # Check if this is a refusal error (DSPy tries to call .strip() on None)
+            if "'NoneType' object has no attribute 'strip'" in str(e):
+                # This is likely a model refusal - provide a better error message
+                raise ValueError(
+                    "Model refused to generate code for this query. "
+                    "This may be due to content safety filters. "
+                    "Try rephrasing the query to avoid potentially sensitive terms. "
+                    f"Original error: {e}"
+                ) from e
+            # Re-raise other AttributeErrors
+            raise
 
         # Extract trajectory
         trajectory = getattr(pred, "trajectory", [])
