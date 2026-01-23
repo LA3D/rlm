@@ -1,8 +1,10 @@
 # E009: Memory Impact Sampling Study
 
 **Date**: 2026-01-23
-**Status**: Proposed
+**Status**: Proposed (awaiting implementation verification)
 **Purpose**: Systematically test memory impact with proper sampling to account for stochasticity
+
+**Blocker**: Implementation correctness needs verification before executing this study. Once implementation is confirmed correct, this study can proceed.
 
 ## Problem Statement
 
