@@ -1,0 +1,120 @@
+# Experiment E001: Baseline Before Reasoning Fields
+
+experiment:
+  id: "E001"
+  name: "baseline_before_reasoning"
+
+  # What are you testing?
+  hypothesis: |
+    Establish baseline performance metrics before implementing Think-Act-Verify-Reflect
+    reasoning cycles. This baseline will be used to measure the impact of structured
+    reasoning fields on evidence quality and pass rate.
+
+  # Traceability
+  date_started: "2026-01-20"
+  date_completed: "2026-01-22"
+  git_commit: "03d298b4602e295b358ec531bfb66734953fb832"
+  git_branch: "main"
+
+  # What changed from previous work?
+  changes:
+    code:
+      - "Standard DSPy RLM with QueryConstructionSig (no reasoning fields)"
+      - "Remote SPARQL execution to UniProt endpoint"
+      - "Outcome verification grader for structural correctness"
+    prompts:
+      - "Basic context with ontology metadata and tool guidance"
+
+  # Which tasks were run?
+  tasks:
+    - "uniprot/taxonomy/uniprot_bacteria_taxa_001"
+    - "uniprot/taxonomy/uniprot_ecoli_k12_sequences_001"
+    - "basic_search_001"
+
+  # Experimental conditions
+  cohorts:
+    - name: "baseline"
+      description: "DSPy RLM without reasoning fields"
+      git_commit: "03d298b4"
+      config:
+        reasoning_fields: false
+        enable_memory: false
+        max_iterations: 16
+
+  # Experimental design
+  trials_per_task: "variable (6-15 runs per task)"
+  random_seed: null  # Not controlled in baseline
+
+  # What to measure?
+  metrics:
+    primary:
+      - "pass_rate"
+      - "avg_iterations"
+    secondary:
+      - "convergence_rate"
+      - "evidence_format_correctness"
+
+  # Statistical analysis
+  comparison:
+    baseline_experiment: null  # This IS the baseline
+    statistical_test: null
+    significance_level: 0.05
+
+  # Status tracking
+  status: "completed"
+
+  # Results summary
+  results:
+    outcome: "baseline_established"
+    summary: |
+      Baseline measurements before Think-Act-Verify-Reflect implementation:
+
+      - bacteria_taxa: 58.6% pass rate (17/29 trials), 8.9 avg iterations
+      - ecoli_k12: 0.0% pass rate (0/6 trials), 11.0 avg iterations
+      - basic_search: 0.0% pass rate (0/4 trials), failed to run
+
+      KEY FINDING: E. coli K12 task showed systematic evidence format issues.
+      Agent stored metadata (sequence_length) instead of actual data (amino acid sequences).
+      This indicated need for explicit verification step before SUBMIT.
+
+    next_steps: |
+      → E002: Implement Rung 1 of Think-Act-Verify-Reflect plan
+
+      Add thinking/verification/reflection fields to QueryConstructionSig to:
+      1. Address evidence format issues
+      2. Improve pass rate on E. coli K12 task
+      3. Establish structured reasoning pattern
+
+      Target: >50% pass rate on E. coli K12, evidence includes actual sequences
+
+# Detailed findings
+findings:
+  bacteria_taxa:
+    pass_rate: 0.586
+    passed_trials: 17
+    total_trials: 29
+    avg_iterations: 8.9
+    notes: "Moderate success, but inconsistent evidence quality"
+
+  ecoli_k12:
+    pass_rate: 0.0
+    passed_trials: 0
+    total_trials: 6
+    avg_iterations: 11.0
+    notes: |
+      Complete failure mode. Evidence format issues: agent stored sequence_length
+      instead of actual amino acid sequences. No verification step to catch this
+      before SUBMIT.
+
+  basic_search:
+    pass_rate: 0.0
+    passed_trials: 0
+    total_trials: 4
+    avg_iterations: 0.0
+    notes: "Failed to execute (unrelated to reasoning fields)"
+
+# References
+references:
+  - "Think-Act-Verify-Reflect plan: ~/.claude/plans/ethereal-wobbling-clover.md"
+  - "Trajectory v3: docs/planning/trajectory_v3.md"
+  - "Migration from flat results/: evals/scripts/migrate_to_experiments.py"

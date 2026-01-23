@@ -1,0 +1,756 @@
+{
+  "task_id": "uniprot_bacteria_taxa_001",
+  "task_query": "Select all bacterial taxa and their scientific name from UniProt taxonomy.",
+  "pass_at_k": 1.0,
+  "pass_power_k": 1.0,
+  "avg_iterations": 8.0,
+  "avg_groundedness": 0.0,
+  "total_trials": 1,
+  "passed_trials": 1,
+  "timestamp": "2026-01-22T21:31:54.713203Z",
+  "trial_results": [
+    {
+      "trial_number": 0,
+      "passed": true,
+      "answer": "The SPARQL query successfully retrieves bacterial taxa and their scientific names from UniProt taxonomy. The query finds all taxa that are subclasses of Bacteria (taxon:2) and returns their URIs and scientific names. Retrieved 100 bacterial taxa including species like Cellvibrio, Pseudomonas, Mycobacterium, Herbaspirillum, and many others.",
+      "iterations": 8,
+      "grader_results": {
+        "convergence": {
+          "passed": true,
+          "score": 0.7,
+          "reason": "Converged in 9 iterations",
+          "details": {
+            "converged": true,
+            "iterations": 9,
+            "max_iterations": 15,
+            "within_limit": true,
+            "efficiency": 0.7
+          }
+        },
+        "outcome_verification": {
+          "passed": true,
+          "score": 1.0,
+          "reason": "Found 50 results with required properties",
+          "details": {
+            "result_count": 50,
+            "required_fields_present": true,
+            "field_checks": {
+              "taxon": true,
+              "scientificName": true
+            },
+            "verification_patterns": [
+              {
+                "rule": "taxon matches /taxonomy//",
+                "passed": true,
+                "match_count": 50,
+                "total_checked": 50
+              }
+            ],
+            "sample_results": [
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/10",
+                "scientific_name": "Cellvibrio",
+                "taxon_id": "10"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100",
+                "scientific_name": "Ancylobacter aquaticus",
+                "taxon_id": "100"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100000",
+                "scientific_name": "Herbaspirillum sp. BA12",
+                "taxon_id": "100000"
+              }
+            ],
+            "metadata_based": false
+          }
+        },
+        "llm_judge": {
+          "passed": true,
+          "score": 0.95,
+          "reason": "LLM Judge: The query correctly retrieves bacterial taxa by using the subClassOf relationship to Bacteria (taxon:2), returns scientific names, and produces a valid set of results matching the original task requirements.",
+          "details": {
+            "llm_judgment": {
+              "correct": true,
+              "confidence": 0.95,
+              "reasoning": "The query correctly retrieves bacterial taxa by using the subClassOf relationship to Bacteria (taxon:2), returns scientific names, and produces a valid set of results matching the original task requirements."
+            },
+            "model": "anthropic/claude-3-5-haiku-20241022"
+          }
+        },
+        "tool_called": {
+          "passed": true,
+          "score": 1.0,
+          "reason": "Called all 1 required tools",
+          "details": {
+            "found_required": [
+              "sparql_query"
+            ],
+            "missing_required": [],
+            "found_forbidden": [],
+            "all_tools_called": [
+              "LCASE",
+              "FILTER",
+              "res_head",
+              "split",
+              "subClassOf",
+              "probe_relationships",
+              "search_entity",
+              "CONTAINS",
+              "sparql_query",
+              "relationships",
+              "domain",
+              "results",
+              "enumerate",
+              "Bacteria",
+              "query",
+              "describe_entity",
+              "get",
+              "taxa",
+              "STR",
+              "SUBMIT"
+            ]
+          }
+        }
+      },
+      "transcript": [
+        {
+          "iteration": 1,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "# First, let's explore the ontology to understand the schema\n# Look for classes related to taxonomy and bacteria\n\nprint(\"=== Exploring Classes ===\")\nclasses_query = \"\"\"\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nSELECT DISTINCT ?class ?label\nWHERE {\n  ?class a owl:Class .\n  OPTIONAL { ?class rdfs:label ?label }\n  FILTER(CONTAINS(LCASE(STR(?class)), \"tax\") || \n         CONTAINS(LCASE(STR(?label)), \"tax\") ||\n         CONTAINS(LCASE(STR(?class)), \"organism\") ||\n         CONTAINS(LCASE(STR(?label)), \"organism\"))\n}\nLIMIT 20\n\"\"\"\nclasses = query(classes_query)\nfor c in classes:\n    print(c)\n\nprint(\"\\n=== Exploring Properties ===\")\nprops_query = \"\"\"\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nSELECT DISTINCT ?prop ?label\nWHERE {\n  ?prop a owl:ObjectProperty .\n  OPTIONAL { ?prop rdfs:label ?label }\n  FILTER(CONTAINS(LCASE(STR(?prop)), \"tax\") || \n         CONTAINS(LCASE(STR(?label)), \"tax\") ||\n         CONTAINS(LCASE(STR(?prop)), \"name\") ||\n         CONTAINS(LCASE(STR(?label)), \"name\"))\n}\nLIMIT 20\n\"\"\"\nprops = query(props_query)\nfor p in props:\n    print(p)",
+              "result": {
+                "stdout": "=== Exploring Classes ===\n{'class': 'http://purl.uniprot.org/core/Not_Obsolete_Taxon', 'label': 'Not obsolete taxon (record)'}\n{'class': 'http://purl.uniprot.org/core/Obsolete_Taxon', 'label': 'Obsolete Taxon'}\n{'class': 'http://purl.uniprot.org/core/Rank', 'label': 'Taxon rank'}\n{'class': 'http://purl.uniprot.org/core/Taxon', 'label': 'Taxon'}\n{'class': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement', 'label': 'None'}\n\n=== Exploring Properties ===\n{'prop': 'http://purl.uniprot.org/core/alternativeName', 'label': 'alternativeName'}\n{'prop': 'http://purl.uniprot.org/core/commonName', 'label': 'common name'}\n{'prop': 'http://purl.uniprot.org/core/commonTaxon', 'label': 'common taxon'}\n{'prop': 'http://purl.uniprot.org/core/locusName', 'label': 'locus name'}\n{'prop': 'http://purl.uniprot.org/core/recommendedName', 'label': 'recommended name'}\n{'prop': 'http://purl.uniprot.org/core/structuredName', 'label': 'structured name'}\n{'prop': 'http://purl.uniprot.org/core/submittedName', 'label': 'submitted name'}\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 2,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Let's explore properties associated with Taxon class\nprint(\"=== Exploring Taxon Properties ===\")\ntaxon_props_query = \"\"\"\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\nSELECT DISTINCT ?prop ?label\nWHERE {\n  ?prop rdfs:domain up:Taxon .\n  OPTIONAL { ?prop rdfs:label ?label }\n}\n\"\"\"\ntaxon_props = query(taxon_props_query)\nfor p in taxon_props:\n    print(p)\n\nprint(\"\\n=== Looking for scientific name properties ===\")\nsci_name_query = \"\"\"\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT DISTINCT ?prop ?label\nWHERE {\n  ?prop a ?type .\n  OPTIONAL { ?prop rdfs:label ?label }\n  FILTER(CONTAINS(LCASE(STR(?prop)), \"scientific\") || \n         CONTAINS(LCASE(STR(?label)), \"scientific\"))\n}\n\"\"\"\nsci_props = query(sci_name_query)\nfor p in sci_props:\n    print(p)\n\nprint(\"\\n=== Checking for rank-related properties ===\")\nrank_query = \"\"\"\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\nSELECT DISTINCT ?prop ?label\nWHERE {\n  ?prop a ?type .\n  OPTIONAL { ?prop rdfs:label ?label }\n  FILTER(CONTAINS(LCASE(STR(?prop)), \"rank\"))\n}\n\"\"\"\nrank_props = query(rank_query)\nfor p in rank_props:\n    print(p)\n```",
+              "result": {
+                "stdout": "=== Exploring Taxon Properties ===\n{'prop': 'http://purl.uniprot.org/core/commonName', 'label': 'common name'}\n{'prop': 'http://purl.uniprot.org/core/host', 'label': 'host'}\n{'prop': 'http://purl.uniprot.org/core/rank', 'label': 'rank'}\n{'prop': 'http://purl.uniprot.org/core/strain', 'label': 'strain'}\n{'prop': 'http://purl.uniprot.org/core/complete', 'label': 'complete'}\n{'prop': 'http://purl.uniprot.org/core/otherName', 'label': 'other name'}\n{'prop': 'http://purl.uniprot.org/core/partOfLineage', 'label': 'part of lineage'}\n{'prop': 'http://purl.uniprot.org/core/scientificName', 'label': 'scientific name'}\n{'prop': 'http://purl.uniprot.org/core/synonym', 'label': 'synonym'}\n\n=== Looking for scientific name properties ===\n{'prop': 'http://purl.uniprot.org/core/scientificName', 'label': 'scientific name'}\n\n=== Checking for rank-related properties ===\n{'prop': 'http://purl.uniprot.org/core/rank', 'label': 'rank'}\n{'prop': 'http://purl.uniprot.org/core/Rank', 'label': 'Taxon rank'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Biotype', 'label': 'Taxonomic rank biotype'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Class', 'label': 'Taxonomic rank class'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Cohort', 'label': 'Taxonomic rank cohort'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Domain', 'label': 'Taxonomic rank domain'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Family', 'label': 'Taxonomic rank family'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Form', 'label': 'Taxonomic rank form'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Forma', 'label': 'Taxonomic rank forma'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Forma_Specialis', 'label': 'Taxonomic rank forma specialis'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Genotype', 'label': 'Taxonomic rank genotype'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Genus', 'label': 'Taxonomic rank genus'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Infraclass', 'label': 'Taxonomic rank infraclass'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Infraorder', 'label': 'Taxonomic rank infraorder'}\n{'prop': 'http://purl.uniprot.org/core/Taxonomic_Rank_Isolate', 'label': 'Taxonomic rank isolate'}\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 3,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Let's search for bacteria-related entities to understand the data structure\nprint(\"=== Searching for Bacteria entities ===\")\nbacteria_entities = search_entity(\"Bacteria\", limit=10, search_in=\"label\")\nfor i, entity in enumerate(bacteria_entities[:5]):\n    print(f\"\\n{i+1}. {entity}\")\n\n# Let's describe one of these entities to see its structure\nif bacteria_entities:\n    print(\"\\n=== Describing first Bacteria entity ===\")\n    first_bacteria = bacteria_entities[0]['uri']\n    description = describe_entity(first_bacteria, limit=20)\n    print(f\"URI: {first_bacteria}\")\n    print(f\"Types: {description.get('types', [])}\")\n    print(f\"Outgoing relationships:\")\n    for rel in description.get('outgoing', [])[:10]:\n        print(f\"  {rel}\")\n```",
+              "result": {
+                "stdout": "=== Searching for Bacteria entities ===\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 4,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Let's query the remote endpoint to explore taxon data\n# First, let's see if we can find the Bacteria taxon itself\nprint(\"=== Finding Bacteria taxon ===\")\nbacteria_query = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nSELECT ?taxon ?name\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?name .\n  FILTER(CONTAINS(LCASE(?name), \"bacteria\"))\n}\nLIMIT 10\n\"\"\"\nresult1 = sparql_query(bacteria_query, \"bacteria_search\")\nprint(res_head(\"bacteria_search\", 10))\n\nprint(\"\\n=== Checking structure of taxon URIs ===\")\n# Let's also check if there's a specific Bacteria taxon with a known ID\nbacteria_direct = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nSELECT ?name ?rank\nWHERE {\n  taxon:2 a up:Taxon ;\n          up:scientificName ?name .\n  OPTIONAL { taxon:2 up:rank ?rank }\n}\n\"\"\"\nresult2 = sparql_query(bacteria_direct, \"bacteria_direct\")\nprint(res_head(\"bacteria_direct\", 5))\n```",
+              "result": {
+                "stdout": "=== Finding Bacteria taxon ===\n[{'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1002692'), 'name': 'Acidobacteriaceae bacterium A2-4c'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008164'), 'name': 'Halobacteriales archaeon YIM 93588'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008165'), 'name': 'Halobacteriales archaeon YIM 93590'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008166'), 'name': 'Halobacteriales archaeon YIM 93598'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008167'), 'name': 'Halobacteriales archaeon YIM 93605'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008168'), 'name': 'Halobacteriales archaeon YIM 93606'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008169'), 'name': 'Halobacteriales archaeon YIM 93607'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008170'), 'name': 'Halobacteriales archaeon YIM 93608'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008171'), 'name': 'Halobacteriales archaeon YIM 93615'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1008172'), 'name': 'Halobacteriales archaeon YIM 93671'}]\n\n=== Checking structure of taxon URIs ===\n[{'name': 'Bacteria', 'rank': rdflib.term.URIRef('http://purl.uniprot.org/core/Taxonomic_Rank_Domain')}]\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 5,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Query for all bacterial taxa using the partOfLineage property\nprint(\"=== Querying for all bacterial taxa ===\")\nbacterial_taxa_query = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon ;\n         up:partOfLineage taxon:2 ;\n         up:scientificName ?scientificName .\n}\nLIMIT 1000\n\"\"\"\n\nresult = sparql_query(bacterial_taxa_query, \"bacterial_taxa\")\n\n# Let's check how many results we got\nprint(\"\\n=== Sample of bacterial taxa (first 10) ===\")\nsample = res_head(\"bacterial_taxa\", 10)\nfor i, row in enumerate(sample, 1):\n    print(f\"{i}. {row['scientificName']} ({row['taxon']})\")\n\n# Let's also check the total count by getting a larger sample\nprint(\"\\n=== Checking result size ===\")\nlarger_sample = res_head(\"bacterial_taxa\", 1000)\nprint(f\"Retrieved {len(larger_sample)} bacterial taxa\")\n\n# Store the query and a sample of evidence\nfinal_query = bacterial_taxa_query\nevidence_sample = larger_sample[:20]  # Keep first 20 as evidence\n```",
+              "result": {
+                "stdout": "=== Querying for all bacterial taxa ===\n\n=== Sample of bacterial taxa (first 10) ===\n\n=== Checking result size ===\nRetrieved 0 bacterial taxa\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 6,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Let's probe the Bacteria taxon to see what relationships it has\nprint(\"=== Probing Bacteria taxon relationships ===\")\nbacteria_rels = probe_relationships(\"http://purl.uniprot.org/taxonomy/2\", \n                                   predicate=\"\", \n                                   direction=\"both\", \n                                   limit=20)\n\nprint(\"Incoming relationships (other taxa pointing TO Bacteria):\")\nfor rel in bacteria_rels.get('incoming', [])[:10]:\n    print(f\"  {rel}\")\n\nprint(\"\\nOutgoing relationships (Bacteria pointing to other entities):\")\nfor rel in bacteria_rels.get('outgoing', [])[:10]:\n    print(f\"  {rel}\")\n\n# Let's also try a different approach - find taxa that have Bacteria as a parent\nprint(\"\\n=== Testing alternative query patterns ===\")\nalt_query1 = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName ;\n         rdfs:subClassOf taxon:2 .\n}\nLIMIT 10\n\"\"\"\nresult_alt1 = sparql_query(alt_query1, \"alt1\")\nprint(\"\\nAlternative query 1 (subClassOf):\")\nprint(res_head(\"alt1\", 5))\n```",
+              "result": {
+                "stdout": "=== Probing Bacteria taxon relationships ===\nIncoming relationships (other taxa pointing TO Bacteria):\n\nOutgoing relationships (Bacteria pointing to other entities):\n\n=== Testing alternative query patterns ===\n\nAlternative query 1 (subClassOf):\n[{'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/10'), 'scientificName': 'Cellvibrio'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/100'), 'scientificName': 'Ancylobacter aquaticus'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/100000'), 'scientificName': 'Herbaspirillum sp. BA12'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1000000'), 'scientificName': 'Microbacterium sp. 6.11-VPa'}, {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1000001'), 'scientificName': 'Mycobacterium sp. 1.1-VEs'}]\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 7,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Execute the complete query for all bacterial taxa\nprint(\"=== Executing complete query for bacterial taxa ===\")\nfinal_sparql = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName ;\n         rdfs:subClassOf taxon:2 .\n}\n\"\"\"\n\nresult = sparql_query(final_sparql, \"all_bacterial_taxa\")\n\n# Get a sample to verify\nprint(\"\\n=== Sample of results (first 20) ===\")\nsample = res_head(\"all_bacterial_taxa\", 20)\nfor i, row in enumerate(sample, 1):\n    taxon_id = str(row['taxon']).split('/')[-1]\n    print(f\"{i}. {row['scientificName']} (taxon:{taxon_id})\")\n\n# Get a larger sample to check total count\nprint(\"\\n=== Checking total results ===\")\nlarge_sample = res_head(\"all_bacterial_taxa\", 10000)\nprint(f\"Total bacterial taxa retrieved: {len(large_sample)}\")\n\n# Store evidence - first 50 results as examples\nevidence_data = {\n    \"query_type\": \"bacterial_taxa_retrieval\",\n    \"total_count\": len(large_sample),\n    \"sample_results\": [\n        {\n            \"taxon_uri\": str(row['taxon']),\n            \"scientific_name\": str(row['scientificName'])\n        }\n        for row in large_sample[:50]\n    ],\n    \"query_pattern\": \"rdfs:subClassOf taxon:2 (Bacteria domain)\"\n}\n\nprint(f\"\\nEvidence prepared with {len(evidence_data['sample_results'])} sample entries\")\n```",
+              "result": {
+                "stdout": "=== Executing complete query for bacterial taxa ===\n\n=== Sample of results (first 20) ===\n1. Cellvibrio (taxon:10)\n2. Ancylobacter aquaticus (taxon:100)\n3. Herbaspirillum sp. BA12 (taxon:100000)\n4. Microbacterium sp. 6.11-VPa (taxon:1000000)\n5. Mycobacterium sp. 1.1-VEs (taxon:1000001)\n6. Mycobacterium sp. 1.12-VEs (taxon:1000002)\n7. Nocardia sp. 3.2-VPr (taxon:1000003)\n8. Polaromonas sp. 7.23-VPa (taxon:1000004)\n9. Promicromonospora sp. 10.25-Bb (taxon:1000005)\n10. Promicromonospora sp. 3.1- VPr (taxon:1000006)\n11. Pseudomonas sp. 10S-VPa (taxon:1000007)\n12. Pseudomonas sp. 5B-VPa (taxon:1000008)\n13. Pseudomonas sp. 5K-VPa (taxon:1000009)\n14. Herbaspirillum sp. BA14 (taxon:100001)\n15. Pseudomonas sp. 5KS-VPa (taxon:1000010)\n16. Pseudomonas sp. 5KW-VPa (taxon:1000011)\n17. Pseudomonas sp. 5S-VPa (taxon:1000012)\n18. Pseudomonas sp. 5T-VPa (taxon:1000013)\n19. Pseudomonas sp. 6S-VPa (taxon:1000014)\n20. Rhodococcus sp. 1.15-VEs (taxon:1000015)\n\n=== Checking total results ===\nTotal bacterial taxa retrieved: 100\n\nEvidence prepared with 50 sample entries\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 8,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Let's verify if there are more results by trying to get more rows\nprint(\"=== Verifying result completeness ===\")\ntry:\n    extended_sample = res_head(\"all_bacterial_taxa\", 200)\n    actual_count = len(extended_sample)\n    print(f\"Actual results available: {actual_count}\")\nexcept Exception as e:\n    print(f\"Could not get more than 100 results: {e}\")\n    actual_count = 100\n\n# Prepare final answer components\nthinking = \"\"\"To answer this query, I needed to:\n1. Explore the UniProt ontology schema to understand how taxa are represented\n2. Identify that taxa use the class up:Taxon with property up:scientificName\n3. Discover that Bacteria is represented as taxon:2 with rank Domain\n4. Find that taxonomic hierarchy uses rdfs:subClassOf (not up:partOfLineage)\n5. Construct a SPARQL query to find all taxa that are subclasses of Bacteria\"\"\"\n\nverification = \"\"\"The query was tested and verified by:\n1. First confirming taxon:2 is \"Bacteria\" with rank Domain\n2. Testing the rdfs:subClassOf relationship pattern\n3. Retrieving sample results showing diverse bacterial taxa (Cellvibrio, Pseudomonas, Mycobacterium, etc.)\n4. All results have both taxon URI and scientificName as required\"\"\"\n\nreflection = \"\"\"The key insight was discovering that UniProt taxonomy uses rdfs:subClassOf for the taxonomic hierarchy rather than a custom property like partOfLineage. This is a standard RDF pattern for representing class hierarchies. The query successfully retrieves bacterial taxa, though the endpoint appears to limit results to 100 rows.\"\"\"\n\nanswer = f\"\"\"The SPARQL query successfully retrieves bacterial taxa and their scientific names from UniProt taxonomy. The query finds all taxa that are subclasses of Bacteria (taxon:2) and returns their URIs and scientific names. Retrieved {actual_count} bacterial taxa including species like Cellvibrio, Pseudomonas, Mycobacterium, Herbaspirillum, and many others.\"\"\"\n\nsparql = \"\"\"PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName ;\n         rdfs:subClassOf taxon:2 .\n}\"\"\"\n\n# Prepare evidence with actual results\nevidence = {\n    \"query_method\": \"rdfs:subClassOf relationship to Bacteria domain (taxon:2)\",\n    \"total_results\": actual_count,\n    \"sample_taxa\": [\n        {\n            \"taxon_uri\": str(row['taxon']),\n            \"scientific_name\": str(row['scientificName']),\n            \"taxon_id\": str(row['taxon']).split('/')[-1]\n        }\n        for row in large_sample[:50]\n    ],\n    \"verification\": {\n        \"bacteria_taxon\": \"http://purl.uniprot.org/taxonomy/2\",\n        \"bacteria_name\": \"Bacteria\",\n        \"bacteria_rank\": \"Domain\",\n        \"relationship_property\": \"rdfs:subClassOf\"\n    }\n}\n\nprint(\"\\n=== Submitting final answer ===\")\nprint(f\"Answer: {answer[:100]}...\")\nprint(f\"SPARQL query length: {len(sparql)} chars\")\nprint(f\"Evidence includes {len(evidence['sample_taxa'])} sample taxa\")\n\nSUBMIT(\n    thinking=thinking,\n    verification=verification,\n    reflection=reflection,\n    answer=answer,\n    sparql=sparql,\n    evidence=evidence\n)\n```",
+              "result": {
+                "stdout": "FINAL: {'thinking': 'To answer this query, I needed to:\\n1. Explore the UniProt ontology schema to understand how taxa are represented\\n2. Identify that taxa use the class up:Taxon with property up:scientificName\\n3. Discover that Bacteria is represented as taxon:2 with rank Domain\\n4. Find that taxonomic hierarchy uses rdfs:subClassOf (not up:partOfLineage)\\n5. Construct a SPARQL query to find all taxa that are subclasses of Bacteria', 'verification': 'The query was tested and verified by:\\n1. First confirming taxon:2 is \"Bacteria\" with rank Domain\\n2. Testing the rdfs:subClassOf relationship pattern\\n3. Retrieving sample results showing diverse bacterial taxa (Cellvibrio, Pseudomonas, Mycobacterium, etc.)\\n4. All results have both taxon URI and scientificName as required', 'reflection': 'The key insight was discovering that UniProt taxonomy uses rdfs:subClassOf for the taxonomic hierarchy rather than a custom property like partOfLineage. This is a standard RDF pattern for representing class hierarchies. The query successfully retrieves bacterial taxa, though the endpoint appears to limit results to 100 rows.', 'answer': 'The SPARQL query successfully retrieves bacterial taxa and their scientific names from UniProt taxonomy. The query finds all taxa that are subclasses of Bacteria (taxon:2) and returns their URIs and scientific names. Retrieved 100 bacterial taxa including species like Cellvibrio, Pseudomonas, Mycobacterium, Herbaspirillum, and many others.', 'sparql': 'PREFIX up: <http://purl.uniprot.org/core/>\\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\n\\nSELECT ?taxon ?scientificName\\nWHERE {\\n  ?taxon a up:Taxon ;\\n         up:scientificName ?scientificName ;\\n         rdfs:subClassOf taxon:2 .\\n}', 'evidence': {'query_method': 'rdfs:subClassOf relationship to Bacteria domain (taxon:2)', 'total_results': 100, 'sample_taxa': [{'taxon_uri': 'http://purl.uniprot.org/taxonomy/10', 'scientific_name': 'Cellvibrio', 'taxon_id': '10'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100', 'scientific_name': 'Ancylobacter aquaticus', 'taxon_id': '100'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100000', 'scientific_name': 'Herbaspirillum sp. BA12', 'taxon_id': '100000'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000000', 'scientific_name': 'Microbacterium sp. 6.11-VPa', 'taxon_id': '1000000'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000001', 'scientific_name': 'Mycobacterium sp. 1.1-VEs', 'taxon_id': '1000001'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000002', 'scientific_name': 'Mycobacterium sp. 1.12-VEs', 'taxon_id': '1000002'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000003', 'scientific_name': 'Nocardia sp. 3.2-VPr', 'taxon_id': '1000003'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000004', 'scientific_name': 'Polaromonas sp. 7.23-VPa', 'taxon_id': '1000004'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000005', 'scientific_name': 'Promicromonospora sp. 10.25-Bb', 'taxon_id': '1000005'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000006', 'scientific_name': 'Promicromonospora sp. 3.1- VPr', 'taxon_id': '1000006'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000007', 'scientific_name': 'Pseudomonas sp. 10S-VPa', 'taxon_id': '1000007'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000008', 'scientific_name': 'Pseudomonas sp. 5B-VPa', 'taxon_id': '1000008'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000009', 'scientific_name': 'Pseudomonas sp. 5K-VPa', 'taxon_id': '1000009'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100001', 'scientific_name': 'Herbaspirillum sp. BA14', 'taxon_id': '100001'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000010', 'scientific_name': 'Pseudomonas sp. 5KS-VPa', 'taxon_id': '1000010'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000011', 'scientific_name': 'Pseudomonas sp. 5KW-VPa', 'taxon_id': '1000011'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000012', 'scientific_name': 'Pseudomonas sp. 5S-VPa', 'taxon_id': '1000012'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000013', 'scientific_name': 'Pseudomonas sp. 5T-VPa', 'taxon_id': '1000013'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000014', 'scientific_name': 'Pseudomonas sp. 6S-VPa', 'taxon_id': '1000014'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000015', 'scientific_name': 'Rhodococcus sp. 1.15-VEs', 'taxon_id': '1000015'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000016', 'scientific_name': 'Rhodococcus sp. 1.3-VEs', 'taxon_id': '1000016'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000017', 'scientific_name': 'Rhodococcus sp. 3.3-VPr', 'taxon_id': '1000017'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000018', 'scientific_name': 'Rhodococcus sp. 4.20-VOd', 'taxon_id': '1000018'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000019', 'scientific_name': 'Rhodococcus sp. 4.20ST-VOd', 'taxon_id': '1000019'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100002', 'scientific_name': 'Herbaspirillum sp. BA15', 'taxon_id': '100002'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000020', 'scientific_name': 'Sanguibacter sp. 1.16-VEs', 'taxon_id': '1000020'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000021', 'scientific_name': 'Sanguibacter sp. 1.23-VEs', 'taxon_id': '1000021'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000022', 'scientific_name': 'Sanguibacter sp. 1.23S-VEs', 'taxon_id': '1000022'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000023', 'scientific_name': 'Comamonadaceae bacterium 12S-VPa', 'taxon_id': '1000023'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000024', 'scientific_name': 'Intrasporangiaceae bacterium 7.31-VPa', 'taxon_id': '1000024'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000025', 'scientific_name': 'Intrasporangiaceae bacterium 7.4-VPa', 'taxon_id': '1000025'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000026', 'scientific_name': 'Micrococcineae bacterium 9.2-BP', 'taxon_id': '1000026'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000027', 'scientific_name': 'alpha proteobacterium 6.6-VPa', 'taxon_id': '1000027'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000028', 'scientific_name': 'Bacillus sp. enrichment culture clone w-181', 'taxon_id': '1000028'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000029', 'scientific_name': 'Pseudomonas sp. MBYD-1', 'taxon_id': '1000029'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100003', 'scientific_name': 'Herbaspirillum sp. BA16', 'taxon_id': '100003'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000030', 'scientific_name': 'Agrobacterium sp. G21-07', 'taxon_id': '1000030'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000031', 'scientific_name': 'Agrobacterium sp. G21-09', 'taxon_id': '1000031'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000032', 'scientific_name': 'Enterobacter sp. P19-19', 'taxon_id': '1000032'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000033', 'scientific_name': 'Flavobacterium sp. G23-27', 'taxon_id': '1000033'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/1000034', 'scientific_name': 'Erwinia sp. Koakin', 'taxon_id': '1000034'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100004', 'scientific_name': 'Herbaspirillum sp. BA134', 'taxon_id': '100004'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100005', 'scientific_name': 'Herbaspirillum sp. BA161', 'taxon_id': '100005'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100006', 'scientific_name': 'Azospirillum sp. Ala', 'taxon_id': '100006'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100007', 'scientific_name': 'Mycobacterium sp. C2-3', 'taxon_id': '100007'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100012', 'scientific_name': 'Bartonella sp. RR13863PO', 'taxon_id': '100012'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100013', 'scientific_name': 'Bartonella sp. MM5136CA', 'taxon_id': '100013'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100014', 'scientific_name': 'diazotroph str. AB48', 'taxon_id': '100014'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100015', 'scientific_name': 'diazotroph str. AB71', 'taxon_id': '100015'}, {'taxon_uri': 'http://purl.uniprot.org/taxonomy/100016', 'scientific_name': 'diazotroph str. AB117', 'taxon_id': '100016'}], 'verification': {'bacteria_taxon': 'http://purl.uniprot.org/taxonomy/2', 'bacteria_name': 'Bacteria', 'bacteria_rank': 'Domain', 'relationship_property': 'rdfs:subClassOf'}}}",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName ;\n         rdfs:subClassOf taxon:2 .\n}",
+          "evidence": {
+            "query_method": "rdfs:subClassOf relationship to Bacteria domain (taxon:2)",
+            "total_results": 100,
+            "sample_taxa": [
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/10",
+                "scientific_name": "Cellvibrio",
+                "taxon_id": "10"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100",
+                "scientific_name": "Ancylobacter aquaticus",
+                "taxon_id": "100"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100000",
+                "scientific_name": "Herbaspirillum sp. BA12",
+                "taxon_id": "100000"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000000",
+                "scientific_name": "Microbacterium sp. 6.11-VPa",
+                "taxon_id": "1000000"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000001",
+                "scientific_name": "Mycobacterium sp. 1.1-VEs",
+                "taxon_id": "1000001"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000002",
+                "scientific_name": "Mycobacterium sp. 1.12-VEs",
+                "taxon_id": "1000002"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000003",
+                "scientific_name": "Nocardia sp. 3.2-VPr",
+                "taxon_id": "1000003"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000004",
+                "scientific_name": "Polaromonas sp. 7.23-VPa",
+                "taxon_id": "1000004"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000005",
+                "scientific_name": "Promicromonospora sp. 10.25-Bb",
+                "taxon_id": "1000005"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000006",
+                "scientific_name": "Promicromonospora sp. 3.1- VPr",
+                "taxon_id": "1000006"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000007",
+                "scientific_name": "Pseudomonas sp. 10S-VPa",
+                "taxon_id": "1000007"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000008",
+                "scientific_name": "Pseudomonas sp. 5B-VPa",
+                "taxon_id": "1000008"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000009",
+                "scientific_name": "Pseudomonas sp. 5K-VPa",
+                "taxon_id": "1000009"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100001",
+                "scientific_name": "Herbaspirillum sp. BA14",
+                "taxon_id": "100001"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000010",
+                "scientific_name": "Pseudomonas sp. 5KS-VPa",
+                "taxon_id": "1000010"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000011",
+                "scientific_name": "Pseudomonas sp. 5KW-VPa",
+                "taxon_id": "1000011"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000012",
+                "scientific_name": "Pseudomonas sp. 5S-VPa",
+                "taxon_id": "1000012"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000013",
+                "scientific_name": "Pseudomonas sp. 5T-VPa",
+                "taxon_id": "1000013"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000014",
+                "scientific_name": "Pseudomonas sp. 6S-VPa",
+                "taxon_id": "1000014"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000015",
+                "scientific_name": "Rhodococcus sp. 1.15-VEs",
+                "taxon_id": "1000015"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000016",
+                "scientific_name": "Rhodococcus sp. 1.3-VEs",
+                "taxon_id": "1000016"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000017",
+                "scientific_name": "Rhodococcus sp. 3.3-VPr",
+                "taxon_id": "1000017"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000018",
+                "scientific_name": "Rhodococcus sp. 4.20-VOd",
+                "taxon_id": "1000018"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000019",
+                "scientific_name": "Rhodococcus sp. 4.20ST-VOd",
+                "taxon_id": "1000019"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100002",
+                "scientific_name": "Herbaspirillum sp. BA15",
+                "taxon_id": "100002"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000020",
+                "scientific_name": "Sanguibacter sp. 1.16-VEs",
+                "taxon_id": "1000020"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000021",
+                "scientific_name": "Sanguibacter sp. 1.23-VEs",
+                "taxon_id": "1000021"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000022",
+                "scientific_name": "Sanguibacter sp. 1.23S-VEs",
+                "taxon_id": "1000022"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000023",
+                "scientific_name": "Comamonadaceae bacterium 12S-VPa",
+                "taxon_id": "1000023"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000024",
+                "scientific_name": "Intrasporangiaceae bacterium 7.31-VPa",
+                "taxon_id": "1000024"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000025",
+                "scientific_name": "Intrasporangiaceae bacterium 7.4-VPa",
+                "taxon_id": "1000025"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000026",
+                "scientific_name": "Micrococcineae bacterium 9.2-BP",
+                "taxon_id": "1000026"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000027",
+                "scientific_name": "alpha proteobacterium 6.6-VPa",
+                "taxon_id": "1000027"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000028",
+                "scientific_name": "Bacillus sp. enrichment culture clone w-181",
+                "taxon_id": "1000028"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000029",
+                "scientific_name": "Pseudomonas sp. MBYD-1",
+                "taxon_id": "1000029"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100003",
+                "scientific_name": "Herbaspirillum sp. BA16",
+                "taxon_id": "100003"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000030",
+                "scientific_name": "Agrobacterium sp. G21-07",
+                "taxon_id": "1000030"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000031",
+                "scientific_name": "Agrobacterium sp. G21-09",
+                "taxon_id": "1000031"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000032",
+                "scientific_name": "Enterobacter sp. P19-19",
+                "taxon_id": "1000032"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000033",
+                "scientific_name": "Flavobacterium sp. G23-27",
+                "taxon_id": "1000033"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/1000034",
+                "scientific_name": "Erwinia sp. Koakin",
+                "taxon_id": "1000034"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100004",
+                "scientific_name": "Herbaspirillum sp. BA134",
+                "taxon_id": "100004"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100005",
+                "scientific_name": "Herbaspirillum sp. BA161",
+                "taxon_id": "100005"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100006",
+                "scientific_name": "Azospirillum sp. Ala",
+                "taxon_id": "100006"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100007",
+                "scientific_name": "Mycobacterium sp. C2-3",
+                "taxon_id": "100007"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100012",
+                "scientific_name": "Bartonella sp. RR13863PO",
+                "taxon_id": "100012"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100013",
+                "scientific_name": "Bartonella sp. MM5136CA",
+                "taxon_id": "100013"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100014",
+                "scientific_name": "diazotroph str. AB48",
+                "taxon_id": "100014"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100015",
+                "scientific_name": "diazotroph str. AB71",
+                "taxon_id": "100015"
+              },
+              {
+                "taxon_uri": "http://purl.uniprot.org/taxonomy/100016",
+                "scientific_name": "diazotroph str. AB117",
+                "taxon_id": "100016"
+              }
+            ],
+            "verification": {
+              "bacteria_taxon": "http://purl.uniprot.org/taxonomy/2",
+              "bacteria_name": "Bacteria",
+              "bacteria_rank": "Domain",
+              "relationship_property": "rdfs:subClassOf"
+            }
+          }
+        }
+      ],
+      "error": null,
+      "timestamp": "2026-01-22T21:31:54.713152Z",
+      "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName ;\n         rdfs:subClassOf taxon:2 .\n}",
+      "evidence": {
+        "query_method": "rdfs:subClassOf relationship to Bacteria domain (taxon:2)",
+        "total_results": 100,
+        "sample_taxa": [
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/10",
+            "scientific_name": "Cellvibrio",
+            "taxon_id": "10"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100",
+            "scientific_name": "Ancylobacter aquaticus",
+            "taxon_id": "100"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100000",
+            "scientific_name": "Herbaspirillum sp. BA12",
+            "taxon_id": "100000"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000000",
+            "scientific_name": "Microbacterium sp. 6.11-VPa",
+            "taxon_id": "1000000"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000001",
+            "scientific_name": "Mycobacterium sp. 1.1-VEs",
+            "taxon_id": "1000001"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000002",
+            "scientific_name": "Mycobacterium sp. 1.12-VEs",
+            "taxon_id": "1000002"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000003",
+            "scientific_name": "Nocardia sp. 3.2-VPr",
+            "taxon_id": "1000003"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000004",
+            "scientific_name": "Polaromonas sp. 7.23-VPa",
+            "taxon_id": "1000004"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000005",
+            "scientific_name": "Promicromonospora sp. 10.25-Bb",
+            "taxon_id": "1000005"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000006",
+            "scientific_name": "Promicromonospora sp. 3.1- VPr",
+            "taxon_id": "1000006"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000007",
+            "scientific_name": "Pseudomonas sp. 10S-VPa",
+            "taxon_id": "1000007"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000008",
+            "scientific_name": "Pseudomonas sp. 5B-VPa",
+            "taxon_id": "1000008"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000009",
+            "scientific_name": "Pseudomonas sp. 5K-VPa",
+            "taxon_id": "1000009"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100001",
+            "scientific_name": "Herbaspirillum sp. BA14",
+            "taxon_id": "100001"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000010",
+            "scientific_name": "Pseudomonas sp. 5KS-VPa",
+            "taxon_id": "1000010"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000011",
+            "scientific_name": "Pseudomonas sp. 5KW-VPa",
+            "taxon_id": "1000011"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000012",
+            "scientific_name": "Pseudomonas sp. 5S-VPa",
+            "taxon_id": "1000012"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000013",
+            "scientific_name": "Pseudomonas sp. 5T-VPa",
+            "taxon_id": "1000013"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000014",
+            "scientific_name": "Pseudomonas sp. 6S-VPa",
+            "taxon_id": "1000014"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000015",
+            "scientific_name": "Rhodococcus sp. 1.15-VEs",
+            "taxon_id": "1000015"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000016",
+            "scientific_name": "Rhodococcus sp. 1.3-VEs",
+            "taxon_id": "1000016"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000017",
+            "scientific_name": "Rhodococcus sp. 3.3-VPr",
+            "taxon_id": "1000017"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000018",
+            "scientific_name": "Rhodococcus sp. 4.20-VOd",
+            "taxon_id": "1000018"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000019",
+            "scientific_name": "Rhodococcus sp. 4.20ST-VOd",
+            "taxon_id": "1000019"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100002",
+            "scientific_name": "Herbaspirillum sp. BA15",
+            "taxon_id": "100002"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000020",
+            "scientific_name": "Sanguibacter sp. 1.16-VEs",
+            "taxon_id": "1000020"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000021",
+            "scientific_name": "Sanguibacter sp. 1.23-VEs",
+            "taxon_id": "1000021"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000022",
+            "scientific_name": "Sanguibacter sp. 1.23S-VEs",
+            "taxon_id": "1000022"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000023",
+            "scientific_name": "Comamonadaceae bacterium 12S-VPa",
+            "taxon_id": "1000023"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000024",
+            "scientific_name": "Intrasporangiaceae bacterium 7.31-VPa",
+            "taxon_id": "1000024"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000025",
+            "scientific_name": "Intrasporangiaceae bacterium 7.4-VPa",
+            "taxon_id": "1000025"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000026",
+            "scientific_name": "Micrococcineae bacterium 9.2-BP",
+            "taxon_id": "1000026"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000027",
+            "scientific_name": "alpha proteobacterium 6.6-VPa",
+            "taxon_id": "1000027"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000028",
+            "scientific_name": "Bacillus sp. enrichment culture clone w-181",
+            "taxon_id": "1000028"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000029",
+            "scientific_name": "Pseudomonas sp. MBYD-1",
+            "taxon_id": "1000029"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100003",
+            "scientific_name": "Herbaspirillum sp. BA16",
+            "taxon_id": "100003"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000030",
+            "scientific_name": "Agrobacterium sp. G21-07",
+            "taxon_id": "1000030"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000031",
+            "scientific_name": "Agrobacterium sp. G21-09",
+            "taxon_id": "1000031"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000032",
+            "scientific_name": "Enterobacter sp. P19-19",
+            "taxon_id": "1000032"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000033",
+            "scientific_name": "Flavobacterium sp. G23-27",
+            "taxon_id": "1000033"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/1000034",
+            "scientific_name": "Erwinia sp. Koakin",
+            "taxon_id": "1000034"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100004",
+            "scientific_name": "Herbaspirillum sp. BA134",
+            "taxon_id": "100004"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100005",
+            "scientific_name": "Herbaspirillum sp. BA161",
+            "taxon_id": "100005"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100006",
+            "scientific_name": "Azospirillum sp. Ala",
+            "taxon_id": "100006"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100007",
+            "scientific_name": "Mycobacterium sp. C2-3",
+            "taxon_id": "100007"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100012",
+            "scientific_name": "Bartonella sp. RR13863PO",
+            "taxon_id": "100012"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100013",
+            "scientific_name": "Bartonella sp. MM5136CA",
+            "taxon_id": "100013"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100014",
+            "scientific_name": "diazotroph str. AB48",
+            "taxon_id": "100014"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100015",
+            "scientific_name": "diazotroph str. AB71",
+            "taxon_id": "100015"
+          },
+          {
+            "taxon_uri": "http://purl.uniprot.org/taxonomy/100016",
+            "scientific_name": "diazotroph str. AB117",
+            "taxon_id": "100016"
+          }
+        ],
+        "verification": {
+          "bacteria_taxon": "http://purl.uniprot.org/taxonomy/2",
+          "bacteria_name": "Bacteria",
+          "bacteria_rank": "Domain",
+          "relationship_property": "rdfs:subClassOf"
+        }
+      },
+      "converged": true
+    }
+  ]
+}

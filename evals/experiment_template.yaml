@@ -1,0 +1,89 @@
+# Experiment metadata template
+# Copy this file to experiments/EXXX_name/experiment.yaml
+
+experiment:
+  id: "E002"
+  name: "think_act_verify_reflect_rung1"
+
+  # What are you testing?
+  hypothesis: |
+    Adding explicit thinking/verification/reflection output fields to the
+    QueryConstructionSig will improve evidence quality and pass rate,
+    particularly on tasks where the agent was storing metadata (e.g.,
+    sequence_length) instead of actual data (amino acid sequences).
+
+  # Traceability
+  date_started: "2026-01-22"
+  date_completed: null  # null if in progress
+  git_commit: "9efd8204ab1230bb984cccf8ebb397d2d1ab8a60"
+  git_branch: "main"
+
+  # What changed from baseline?
+  changes:
+    code:
+      - "Added thinking/verification/reflection fields to QueryConstructionSig"
+      - "Added THINK→ACT→VERIFY→REFLECT guidance to context prompts"
+      - "Modified task_runner.py to capture reasoning fields in results"
+    prompts:
+      - "Added explicit evidence format requirements (NOT just counts/lengths)"
+      - "Added verification step guidance (check results match expectations)"
+
+  # Which tasks to run?
+  tasks:
+    - "uniprot/taxonomy/uniprot_bacteria_taxa_001"
+    - "uniprot/taxonomy/uniprot_ecoli_k12_sequences_001"
+
+  # Experimental conditions
+  cohorts:
+    - name: "baseline"
+      description: "Control: DSPy RLM without reasoning fields"
+      git_commit: "03d298b4"  # Before reasoning fields
+      config:
+        reasoning_fields: false
+        enable_memory: false
+
+    - name: "rung1_reasoning_fields"
+      description: "Experimental: Think-Act-Verify-Reflect fields"
+      git_commit: "9efd8204"
+      config:
+        reasoning_fields: true
+        enable_memory: false
+
+  # Experimental design
+  trials_per_task: 10
+  random_seed: 42
+
+  # What to measure?
+  metrics:
+    primary:
+      - "pass_rate"          # Main success metric
+      - "evidence_format_correctness"  # Specific to hypothesis
+    secondary:
+      - "avg_iterations"     # Check for overhead
+      - "convergence_rate"   # How often it finishes in budget
+
+  # Statistical analysis
+  comparison:
+    baseline_experiment: "E001_baseline_before_reasoning"
+    statistical_test: "paired_t_test"  # Same tasks before/after
+    significance_level: 0.05
+
+  # Status tracking
+  status: "in_progress"  # planned | in_progress | completed | superseded
+
+  # Results summary (filled in after completion)
+  results:
+    outcome: null  # hypothesis_supported | hypothesis_rejected | inconclusive
+    summary: null
+    next_steps: null
+
+# Human notes (optional inline documentation)
+notes: |
+  This is Rung 1 from the Think-Act-Verify-Reflect plan. We're testing
+  whether adding structured reasoning fields is sufficient, or if we need
+  Rung 2 (explicit exploration/planning phases).
+
+  Key question: Does evidence format consistency improve?
+
+  E. coli K12 baseline: 0/6 trials passed (evidence had sequence_length)
+  Expected: Evidence should include actual amino acid sequences.

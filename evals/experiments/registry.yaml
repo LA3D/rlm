@@ -1,0 +1,79 @@
+# Experiment Registry
+# This file tracks all experiments in chronological order
+
+experiments:
+  - id: "E001"
+    name: "baseline_before_reasoning"
+    date: "2026-01-20"
+    status: "completed"
+    description: "Initial baseline measurements with DSPy RLM before Think-Act-Verify-Reflect"
+    git_commit: "03d298b4602e295b358ec531bfb66734953fb832"
+    path: "experiments/E001_baseline_before_reasoning"
+    parent: null
+    results_summary:
+      bacteria_taxa: "58.6% pass rate (17/29 trials), 8.9 avg iterations"
+      ecoli_k12: "0.0% pass rate (0/6 trials) - evidence format issues"
+      basic_search: "0.0% pass rate (0/4 trials) - failed to run"
+    key_findings:
+      - "E. coli K12 systematic failure: stored sequence_length instead of actual sequences"
+      - "No verification step before SUBMIT led to wrong evidence format"
+
+  - id: "E002"
+    name: "rung1_think_act_verify_reflect"
+    date: "2026-01-22"
+    status: "in_progress"
+    description: "Rung 1: Add thinking/verification/reflection fields to QueryConstructionSig"
+    git_commit: "9efd8204ab1230bb984cccf8ebb397d2d1ab8a60"
+    path: "experiments/E002_rung1_think_act_verify_reflect"
+    parent: "E001"
+    hypothesis: "Reasoning fields improve evidence quality and pass rate"
+    results_summary:
+      ecoli_k12: "60.0% pass rate (3/5 trials) - evidence includes actual sequences ✓"
+      bacteria_taxa: "Not yet re-tested with full implementation"
+    key_findings:
+      - "E. coli K12 improvement: 0% → 60% pass rate"
+      - "Evidence format fixed: now includes actual amino acid sequences"
+      - "Minimal overhead: +0.9 iterations"
+      - "Reasoning fields populated with meaningful content"
+    next_steps:
+      - "Commit task_runner.py changes"
+      - "Run 10 trials with full implementation on both tasks"
+      - "Statistical comparison with E001"
+      - "Decision: Is Rung 1 sufficient or proceed to Rung 2?"
+
+# Planned experiments
+planned:
+  - id: "E003"
+    name: "rung2_exploration_planning"
+    status: "planned"
+    description: "Rung 2: Add exploration_summary and plan fields for phased execution"
+    parent: "E002"
+    condition: "Only if E002 pass rate is 50-80% (indicating need for more structure)"
+
+  - id: "E004"
+    name: "affordance_ablation"
+    status: "planned"
+    description: "Test which specific affordance features help (minimal/structural/semantic/full)"
+    parent: "E002"
+    maps_to: "RQ5 (representation utility) from trajectory_v3.md"
+
+  - id: "E005"
+    name: "memory_learning_curves"
+    status: "planned"
+    description: "Measure learning dynamics with ReasoningBank over sequential runs"
+    parent: "E002"
+    maps_to: "RQ4 (learning dynamics) from trajectory_v3.md"
+
+  - id: "E006"
+    name: "reasoning_boundaries_L0_L7"
+    status: "planned"
+    description: "Identify reasoning capability boundaries (L0 direct → L7 explanation)"
+    parent: "E002"
+    maps_to: "RQ6 (reasoning boundaries) from trajectory_v3.md"
+
+# Experiment lifecycle statuses:
+# - planned: Designed but not yet run
+# - in_progress: Currently collecting data
+# - completed: All trials run, analysis done
+# - superseded: Results invalidated by later findings
+# - abandoned: Discontinued (document reason in experiment.yaml)

@@ -1,0 +1,63 @@
+# Experiment registry
+# This file tracks all experiments in chronological order
+# Each experiment should have a corresponding directory in experiments/
+
+experiments:
+  - id: "E001"
+    name: "baseline_before_reasoning"
+    date: "2026-01-20"
+    status: "completed"
+    description: "Initial baseline measurements with DSPy RLM before Think-Act-Verify-Reflect"
+    git_commit: "03d298b4"
+    path: "experiments/E001_baseline_before_reasoning"
+    parent: null
+    results_summary:
+      bacteria_taxa: "58.6% pass rate (17/29 trials)"
+      ecoli_k12: "0.0% pass rate (0/6 trials) - evidence format issues"
+
+  - id: "E002"
+    name: "think_act_verify_reflect_rung1"
+    date: "2026-01-22"
+    status: "in_progress"
+    description: "Rung 1: Add thinking/verification/reflection fields to QueryConstructionSig"
+    git_commit: "9efd8204"
+    path: "experiments/E002_rung1_think_act_verify_reflect"
+    parent: "E001"
+    hypothesis: "Reasoning fields improve evidence quality"
+    results_summary:
+      ecoli_k12: "60.0% pass rate (3/5 trials) - evidence includes actual sequences"
+
+  # Future experiments (examples)
+  # - id: "E003"
+  #   name: "rung2_exploration_planning"
+  #   date: "2026-01-23"
+  #   status: "planned"
+  #   description: "Rung 2: Add exploration_summary and plan fields"
+  #   git_commit: null
+  #   path: "experiments/E003_rung2_exploration_planning"
+  #   parent: "E002"
+
+  # - id: "E004"
+  #   name: "affordance_ablation"
+  #   date: "2026-01-24"
+  #   status: "planned"
+  #   description: "Test which specific affordance features help (minimal/structural/semantic/full)"
+  #   git_commit: null
+  #   path: "experiments/E004_affordance_ablation"
+  #   parent: "E002"
+
+  # - id: "E005"
+  #   name: "memory_learning_curves"
+  #   date: "2026-01-25"
+  #   status: "planned"
+  #   description: "Measure learning dynamics with ReasoningBank over sequential runs"
+  #   git_commit: null
+  #   path: "experiments/E005_memory_learning_curves"
+  #   parent: "E002"
+
+# Experiment lifecycle statuses:
+# - planned: Designed but not yet run
+# - in_progress: Currently collecting data
+# - completed: All trials run, analysis done
+# - superseded: Results invalidated by later findings
+# - abandoned: Discontinued (document reason in experiment.yaml)

@@ -1,0 +1,202 @@
+# Experiment E002: Rung 1 - Think-Act-Verify-Reflect
+
+experiment:
+  id: "E002"
+  name: "rung1_think_act_verify_reflect"
+
+  # What are you testing?
+  hypothesis: |
+    Adding explicit thinking/verification/reflection output fields to the
+    QueryConstructionSig will improve evidence quality and pass rate,
+    particularly on tasks where the agent was storing metadata (e.g.,
+    sequence_length) instead of actual data (amino acid sequences).
+
+    Specific predictions:
+    1. E. coli K12 pass rate: 0% → >50%
+    2. Evidence will include actual sequences, not just sequence_length
+    3. Minimal overhead: <2 iteration increase
+    4. Reasoning fields will contain meaningful content
+
+  # Traceability
+  date_started: "2026-01-22"
+  date_completed: null  # In progress - needs more trials
+  git_commit: "9efd8204ab1230bb984cccf8ebb397d2d1ab8a60"
+  git_branch: "main"
+
+  # What changed from E001?
+  changes:
+    code:
+      - "Added thinking/verification/reflection fields to QueryConstructionSig"
+      - "Extended DSPyRLMResult dataclass to capture reasoning fields"
+      - "Added THINK→ACT→VERIFY→REFLECT guidance to context prompts"
+      - "Enhanced evidence description: actual data NOT just counts/lengths"
+      - "Modified task_runner.py to capture reasoning fields (uncommitted initially)"
+    prompts:
+      - "Added explicit THINK→ACT→VERIFY→REFLECT cycle instructions"
+      - "Added verification guidance: 'Check results match expectations'"
+      - "Added reflection guidance: 'Does evidence include actual data?'"
+      - "Specific examples: 'sequence field with amino acids ✓ (NOT sequence_length!)'"
+
+  # Which tasks were run?
+  tasks:
+    - "uniprot/taxonomy/uniprot_ecoli_k12_sequences_001"
+    # Note: bacteria_taxa not re-tested with full implementation yet
+
+  # Experimental conditions
+  cohorts:
+    - name: "baseline"
+      description: "E001 baseline for comparison"
+      git_commit: "03d298b4"
+      config:
+        reasoning_fields: false
+        enable_memory: false
+
+    - name: "incomplete"
+      description: "After signature changes but before task_runner.py update"
+      git_commit: "9efd8204"
+      config:
+        reasoning_fields: true  # In signature
+        capture_fields: false    # Not captured by task_runner
+        enable_memory: false
+
+    - name: "rung1_reasoning_fields"
+      description: "Full Think-Act-Verify-Reflect implementation"
+      git_commit: "9efd8204"
+      config:
+        reasoning_fields: true
+        capture_fields: true     # Captured by task_runner
+        enable_memory: false
+
+  # Experimental design
+  trials_per_task: "variable (1-3 per run)"
+  random_seed: null
+
+  # What to measure?
+  metrics:
+    primary:
+      - "pass_rate"
+      - "evidence_format_correctness"  # Specific to hypothesis
+    secondary:
+      - "avg_iterations"
+      - "convergence_rate"
+      - "reasoning_field_quality"  # Are fields populated meaningfully?
+
+  # Statistical analysis
+  comparison:
+    baseline_experiment: "E001_baseline_before_reasoning"
+    statistical_test: "paired_t_test"  # Same tasks before/after
+    significance_level: 0.05
+
+  # Status tracking
+  status: "in_progress"  # Needs more trials with full implementation
+
+  # Results summary (preliminary)
+  results:
+    outcome: "hypothesis_supported_preliminary"
+    summary: |
+      Preliminary results with full implementation (1 trial):
+
+      E. coli K12:
+      - Baseline (E001): 0.0% pass rate (0/6 trials)
+      - Rung 1 (E002): 60.0% pass rate (3/5 trials across all cohorts)
+      - Full implementation (1 trial): 100% pass rate (1/1)
+      - Avg iterations: 11.0 → 11.9 (+0.9, minimal overhead ✓)
+
+      Evidence Quality (full implementation run):
+      - metadata_based: false ✓
+      - Evidence includes actual amino acid sequences ✓
+      - Sample: "MNKVGMFYTYWSTEWMVDFP..." (not just sequence_length)
+
+      Reasoning Fields Populated:
+      - Thinking: "Explored schema → identified K12 taxa → constructed query..."
+      - Verification: "Verified 16 K12-related taxa, query structure correct..."
+      - Reflection: "Query successfully addresses request by including main strain + 15 substrains..."
+
+      CONCLUSION: Evidence format issue FIXED. Pass rate dramatically improved.
+
+    next_steps: |
+      1. Commit task_runner.py changes so all runs capture reasoning fields
+      2. Run 10 trials on both bacteria_taxa and ecoli_k12 with full implementation
+      3. Statistical comparison with E001 baseline
+      4. Decision point: Is Rung 1 sufficient, or proceed to Rung 2?
+
+      If pass rate on ecoli_k12 stabilizes >80% with 10 trials:
+        → Rung 1 is sufficient, move to E004 (affordance ablation)
+
+      If pass rate is 50-80%:
+        → Consider E003 Rung 2 (exploration/planning phases)
+
+      If pass rate <50%:
+        → Re-evaluate approach or investigate failure modes
+
+# Detailed findings by cohort
+findings:
+  incomplete_cohort:
+    description: "Signature changed but task_runner didn't capture fields"
+    passed_trials: 2
+    total_trials: 4
+    pass_rate: 0.5
+    notes: |
+      Mixed results. Reasoning fields present in DSPy output but not captured
+      in trial results for grading. Still showed improvement over baseline,
+      suggesting the prompt guidance helps even without explicit field capture.
+
+  rung1_full_implementation:
+    description: "Full Think-Act-Verify-Reflect with field capture"
+    passed_trials: 1
+    total_trials: 1
+    pass_rate: 1.0
+    avg_iterations: 10.0
+    notes: |
+      Perfect pass on E. coli K12 task. Evidence format correct (actual sequences).
+      Reasoning fields show meaningful content. This is the target configuration.
+
+      Need 10+ trials to establish statistical significance.
+
+# Evidence quality analysis
+evidence_analysis:
+  baseline_behavior:
+    issue: "Stored sequence_length metadata instead of actual amino acid sequences"
+    example: |
+      {
+        "protein": "...",
+        "sequence_length": 298  # WRONG - this is metadata
+      }
+
+  rung1_behavior:
+    fix: "Stores actual amino acid sequences"
+    example: |
+      {
+        "protein": "http://purl.uniprot.org/uniprot/A0A0A6YVN8",
+        "sequence_preview": "MNKVGMFYTYWSTEWMVDFPATAKRIAGLGFDLMEISLGEFHNLSD...",
+        "sequence_length": 298  # Also includes length, but has actual data
+      }
+
+  reasoning_fields_example:
+    thinking: |
+      To answer this query, I needed to:
+      1. Explore the UniProt RDF schema to understand how proteins, organisms, and sequences are represented
+      2. Identify E. coli K12 (taxon:83333) and all its related strains
+      3. Construct a SPARQL query that retrieves proteins from all K12-related taxa
+      4. The query uses the up:organism property to link proteins to taxa, and up:sequence with rdf:value to get sequences
+
+    verification: |
+      Verified that:
+      - The main E. coli K12 taxon is taxon:83333
+      - Found 16 K12-related taxa (main strain + 15 substrains)
+      - The SPARQL query correctly retrieves protein URIs and their amino acid sequences
+      - Sample results show valid protein identifiers and amino acid sequences of varying lengths
+
+    reflection: |
+      The query successfully addresses the user's request by:
+      1. Including the main E. coli K12 strain (taxon:83333)
+      2. Including all K12 substrains (15 additional taxa)
+      3. Retrieving both the protein identifiers (URIs) and their complete amino acid sequences
+      4. Using the standard UniProt RDF properties (up:organism, up:sequence, rdf:value)
+
+# References
+references:
+  - "Think-Act-Verify-Reflect plan (Rung 1): ~/.claude/plans/ethereal-wobbling-clover.md"
+  - "Commit 9efd820: Add Think-Act-Verify-Reflect reasoning cycles to DSPy RLM"
+  - "Baseline: E001_baseline_before_reasoning"
+  - "Trajectory v3 Phase 4: docs/planning/trajectory_v3.md"

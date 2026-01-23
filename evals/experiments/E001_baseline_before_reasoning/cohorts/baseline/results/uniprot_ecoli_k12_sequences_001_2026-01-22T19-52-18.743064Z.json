@@ -1,0 +1,387 @@
+{
+  "task_id": "uniprot_ecoli_k12_sequences_001",
+  "task_query": "Select UniProtKB proteins (and their amino acid sequences) for E. coli K12 and all its strains.",
+  "pass_at_k": 0.0,
+  "pass_power_k": 0.0,
+  "avg_iterations": 10.0,
+  "avg_groundedness": 0.0,
+  "total_trials": 1,
+  "passed_trials": 0,
+  "timestamp": "2026-01-22T19:52:18.743064Z",
+  "trial_results": [
+    {
+      "trial_number": 0,
+      "passed": false,
+      "answer": "The query retrieves 4600 UniProtKB proteins with their amino acid sequences from E. coli K12 (taxon 83333) and its strains: E. coli O17 str. K12a (taxon 1010810) and E. coli str. K-12 substr. MDS42 (taxon 1110693). Each result contains the protein URI and its complete amino acid sequence.",
+      "iterations": 10,
+      "grader_results": {
+        "convergence": {
+          "passed": false,
+          "score": 0.0,
+          "reason": "Exceeded iteration limit: 11 > 10",
+          "details": {
+            "converged": true,
+            "iterations": 11,
+            "max_iterations": 10,
+            "within_limit": false,
+            "efficiency": 0.0
+          }
+        },
+        "outcome_verification": {
+          "passed": false,
+          "score": 0.0,
+          "reason": "Found 0 results, need >= 3",
+          "details": {
+            "result_count": 0,
+            "required_fields_present": true,
+            "field_checks": {},
+            "verification_patterns": [
+              {
+                "rule": "protein matches /uniprot.org/uniprot//",
+                "passed": false,
+                "match_count": 0,
+                "total_checked": 0
+              },
+              {
+                "rule": "sequence matches /[A-Z]{10,}/",
+                "passed": false,
+                "match_count": 0,
+                "total_checked": 0
+              }
+            ],
+            "sample_results": [],
+            "metadata_based": []
+          }
+        },
+        "llm_judge": {
+          "passed": true,
+          "score": 0.9,
+          "reason": "LLM Judge: The agent successfully retrieved UniProtKB proteins for E. coli K12 and its strains, including protein sequences, demonstrating a valid approach that meets the core requirements of the task.",
+          "details": {
+            "llm_judgment": {
+              "correct": true,
+              "confidence": 0.9,
+              "reasoning": "The agent successfully retrieved UniProtKB proteins for E. coli K12 and its strains, including protein sequences, demonstrating a valid approach that meets the core requirements of the task."
+            },
+            "model": "anthropic/claude-3-5-haiku-20241022"
+          }
+        },
+        "tool_called": {
+          "passed": true,
+          "score": 1.0,
+          "reason": "Called all 1 required tools",
+          "details": {
+            "found_required": [
+              "sparql_query"
+            ],
+            "missing_required": [],
+            "found_forbidden": [],
+            "all_tools_called": [
+              "enumerate",
+              "search_entity",
+              "SELECT",
+              "SUBMIT",
+              "coli",
+              "MDS42",
+              "FILTER",
+              "taxon",
+              "strains",
+              "exists",
+              "CONTAINS",
+              "K12",
+              "min",
+              "K12a",
+              "join",
+              "LCASE",
+              "sparql_query",
+              "query",
+              "append",
+              "Sequence",
+              "res_head",
+              "COUNT"
+            ]
+          }
+        }
+      },
+      "transcript": [
+        {
+          "iteration": 1,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "# First, let's look at the query and context to understand what we're working with\nprint(\"Query:\", query)\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Explore the schema - look for classes related to proteins and organisms\nschema_query = \"\"\"\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nSELECT DISTINCT ?class ?label\nWHERE {\n  ?class a owl:Class .\n  OPTIONAL { ?class rdfs:label ?label }\n}\nORDER BY ?class\nLIMIT 50\n\"\"\"\n\nclasses = query(schema_query)\nprint(\"Available classes in ontology:\")\nfor c in classes[:20]:  # Print first 20\n    print(f\"  {c}\")",
+              "result": {
+                "stdout": "Query: <function make_sparql_select_tool.<locals>.sparql_select_tool at 0x1069f56c0>\n\n================================================================================\n\nAvailable classes in ontology:\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b1', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b106', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b110', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b120', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b124', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b128', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b131', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b134', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b137', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b14', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b140', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b144', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b147', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b151', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b159', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b183', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b191', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b22', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b26', 'label': 'None'}\n  {'class': 'nefe379ef40bc4174bce9c2100c8c1a99b29', 'label': 'None'}\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 2,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Let's look for properties instead, which might be more informative\nproperties_query = \"\"\"\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nSELECT DISTINCT ?property ?label\nWHERE {\n  ?property a owl:ObjectProperty .\n  OPTIONAL { ?property rdfs:label ?label }\n}\nORDER BY ?property\nLIMIT 50\n\"\"\"\n\nproperties = query(properties_query)\nprint(\"Object Properties:\")\nfor p in properties[:30]:\n    print(f\"  {p}\")\n\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Also check for datatype properties\ndatatype_props_query = \"\"\"\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nSELECT DISTINCT ?property ?label\nWHERE {\n  ?property a owl:DatatypeProperty .\n  OPTIONAL { ?property rdfs:label ?label }\n}\nORDER BY ?property\nLIMIT 50\n\"\"\"\n\ndatatype_props = query(datatype_props_query)\nprint(\"Datatype Properties:\")\nfor p in datatype_props[:30]:\n    print(f\"  {p}\")\n```",
+              "result": {
+                "stdout": "Object Properties:\n  {'property': 'http://biohackathon.org/resource/faldo#location', 'label': 'None'}\n  {'property': 'http://biohackathon.org/resource/faldo#reference', 'label': 'None'}\n  {'property': 'http://purl.uniprot.org/core/activity', 'label': 'catalytic activity'}\n  {'property': 'http://purl.uniprot.org/core/alternativeName', 'label': 'alternativeName'}\n  {'property': 'http://purl.uniprot.org/core/annotation', 'label': 'annotation'}\n  {'property': 'http://purl.uniprot.org/core/attribution', 'label': 'attribution'}\n  {'property': 'http://purl.uniprot.org/core/basedOn', 'label': 'based on'}\n  {'property': 'http://purl.uniprot.org/core/catalyticActivity', 'label': 'catalytic activity'}\n  {'property': 'http://purl.uniprot.org/core/catalyzedPhysiologicalReaction', 'label': 'catalyzed physiological reaction'}\n  {'property': 'http://purl.uniprot.org/core/catalyzedReaction', 'label': 'catalyzed reaction'}\n  {'property': 'http://purl.uniprot.org/core/category', 'label': 'category'}\n  {'property': 'http://purl.uniprot.org/core/cellularComponent', 'label': 'cellular component'}\n  {'property': 'http://purl.uniprot.org/core/chainSequenceMapping', 'label': 'chainSequenceMapping'}\n  {'property': 'http://purl.uniprot.org/core/citation', 'label': 'citation'}\n  {'property': 'http://purl.uniprot.org/core/classifiedWith', 'label': 'classified with'}\n  {'property': 'http://purl.uniprot.org/core/cofactor', 'label': 'cofactor'}\n  {'property': 'http://purl.uniprot.org/core/commonName', 'label': 'common name'}\n  {'property': 'http://purl.uniprot.org/core/commonTaxon', 'label': 'common taxon'}\n  {'property': 'http://purl.uniprot.org/core/component', 'label': 'proteome component'}\n  {'property': 'http://purl.uniprot.org/core/conflictingSequence', 'label': 'conflicting sequence'}\n  {'property': 'http://purl.uniprot.org/core/context', 'label': 'context'}\n  {'property': 'http://purl.uniprot.org/core/database', 'label': 'database'}\n  {'property': 'http://purl.uniprot.org/core/disease', 'label': 'disease'}\n  {'property': 'http://purl.uniprot.org/core/domain', 'label': 'domain'}\n  {'property': 'http://purl.uniprot.org/core/encodedBy', 'label': 'encoded by'}\n  {'property': 'http://purl.uniprot.org/core/encodedIn', 'label': 'encoded in'}\n  {'property': 'http://purl.uniprot.org/core/enzyme', 'label': 'enzyme'}\n  {'property': 'http://purl.uniprot.org/core/enzymeClass', 'label': 'enzyme class'}\n  {'property': 'http://purl.uniprot.org/core/erratum', 'label': 'erratum'}\n  {'property': 'http://purl.uniprot.org/core/erratumFor', 'label': 'erratum for'}\n\n================================================================================\n\nDatatype Properties:\n  {'property': 'http://purl.uniprot.org/core/abstract', 'label': 'abstract'}\n  {'property': 'http://purl.uniprot.org/core/alias', 'label': 'alias'}\n  {'property': 'http://purl.uniprot.org/core/allergenName', 'label': 'allergen name'}\n  {'property': 'http://purl.uniprot.org/core/atypical', 'label': 'atypical'}\n  {'property': 'http://purl.uniprot.org/core/author', 'label': 'author'}\n  {'property': 'http://purl.uniprot.org/core/authorsIncomplete', 'label': 'authorsIncomplete'}\n  {'property': 'http://purl.uniprot.org/core/base', 'label': 'None'}\n  {'property': 'http://purl.uniprot.org/core/begin', 'label': 'None'}\n  {'property': 'http://purl.uniprot.org/core/biotechName', 'label': 'biotechName'}\n  {'property': 'http://purl.uniprot.org/core/cdAntigenName', 'label': 'CD molecule antigen name'}\n  {'property': 'http://purl.uniprot.org/core/certain', 'label': 'certain'}\n  {'property': 'http://purl.uniprot.org/core/chain', 'label': 'chain'}\n  {'property': 'http://purl.uniprot.org/core/checksum', 'label': 'checksum'}\n  {'property': 'http://purl.uniprot.org/core/cofactorLabel', 'label': 'cofactorLabel'}\n  {'property': 'http://purl.uniprot.org/core/complete', 'label': 'complete'}\n  {'property': 'http://purl.uniprot.org/core/crc64Checksum', 'label': 'crc64Checksum (no longer used in UniProt RDF)'}\n  {'property': 'http://purl.uniprot.org/core/created', 'label': 'created'}\n  {'property': 'http://purl.uniprot.org/core/curated', 'label': 'curated'}\n  {'property': 'http://purl.uniprot.org/core/date', 'label': 'date'}\n  {'property': 'http://purl.uniprot.org/core/domains', 'label': 'None'}\n  {'property': 'http://purl.uniprot.org/core/ecName', 'label': 'EC as a name'}\n  {'property': 'http://purl.uniprot.org/core/editor', 'label': 'editor'}\n  {'property': 'http://purl.uniprot.org/core/end', 'label': 'None'}\n  {'property': 'http://purl.uniprot.org/core/exclusionReason', 'label': 'proteome exclusion reason'}\n  {'property': 'http://purl.uniprot.org/core/experiments', 'label': 'experiments'}\n  {'property': 'http://purl.uniprot.org/core/fragment', 'label': 'fragment'}\n  {'property': 'http://purl.uniprot.org/core/frameshift', 'label': 'frameshift'}\n  {'property': 'http://purl.uniprot.org/core/fullName', 'label': 'fullName'}\n  {'property': 'http://purl.uniprot.org/core/fused', 'label': 'None'}\n  {'property': 'http://purl.uniprot.org/core/group', 'label': 'group'}\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 3,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Search for E. coli K12 entities\necoli_results = search_entity(\"E. coli K12\", limit=20, search_in=\"label\")\nprint(\"Search results for 'E. coli K12':\")\nfor i, result in enumerate(ecoli_results[:10]):\n    print(f\"{i+1}. {result}\")\n\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Also try searching for \"Escherichia coli K12\"\necoli_results2 = search_entity(\"Escherichia coli K12\", limit=20, search_in=\"label\")\nprint(\"Search results for 'Escherichia coli K12':\")\nfor i, result in enumerate(ecoli_results2[:10]):\n    print(f\"{i+1}. {result}\")\n\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Try searching for just \"K12\" or \"K-12\"\nk12_results = search_entity(\"K-12\", limit=20, search_in=\"label\")\nprint(\"Search results for 'K-12':\")\nfor i, result in enumerate(k12_results[:10]):\n    print(f\"{i+1}. {result}\")\n```",
+              "result": {
+                "stdout": "Search results for 'E. coli K12':\n\n================================================================================\n\nSearch results for 'Escherichia coli K12':\n\n================================================================================\n\nSearch results for 'K-12':\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 4,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Let's try querying the remote endpoint directly for E. coli K12\n# E. coli K12 has taxon ID 83333, and strains would be descendants\n\n# First, let's try a simple query to find organisms with \"coli\" and \"K\" in their name\ntest_query = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?taxon ?name ?mnemonic\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?name .\n  OPTIONAL { ?taxon up:mnemonic ?mnemonic }\n  FILTER(CONTAINS(LCASE(?name), \"escherichia coli\") && CONTAINS(LCASE(?name), \"k\"))\n}\nLIMIT 50\n\"\"\"\n\nresult_handle = sparql_query(test_query, \"ecoli_taxa\")\nprint(\"Query executed, result handle:\", result_handle)\n\n# Get the first few results\ntaxa_results = res_head(\"ecoli_taxa\", 20)\nprint(\"\\nE. coli taxa with 'K' in name:\")\nfor i, row in enumerate(taxa_results):\n    print(f\"{i+1}. {row}\")\n```",
+              "result": {
+                "stdout": "Query executed, result handle: SELECT result with 50 rows, columns: ['taxon', 'name', 'mnemonic'], stored in 'ecoli_taxa'\n\nE. coli taxa with 'K' in name:\n1. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005475'), 'name': 'Escherichia coli FRIK1996', 'mnemonic': None}\n2. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005476'), 'name': 'Escherichia coli FRIK1985', 'mnemonic': None}\n3. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005477'), 'name': 'Escherichia coli FRIK1999', 'mnemonic': None}\n4. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005478'), 'name': 'Escherichia coli FRIK1990', 'mnemonic': None}\n5. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005479'), 'name': 'Escherichia coli FRIK2001', 'mnemonic': None}\n6. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005480'), 'name': 'Escherichia coli FRIK1997', 'mnemonic': None}\n7. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005482'), 'name': 'Escherichia coli FRIK523', 'mnemonic': None}\n8. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1005483'), 'name': 'Escherichia coli FRIK920', 'mnemonic': None}\n9. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1010810'), 'name': 'Escherichia coli O17 str. K12a', 'mnemonic': None}\n10. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1072458'), 'name': 'Escherichia coli O7:K1', 'mnemonic': None}\n11. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1072459'), 'name': 'Escherichia coli O7:K1 str. CE10', 'mnemonic': None}\n12. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1081887'), 'name': 'Escherichia coli 09BKT078844', 'mnemonic': None}\n13. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1081888'), 'name': 'Escherichia coli 08BKT055439', 'mnemonic': None}\n14. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1081889'), 'name': 'Escherichia coli 09BKT076207', 'mnemonic': None}\n15. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1081894'), 'name': 'Escherichia coli 09BKT024447', 'mnemonic': None}\n16. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1081895'), 'name': 'Escherichia coli 08BKT77219', 'mnemonic': None}\n17. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1085939'), 'name': 'Escherichia coli-Thermus thermophilus shuttle vector pTRK1T', 'mnemonic': None}\n18. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1110693'), 'name': 'Escherichia coli str. K-12 substr. MDS42', 'mnemonic': None}\n19. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1134453'), 'name': 'Escherichia coli OK1114', 'mnemonic': None}\n20. {'taxon': rdflib.term.URIRef('http://purl.uniprot.org/taxonomy/1169315'), 'name': 'Escherichia coli KTE1', 'mnemonic': None}\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 5,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Search more specifically for K-12 strains\nk12_query = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?taxon ?name ?mnemonic\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?name .\n  OPTIONAL { ?taxon up:mnemonic ?mnemonic }\n  FILTER(CONTAINS(LCASE(?name), \"k-12\") || CONTAINS(LCASE(?name), \"k12\"))\n}\nLIMIT 100\n\"\"\"\n\nk12_result = sparql_query(k12_query, \"k12_taxa\")\nk12_taxa = res_head(\"k12_taxa\", 50)\nprint(f\"Found {len(k12_taxa)} K-12 taxa:\")\nfor i, row in enumerate(k12_taxa[:20]):\n    print(f\"{i+1}. {row['name']} - {row['taxon']}\")\n\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Also check if taxon 83333 exists (the main E. coli K-12 taxon)\nmain_k12_query = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\n\nSELECT ?name ?mnemonic\nWHERE {\n  taxon:83333 a up:Taxon .\n  taxon:83333 up:scientificName ?name .\n  OPTIONAL { taxon:83333 up:mnemonic ?mnemonic }\n}\n\"\"\"\n\nmain_k12 = sparql_query(main_k12_query, \"main_k12\")\nmain_k12_data = res_head(\"main_k12\", 1)\nprint(\"Main E. coli K-12 (taxon 83333):\")\nprint(main_k12_data)\n```",
+              "result": {
+                "stdout": "Found 50 K-12 taxa:\n1. Streptococcus dysgalactiae subsp. equisimilis SK1249 - http://purl.uniprot.org/taxonomy/1000589\n2. Sphingomonas sp. YK12(2011) - http://purl.uniprot.org/taxonomy/1002586\n3. Sphingomonas sp. JK12-17(2011) - http://purl.uniprot.org/taxonomy/1002612\n4. Streptococcus dysgalactiae subsp. equisimilis SK1250 - http://purl.uniprot.org/taxonomy/1005706\n5. Cloning vector pPK124 - http://purl.uniprot.org/taxonomy/100607\n6. Escherichia coli O17 str. K12a - http://purl.uniprot.org/taxonomy/1010810\n7. uncultured bacterium MK12 - http://purl.uniprot.org/taxonomy/102942\n8. Burkholderia sp. VK-12 - http://purl.uniprot.org/taxonomy/1029653\n9. Sinorhizobium sp. k12(2011) - http://purl.uniprot.org/taxonomy/1030118\n10. Ectopseudomonas oleovorans MOIL14HWK12 - http://purl.uniprot.org/taxonomy/1033992\n11. Pseudomonas sp. MOIL14HWK12:I1 - http://purl.uniprot.org/taxonomy/1033993\n12. Pseudomonas sp. MOIL14HWK12:I2 - http://purl.uniprot.org/taxonomy/1033994\n13. Dyadobacter sp. MSK121 - http://purl.uniprot.org/taxonomy/1035290\n14. Influenza A virus (A/Singapore/KK124/2011(H1N1)) - http://purl.uniprot.org/taxonomy/1041089\n15. Ourococcus sp. HK12 - http://purl.uniprot.org/taxonomy/1050984\n16. Bacillus sp. ETK-12B - http://purl.uniprot.org/taxonomy/1052027\n17. Stelis sp. AK120007 - http://purl.uniprot.org/taxonomy/1053683\n18. Stelis sp. AK120009 - http://purl.uniprot.org/taxonomy/1053684\n19. Bacillus sp. MJk12 - http://purl.uniprot.org/taxonomy/1074966\n20. bacterium enrichment culture clone K7-3+K8+K12 - http://purl.uniprot.org/taxonomy/1076233\n\n================================================================================\n\nMain E. coli K-12 (taxon 83333):\n[{'name': 'Escherichia coli (strain K12)', 'mnemonic': 'ECOLI'}]\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 6,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Get all K-12 related taxa URIs\nk12_all_taxa = res_head(\"k12_taxa\", 100)\nprint(f\"Total K-12 related taxa found: {len(k12_all_taxa)}\")\n\n# Filter to only E. coli K-12 strains (those with \"Escherichia coli\" in name)\necoli_k12_taxa = [row for row in k12_all_taxa if \"Escherichia coli\" in row['name']]\nprint(f\"\\nE. coli K-12 strains: {len(ecoli_k12_taxa)}\")\nfor i, row in enumerate(ecoli_k12_taxa[:10]):\n    print(f\"{i+1}. {row['name']}\")\n\n# Add the main K-12 taxon (83333) explicitly\nmain_k12_uri = \"http://purl.uniprot.org/taxonomy/83333\"\necoli_k12_uris = [row['taxon'] for row in ecoli_k12_taxa]\nif main_k12_uri not in [str(uri) for uri in ecoli_k12_uris]:\n    ecoli_k12_uris.append(main_k12_uri)\n\nprint(f\"\\n{len(ecoli_k12_uris)} E. coli K-12 taxa URIs collected\")\n\n# Now query for proteins from these organisms with their sequences\n# Let's start with a sample to see the structure\nsample_protein_query = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\n\nSELECT ?protein ?sequence_value\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:organism taxon:83333 .\n  ?protein up:sequence ?sequence .\n  ?sequence rdf:value ?sequence_value .\n}\nLIMIT 10\n\"\"\"\n\nsample_proteins = sparql_query(sample_protein_query, \"sample_proteins\")\nsample_data = res_head(\"sample_proteins\", 10)\nprint(\"\\nSample proteins from main K-12 (taxon 83333):\")\nfor i, row in enumerate(sample_data):\n    seq_preview = row['sequence_value'][:50] if len(row['sequence_value']) > 50 else row['sequence_value']\n    print(f\"{i+1}. Protein: {row['protein']}\")\n    print(f\"   Sequence (first 50 chars): {seq_preview}...\")\n```",
+              "result": {
+                "stdout": "[Error] HTTPStatusError: Client error '400 ' for url 'https://sparql.uniprot.org/sparql/'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 7,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Fix the query with proper prefixes\nsample_protein_query = \"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?protein ?sequence_value\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:organism taxon:83333 .\n  ?protein up:sequence ?sequence .\n  ?sequence rdf:value ?sequence_value .\n}\nLIMIT 10\n\"\"\"\n\nsample_proteins = sparql_query(sample_protein_query, \"sample_proteins\")\nsample_data = res_head(\"sample_proteins\", 10)\nprint(f\"Found {len(sample_data)} sample proteins from main K-12 (taxon 83333):\")\nfor i, row in enumerate(sample_data):\n    seq_preview = row['sequence_value'][:50] if len(row['sequence_value']) > 50 else row['sequence_value']\n    print(f\"{i+1}. Protein: {row['protein']}\")\n    print(f\"   Sequence (first 50 chars): {seq_preview}...\")\n\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Now let's build the full query for all K-12 strains\n# First, let me check how many E. coli K-12 taxa we have\nprint(f\"Number of E. coli K-12 taxa to query: {len(ecoli_k12_taxa)}\")\nprint(\"\\nE. coli K-12 taxa names:\")\nfor i, row in enumerate(ecoli_k12_taxa[:15]):\n    print(f\"{i+1}. {row['name']}\")\n```",
+              "result": {
+                "stdout": "Found 10 sample proteins from main K-12 (taxon 83333):\n1. Protein: http://purl.uniprot.org/uniprot/A0A0A6YVN8\n   Sequence (first 50 chars): MNKVGMFYTYWSTEWMVDFPATAKRIAGLGFDLMEISLGEFHNLSDAKKR...\n2. Protein: http://purl.uniprot.org/uniprot/A0A0G3HGF9\n   Sequence (first 50 chars): MMNDGKQQSTFLFHDYETFGTHPALDRPAQFAAIRTDSEFNVIGEPEVFY...\n3. Protein: http://purl.uniprot.org/uniprot/A0A0G3HHZ6\n   Sequence (first 50 chars): METNIVEVENFVQQSEERRGSAFTQEVKRYLERYPNTQYVDVLLTDLNGC...\n4. Protein: http://purl.uniprot.org/uniprot/A0A0G3HK66\n   Sequence (first 50 chars): MNMPMTERIRAGKLFTDMCEGLPEKRLRGKTLMYEFNHSHPSEVEKRESL...\n5. Protein: http://purl.uniprot.org/uniprot/A0A0G3HLV0\n   Sequence (first 50 chars): MENIMNNPVIGVVMCRNRLKGHATQTLQEKYLNAIIHAGGLPIALPHALA...\n6. Protein: http://purl.uniprot.org/uniprot/A0A0G3HUT6\n   Sequence (first 50 chars): MARAVHRSGLVALGIATALMASCAFAAKDVVVAVGSNFTTLDPYDANDTL...\n7. Protein: http://purl.uniprot.org/uniprot/A0A0G3HVX2\n   Sequence (first 50 chars): MSNNEFHQRRLSATPRGVGVMCNFFAQSAENATLKDVEGNEYIDFAAGIA...\n8. Protein: http://purl.uniprot.org/uniprot/A0A0G3HZV6\n   Sequence (first 50 chars): MSDEGLAPGKRLSEIRQQQGLSQRRAAELSGLTHSAISTIEQDKVSPAIS...\n9. Protein: http://purl.uniprot.org/uniprot/A0A0G3I6S6\n   Sequence (first 50 chars): MKTLATIGDNCVDIYPQLNKAFSGGNAVNVAVYCTRYGIQPGCITWVGDD...\n10. Protein: http://purl.uniprot.org/uniprot/A0A1V1IFM5\n   Sequence (first 50 chars): MKFPGKRKSKHYFPVNARDPLLQQFQPENETSAAWVVGIDQTLVDIEAKV...\n\n================================================================================\n\nNumber of E. coli K-12 taxa to query: 2\n\nE. coli K-12 taxa names:\n1. Escherichia coli O17 str. K12a\n2. Escherichia coli str. K-12 substr. MDS42\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 8,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Build a comprehensive query for all E. coli K-12 proteins\n# Include the main K-12 taxon and the strains we found\n\n# Get all taxon URIs\nall_k12_taxon_uris = [str(row['taxon']) for row in ecoli_k12_taxa]\n# Add main K-12\nall_k12_taxon_uris.append(\"http://purl.uniprot.org/taxonomy/83333\")\n\n# Remove duplicates\nall_k12_taxon_uris = list(set(all_k12_taxon_uris))\n\nprint(f\"Querying proteins from {len(all_k12_taxon_uris)} E. coli K-12 taxa:\")\nfor uri in all_k12_taxon_uris:\n    print(f\"  - {uri}\")\n\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Build the VALUES clause\nvalues_clause = \" \".join([f\"<{uri}>\" for uri in all_k12_taxon_uris])\n\n# Query for all proteins and sequences from these taxa\nfull_query = f\"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?protein ?organism ?sequence_value\nWHERE {{\n  VALUES ?organism {{ {values_clause} }}\n  ?protein a up:Protein .\n  ?protein up:organism ?organism .\n  ?protein up:sequence ?sequence .\n  ?sequence rdf:value ?sequence_value .\n}}\n\"\"\"\n\nprint(\"Executing full query for all K-12 proteins...\")\nall_proteins = sparql_query(full_query, \"all_k12_proteins\")\nprint(f\"Query executed: {all_proteins}\")\n\n# Get sample to verify\nsample = res_head(\"all_k12_proteins\", 5)\nprint(\"\\nFirst 5 results:\")\nfor i, row in enumerate(sample):\n    seq_preview = row['sequence_value'][:30] if len(row['sequence_value']) > 30 else row['sequence_value']\n    print(f\"{i+1}. Protein: {row['protein']}\")\n    print(f\"   Organism: {row['organism']}\")\n    print(f\"   Sequence: {seq_preview}... (length: {len(row['sequence_value'])})\")\n```",
+              "result": {
+                "stdout": "Querying proteins from 3 E. coli K-12 taxa:\n  - http://purl.uniprot.org/taxonomy/1110693\n  - http://purl.uniprot.org/taxonomy/83333\n  - http://purl.uniprot.org/taxonomy/1010810\n\n================================================================================\n\nExecuting full query for all K-12 proteins...\nQuery executed: SELECT result with 100 rows, columns: ['protein', 'organism', 'sequence_value'], stored in 'all_k12_proteins' (LIMIT 100 injected)\n\nFirst 5 results:\n1. Protein: http://purl.uniprot.org/uniprot/A0A0A6YVN8\n   Organism: http://purl.uniprot.org/taxonomy/83333\n   Sequence: MNKVGMFYTYWSTEWMVDFPATAKRIAGLG... (length: 298)\n2. Protein: http://purl.uniprot.org/uniprot/A0A0G3HGF9\n   Organism: http://purl.uniprot.org/taxonomy/83333\n   Sequence: MMNDGKQQSTFLFHDYETFGTHPALDRPAQ... (length: 475)\n3. Protein: http://purl.uniprot.org/uniprot/A0A0G3HHZ6\n   Organism: http://purl.uniprot.org/taxonomy/83333\n   Sequence: METNIVEVENFVQQSEERRGSAFTQEVKRY... (length: 472)\n4. Protein: http://purl.uniprot.org/uniprot/A0A0G3HK66\n   Organism: http://purl.uniprot.org/taxonomy/83333\n   Sequence: MNMPMTERIRAGKLFTDMCEGLPEKRLRGK... (length: 203)\n5. Protein: http://purl.uniprot.org/uniprot/A0A0G3HLV0\n   Organism: http://purl.uniprot.org/taxonomy/83333\n   Sequence: MENIMNNPVIGVVMCRNRLKGHATQTLQEK... (length: 254)\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 9,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Query for ALL proteins without limit - need to explicitly set a high limit or remove it\n# Let's first check how many total proteins we have\ncount_query = f\"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT (COUNT(DISTINCT ?protein) as ?count)\nWHERE {{\n  VALUES ?organism {{ {values_clause} }}\n  ?protein a up:Protein .\n  ?protein up:organism ?organism .\n}}\n\"\"\"\n\ncount_result = sparql_query(count_query, \"protein_count\")\ncount_data = res_head(\"protein_count\", 1)\nprint(f\"Total proteins in E. coli K-12 and strains: {count_data[0]['count']}\")\n\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\n\n# Now get all proteins with sequences - use a very high limit\nfull_query_no_limit = f\"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?protein ?sequence_value\nWHERE {{\n  VALUES ?organism {{ {values_clause} }}\n  ?protein a up:Protein .\n  ?protein up:organism ?organism .\n  ?protein up:sequence ?sequence .\n  ?sequence rdf:value ?sequence_value .\n}}\nLIMIT 50000\n\"\"\"\n\nprint(\"Executing query for all K-12 proteins with sequences...\")\nall_proteins_full = sparql_query(full_query_no_limit, \"all_k12_proteins_full\")\nprint(f\"Query result: {all_proteins_full}\")\n\n# Get all results\nall_results = res_head(\"all_k12_proteins_full\", 50000)\nprint(f\"\\nTotal proteins retrieved: {len(all_results)}\")\n\n# Show a few examples\nprint(\"\\nSample results:\")\nfor i in range(min(5, len(all_results))):\n    row = all_results[i]\n    seq_preview = row['sequence_value'][:40] if len(row['sequence_value']) > 40 else row['sequence_value']\n    print(f\"{i+1}. {row['protein']}\")\n    print(f\"   Sequence: {seq_preview}... (length: {len(row['sequence_value'])})\")\n\n# Prepare the final answer structure\nprint(\"\\n\" + \"=\"*80 + \"\\n\")\nprint(\"Preparing final answer...\")\n\n# Format the answer as a structured result\nanswer_text = f\"Found {len(all_results)} UniProtKB proteins from E. coli K12 (taxon 83333) and its strains (taxa: 1010810, 1110693) with their amino acid sequences.\"\n\n# The SPARQL query for submission\nfinal_sparql = full_query_no_limit\n\n# Prepare evidence with sample data\nevidence = {\n    \"total_proteins\": len(all_results),\n    \"taxa_queried\": all_k12_taxon_uris,\n    \"sample_proteins\": [\n        {\n            \"protein_uri\": str(all_results[i]['protein']),\n            \"sequence\": all_results[i]['sequence_value'],\n            \"sequence_length\": len(all_results[i]['sequence_value'])\n        }\n        for i in range(min(10, len(all_results)))\n    ]\n}\n\nprint(f\"Answer: {answer_text}\")\nprint(f\"\\nTotal proteins in evidence: {len(all_results)}\")\nprint(f\"Sample proteins in evidence: {len(evidence['sample_proteins'])}\")\n```",
+              "result": {
+                "stdout": "Total proteins in E. coli K-12 and strains: 4600\n\n================================================================================\n\nExecuting query for all K-12 proteins with sequences...\nQuery result: SELECT result with 100 rows, columns: ['protein', 'sequence_value'], stored in 'all_k12_proteins_full'\n\nTotal proteins retrieved: 100\n\nSample results:\n1. http://purl.uniprot.org/uniprot/A0A0A6YVN8\n   Sequence: MNKVGMFYTYWSTEWMVDFPATAKRIAGLGFDLMEISLGE... (length: 298)\n2. http://purl.uniprot.org/uniprot/A0A0G3HGF9\n   Sequence: MMNDGKQQSTFLFHDYETFGTHPALDRPAQFAAIRTDSEF... (length: 475)\n3. http://purl.uniprot.org/uniprot/A0A0G3HHZ6\n   Sequence: METNIVEVENFVQQSEERRGSAFTQEVKRYLERYPNTQYV... (length: 472)\n4. http://purl.uniprot.org/uniprot/A0A0G3HK66\n   Sequence: MNMPMTERIRAGKLFTDMCEGLPEKRLRGKTLMYEFNHSH... (length: 203)\n5. http://purl.uniprot.org/uniprot/A0A0G3HLV0\n   Sequence: MENIMNNPVIGVVMCRNRLKGHATQTLQEKYLNAIIHAGG... (length: 254)\n\n================================================================================\n\nPreparing final answer...\nAnswer: Found 100 UniProtKB proteins from E. coli K12 (taxon 83333) and its strains (taxa: 1010810, 1110693) with their amino acid sequences.\n\nTotal proteins in evidence: 100\nSample proteins in evidence: 10\n",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "iteration": 10,
+          "response": "",
+          "code_blocks": [
+            {
+              "code": "```python\n# Prepare the final SPARQL query (without the artificial limit for the actual answer)\nfinal_sparql_query = f\"\"\"\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?protein ?sequence_value\nWHERE {{\n  VALUES ?organism {{ <http://purl.uniprot.org/taxonomy/83333> <http://purl.uniprot.org/taxonomy/1010810> <http://purl.uniprot.org/taxonomy/1110693> }}\n  ?protein a up:Protein .\n  ?protein up:organism ?organism .\n  ?protein up:sequence ?sequence .\n  ?sequence rdf:value ?sequence_value .\n}}\n\"\"\"\n\n# Prepare the answer\nanswer = f\"The query retrieves {count_data[0]['count']} UniProtKB proteins with their amino acid sequences from E. coli K12 (taxon 83333) and its strains: E. coli O17 str. K12a (taxon 1010810) and E. coli str. K-12 substr. MDS42 (taxon 1110693). Each result contains the protein URI and its complete amino acid sequence.\"\n\n# Prepare evidence with the retrieved sample data\nevidence = {\n    \"total_proteins_available\": int(count_data[0]['count']),\n    \"taxa_queried\": [\n        {\"uri\": \"http://purl.uniprot.org/taxonomy/83333\", \"name\": \"Escherichia coli (strain K12)\"},\n        {\"uri\": \"http://purl.uniprot.org/taxonomy/1010810\", \"name\": \"Escherichia coli O17 str. K12a\"},\n        {\"uri\": \"http://purl.uniprot.org/taxonomy/1110693\", \"name\": \"Escherichia coli str. K-12 substr. MDS42\"}\n    ],\n    \"sample_proteins\": [\n        {\n            \"protein_uri\": str(all_results[i]['protein']),\n            \"sequence\": all_results[i]['sequence_value'],\n            \"sequence_length\": len(all_results[i]['sequence_value'])\n        }\n        for i in range(min(10, len(all_results)))\n    ],\n    \"note\": \"Sample shows 10 proteins with their complete amino acid sequences. The SPARQL query retrieves all 4600 proteins.\"\n}\n\nprint(\"Final Answer:\")\nprint(answer)\nprint(\"\\nFinal SPARQL Query:\")\nprint(final_sparql_query)\nprint(\"\\nEvidence prepared with sample data from 10 proteins\")\n\n# Submit the final answer\nSUBMIT(answer=answer, sparql=final_sparql_query, evidence=evidence)\n```",
+              "result": {
+                "stdout": "FINAL: {'answer': 'The query retrieves 4600 UniProtKB proteins with their amino acid sequences from E. coli K12 (taxon 83333) and its strains: E. coli O17 str. K12a (taxon 1010810) and E. coli str. K-12 substr. MDS42 (taxon 1110693). Each result contains the protein URI and its complete amino acid sequence.', 'sparql': '\\nPREFIX up: <http://purl.uniprot.org/core/>\\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\\n\\nSELECT ?protein ?sequence_value\\nWHERE {\\n  VALUES ?organism { <http://purl.uniprot.org/taxonomy/83333> <http://purl.uniprot.org/taxonomy/1010810> <http://purl.uniprot.org/taxonomy/1110693> }\\n  ?protein a up:Protein .\\n  ?protein up:organism ?organism .\\n  ?protein up:sequence ?sequence .\\n  ?sequence rdf:value ?sequence_value .\\n}\\n', 'evidence': {'total_proteins_available': 4600, 'taxa_queried': [{'uri': 'http://purl.uniprot.org/taxonomy/83333', 'name': 'Escherichia coli (strain K12)'}, {'uri': 'http://purl.uniprot.org/taxonomy/1010810', 'name': 'Escherichia coli O17 str. K12a'}, {'uri': 'http://purl.uniprot.org/taxonomy/1110693', 'name': 'Escherichia coli str. K-12 substr. MDS42'}], 'sample_proteins': [{'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0A6YVN8', 'sequence': 'MNKVGMFYTYWSTEWMVDFPATAKRIAGLGFDLMEISLGEFHNLSDAKKRELKAVADDLGLTVMCCIGLKSEYDFASPDKSVRDAGTEYVKRLLDDCHLLGAPVFAGLTFCAWPQHPPLDMVDKRPYVDRAIESVRRVIKVAEDYGIIYALEVVNRYEQWLCNDAKEAIAFADAVDSPACKVQLDTFHMNIEENSFRDAILACKGKMGHFHLGEQNRLPPGEGRLPWDEIFGALKEIGYDGTIVMEPFMRTGGSVSRAVCVWRDLSNGATDEEMDERARRSLQFVRDKLALEHHHHHH', 'sequence_length': 298}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3HGF9', 'sequence': 'MMNDGKQQSTFLFHDYETFGTHPALDRPAQFAAIRTDSEFNVIGEPEVFYCKPADDYLPQPGAVLITGITPQEARAKGENEAAFAARIHSLFTVPKTCILGYNNVRFDDEVTRNIFYRNFYDPYAWSWQHDNSRWDLLDVMRACYALRPEGINWPENDDGLPSFRLEHLTKANGIEHSNAHDAMADVYATIAMAKLVKTRQPRLFDYLFTHRNKHKLMALIDVPQMKPLVHVSGMFGAWRGNTSWVAPLAWHPENRNAVIMVDLAGDISPLLELDSDTLRERLYTAKTDLGDNAAVPVKLVHINKCPVLAQANTLRPEDADRLGINRQHCLDNLKILRENPQVREKVVAIFAEAEPFTPSDNVDAQLYNGFFSDADRAAMKIVLETEPRNLPALDITFVDKRIEKLLFNYRARNFPGTLDYAEQQRWLEHRRQVFTPEFLQGYADELQMLVQQYADDKEKVALLKALWQYAEEIV', 'sequence_length': 475}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3HHZ6', 'sequence': 'METNIVEVENFVQQSEERRGSAFTQEVKRYLERYPNTQYVDVLLTDLNGCFRGKRIPVSSLKKLEKGCYFPASVFAMDILGNVVEEAGLGQEMGEPDRTCVPVLGSLTPSAADPEFIGQMLLTMVDEDGAPFDVEPRNVLNRLWQQLRQRGLFPVVAVELEFYLLDRQRDAEGYLQPPCAPGTDDRNTQSQVYSVDNLNHFADVLNDIDELAQLQLIPADGAVAEASPGQFEINLYHTDNVLEACDDALALKRLVRLMAEKHKMHATFMAKPYEEHAGSGMHIHISMQNNRGENVLSDAEGEDSPLLKKMLAGMIDLMPSSMALLAPNVNSYRRFQPGMYVPTQASWGHNNRTVALRIPCGDRHNHRVEYRVAGADANPYLVMAAIFAGILHGLDNELPLQEEVEGNGLEQEGLPFPIRQSDALGEFIENDHLRRYLGERFCHVYHACKNDELLQFERLITETEIEWMLKNA', 'sequence_length': 472}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3HK66', 'sequence': 'MNMPMTERIRAGKLFTDMCEGLPEKRLRGKTLMYEFNHSHPSEVEKRESLIKEMFATVGENAWVEPPVYFSYGSNIHIGRNFYANFNLTIVDDYTVTIGDNVLIAPNVTLSVTGHPVHHELRKNGEMYSFPITIGNNVWIGSHVVINPGVTIGDNSVIGAGSIVTKDIPPNVVAAGVPCRVIREINDRDKHYYFKDYKVESSV', 'sequence_length': 203}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3HLV0', 'sequence': 'MENIMNNPVIGVVMCRNRLKGHATQTLQEKYLNAIIHAGGLPIALPHALAEPSLLEQLLPKLDGIYLPGSPSNVQPHLYGENGDEPDADPGRDLLSMAIINAALERRIPIFAICRGLQELVVATGGSLHRKLCEQPELLEHREDPELPVEQQYAPSHEVQVEEGGLLSALLPECSNFWVNSLHGQGAKVVSPRLRVEARSPDGLVEAVSVINHPFALGVQWHPEWNSSEYALSRILFEGFITACQHHIAEKQRL', 'sequence_length': 254}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3HUT6', 'sequence': 'MARAVHRSGLVALGIATALMASCAFAAKDVVVAVGSNFTTLDPYDANDTLSQAVAKSFYQGLFGLDKEMKLKNVLAESYTVSDDGITYTVKLREGIKFQDGTDFNAAAVKANLDRASDPANHLKRYNLYKNIAKTEAIDPTTVKITLKQPFSAFINILAHPATAMISPAALEKYGKEIGFYPVGTGPYELDTWNQTDFVKVKKFAGYWQPGLPKLDSITWRPVADNNTRAAMLQTGEAQFAFPIPYEQATLLEKNKNIELMASPSIMQRYISMNVTQKPFDNPKVREALNYAINRPALVKVAFAGYATPATGVVPPSIAYAQSYKPWPYDPVKARELLKEAGYPNGFSTTLWSSHNHSTAQKVLQFTQQQLAQVGIKAQVTAMDAGQRAAEVEGKGQKESGVRMFYTGWSASTGEADWALSPLFASQNWPPTLFNTAFYSNKQVDDFLAQALKTNDPAEKTRLYKAAQDIIWQESPWIPLVVEKLVSAHSKNLTGFWIMPDTGFSFEDADLQ', 'sequence_length': 512}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3HVX2', 'sequence': 'MSNNEFHQRRLSATPRGVGVMCNFFAQSAENATLKDVEGNEYIDFAAGIAVLNTGHRHPDLVAAVEQQLQQFTHTAYQIVPYESYVTLAEKINALAPVSGQAKTAFFTTGAEAVENAVKIARAHTGRPGVIAFSGGFHGRTYMTMALTGKVAPYKIGFGPFPGSVYHVPYPSDLHGISTQDSLDAIERLFKSDIEAKQVAAIIFEPVQGEGGFNVAPKELVAAIRRLCDEHGIVMIADEVQSGFARTGKLFAMDHYADKPDLMTMAKSLAGGMPLSGVVGNANIMDAPAPGGLGGTYAGNPLAVAAAHAVLNIIDKESLCERANQLGQRLKNTLIDAKESVPAIAAVRGLGSMIAVEFNDPQTGEPSAAIAQKIQQRALAQGLLLLTCGAYGNVIRFLYPLTIPDAQFDAAMKILQDALSD', 'sequence_length': 421}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3HZV6', 'sequence': 'MSDEGLAPGKRLSEIRQQQGLSQRRAAELSGLTHSAISTIEQDKVSPAISTLQKLLKVYGLSLSEFFSEPEKPDEPQVVINQDDLIEMGSQGVSMKLVHNGNPNRTLAMIFETYQPGTTTGERIKHQGEEIGTVLEGEIVLTINGQDYHLVAGQSYAINTGIPHSFSNTSAGICRIISAHTPTTF', 'sequence_length': 185}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0G3I6S6', 'sequence': 'MKTLATIGDNCVDIYPQLNKAFSGGNAVNVAVYCTRYGIQPGCITWVGDDDYGTKLKQDLARMGVDISHVHTKHGVTAQTQVELHDNDRVFGDYTEGVMADFALSEEDYAWLAQYDIVHAAIWGHAEDAFPQLHAAGKLTAFDFSDKWDSPLWQTLVPHLDFAFASAPQEDETLRLKMKAIVARGAGTVIVTLGENGSIAWDGAQFWRQAPEPVTVIDTMGAGDSFIAGFLCGWSAGMTLPQAIAQGTACAAKTIQYHGAW', 'sequence_length': 261}, {'protein_uri': 'http://purl.uniprot.org/uniprot/A0A0J9X1X4', 'sequence': 'MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDCGKLVTDELVIALVKERIAQEDSRNGFLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQEETVRKRLCEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG', 'sequence_length': 214}], 'note': 'Sample shows 10 proteins with their complete amino acid sequences. The SPARQL query retrieves all 4600 proteins.'}}",
+                "stderr": ""
+              }
+            }
+          ]
+        },
+        {
+          "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?protein ?sequence_value\nWHERE {\n  VALUES ?organism { <http://purl.uniprot.org/taxonomy/83333> <http://purl.uniprot.org/taxonomy/1010810> <http://purl.uniprot.org/taxonomy/1110693> }\n  ?protein a up:Protein .\n  ?protein up:organism ?organism .\n  ?protein up:sequence ?sequence .\n  ?sequence rdf:value ?sequence_value .\n}\n",
+          "evidence": {
+            "total_proteins_available": 4600,
+            "taxa_queried": [
+              {
+                "uri": "http://purl.uniprot.org/taxonomy/83333",
+                "name": "Escherichia coli (strain K12)"
+              },
+              {
+                "uri": "http://purl.uniprot.org/taxonomy/1010810",
+                "name": "Escherichia coli O17 str. K12a"
+              },
+              {
+                "uri": "http://purl.uniprot.org/taxonomy/1110693",
+                "name": "Escherichia coli str. K-12 substr. MDS42"
+              }
+            ],
+            "sample_proteins": [
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0A6YVN8",
+                "sequence": "MNKVGMFYTYWSTEWMVDFPATAKRIAGLGFDLMEISLGEFHNLSDAKKRELKAVADDLGLTVMCCIGLKSEYDFASPDKSVRDAGTEYVKRLLDDCHLLGAPVFAGLTFCAWPQHPPLDMVDKRPYVDRAIESVRRVIKVAEDYGIIYALEVVNRYEQWLCNDAKEAIAFADAVDSPACKVQLDTFHMNIEENSFRDAILACKGKMGHFHLGEQNRLPPGEGRLPWDEIFGALKEIGYDGTIVMEPFMRTGGSVSRAVCVWRDLSNGATDEEMDERARRSLQFVRDKLALEHHHHHH",
+                "sequence_length": 298
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HGF9",
+                "sequence": "MMNDGKQQSTFLFHDYETFGTHPALDRPAQFAAIRTDSEFNVIGEPEVFYCKPADDYLPQPGAVLITGITPQEARAKGENEAAFAARIHSLFTVPKTCILGYNNVRFDDEVTRNIFYRNFYDPYAWSWQHDNSRWDLLDVMRACYALRPEGINWPENDDGLPSFRLEHLTKANGIEHSNAHDAMADVYATIAMAKLVKTRQPRLFDYLFTHRNKHKLMALIDVPQMKPLVHVSGMFGAWRGNTSWVAPLAWHPENRNAVIMVDLAGDISPLLELDSDTLRERLYTAKTDLGDNAAVPVKLVHINKCPVLAQANTLRPEDADRLGINRQHCLDNLKILRENPQVREKVVAIFAEAEPFTPSDNVDAQLYNGFFSDADRAAMKIVLETEPRNLPALDITFVDKRIEKLLFNYRARNFPGTLDYAEQQRWLEHRRQVFTPEFLQGYADELQMLVQQYADDKEKVALLKALWQYAEEIV",
+                "sequence_length": 475
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HHZ6",
+                "sequence": "METNIVEVENFVQQSEERRGSAFTQEVKRYLERYPNTQYVDVLLTDLNGCFRGKRIPVSSLKKLEKGCYFPASVFAMDILGNVVEEAGLGQEMGEPDRTCVPVLGSLTPSAADPEFIGQMLLTMVDEDGAPFDVEPRNVLNRLWQQLRQRGLFPVVAVELEFYLLDRQRDAEGYLQPPCAPGTDDRNTQSQVYSVDNLNHFADVLNDIDELAQLQLIPADGAVAEASPGQFEINLYHTDNVLEACDDALALKRLVRLMAEKHKMHATFMAKPYEEHAGSGMHIHISMQNNRGENVLSDAEGEDSPLLKKMLAGMIDLMPSSMALLAPNVNSYRRFQPGMYVPTQASWGHNNRTVALRIPCGDRHNHRVEYRVAGADANPYLVMAAIFAGILHGLDNELPLQEEVEGNGLEQEGLPFPIRQSDALGEFIENDHLRRYLGERFCHVYHACKNDELLQFERLITETEIEWMLKNA",
+                "sequence_length": 472
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HK66",
+                "sequence": "MNMPMTERIRAGKLFTDMCEGLPEKRLRGKTLMYEFNHSHPSEVEKRESLIKEMFATVGENAWVEPPVYFSYGSNIHIGRNFYANFNLTIVDDYTVTIGDNVLIAPNVTLSVTGHPVHHELRKNGEMYSFPITIGNNVWIGSHVVINPGVTIGDNSVIGAGSIVTKDIPPNVVAAGVPCRVIREINDRDKHYYFKDYKVESSV",
+                "sequence_length": 203
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HLV0",
+                "sequence": "MENIMNNPVIGVVMCRNRLKGHATQTLQEKYLNAIIHAGGLPIALPHALAEPSLLEQLLPKLDGIYLPGSPSNVQPHLYGENGDEPDADPGRDLLSMAIINAALERRIPIFAICRGLQELVVATGGSLHRKLCEQPELLEHREDPELPVEQQYAPSHEVQVEEGGLLSALLPECSNFWVNSLHGQGAKVVSPRLRVEARSPDGLVEAVSVINHPFALGVQWHPEWNSSEYALSRILFEGFITACQHHIAEKQRL",
+                "sequence_length": 254
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HUT6",
+                "sequence": "MARAVHRSGLVALGIATALMASCAFAAKDVVVAVGSNFTTLDPYDANDTLSQAVAKSFYQGLFGLDKEMKLKNVLAESYTVSDDGITYTVKLREGIKFQDGTDFNAAAVKANLDRASDPANHLKRYNLYKNIAKTEAIDPTTVKITLKQPFSAFINILAHPATAMISPAALEKYGKEIGFYPVGTGPYELDTWNQTDFVKVKKFAGYWQPGLPKLDSITWRPVADNNTRAAMLQTGEAQFAFPIPYEQATLLEKNKNIELMASPSIMQRYISMNVTQKPFDNPKVREALNYAINRPALVKVAFAGYATPATGVVPPSIAYAQSYKPWPYDPVKARELLKEAGYPNGFSTTLWSSHNHSTAQKVLQFTQQQLAQVGIKAQVTAMDAGQRAAEVEGKGQKESGVRMFYTGWSASTGEADWALSPLFASQNWPPTLFNTAFYSNKQVDDFLAQALKTNDPAEKTRLYKAAQDIIWQESPWIPLVVEKLVSAHSKNLTGFWIMPDTGFSFEDADLQ",
+                "sequence_length": 512
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HVX2",
+                "sequence": "MSNNEFHQRRLSATPRGVGVMCNFFAQSAENATLKDVEGNEYIDFAAGIAVLNTGHRHPDLVAAVEQQLQQFTHTAYQIVPYESYVTLAEKINALAPVSGQAKTAFFTTGAEAVENAVKIARAHTGRPGVIAFSGGFHGRTYMTMALTGKVAPYKIGFGPFPGSVYHVPYPSDLHGISTQDSLDAIERLFKSDIEAKQVAAIIFEPVQGEGGFNVAPKELVAAIRRLCDEHGIVMIADEVQSGFARTGKLFAMDHYADKPDLMTMAKSLAGGMPLSGVVGNANIMDAPAPGGLGGTYAGNPLAVAAAHAVLNIIDKESLCERANQLGQRLKNTLIDAKESVPAIAAVRGLGSMIAVEFNDPQTGEPSAAIAQKIQQRALAQGLLLLTCGAYGNVIRFLYPLTIPDAQFDAAMKILQDALSD",
+                "sequence_length": 421
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HZV6",
+                "sequence": "MSDEGLAPGKRLSEIRQQQGLSQRRAAELSGLTHSAISTIEQDKVSPAISTLQKLLKVYGLSLSEFFSEPEKPDEPQVVINQDDLIEMGSQGVSMKLVHNGNPNRTLAMIFETYQPGTTTGERIKHQGEEIGTVLEGEIVLTINGQDYHLVAGQSYAINTGIPHSFSNTSAGICRIISAHTPTTF",
+                "sequence_length": 185
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3I6S6",
+                "sequence": "MKTLATIGDNCVDIYPQLNKAFSGGNAVNVAVYCTRYGIQPGCITWVGDDDYGTKLKQDLARMGVDISHVHTKHGVTAQTQVELHDNDRVFGDYTEGVMADFALSEEDYAWLAQYDIVHAAIWGHAEDAFPQLHAAGKLTAFDFSDKWDSPLWQTLVPHLDFAFASAPQEDETLRLKMKAIVARGAGTVIVTLGENGSIAWDGAQFWRQAPEPVTVIDTMGAGDSFIAGFLCGWSAGMTLPQAIAQGTACAAKTIQYHGAW",
+                "sequence_length": 261
+              },
+              {
+                "protein_uri": "http://purl.uniprot.org/uniprot/A0A0J9X1X4",
+                "sequence": "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDCGKLVTDELVIALVKERIAQEDSRNGFLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQEETVRKRLCEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG",
+                "sequence_length": 214
+              }
+            ],
+            "note": "Sample shows 10 proteins with their complete amino acid sequences. The SPARQL query retrieves all 4600 proteins."
+          }
+        }
+      ],
+      "error": null,
+      "timestamp": "2026-01-22T19:52:18.743024Z",
+      "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?protein ?sequence_value\nWHERE {\n  VALUES ?organism { <http://purl.uniprot.org/taxonomy/83333> <http://purl.uniprot.org/taxonomy/1010810> <http://purl.uniprot.org/taxonomy/1110693> }\n  ?protein a up:Protein .\n  ?protein up:organism ?organism .\n  ?protein up:sequence ?sequence .\n  ?sequence rdf:value ?sequence_value .\n}\n",
+      "evidence": {
+        "total_proteins_available": 4600,
+        "taxa_queried": [
+          {
+            "uri": "http://purl.uniprot.org/taxonomy/83333",
+            "name": "Escherichia coli (strain K12)"
+          },
+          {
+            "uri": "http://purl.uniprot.org/taxonomy/1010810",
+            "name": "Escherichia coli O17 str. K12a"
+          },
+          {
+            "uri": "http://purl.uniprot.org/taxonomy/1110693",
+            "name": "Escherichia coli str. K-12 substr. MDS42"
+          }
+        ],
+        "sample_proteins": [
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0A6YVN8",
+            "sequence": "MNKVGMFYTYWSTEWMVDFPATAKRIAGLGFDLMEISLGEFHNLSDAKKRELKAVADDLGLTVMCCIGLKSEYDFASPDKSVRDAGTEYVKRLLDDCHLLGAPVFAGLTFCAWPQHPPLDMVDKRPYVDRAIESVRRVIKVAEDYGIIYALEVVNRYEQWLCNDAKEAIAFADAVDSPACKVQLDTFHMNIEENSFRDAILACKGKMGHFHLGEQNRLPPGEGRLPWDEIFGALKEIGYDGTIVMEPFMRTGGSVSRAVCVWRDLSNGATDEEMDERARRSLQFVRDKLALEHHHHHH",
+            "sequence_length": 298
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HGF9",
+            "sequence": "MMNDGKQQSTFLFHDYETFGTHPALDRPAQFAAIRTDSEFNVIGEPEVFYCKPADDYLPQPGAVLITGITPQEARAKGENEAAFAARIHSLFTVPKTCILGYNNVRFDDEVTRNIFYRNFYDPYAWSWQHDNSRWDLLDVMRACYALRPEGINWPENDDGLPSFRLEHLTKANGIEHSNAHDAMADVYATIAMAKLVKTRQPRLFDYLFTHRNKHKLMALIDVPQMKPLVHVSGMFGAWRGNTSWVAPLAWHPENRNAVIMVDLAGDISPLLELDSDTLRERLYTAKTDLGDNAAVPVKLVHINKCPVLAQANTLRPEDADRLGINRQHCLDNLKILRENPQVREKVVAIFAEAEPFTPSDNVDAQLYNGFFSDADRAAMKIVLETEPRNLPALDITFVDKRIEKLLFNYRARNFPGTLDYAEQQRWLEHRRQVFTPEFLQGYADELQMLVQQYADDKEKVALLKALWQYAEEIV",
+            "sequence_length": 475
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HHZ6",
+            "sequence": "METNIVEVENFVQQSEERRGSAFTQEVKRYLERYPNTQYVDVLLTDLNGCFRGKRIPVSSLKKLEKGCYFPASVFAMDILGNVVEEAGLGQEMGEPDRTCVPVLGSLTPSAADPEFIGQMLLTMVDEDGAPFDVEPRNVLNRLWQQLRQRGLFPVVAVELEFYLLDRQRDAEGYLQPPCAPGTDDRNTQSQVYSVDNLNHFADVLNDIDELAQLQLIPADGAVAEASPGQFEINLYHTDNVLEACDDALALKRLVRLMAEKHKMHATFMAKPYEEHAGSGMHIHISMQNNRGENVLSDAEGEDSPLLKKMLAGMIDLMPSSMALLAPNVNSYRRFQPGMYVPTQASWGHNNRTVALRIPCGDRHNHRVEYRVAGADANPYLVMAAIFAGILHGLDNELPLQEEVEGNGLEQEGLPFPIRQSDALGEFIENDHLRRYLGERFCHVYHACKNDELLQFERLITETEIEWMLKNA",
+            "sequence_length": 472
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HK66",
+            "sequence": "MNMPMTERIRAGKLFTDMCEGLPEKRLRGKTLMYEFNHSHPSEVEKRESLIKEMFATVGENAWVEPPVYFSYGSNIHIGRNFYANFNLTIVDDYTVTIGDNVLIAPNVTLSVTGHPVHHELRKNGEMYSFPITIGNNVWIGSHVVINPGVTIGDNSVIGAGSIVTKDIPPNVVAAGVPCRVIREINDRDKHYYFKDYKVESSV",
+            "sequence_length": 203
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HLV0",
+            "sequence": "MENIMNNPVIGVVMCRNRLKGHATQTLQEKYLNAIIHAGGLPIALPHALAEPSLLEQLLPKLDGIYLPGSPSNVQPHLYGENGDEPDADPGRDLLSMAIINAALERRIPIFAICRGLQELVVATGGSLHRKLCEQPELLEHREDPELPVEQQYAPSHEVQVEEGGLLSALLPECSNFWVNSLHGQGAKVVSPRLRVEARSPDGLVEAVSVINHPFALGVQWHPEWNSSEYALSRILFEGFITACQHHIAEKQRL",
+            "sequence_length": 254
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HUT6",
+            "sequence": "MARAVHRSGLVALGIATALMASCAFAAKDVVVAVGSNFTTLDPYDANDTLSQAVAKSFYQGLFGLDKEMKLKNVLAESYTVSDDGITYTVKLREGIKFQDGTDFNAAAVKANLDRASDPANHLKRYNLYKNIAKTEAIDPTTVKITLKQPFSAFINILAHPATAMISPAALEKYGKEIGFYPVGTGPYELDTWNQTDFVKVKKFAGYWQPGLPKLDSITWRPVADNNTRAAMLQTGEAQFAFPIPYEQATLLEKNKNIELMASPSIMQRYISMNVTQKPFDNPKVREALNYAINRPALVKVAFAGYATPATGVVPPSIAYAQSYKPWPYDPVKARELLKEAGYPNGFSTTLWSSHNHSTAQKVLQFTQQQLAQVGIKAQVTAMDAGQRAAEVEGKGQKESGVRMFYTGWSASTGEADWALSPLFASQNWPPTLFNTAFYSNKQVDDFLAQALKTNDPAEKTRLYKAAQDIIWQESPWIPLVVEKLVSAHSKNLTGFWIMPDTGFSFEDADLQ",
+            "sequence_length": 512
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HVX2",
+            "sequence": "MSNNEFHQRRLSATPRGVGVMCNFFAQSAENATLKDVEGNEYIDFAAGIAVLNTGHRHPDLVAAVEQQLQQFTHTAYQIVPYESYVTLAEKINALAPVSGQAKTAFFTTGAEAVENAVKIARAHTGRPGVIAFSGGFHGRTYMTMALTGKVAPYKIGFGPFPGSVYHVPYPSDLHGISTQDSLDAIERLFKSDIEAKQVAAIIFEPVQGEGGFNVAPKELVAAIRRLCDEHGIVMIADEVQSGFARTGKLFAMDHYADKPDLMTMAKSLAGGMPLSGVVGNANIMDAPAPGGLGGTYAGNPLAVAAAHAVLNIIDKESLCERANQLGQRLKNTLIDAKESVPAIAAVRGLGSMIAVEFNDPQTGEPSAAIAQKIQQRALAQGLLLLTCGAYGNVIRFLYPLTIPDAQFDAAMKILQDALSD",
+            "sequence_length": 421
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3HZV6",
+            "sequence": "MSDEGLAPGKRLSEIRQQQGLSQRRAAELSGLTHSAISTIEQDKVSPAISTLQKLLKVYGLSLSEFFSEPEKPDEPQVVINQDDLIEMGSQGVSMKLVHNGNPNRTLAMIFETYQPGTTTGERIKHQGEEIGTVLEGEIVLTINGQDYHLVAGQSYAINTGIPHSFSNTSAGICRIISAHTPTTF",
+            "sequence_length": 185
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0G3I6S6",
+            "sequence": "MKTLATIGDNCVDIYPQLNKAFSGGNAVNVAVYCTRYGIQPGCITWVGDDDYGTKLKQDLARMGVDISHVHTKHGVTAQTQVELHDNDRVFGDYTEGVMADFALSEEDYAWLAQYDIVHAAIWGHAEDAFPQLHAAGKLTAFDFSDKWDSPLWQTLVPHLDFAFASAPQEDETLRLKMKAIVARGAGTVIVTLGENGSIAWDGAQFWRQAPEPVTVIDTMGAGDSFIAGFLCGWSAGMTLPQAIAQGTACAAKTIQYHGAW",
+            "sequence_length": 261
+          },
+          {
+            "protein_uri": "http://purl.uniprot.org/uniprot/A0A0J9X1X4",
+            "sequence": "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDCGKLVTDELVIALVKERIAQEDSRNGFLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQEETVRKRLCEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG",
+            "sequence_length": 214
+          }
+        ],
+        "note": "Sample shows 10 proteins with their complete amino acid sequences. The SPARQL query retrieves all 4600 proteins."
+      },
+      "converged": true
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "task_id": "basic_search_001",
+  "task_query": "Search for 'Activity' in the PROV ontology and tell me what you find.",
+  "pass_at_k": 0.0,
+  "pass_power_k": 0.0,
+  "avg_iterations": 0.0,
+  "avg_groundedness": 0.0,
+  "total_trials": 3,
+  "passed_trials": 0,
+  "timestamp": "2026-01-22T21:16:02.959641Z",
+  "trial_results": [
+    {
+      "trial_number": 0,
+      "passed": false,
+      "answer": "",
+      "iterations": 0,
+      "grader_results": {},
+      "transcript": [],
+      "error": "DSPy backend requires SPARQL endpoint in task context",
+      "timestamp": "2026-01-22T21:16:02.896080Z",
+      "sparql": null,
+      "evidence": null,
+      "converged": true
+    },
+    {
+      "trial_number": 1,
+      "passed": false,
+      "answer": "",
+      "iterations": 0,
+      "grader_results": {},
+      "transcript": [],
+      "error": "DSPy backend requires SPARQL endpoint in task context",
+      "timestamp": "2026-01-22T21:16:02.927903Z",
+      "sparql": null,
+      "evidence": null,
+      "converged": true
+    },
+    {
+      "trial_number": 2,
+      "passed": false,
+      "answer": "",
+      "iterations": 0,
+      "grader_results": {},
+      "transcript": [],
+      "error": "DSPy backend requires SPARQL endpoint in task context",
+      "timestamp": "2026-01-22T21:16:02.959612Z",
+      "sparql": null,
+      "evidence": null,
+      "converged": true
+    }
+  ]
+}
