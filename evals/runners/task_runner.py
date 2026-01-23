@@ -2,6 +2,7 @@
 
 import math
 import json
+import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
@@ -17,6 +18,7 @@ from ..graders import (
     SparqlStructuralGrader,
     AffordanceUtilizationGrader,
     OutcomeVerificationGrader,
+    LLMJudgeGrader,
 )
 from ..graders.base import GradeResult
 
@@ -36,6 +38,10 @@ class TrialResult:
     sparql: Optional[str] = None
     evidence: Optional[dict] = None
     converged: bool = True
+    # Think-Act-Verify-Reflect reasoning fields
+    thinking: Optional[str] = None
+    verification: Optional[str] = None
+    reflection: Optional[str] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -127,15 +133,24 @@ class TaskRunner:
         'sparql_structural': SparqlStructuralGrader,
         'affordance_utilization': AffordanceUtilizationGrader,
         'outcome_verification': OutcomeVerificationGrader,
+        'llm_judge': LLMJudgeGrader,
     }
 
     def __init__(self, config: dict = None):
         """Initialize task runner.
 
         Args:
-            config: Optional global configuration dict
+            config: Optional global configuration dict (keys: enable_mlflow, memory_db_path, enable_memory)
         """
         self.config = config or {}
+
+        # Initialize memory backend if enabled
+        self.memory_backend = None
+        if self.config.get('enable_memory', False):
+            from rlm_runtime.memory import SQLiteMemoryBackend
+            memory_db = self.config.get('memory_db_path', 'evals/memory.db')
+            self.memory_backend = SQLiteMemoryBackend(memory_db)
+            print(f"ReasoningBank enabled: {memory_db}")
 
     def run_task(self, task_path: Path, num_trials: int = None) -> EvalResult:
         """Run all trials for a task.
@@ -267,6 +282,9 @@ class TaskRunner:
             sparql = None
             evidence = None
             converged = True
+            thinking = None
+            verification = None
+            reflection = None
 
             if use_dspy:
                 # Run DSPy RLM - returns DSPyRLMResult with full artifacts
@@ -278,6 +296,16 @@ class TaskRunner:
                 sparql = result.sparql
                 evidence = result.evidence
                 converged = result.converged
+                # Capture Think-Act-Verify-Reflect reasoning fields
+                thinking = result.thinking
+                verification = result.verification
+                reflection = result.reflection
+                # Add extracted artifacts to transcript for graders
+                if sparql or evidence:
+                    transcript.append({
+                        "sparql": sparql,
+                        "evidence": evidence if evidence else {}
+                    })
             else:
                 # Run legacy claudette-backed RLM
                 answer, iterations = self._execute_rlm(task, ns, context)
@@ -308,7 +336,10 @@ class TaskRunner:
                 transcript=transcript,
                 sparql=sparql,
                 evidence=evidence,
-                converged=converged
+                converged=converged,
+                thinking=thinking,
+                verification=verification,
+                reflection=reflection
             )
 
         except Exception as e:
@@ -354,24 +385,51 @@ class TaskRunner:
         context_parts = [
             "You are constructing and executing SPARQL queries.",
             "Use progressive disclosure: inspect schema first, then run bounded queries.",
+            "",
+            "## Strategy",
+            "1. If local ontology is loaded, use query() to explore schema FIRST (instant, no network)",
+            "2. Then test simple queries on remote endpoint",
+            "3. Refine iteratively based on results",
+            "4. Submit final answer with SUBMIT(answer='...', sparql='...', evidence={...})",
         ]
+
+        if ontology_summaries:
+            context_parts.extend(["", "## Loaded ontology summaries:"])
+            context_parts.extend(ontology_summaries)
+            context_parts.extend([
+                "",
+                "Use query() function to explore these local ontologies before querying remote endpoint.",
+                "Example: query(\"SELECT ?class WHERE { ?class a owl:Class } LIMIT 10\", name='local_schema')"
+            ])
 
         if endpoint:
             context_parts.extend([
                 "",
-                f"SPARQL endpoint: {endpoint}",
-                "You can call sparql_query(query, max_results=..., name=..., timeout=...) to execute remote SPARQL.",
+                f"## SPARQL endpoint: {endpoint}",
+                "Call sparql_query(query, max_results=100, name='result_name') to execute remote SPARQL.",
                 "Remote queries may include GRAPH and SERVICE clauses when needed.",
+                "Note: Remote queries are slower than local ontology queries. Use local first for schema exploration.",
             ])
 
-        if ontology_summaries:
-            context_parts.extend(["", "Loaded ontology summaries:"])
-            context_parts.extend(ontology_summaries)
+        # Add SUBMIT syntax examples
+        context_parts.extend([
+            "",
+            "## Submitting Results",
+            "When ready, use SUBMIT with keyword arguments (NOT positional):",
+            "",
+            "SUBMIT(",
+            "    answer='Your natural language answer explaining what was found',",
+            "    sparql='PREFIX ... SELECT ... WHERE { ... }',",
+            "    evidence={'key': 'value', 'sample_results': [...]}",
+            ")",
+            "",
+            "IMPORTANT: SUBMIT requires keyword arguments. Do NOT use: SUBMIT(answer, sparql, evidence)",
+        ])
 
         # Add task-specific context hints (if present)
         hints = ctx.get('hints')
         if hints:
-            context_parts.extend(["", "Hints:", str(hints)])
+            context_parts.extend(["", "## Task Hints:", str(hints)])
 
         return ns, "\n".join(context_parts)
 
@@ -443,6 +501,30 @@ class TaskRunner:
             timeout=timeout
         )
 
+        # Add local ontology tools if ontologies were loaded
+        ontologies = ctx.get('ontologies', []) or []
+        if ontologies:
+            from rlm_runtime.tools import make_ontology_tools
+
+            for onto in ontologies:
+                name = onto.get('name', 'ont')
+                meta = ns.get(f"{name}_meta")
+                if meta is not None:
+                    # Get local ontology query tools
+                    local_tools = make_ontology_tools(meta, include_sparql=True)
+
+                    # Rename sparql_select to query to match prompt guidance
+                    # (prompt says "use query() to explore local ontologies")
+                    if 'sparql_select' in local_tools:
+                        local_tools['query'] = local_tools.pop('sparql_select')
+
+                    # Add local tools to tool surface
+                    tools.update(local_tools)
+
+        # Generate IDs for memory provenance
+        run_id = f"eval-{task.get('id', 'unknown')}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        trajectory_id = f"t-{uuid.uuid4().hex[:8]}"
+
         # Run DSPy RLM with tools - returns full result object
         result = run_dspy_rlm_with_tools(
             query=query,
@@ -452,6 +534,12 @@ class TaskRunner:
             ns=ns,
             max_iterations=max_iters,
             verbose=False,
+            # Memory parameters
+            memory_backend=self.memory_backend,
+            retrieve_memories=3 if self.memory_backend else 0,
+            extract_memories=bool(self.memory_backend),
+            run_id=run_id if self.memory_backend else None,
+            trajectory_id=trajectory_id if self.memory_backend else None,
         )
 
         return result
