@@ -102,11 +102,11 @@ def analyze_trajectory_jsonl(jsonl_path: Path) -> Dict[str, Any]:
                     'timestamp': timestamp
                 })
 
-        elif event_type == 'lm_call':
+        elif event_type in ('lm_call', 'llm_call'):  # Support both naming conventions
             call_id = event.get('call_id')
             lm_starts[call_id] = event
 
-        elif event_type == 'lm_response':
+        elif event_type in ('lm_response', 'llm_response'):  # Support both naming conventions
             call_id = event.get('call_id')
             if call_id in lm_starts:
                 start_event = lm_starts[call_id]

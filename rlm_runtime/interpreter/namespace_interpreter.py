@@ -58,6 +58,149 @@ class NamespaceCodeInterpreter:
         self._globals.clear()
         self._started = False
 
+    def _instrument_tools_if_needed(self, tools: dict[str, Any]) -> dict[str, Any]:
+        """Wrap tools with callback instrumentation if DSPy callbacks are active.
+
+        Args:
+            tools: Dictionary of tool functions
+
+        Returns:
+            Dictionary of instrumented tools (or original tools if no callbacks)
+        """
+        import dspy
+        import uuid
+        from functools import wraps
+
+        # Check if callbacks are active
+        callbacks = dspy.settings.get('callbacks', [])
+        if not callbacks:
+            return tools
+
+        # Wrap each tool
+        instrumented = {}
+        for name, tool_func in tools.items():
+            # Skip non-callable tools (SUBMIT, etc.)
+            if not callable(tool_func):
+                instrumented[name] = tool_func
+                continue
+
+            @wraps(tool_func)
+            def make_instrumented_tool(func, tool_name):
+                def instrumented_tool(*args, **kwargs):
+                    # Generate unique call ID
+                    call_id = f"tool-{uuid.uuid4().hex[:8]}"
+
+                    # Prepare inputs dict
+                    inputs = {
+                        'args': args,
+                        'kwargs': kwargs,
+                    }
+
+                    # Create mock tool instance for callback API
+                    class ToolInstance:
+                        __name__ = tool_name
+
+                    instance = ToolInstance()
+
+                    # Emit on_tool_start
+                    for callback in callbacks:
+                        if hasattr(callback, 'on_tool_start'):
+                            try:
+                                callback.on_tool_start(call_id, instance, inputs)
+                            except Exception as e:
+                                print(f"Warning: Callback on_tool_start failed: {e}")
+
+                    # Execute tool
+                    exception = None
+                    outputs = None
+                    try:
+                        outputs = func(*args, **kwargs)
+                    except Exception as e:
+                        exception = e
+
+                    # Emit on_tool_end
+                    for callback in callbacks:
+                        if hasattr(callback, 'on_tool_end'):
+                            try:
+                                callback.on_tool_end(call_id, {'result': outputs}, exception)
+                            except Exception as e2:
+                                print(f"Warning: Callback on_tool_end failed: {e2}")
+
+                    # Re-raise exception if tool failed
+                    if exception:
+                        raise exception
+
+                    return outputs
+                return instrumented_tool
+
+            instrumented[name] = make_instrumented_tool(tool_func, name)
+
+        return instrumented
+
+    def _validate_and_clean_code(self, code: str) -> str:
+        """Validate and clean code before execution.
+
+        Detects common syntax errors and attempts to fix them:
+        - Triple backticks inside code blocks (markdown formatting)
+        - Other common formatting issues
+
+        Args:
+            code: Raw code string from LLM
+
+        Returns:
+            Cleaned code string
+
+        Raises:
+            SyntaxError: If code has unfixable syntax errors
+        """
+        from dspy.primitives.code_interpreter import CodeInterpreterError
+
+        # Check for triple backticks inside code (common LLM error)
+        lines = code.split('\n')
+        cleaned_lines = []
+        inside_string = False
+        quote_char = None
+
+        for line in lines:
+            # Skip lines that are just markdown code fences
+            stripped = line.strip()
+            if stripped in ('```python', '```'):
+                continue
+
+            # Detect if line starts a multiline string
+            for i, char in enumerate(line):
+                if char in ('"', "'") and (i == 0 or line[i-1] != '\\'):
+                    if not inside_string:
+                        inside_string = True
+                        quote_char = char
+                    elif char == quote_char:
+                        inside_string = False
+                        quote_char = None
+
+            # If not inside string and line has triple backticks, it's likely an error
+            if not inside_string and '```' in line:
+                # This is likely a markdown code fence accidentally included
+                continue
+
+            cleaned_lines.append(line)
+
+        cleaned_code = '\n'.join(cleaned_lines)
+
+        # Try to compile to catch syntax errors early with better error message
+        try:
+            compile(cleaned_code, "<dspy-repl>", "exec")
+        except SyntaxError as e:
+            # Provide helpful error message
+            raise CodeInterpreterError(
+                f"Syntax error in code at line {e.lineno}: {e.msg}\n"
+                f"Common issues:\n"
+                f"  - Check for extra ```python or ``` markers (markdown formatting)\n"
+                f"  - Verify all strings are properly closed\n"
+                f"  - Check for proper indentation"
+            ) from e
+
+        return cleaned_code
+
     def execute(self, code: str, variables: dict[str, Any] | None = None) -> Any:
         """Execute code in the persistent namespace.
 
@@ -82,8 +225,9 @@ class NamespaceCodeInterpreter:
         if variables:
             self._globals.update(variables)
 
-        # Inject tools
-        self._globals.update(self.tools)
+        # Inject tools (with callback instrumentation if available)
+        instrumented_tools = self._instrument_tools_if_needed(self.tools)
+        self._globals.update(instrumented_tools)
 
         # Define SUBMIT function with helpful error messages
         def SUBMIT(*args, **kwargs):
@@ -107,6 +251,9 @@ class NamespaceCodeInterpreter:
             raise _SubmitCalled(dict(kwargs))
 
         self._globals["SUBMIT"] = SUBMIT
+
+        # Pre-validate code for common syntax issues
+        code = self._validate_and_clean_code(code)
 
         # Capture stdout/stderr
         stdout_capture = StringIO()
