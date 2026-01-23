@@ -170,3 +170,9 @@ mlruns/
 # Test trajectory logs
 test_*.jsonl
 *.jsonl
+
+# Benchmark results
+evals/benchmarks/
+
+# Memory database (generated)
+evals/memory.db

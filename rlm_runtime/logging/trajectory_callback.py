@@ -64,6 +64,7 @@ class TrajectoryCallback(BaseCallback):
         self.tool_iteration = 0
         self.lm_call_count = 0
         self.module_depth = 0
+        self.lm_instances = {}  # call_id -> LM instance (for accessing history/usage)
 
         # Ensure parent directory exists
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -195,6 +196,9 @@ class TrajectoryCallback(BaseCallback):
         if not self.log_llm_calls:
             return
 
+        # Store instance for accessing usage in on_lm_end
+        self.lm_instances[call_id] = instance
+
         self._write_event({
             "event": "llm_call",
             "call_id": call_id,
@@ -213,20 +217,41 @@ class TrajectoryCallback(BaseCallback):
 
         Args:
             call_id: Unique call identifier
-            outputs: LLM response
+            outputs: LLM response (list of outputs)
             exception: Exception if LLM call failed
         """
         if not self.log_llm_calls:
             return
 
+        # Extract token usage from LM instance history
+        usage = None
+        instance = self.lm_instances.get(call_id)
+        if instance and hasattr(instance, 'history') and instance.history:
+            # Get the most recent history entry (just added by LM)
+            latest_entry = instance.history[-1]
+            if 'usage' in latest_entry:
+                raw_usage = latest_entry['usage']
+                # Convert to dict and ensure JSON serializable
+                if raw_usage:
+                    usage = {
+                        'prompt_tokens': raw_usage.get('prompt_tokens', 0),
+                        'completion_tokens': raw_usage.get('completion_tokens', 0),
+                        'total_tokens': raw_usage.get('total_tokens', 0),
+                    }
+
         self._write_event({
             "event": "llm_response",
             "call_id": call_id,
             "llm_call_number": self.lm_call_count,
+            "usage": usage,  # Token usage stats
             "outputs": self._serialize_value(outputs, max_length=1000) if outputs else None,
             "exception": str(exception) if exception else None,
             "success": exception is None,
         })
+
+        # Cleanup
+        if call_id in self.lm_instances:
+            del self.lm_instances[call_id]
 
         self.lm_call_count += 1
 
