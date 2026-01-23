@@ -17,6 +17,15 @@ task:
       prefixes: "ontology/uniprot/examples/prefixes.ttl"
       exemplar: "ontology/uniprot/examples/UniProt/36_orthologous_proteins_via_orthodb.ttl"
 
+  # Expected patterns from exemplar (for LLM judge context, not strict requirements)
+  exemplar_patterns:
+    - "PREFIX orthodb:"
+    - "PREFIX up:"
+    - "SERVICE <https://sparql.orthodb.org/sparql/>"
+    - "orthodb:hasMember"
+    - "orthodb:xref"
+    - "OPTIONAL { ... up:annotation ?functionAnnotation }"
+
   graders:
     - type: convergence
       max_iterations: 12
@@ -28,6 +37,10 @@ task:
       result_type: "present"
       min_results: 1
       required_fields: ["ortholog"]
+    - type: llm_judge
+      # LLM evaluates federation approach and ortholog retrieval correctness
+      use_exemplar_patterns: true
+      strict: false
     - type: tool_called
       required: ["sparql_query"]
 

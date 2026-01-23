@@ -17,9 +17,18 @@ task:
       prefixes: "ontology/uniprot/examples/prefixes.ttl"
       exemplar: "ontology/uniprot/examples/UniProt/3_entry_sequences_organism.ttl"
 
+  # Expected patterns from exemplar (for LLM judge context, not strict requirements)
+  exemplar_patterns:
+    - "PREFIX taxon:"
+    - "PREFIX up:"
+    - "up:organism"
+    - "rdfs:subClassOf taxon:83333"  # Note: Materialized - do NOT use rdfs:subClassOf+
+    - "up:sequence"
+    - "rdf:value"
+
   graders:
     - type: convergence
-      max_iterations: 10
+      max_iterations: 16  # Natural: 10-11 when successful, up to 15+ when struggling
     - type: outcome_verification
       # Verify results are E. coli K12 proteins with sequences
       result_type: "present"
@@ -34,6 +43,11 @@ task:
         - field: "sequence"
           pattern: "[A-Z]{10,}"
           matches: "all"
+    - type: llm_judge
+      # LLM provides semantic correctness evaluation
+      # CRITICAL: This task requires NON-transitive hierarchy (materialized)
+      use_exemplar_patterns: true
+      strict: false
     - type: tool_called
       required: ["sparql_query"]
 

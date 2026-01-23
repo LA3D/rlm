@@ -9,6 +9,7 @@ from .tool_called import ToolCalledGrader
 from .sparql_structural import SparqlStructuralGrader
 from .affordance_utilization import AffordanceUtilizationGrader
 from .outcome_verification import OutcomeVerificationGrader
+from .llm_judge import LLMJudgeGrader
 
 __all__ = [
     'BaseGrader',
@@ -21,4 +22,5 @@ __all__ = [
     'SparqlStructuralGrader',
     'AffordanceUtilizationGrader',
     'OutcomeVerificationGrader',
+    'LLMJudgeGrader',
 ]

@@ -17,6 +17,20 @@ task:
       prefixes: "ontology/uniprot/examples/prefixes.ttl"
       exemplar: "ontology/uniprot/examples/UniProt/71_enzymes_interacting_with_molecules_similar_to_dopamine_with_variants_related_to_disease.ttl"
 
+  # Expected patterns from exemplar (for LLM judge context, not strict requirements)
+  exemplar_patterns:
+    - "PREFIX CHEBI:"
+    - "PREFIX rh:"
+    - "PREFIX sachem:"
+    - "PREFIX up:"
+    - "SERVICE <https://idsm.elixir-czech.cz/sparql/endpoint/chebi>"
+    - "sachem:similarCompoundSearch"
+    - "GRAPH <https://sparql.rhea-db.org/rhea>"
+    - "up:reviewed true"
+    - "up:catalyticActivity"
+    - "up:Natural_Variant_Annotation"
+    - "up:Disease_Annotation"
+
   graders:
     - type: convergence
       max_iterations: 14
@@ -28,6 +42,10 @@ task:
       result_type: "present"
       min_results: 1
       required_fields: ["protein"]
+    - type: llm_judge
+      # LLM evaluates highly complex multi-hop query with similarity search
+      use_exemplar_patterns: true
+      strict: false
     - type: tool_called
       required: ["sparql_query"]
 

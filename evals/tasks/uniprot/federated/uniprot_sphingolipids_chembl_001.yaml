@@ -17,6 +17,17 @@ task:
       prefixes: "ontology/uniprot/examples/prefixes.ttl"
       exemplar: "ontology/uniprot/examples/UniProt/40_human_enzymes_that_metabolize_sphingolipids.ttl"
 
+  # Expected patterns from exemplar (for LLM judge context, not strict requirements)
+  exemplar_patterns:
+    - "PREFIX CHEBI:"
+    - "PREFIX rh:"
+    - "PREFIX up:"
+    - "SERVICE <https://sparql.rhea-db.org/sparql>"
+    - "rdfs:subClassOf+ CHEBI:26739"  # Sphingolipids hierarchy
+    - "up:catalyzedReaction"
+    - "up:organism taxon:9606"  # Human
+    - "rdfs:seeAlso ?chemblEntry"
+
   graders:
     - type: convergence
       max_iterations: 12
@@ -28,6 +39,10 @@ task:
       result_type: "present"
       min_results: 1
       required_fields: ["protein"]
+    - type: llm_judge
+      # LLM evaluates semantic correctness of enzyme/metabolite relationships
+      use_exemplar_patterns: true
+      strict: false
     - type: tool_called
       required: ["sparql_query"]
 

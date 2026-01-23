@@ -109,7 +109,9 @@ def run_command(args):
         'use_dspy': not args.claudette,
         'enable_mlflow': mlflow_active,
         'mlflow_experiment': args.mlflow_experiment,
-        'mlflow_tracking_uri': args.mlflow_tracking_uri
+        'mlflow_tracking_uri': args.mlflow_tracking_uri,
+        'enable_memory': args.enable_memory,
+        'memory_db_path': args.memory_db
     }
     runner = TaskRunner(config=config)
     results = []
@@ -414,6 +416,11 @@ def main():
     # Reasoning level filter (Rung 6)
     run_parser.add_argument('--reasoning-level', type=str, default=None,
                            help='Filter tasks by reasoning level (e.g., L3_materialized, L4_federation)')
+    # Memory (ReasoningBank) integration
+    run_parser.add_argument('--enable-memory', action='store_true',
+                           help='Enable ReasoningBank procedural memory (learns from trajectories)')
+    run_parser.add_argument('--memory-db', type=str, default='evals/memory.db',
+                           help='Path to memory database (default: evals/memory.db)')
 
     # List command
     list_parser = subparsers.add_parser('list', help='List available tasks')

@@ -17,6 +17,15 @@ task:
       prefixes: "ontology/uniprot/examples/prefixes.ttl"
       exemplar: "ontology/uniprot/examples/UniProt/78_genetic_disease_related_proteins.ttl"
 
+  # Expected patterns from exemplar (for LLM judge context, not strict requirements)
+  exemplar_patterns:
+    - "PREFIX up:"
+    - "GRAPH <http://sparql.uniprot.org/uniprot>"
+    - "GRAPH <http://sparql.uniprot.org/diseases>"
+    - "up:annotation ?diseaseAnnotation"
+    - "up:disease"
+    - "OPTIONAL { ... rdfs:seeAlso ?mim }"
+
   graders:
     - type: convergence
       max_iterations: 10
@@ -34,6 +43,10 @@ task:
         - field: "protein"
           pattern: "uniprot.org/uniprot/"
           matches: "all"
+    - type: llm_judge
+      # LLM evaluates semantic correctness and graph join approach
+      use_exemplar_patterns: true
+      strict: false
     - type: tool_called
       required: ["sparql_query"]
 

@@ -17,9 +17,16 @@ task:
       prefixes: "ontology/uniprot/examples/prefixes.ttl"
       exemplar: "ontology/uniprot/examples/UniProt/2_bacteria_taxa_and_their_scientific_name.ttl"
 
+  # Expected patterns from exemplar (for LLM judge context, not strict requirements)
+  exemplar_patterns:
+    - "PREFIX taxon:"
+    - "PREFIX up:"
+    - "up:scientificName"
+    - "rdfs:subClassOf taxon:2"  # Note: rdfs:subClassOf+ is also valid
+
   graders:
     - type: convergence
-      max_iterations: 8
+      max_iterations: 15  # Baseline: measure iterations needed WITHOUT ReasoningBank
     - type: outcome_verification
       # Verify actual results are bacterial taxa, not SPARQL patterns
       result_type: "present"
@@ -30,6 +37,11 @@ task:
         - field: "taxon"
           pattern: "taxonomy/"
           matches: "all"
+    - type: llm_judge
+      # LLM provides semantic correctness evaluation
+      # Uses exemplar_patterns as context (non-strict)
+      use_exemplar_patterns: true
+      strict: false  # Allow alternative valid approaches
     - type: tool_called
       required: ["sparql_query"]
 

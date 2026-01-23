@@ -17,6 +17,16 @@ task:
       prefixes: "ontology/uniprot/examples/prefixes.ttl"
       exemplar: "ontology/uniprot/examples/Rhea/110_Select_reaction_ec_protein_for_a_given_reaction.ttl"
 
+  # Expected patterns from exemplar (for LLM judge context, not strict requirements)
+  exemplar_patterns:
+    - "PREFIX rh:"
+    - "PREFIX ec:"
+    - "PREFIX up:"
+    - "rh:ec ?enzyme"
+    - "SERVICE <http://sparql.uniprot.org/sparql>"
+    - "up:reviewed true"
+    - "OPTIONAL { ?protein up:enzyme ?enzyme }"
+
   graders:
     - type: convergence
       max_iterations: 12
@@ -28,6 +38,10 @@ task:
       result_type: "present"
       min_results: 1
       required_fields: ["ec", "protein"]
+    - type: llm_judge
+      # LLM evaluates federation approach and semantic correctness
+      use_exemplar_patterns: true
+      strict: false
     - type: tool_called
       required: ["sparql_query"]
 
