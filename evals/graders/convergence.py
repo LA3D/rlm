@@ -25,8 +25,8 @@ class ConvergenceGrader(BaseGrader):
         """Grade convergence of the RLM run."""
         iteration_count = len(transcript)
 
-        # Check for valid answer
-        converged = bool(answer and answer.strip() and answer != "No answer provided")
+        # Check for valid answer (handle None defensively)
+        converged = bool(answer and isinstance(answer, str) and answer.strip() and answer != "No answer provided")
 
         # Check iteration limit
         within_limit = iteration_count <= self.max_iterations

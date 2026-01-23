@@ -53,7 +53,7 @@ class LLMJudgeGrader(BaseGrader):
         Returns:
             GradeResult with LLM's judgment
         """
-        if not answer or answer.strip() == "":
+        if not answer or not isinstance(answer, str) or answer.strip() == "":
             return GradeResult(
                 passed=False,
                 score=0.0,

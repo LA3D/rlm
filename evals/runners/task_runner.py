@@ -313,7 +313,7 @@ class TaskRunner:
 
             # Grade with all configured graders
             grader_results = {}
-            overall_pass = True
+            llm_judge_result = None
 
             for grader_config in task.get('graders', []):
                 grader = self._get_grader(grader_config)
@@ -324,8 +324,16 @@ class TaskRunner:
                     'reason': result.reason,
                     'details': result.details
                 }
-                if not result.passed:
-                    overall_pass = False
+                # Capture LLM judge result for primary pass/fail decision
+                if grader_config['type'] == 'llm_judge':
+                    llm_judge_result = result.passed
+
+            # Use LLM judge as primary arbiter if present, otherwise use AND logic
+            if llm_judge_result is not None:
+                overall_pass = llm_judge_result
+            else:
+                # Fallback: all graders must pass (AND logic)
+                overall_pass = all(r['passed'] for r in grader_results.values())
 
             return TrialResult(
                 trial_number=trial_num,
