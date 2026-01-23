@@ -111,7 +111,9 @@ def run_command(args):
         'mlflow_experiment': args.mlflow_experiment,
         'mlflow_tracking_uri': args.mlflow_tracking_uri,
         'enable_memory': args.enable_memory,
-        'memory_db_path': args.memory_db
+        'memory_db_path': args.memory_db,
+        'enable_trajectory_logging': args.enable_trajectory_logging,
+        'trajectory_dir': args.trajectory_dir
     }
     runner = TaskRunner(config=config)
     results = []
@@ -421,6 +423,11 @@ def main():
                            help='Enable ReasoningBank procedural memory (learns from trajectories)')
     run_parser.add_argument('--memory-db', type=str, default='evals/memory.db',
                            help='Path to memory database (default: evals/memory.db)')
+    # Trajectory logging for performance profiling
+    run_parser.add_argument('--enable-trajectory-logging', action='store_true',
+                           help='Enable detailed trajectory logging with timestamps for performance profiling')
+    run_parser.add_argument('--trajectory-dir', type=str, default='evals/trajectories',
+                           help='Directory for trajectory logs (default: evals/trajectories)')
 
     # List command
     list_parser = subparsers.add_parser('list', help='List available tasks')

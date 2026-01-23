@@ -525,6 +525,17 @@ class TaskRunner:
         run_id = f"eval-{task.get('id', 'unknown')}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         trajectory_id = f"t-{uuid.uuid4().hex[:8]}"
 
+        # Enable trajectory logging if configured
+        log_path = None
+        if self.config.get('enable_trajectory_logging', False):
+            # Create trajectories directory
+            traj_dir = Path(self.config.get('trajectory_dir', 'evals/trajectories'))
+            traj_dir.mkdir(parents=True, exist_ok=True)
+            # Generate trajectory log path
+            task_id = task.get('id', 'unknown')
+            timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+            log_path = traj_dir / f"{task_id}_{trajectory_id}_{timestamp}.jsonl"
+
         # Run DSPy RLM with tools - returns full result object
         result = run_dspy_rlm_with_tools(
             query=query,
@@ -534,6 +545,9 @@ class TaskRunner:
             ns=ns,
             max_iterations=max_iters,
             verbose=False,
+            # Trajectory logging
+            log_path=log_path,
+            log_llm_calls=True if log_path else False,
             # Memory parameters
             memory_backend=self.memory_backend,
             retrieve_memories=3 if self.memory_backend else 0,
