@@ -30,7 +30,7 @@ task:
 
   graders:
     - type: convergence
-      max_iterations: 12
+      max_iterations: 16  # Increased from 12 (task needs more room, hit truncation)
     - type: sparql_structural
       # Federation to Rhea is the learning objective
       requires_service: ["sparql.rhea-db.org"]

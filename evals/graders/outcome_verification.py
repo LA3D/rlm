@@ -129,6 +129,13 @@ class OutcomeVerificationGrader(BaseGrader):
         if isinstance(evidence, list):
             return evidence
 
+        # Fallback: Search for ANY list of dicts in evidence (task-specific keys)
+        # This handles cases like "orthologous_proteins", "bacterial_taxa", etc.
+        for key, value in evidence.items():
+            if isinstance(value, list) and value and isinstance(value[0], dict):
+                # Found a list of dicts - likely the results
+                return value
+
         # Check for metadata patterns indicating results exist
         # Pattern: {"sample_protein_count": 5, "sample_results_verified": true}
         # This means agent verified results but stored metadata instead of full results

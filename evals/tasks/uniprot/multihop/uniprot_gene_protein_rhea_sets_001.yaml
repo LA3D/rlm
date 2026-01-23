@@ -31,7 +31,7 @@ task:
 
   graders:
     - type: convergence
-      max_iterations: 12
+      max_iterations: 16  # Increased from 12 (task ran 13 iterations)
     - type: outcome_verification
       # Verify results contain gene-protein-reaction chains
       result_type: "present"

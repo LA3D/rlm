@@ -266,11 +266,13 @@ def run_dspy_rlm(
                 print(f"MLflow tracking active: experiment={mlflow_experiment or 'default'}, run={mlflow_run_id}")
 
     # Configure DSPy models and callbacks
+    # Increased max_tokens to 4096 (from 1400) to prevent truncation of long outputs
+    # with detailed answers, SPARQL, thinking, verification, reflection, AND evidence
     dspy.configure(
-        lm=dspy.LM(model, temperature=0.2, max_tokens=1400, cache=False),
+        lm=dspy.LM(model, temperature=0.2, max_tokens=4096, cache=False),
         callbacks=callbacks  # Always pass list (empty or populated)
     )
-    sub_lm = dspy.LM(sub_model, temperature=0.2, max_tokens=1200, cache=False)
+    sub_lm = dspy.LM(sub_model, temperature=0.2, max_tokens=2048, cache=False)
 
     # Load ontology with format auto-detection
     g = Graph()
@@ -837,11 +839,13 @@ def run_dspy_rlm_with_tools(
                 print(f"MLflow tracking active: experiment={mlflow_experiment or 'default'}, run={mlflow_run_id}")
 
     # Configure DSPy models and callbacks
+    # Increased max_tokens to 4096 (from 1400) to prevent truncation of long outputs
+    # with detailed answers, SPARQL, thinking, verification, reflection, AND evidence
     dspy.configure(
-        lm=dspy.LM(model, temperature=0.2, max_tokens=1400, cache=False),
+        lm=dspy.LM(model, temperature=0.2, max_tokens=4096, cache=False),
         callbacks=callbacks  # Always pass list (empty or populated)
     )
-    sub_lm = dspy.LM(sub_model, temperature=0.2, max_tokens=1200, cache=False)
+    sub_lm = dspy.LM(sub_model, temperature=0.2, max_tokens=2048, cache=False)
 
     # Record run in memory backend if provided
     if memory_backend and run_id:

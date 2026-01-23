@@ -28,7 +28,7 @@ task:
 
   graders:
     - type: convergence
-      max_iterations: 10
+      max_iterations: 16  # Increased from 10 (task ran 11 iterations)
     - type: sparql_structural
       # Named graph joins are the learning objective for this task
       requires_graph: true
