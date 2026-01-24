@@ -1,0 +1,8 @@
+{
+  "approach": "scratchpad",
+  "ontology": "prov",
+  "elapsed_seconds": 228.747982,
+  "iterations": 10,
+  "namespace_vars": 37,
+  "error": "No FINAL_VAR found and no guide in namespace"
+}

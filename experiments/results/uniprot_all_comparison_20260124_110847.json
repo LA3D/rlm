@@ -1,0 +1,26 @@
+{
+  "ontology": "uniprot",
+  "ontology_path": "ontology/uniprot/core.ttl",
+  "timestamp": "20260124_110847",
+  "approaches": {
+    "direct_llm": {
+      "approach": "direct_llm",
+      "ontology": "uniprot",
+      "elapsed_seconds": 24.021378,
+      "input_tokens": 16767,
+      "output_tokens": 1464
+    },
+    "rlm_based": {
+      "approach": "rlm_based",
+      "ontology": "uniprot",
+      "elapsed_seconds": 100.769099,
+      "iterations": 8
+    },
+    "dspy_react": {
+      "approach": "dspy_react",
+      "ontology": "uniprot",
+      "elapsed_seconds": 68.164268,
+      "tool_calls": 0
+    }
+  }
+}

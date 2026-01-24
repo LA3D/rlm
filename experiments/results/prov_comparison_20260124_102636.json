@@ -1,0 +1,20 @@
+{
+  "ontology": "prov",
+  "ontology_path": "ontology/prov.ttl",
+  "timestamp": "20260124_102636",
+  "approaches": {
+    "direct_llm": {
+      "approach": "direct_llm",
+      "ontology": "prov",
+      "elapsed_seconds": 30.596492,
+      "input_tokens": 16979,
+      "output_tokens": 1957
+    },
+    "rlm_based": {
+      "approach": "rlm_based",
+      "ontology": "prov",
+      "elapsed_seconds": 144.690507,
+      "iterations": 8
+    }
+  }
+}
