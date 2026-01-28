@@ -35,43 +35,116 @@ class NamespaceCodeInterpreter:
     Attributes:
         tools: Dictionary of tool functions to inject into execution namespace
         output_fields: Optional list of output field definitions for DSPy
+        enable_verification: Whether to inject verification feedback after SPARQL queries
+        guide_metadata: Optional AgentGuideMetadata for verification (required if enable_verification=True)
+        result_truncation_limit: Max chars for output (0=unlimited, default 10000 like Daytona)
         _tools_registered: Flag used by DSPy to track tool registration state
     """
 
     tools: dict[str, Callable[..., Any]] = field(default_factory=dict)
     output_fields: list[dict] | None = None
+    enable_verification: bool = False
+    guide_metadata: Any = None  # AgentGuideMetadata from verification_feedback.py
+    result_truncation_limit: int = 10000  # Truncate long outputs (0 = unlimited)
     _tools_registered: bool = False  # DSPy may toggle this attribute
 
     def __post_init__(self):
         self._started = False
         self._globals: dict[str, Any] = {}
+        self._final_answer = None  # Storage for FINAL/FINAL_VAR
+
+        # Validate verification configuration
+        if self.enable_verification and self.guide_metadata is None:
+            raise ValueError("guide_metadata is required when enable_verification=True")
+
+        # Storage for capturing SPARQL queries during execution (for verification)
+        self._last_sparql_query = None
+        self._last_sparql_results = None
 
     def start(self) -> None:
-        """Initialize the interpreter namespace."""
+        """Initialize the interpreter namespace with FINAL/FINAL_VAR interface."""
         if self._started:
             return
         self._globals = {}
+        self._final_answer = None
+
+        # Add FINAL/FINAL_VAR to namespace (Daytona-style interface)
+        def FINAL(answer):
+            """Mark completion with final answer."""
+            self._final_answer = answer
+            return answer
+
+        def FINAL_VAR(var_name):
+            """Mark completion with variable from namespace."""
+            var_name = var_name.strip().strip('"').strip("'")
+            if var_name in self._globals:
+                self._final_answer = str(self._globals[var_name])
+                return self._final_answer
+            return f"Error: Variable '{var_name}' not found"
+
+        self._globals['FINAL'] = FINAL
+        self._globals['FINAL_VAR'] = FINAL_VAR
+
         self._started = True
 
     def shutdown(self) -> None:
         """Clear the interpreter namespace and reset state."""
         self._globals.clear()
+        self._final_answer = None
         self._started = False
 
-    def _instrument_tools_if_needed(self, tools: dict[str, Any]) -> dict[str, Any]:
-        """Wrap tools with callback instrumentation if DSPy callbacks are active.
+    def _wrap_sparql_tools(self, tools: dict[str, Any]) -> dict[str, Any]:
+        """Wrap SPARQL tools to capture queries for verification.
 
         Args:
             tools: Dictionary of tool functions
 
         Returns:
-            Dictionary of instrumented tools (or original tools if no callbacks)
+            Dictionary with SPARQL tools wrapped
+        """
+        from functools import wraps
+
+        wrapped = {}
+        for name, tool_func in tools.items():
+            if name in ['sparql_select', 'sparql_query'] and callable(tool_func):
+                @wraps(tool_func)
+                def make_wrapped_sparql(func):
+                    def wrapped_sparql(*args, **kwargs):
+                        # Execute the tool
+                        result = func(*args, **kwargs)
+
+                        # Capture query and results for verification
+                        if args:
+                            self._last_sparql_query = args[0]  # First arg is query
+                            self._last_sparql_results = result
+
+                        return result
+                    return wrapped_sparql
+
+                wrapped[name] = make_wrapped_sparql(tool_func)
+            else:
+                wrapped[name] = tool_func
+
+        return wrapped
+
+    def _instrument_tools_if_needed(self, tools: dict[str, Any]) -> dict[str, Any]:
+        """Wrap tools with callback instrumentation if DSPy callbacks are active.
+        Also wraps SPARQL tools for query capture (for verification).
+
+        Args:
+            tools: Dictionary of tool functions
+
+        Returns:
+            Dictionary of instrumented tools
         """
         import dspy
         import uuid
         from functools import wraps
 
-        # Check if callbacks are active
+        # Always wrap SPARQL tools for query capture (needed for verification)
+        tools = self._wrap_sparql_tools(tools)
+
+        # Check if callbacks are active for additional instrumentation
         callbacks = dspy.settings.get('callbacks', [])
         if not callbacks:
             return tools
@@ -201,6 +274,48 @@ class NamespaceCodeInterpreter:
 
         return cleaned_code
 
+    def _generate_verification_feedback(self, code: str, output: str) -> str:
+        """Generate verification feedback for SPARQL query execution.
+
+        Args:
+            code: Code that was executed
+            output: Output from code execution
+
+        Returns:
+            Formatted verification feedback string, or empty string if no feedback
+        """
+        if not self.enable_verification or not self.guide_metadata:
+            return ""
+
+        # Import verification functions
+        try:
+            from rlm_runtime.tools.verification_feedback import (
+                verify_sparql_query,
+                format_verification_feedback,
+            )
+        except ImportError:
+            return ""
+
+        # Use captured query from tool execution (more reliable than regex parsing)
+        if not self._last_sparql_query:
+            return ""
+
+        query = self._last_sparql_query
+        results = self._last_sparql_results or []
+
+        # Clear captured query for next iteration
+        self._last_sparql_query = None
+        self._last_sparql_results = None
+
+        # Run verification
+        try:
+            verification = verify_sparql_query(query, results, self.guide_metadata)
+            feedback = format_verification_feedback(verification)
+            return feedback
+        except Exception as e:
+            # Don't fail on verification errors
+            return f"\n## Verification Note\nCould not verify query: {e}\n"
+
     def execute(self, code: str, variables: dict[str, Any] | None = None) -> Any:
         """Execute code in the persistent namespace.
 
@@ -260,11 +375,12 @@ class NamespaceCodeInterpreter:
         stderr_capture = StringIO()
         old_stdout, old_stderr = sys.stdout, sys.stderr
         start = time.time()
+        submit_called = None
         try:
             sys.stdout, sys.stderr = stdout_capture, stderr_capture
             exec(compile(code, "<dspy-repl>", "exec"), self._globals)
         except _SubmitCalled as e:
-            return FinalOutput(e.payload)
+            submit_called = e
         except SyntaxError:
             raise
         except Exception as e:
@@ -274,6 +390,29 @@ class NamespaceCodeInterpreter:
 
         stdout = stdout_capture.getvalue()
         stderr = stderr_capture.getvalue().strip()
+
+        # Prepare base output
         if stderr:
-            return f"[stderr]\n{stderr}\n\n[stdout]\n{stdout}"
-        return stdout
+            output = f"[stderr]\n{stderr}\n\n[stdout]\n{stdout}"
+        else:
+            output = stdout
+
+        # Truncate long outputs (prevents context explosion)
+        if self.result_truncation_limit > 0 and len(output) > self.result_truncation_limit:
+            output = output[:self.result_truncation_limit] + f"\n[...truncated at {self.result_truncation_limit} chars]"
+
+        # Inject verification feedback if enabled (BEFORE handling SUBMIT)
+        if self.enable_verification:
+            try:
+                feedback = self._generate_verification_feedback(code, output)
+                if feedback:
+                    output = output + feedback
+            except Exception as e:
+                # Don't fail on verification errors, just skip feedback
+                pass
+
+        # Now handle SUBMIT if it was called
+        if submit_called:
+            return FinalOutput(submit_called.payload)
+
+        return output

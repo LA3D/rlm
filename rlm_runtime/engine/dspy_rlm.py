@@ -63,6 +63,10 @@ def run_dspy_rlm(
     memory_backend: Optional["MemoryBackend"] = None,
     retrieve_memories: int = 3,
     extract_memories: bool = False,
+    enable_verification: bool = False,
+    enable_curriculum_retrieval: bool = False,
+    result_truncation_limit: int = 10000,
+    require_agent_guide: bool = False,
     run_id: Optional[str] = None,
     trajectory_id: Optional[str] = None,
     log_path: Optional[str | Path] = None,
@@ -90,6 +94,10 @@ def run_dspy_rlm(
         memory_backend: Optional MemoryBackend for retrieval/extraction
         retrieve_memories: Number of memories to retrieve if backend provided (default 3)
         extract_memories: Whether to extract and store memories after execution (default False)
+        enable_verification: Whether to inject verification feedback after SPARQL queries (default False)
+        enable_curriculum_retrieval: Whether to use curriculum-aware memory retrieval (default False)
+        result_truncation_limit: Max chars for REPL output (0=unlimited, default 10000 like Daytona)
+        require_agent_guide: Error if no AGENT_GUIDE.md found (default False allows fallback)
         run_id: Optional run ID for provenance tracking
         trajectory_id: Optional trajectory ID for provenance tracking
         log_path: Optional path to JSONL log file for trajectory logging
@@ -301,6 +309,15 @@ def run_dspy_rlm(
 
     meta = GraphMeta(graph=g, name=onto_name)
 
+    # Load AGENT_GUIDE.md metadata if verification is enabled
+    guide_metadata = None
+    if enable_verification:
+        from rlm_runtime.tools.verification_feedback import load_agent_guide_for_ontology
+
+        guide_metadata = load_agent_guide_for_ontology(ontology_path)
+        if guide_metadata is None and verbose:
+            print(f"Warning: enable_verification=True but no AGENT_GUIDE.md found for {onto_name}")
+
     # Record run in memory backend if provided
     if memory_backend and run_id:
         memory_backend.add_run(
@@ -329,11 +346,29 @@ def run_dspy_rlm(
     if memory_backend and retrieve_memories > 0:
         from rlm_runtime.memory.extraction import format_memories_for_context
 
-        retrieved_memories = memory_backend.retrieve(query, k=retrieve_memories)
-        if retrieved_memories:
-            memory_context = format_memories_for_context(retrieved_memories)
+        # Use curriculum-aware retrieval if enabled
+        if enable_curriculum_retrieval:
+            from rlm_runtime.memory.curriculum_retrieval import retrieve_with_curriculum
+
+            retrieved_memories = retrieve_with_curriculum(
+                query,
+                memory_backend,
+                k=retrieve_memories,
+                ontology_name=onto_name
+            )
+            if verbose:
+                print(f"Retrieved {len(retrieved_memories)} memories (curriculum-aware)")
+        else:
+            retrieved_memories = memory_backend.retrieve(query, k=retrieve_memories)
             if verbose:
                 print(f"Retrieved {len(retrieved_memories)} memories")
+
+        if retrieved_memories:
+            # Separate exemplars from regular memories for different formatting
+            exemplar_memories = [m for m in retrieved_memories if m.source_type == 'exemplar']
+            regular_memories = [m for m in retrieved_memories if m.source_type != 'exemplar']
+
+            memory_context = format_memories_for_context(retrieved_memories)
 
             # Log memory retrieval event
             if memory_logger:
@@ -347,36 +382,43 @@ def run_dspy_rlm(
         "IMPORTANT: When calling SUBMIT, use keyword arguments with literal values or inline expressions.",
         "Example: SUBMIT(answer='The answer is...', sparql='SELECT...', evidence={'key': value})",
         "",
-        "## Reasoning Process",
+        "## Reasoning Process with State Tracking",
         "",
-        "Each iteration should follow THINK → ACT → VERIFY → REFLECT cycles:",
+        "Each iteration should follow THINK → ACT → VERIFY → REFLECT cycles with explicit state tracking:",
         "",
-        "**THINK**: State what you learned and what you'll do next.",
-        "- 'I found Protein class with organism property linking to Taxon...'",
-        "- 'E. coli K-12 strains are siblings (materialized), so I'll use VALUES clause...'",
+        "**THINK**: State what you've discovered and what to do next.",
+        "- Track state: 'Discovered classes: [up:Protein], properties: [up:organism]'",
+        "- Plan action: 'I found Protein class with organism property linking to Taxon...'",
+        "- Consider constraints: 'E. coli K-12 strains are siblings (materialized), so I'll use VALUES clause...'",
         "",
         "**ACT**: Execute code (search, query, describe).",
+        "- Example: `search_entity('protein')` or `sparql_select(query)`",
         "",
         "**VERIFY**: Check results match expectations (like running tests).",
-        "- 'Results have protein field ✓'",
-        "- 'Results have sequence field with amino acids ✓' (NOT just sequence_length!)",
-        "- 'Query returned expected columns ✓'",
+        "- Domain/range constraints: 'Property up:organism domain=Protein range=Taxon ✓'",
+        "- Result structure: 'Results have protein field ✓'",
+        "- Data quality: 'Results have sequence field with amino acids ✓' (NOT just sequence_length!)",
+        "- Query correctness: 'Query returned expected columns ✓'",
         "",
         "**REFLECT**: Self-critique before SUBMIT.",
-        "- 'Evidence includes actual sequences, not just metadata'",
-        "- 'All required fields are present with correct types'",
-        "- 'URIs are valid and grounded in results'",
+        "- Evidence quality: 'Evidence includes actual sequences, not just metadata'",
+        "- Completeness: 'All required fields are present with correct types'",
+        "- Groundedness: 'URIs are valid and grounded in results'",
         "",
         "When you SUBMIT, include your final thinking, verification, and reflection.",
         "Evidence MUST include actual data samples (sequences, labels, descriptions) NOT just counts or lengths.",
         "",
     ]
 
-    # Auto-generate sense card with SPARQL templates if not provided
-    # Minimal tools need SPARQL templates for effective query construction
+    # Load rich sense card (AGENT_GUIDE.md preferred) if not provided
     if sense_card is None:
-        sense_card_obj = build_sense_card(str(ontology_path), onto_name)
-        sense_card = format_sense_card(sense_card_obj, include_sparql_templates=True)
+        from rlm_runtime.context import load_rich_sense_card
+
+        sense_card = load_rich_sense_card(
+            ontology_path,
+            onto_name,
+            fallback_to_generated=not require_agent_guide,
+        )
 
     # Inject sense card FIRST (before meta summary)
     if sense_card:
@@ -398,7 +440,26 @@ def run_dspy_rlm(
     # Inject memories if available
     if memory_context:
         context_parts.append("")
-        context_parts.append(memory_context)
+
+        # Format exemplars separately with special section
+        if enable_curriculum_retrieval and exemplar_memories:
+            context_parts.append("## Reasoning Chain Exemplars")
+            context_parts.append("")
+            context_parts.append("Follow these state-tracking patterns from successful queries:")
+            context_parts.append("")
+            for mem in exemplar_memories:
+                context_parts.append(f"### {mem.title}")
+                context_parts.append(mem.content)
+                context_parts.append("")
+
+        # Format regular memories
+        if regular_memories:
+            from rlm_runtime.memory.extraction import format_memories_for_context
+            regular_context = format_memories_for_context(regular_memories)
+            if regular_context:
+                context_parts.append("## Procedural Memories from Successful Runs")
+                context_parts.append("")
+                context_parts.append(regular_context)
 
     context_parts.extend([
         "",
@@ -438,7 +499,7 @@ def run_dspy_rlm(
             desc="Grounding evidence: URIs, result samples with actual data (sequences, labels, descriptions - not just counts or lengths)."
         )
 
-    # Create RLM
+    # Create RLM with enhanced interpreter (scratchpad features)
     rlm = dspy.RLM(
         QueryConstructionSig,
         max_iterations=max_iterations,
@@ -446,7 +507,11 @@ def run_dspy_rlm(
         verbose=verbose,
         tools=tools,
         sub_lm=sub_lm,
-        interpreter=NamespaceCodeInterpreter(),
+        interpreter=NamespaceCodeInterpreter(
+            enable_verification=enable_verification,
+            guide_metadata=guide_metadata,
+            result_truncation_limit=result_truncation_limit,
+        ),
     )
 
     # Execute
