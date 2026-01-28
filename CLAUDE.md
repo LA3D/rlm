@@ -272,12 +272,18 @@ Every run must produce structured output via `SUBMIT(sparql=..., answer=..., evi
 - FTS5 BM25 retrieval (replaces `rank-bm25` dependency)
 - Memory packs: JSONL files with stable IDs, committed to git
 - Closed loop: retrieve → inject → run → judge → extract → store
+- **Chain-of-Thought extension** (Phase 3.5):
+  - Reasoning chain exemplars with curriculum levels (L1-L5)
+  - Curriculum-aware retrieval (level-based prioritization)
+  - Verification feedback via AGENT_GUIDE.md metadata
+  - Quality threshold extraction from high-quality trajectories
 
-**Four-Layer Context Injection:**
+**Five-Layer Context Injection:**
 1. Sense card (~600 chars) - Compact ontology metadata with 100% URI grounding
-2. Procedural memories - Retrieved strategies from SQLite
-3. Ontology-specific recipes - Curated patterns (optional)
-4. Base context - GraphMeta summary/stats
+2. Reasoning chain exemplars - Structured CoT examples with state tracking (optional, Phase 3.5)
+3. Procedural memories - Retrieved strategies from SQLite
+4. Ontology-specific recipes - Curated patterns (optional)
+5. Base context - GraphMeta summary/stats
 
 **Observability & Experiment Tracking:**
 - **Dual logging**: JSONL trajectory logs (real-time debugging) + MLflow (structured analysis)
@@ -449,17 +455,39 @@ git commit -m "Update rlmpaper submodule"
 
 The project follows a documentation-driven approach:
 
-1. **Trajectory document** (`docs/planning/trajectory_v2.md`) - Master plan (active)
+1. **Trajectory document** (`docs/planning/trajectory_v3.md`) - Master plan (active, supersedes v2)
 2. **Design documents** (`docs/design/`) - Architecture and patterns:
    - `reasoningbank-sqlite-architecture.md` - SQLite memory store design
    - `claudette-to-dspy-migration.md` - DSPy migration plan
    - `dspy-migration-system-analysis.md` - Module-by-module impact
    - `ontology-query-construction-with-rlm-reasoningbank-dspy.md` - Query construction requirements
    - `hybrid-nbdev-runtime-refactor.md` - Hybrid codebase approach
-3. **Task documents** (`docs/tasks/`) - Specific implementation tasks
+   - `instruction-tuning-via-reasoning-chains.md` - Chain-of-Thought instruction tuning design
+3. **Task documents** (`docs/tasks/`) - Specific implementation tasks:
+   - `00-core-alignment.md` - Core RLM alignment with rlmpaper protocol
+   - `04-shacl-summary.md` - SHACL integration implementation
+   - `05-cot-instruction-tuning.md` - Chain-of-Thought instruction tuning implementation
 4. **Usage guides** (`docs/guides/`) - How-to documentation
-5. **Notebook markdown cells** - Inline documentation
-6. **Docstrings** - Fast.ai style docstrings in exported functions
+5. **Experiment documentation** (`experiments/*/README.md`) - Experiment designs and results
+6. **Notebook markdown cells** - Inline documentation
+7. **Docstrings** - Fast.ai style docstrings in exported functions
+
+### Documentation Philosophy
+
+When adding new documentation:
+
+1. **Planning docs** (`docs/planning/`) - Major architectural changes and master plans
+2. **Design docs** (`docs/design/`) - Significant design decisions and architecture
+3. **Task docs** (`docs/tasks/`) - Implementation stage summaries (what was built, how it works)
+4. **Guides** (`docs/guides/`) - Practical how-to documentation for users
+5. **Experiments** (`experiments/*/`) - Experiment designs, results, and analysis
+6. **Archive** (`docs/archive/`) - Completed session notes and outdated content
+
+Keep documentation:
+- **Concise** - Remove redundancy, focus on key information
+- **Actionable** - Include concrete examples and code snippets
+- **Current** - Archive or update outdated content
+- **Cross-referenced** - Link to related documents
 
 ## Code Style
 
@@ -520,32 +548,37 @@ Eval reports are generated in notebooks (`nbs/eval_reports.ipynb`) for GitHub Pa
 
 See section "Executing Notebooks with Outputs" for workflow details.
 
-## Current Work (v2 Trajectory)
+## Current Work (v3 Trajectory)
 
-The project is implementing trajectory v2. See `docs/planning/trajectory_v2.md` for the full roadmap.
+The project is implementing trajectory v3. See `docs/planning/trajectory_v3.md` for the full roadmap.
 
-**Completed (v1):**
-- Ontology handles + GraphMeta scaffolding + bounded views
-- Dataset memory model with mem/prov graphs, provenance, snapshots
-- SPARQL result handles + bounded sampling/view patterns
-- SHACL shape/query template indexing
-- Procedural memory closed loop (notebook form)
-- Evaluation framework in `evals/`
+**Status:** Phases 1-3 complete, Phase 3.5 complete, Phases 4-7 planned
 
-**v2 Phases:**
+**Completed:**
+- ✅ Phase 1: Foundation correctness (dataset snapshots, tool bounding)
+- ✅ Phase 2: Remote SPARQL integration (UniProt endpoint support)
+- ✅ Phase 3: Procedural memory model (ReasoningBank, sense cards, extraction)
+- ✅ Phase 3.5: Chain-of-Thought instruction tuning (exemplars, verification, curriculum)
+- ✅ v1 work: Ontology handles, GraphMeta, bounded views, SHACL indexing, eval framework
 
-| Phase | Goal | Status |
-|-------|------|--------|
-| **A** | Stable runtime surface (`rlm_runtime/`) | Completed |
-| **B** | DSPy RLM with typed outputs | Completed |
-| **C** | SQLite ReasoningBank + memory packs | Completed |
-| **D** | SHACL-driven query construction | Planned |
-| **E** | Observability (MLflow + JSONL logs) | Completed |
+**Phase 3.5 Highlights (Instruction Tuning):**
+- Reasoning chain exemplars with curriculum levels (L1-L5)
+- AGENT_GUIDE.md parsing for verification feedback
+- Domain/range constraint checking and anti-pattern detection
+- Curriculum-aware retrieval (level-based prioritization)
+- E-RC-001 experiment: baseline vs schema vs exemplar3 conditions
+- 57 tests passing, all features backward compatible
 
-**Known Gaps to Address:**
-- Dataset snapshot `session_id` restoration incomplete
-- Replace `rank-bm25` with SQLite FTS5
-- Enforce query-construction output contract (`{sparql, answer, evidence}`)
+**Planned (v3 Phases):**
+- 🔄 Phase 4: Eval harness + learning metrics + representation ablation
+- 🔄 Phase 5: Human feedback integration + curriculum runner
+- 🔄 Phase 6: Retire claudette and stabilize
+- 🔄 Phase 7: SHACL-driven query construction (template-guided)
+
+**Research Dimensions (Phase 4):**
+1. **Affordance granularity ablation** - Which specific knowledge representations help?
+2. **Reasoning complexity boundaries** - Where do LM capabilities end? What tools extend them?
+3. **Learning dynamics** - Does the system improve with experience?
 
 ## References
 

@@ -5,8 +5,9 @@ This directory contains experiments validating and comparing different approache
 ## Quick Navigation
 
 - **[Agent Guide Generation](#agent-guide-generation-experiment)** - Compare 4 approaches for generating AGENT_GUIDE.md documentation
+- **[Reasoning Chain Validation](#reasoning-chain-validation-experiment)** - Test PDDL-INSTRUCT style reasoning chains for SPARQL construction
 - **Results Summary** - [PROV](#prov-results-small-ontology) | [UniProt](#uniprot-results-large-ontology)
-- **Code** - [agent_guide_generation/](./agent_guide_generation/) directory
+- **Code** - [agent_guide_generation/](./agent_guide_generation/) | [reasoning_chain_validation/](./reasoning_chain_validation/)
 
 ---
 
@@ -224,6 +225,14 @@ experiments/
 │   ├── test_dspy_react.py              # Quick ReAct test
 │   └── test_scratchpad.py              # Quick Scratchpad test
 │
+├── reasoning_chain_validation/         # PDDL-INSTRUCT style reasoning chains
+│   ├── README.md                       # Full experiment design
+│   ├── exemplars/                      # Reasoning chain exemplars (L1-L5)
+│   │   └── uniprot_l2_crossref.md     # Level 2 example
+│   ├── rc_001_exemplar_impact.py      # E-RC-001: Exemplar impact
+│   ├── behavior_analysis.py           # Shared behavior analysis module
+│   └── results/                        # Generated outputs
+│
 └── results/
     ├── latest/                         # Symlinks to latest successful runs
     │   ├── prov_direct.md -> ../runs/20260124_110501/...
@@ -286,15 +295,137 @@ experiments/
 
 ---
 
+---
+
+## Reasoning Chain Validation Experiment
+
+**NEW (2026-01-26)** - Validating PDDL-INSTRUCT style reasoning chains for SPARQL query construction.
+
+### Research Question
+
+**Do explicit reasoning chain exemplars improve SPARQL query construction?**
+
+Based on the PDDL-INSTRUCT paper (arXiv:2509.13351v1), which achieved 28% → 94% accuracy on planning tasks through:
+- Decomposed state-action-state reasoning
+- External verification
+- Detailed feedback (not just binary pass/fail)
+
+### Four Experiments
+
+| Experiment | Question | Design |
+|------------|----------|--------|
+| **E-RC-001** | Do reasoning chains help? | Baseline vs 3/5 exemplars |
+| **E-RC-002** | Which architecture for state tracking? | ReAct vs RLM vs Scratchpad vs Structured-State |
+| **E-RC-003** | Does detailed feedback help? | None vs Binary vs Detailed |
+| **E-RC-004** | Can we detect good reasoning? | Behavior analysis validation |
+
+### Quick Start
+
+```bash
+# Run E-RC-001 with DSPy RLM implementation
+python experiments/reasoning_chain_validation/rc_001_with_rlm.py --condition all
+
+# Run single condition
+python experiments/reasoning_chain_validation/rc_001_with_rlm.py --condition exemplar3
+
+# Test behavior analysis
+python experiments/reasoning_chain_validation/behavior_analysis.py
+
+# Load exemplars into memory backend
+python scripts/load_exemplars.py \
+    --exemplar-dir experiments/reasoning_chain_validation/exemplars \
+    --db-path memory.db \
+    --ontology uniprot \
+    --stats
+```
+
+### E-RC-001 Results (2026-01-27)
+
+**Implementation:** DSPy RLM with verification feedback + curriculum-aware retrieval
+
+**Test Conditions:**
+- **baseline**: No exemplars, no schema (stats only)
+- **schema**: Schema in context via AGENT_GUIDE.md
+- **exemplar3**: L1-L3 exemplars + curriculum retrieval
+
+| Condition | Convergence | Avg Iterations | Avg Reasoning Quality |
+|-----------|-------------|----------------|---------------------|
+| baseline | 3/3 (100%) | 6.7 | 0.52 |
+| schema | 3/3 (100%) | 6.7 | **0.59** |
+| exemplar3 | 3/3 (100%) | 7.0 | 0.48 |
+
+**Key Findings:**
+1. ✅ **System is functional** - All conditions achieved 100% convergence
+2. ✅ **Verification feedback working** - Domain/range checks visible in traces
+3. ✅ **State tracking adopted** - Strong scores (0.67-1.0) across all runs
+4. ✅ **Schema metadata valuable** - Schema condition outperformed others (0.59 quality)
+5. ⚠️ **Exemplar impact unclear** - Need more exemplars (L3-L5) and harder tasks
+
+**Implementation Status:**
+- ✅ Phase 1: Foundation modules (exemplar_loader, verification_feedback, curriculum_retrieval)
+- ✅ Phase 2: Interpreter enhancement with verification feedback
+- ✅ Phase 3: DSPy RLM integration (CoT features, curriculum retrieval)
+- ✅ Phase 4: Experiment integration (rc_001_with_rlm.py, load_exemplars.py)
+- ✅ All 57 tests passing
+
+**Next Steps:**
+- Create L3-L5 exemplars for more complex query patterns
+- Test on ontologies with instance data (not just schema)
+- Design harder tasks (multi-hop joins, aggregations, complex filters)
+
+**Results:** [experiments/reasoning_chain_validation/results/comparison_summary.md](./reasoning_chain_validation/results/comparison_summary.md)
+
+### Behavior Analysis
+
+The key innovation is analyzing reasoning traces for PDDL-INSTRUCT style indicators:
+
+| Indicator | What it Measures |
+|-----------|-----------------|
+| **State tracking** | Does agent track discovered classes/properties? |
+| **Verification** | Does agent verify constraints before/after? |
+| **Anti-pattern avoidance** | Does agent avoid known mistakes? |
+| **Step-by-step** | Is reasoning clearly structured? |
+
+### Success Criteria
+
+| Experiment | Success if... |
+|------------|---------------|
+| E-RC-001 | Exemplar-5 > 20% better pass rate than Baseline |
+| E-RC-002 | One architecture clearly outperforms on state tracking |
+| E-RC-003 | Detailed feedback > 25% better correction rate |
+| E-RC-004 | Behavior analysis achieves F1 > 0.8 |
+
+**If 3/4 succeed**, the reasoning chains approach is validated for investment in ReasoningBank integration.
+
+### Files
+
+```
+reasoning_chain_validation/
+├── README.md                      # Full experiment design
+├── exemplars/                     # Reasoning chain exemplars
+│   └── uniprot_l2_crossref.md    # Level 2 example
+├── rc_001_exemplar_impact.py      # E-RC-001 runner
+├── behavior_analysis.py           # Shared analysis module
+└── results/                       # Generated outputs
+```
+
+### Related Documents
+
+- [ontology-kr-affordances-for-llm-reasoning.md](../docs/design/ontology-kr-affordances-for-llm-reasoning.md)
+- [instruction-tuning-via-reasoning-chains.md](../docs/design/instruction-tuning-via-reasoning-chains.md)
+
+---
+
 ## Future Experiments
 
 Potential areas to explore:
 
-1. **Query Construction** - Test scratchpad vs RLM on actual query construction tasks
+1. ~~**Query Construction** - Test scratchpad vs RLM on actual query construction tasks~~ → **E-RC-002**
 2. **Memory Retrieval** - Compare approaches for procedural memory retrieval
 3. **SHACL Example Usage** - How do approaches leverage 1,228 UniProt examples?
 4. **Scalability Tests** - Test on Schema.org (1MB), Wikidata ontology
 5. **Hybrid Approaches** - Combine Direct LLM + Scratchpad refinement
+6. **ReasoningBank Integration** - Store/retrieve reasoning chains (pending E-RC validation)
 
 ---
 

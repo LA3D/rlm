@@ -1,0 +1,20 @@
+============================================================
+TESTING VERIFICATION FEEDBACK
+============================================================
+
+Query: What is the Activity class used for?
+Ontology: /Users/cvardema/dev/git/LA3D/rlm/ontology/prov/prov.ttl
+Verification: ENABLED
+
+Running with verification feedback enabled...
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/test_verification_quick.py", line 114, in <module>
+    success = test_verification_feedback()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/test_verification_quick.py", line 41, in test_verification_feedback
+    result = run_dspy_rlm(
+             ^^^^^^^^^^^^^
+  File "/Users/cvardema/dev/git/LA3D/rlm/rlm_runtime/engine/dspy_rlm.py", line 183, in run_dspy_rlm
+    raise FileNotFoundError(f"Ontology not found: {ontology_path}")
+FileNotFoundError: Ontology not found: /Users/cvardema/dev/git/LA3D/rlm/ontology/prov/prov.ttl

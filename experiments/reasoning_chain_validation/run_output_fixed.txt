@@ -1,0 +1,44 @@
+Traceback (most recent call last):
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/rc_001_with_rlm.py", line 253, in run_experiment
+    result = run_task_with_rlm(task, condition, backend, verbose)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/rc_001_with_rlm.py", line 165, in run_task_with_rlm
+    raise FileNotFoundError(f"Ontology not found: {ontology_path}")
+FileNotFoundError: Ontology not found: ontology/uniprot.ttl
+Traceback (most recent call last):
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/rc_001_with_rlm.py", line 253, in run_experiment
+    result = run_task_with_rlm(task, condition, backend, verbose)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/rc_001_with_rlm.py", line 165, in run_task_with_rlm
+    raise FileNotFoundError(f"Ontology not found: {ontology_path}")
+FileNotFoundError: Ontology not found: ontology/uniprot.ttl
+Traceback (most recent call last):
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/rc_001_with_rlm.py", line 253, in run_experiment
+    result = run_task_with_rlm(task, condition, backend, verbose)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cvardema/dev/git/LA3D/rlm/experiments/reasoning_chain_validation/rc_001_with_rlm.py", line 165, in run_task_with_rlm
+    raise FileNotFoundError(f"Ontology not found: {ontology_path}")
+FileNotFoundError: Ontology not found: ontology/uniprot.ttl
+Warning: Exemplar directory not found: experiments/reasoning_chain_validation/exemplars
+Exemplar conditions will have no exemplars loaded.
+
+============================================================
+E-RC-001: EXEMPLAR IMPACT EXPERIMENT
+============================================================
+
+Condition: exemplar3
+------------------------------------------------------------
+  Warning: Could not load exemplars: Exemplar directory not found: experiments/reasoning_chain_validation/exemplars
+  ✗ L1-protein-lookup: ERROR - Ontology not found: ontology/uniprot.ttl
+  ✗ L2-go-annotations: ERROR - Ontology not found: ontology/uniprot.ttl
+  ✗ L3-reviewed-human: ERROR - Ontology not found: ontology/uniprot.ttl
+
+Results saved to: experiments/reasoning_chain_validation/results/rc_001_results_20260127_102833.json
+
+============================================================
+SUMMARY
+============================================================
+
+exemplar3:
+  No results
+

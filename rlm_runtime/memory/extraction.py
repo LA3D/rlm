@@ -576,3 +576,203 @@ Format as JSON array (1-3 meta-patterns):
         meta_patterns.append(memory)
 
     return meta_patterns
+
+
+def should_extract_as_exemplar(
+    trajectory: list[dict],
+    thinking: str,
+    verification: str,
+    reflection: str
+) -> bool:
+    """Check if trajectory exhibits exemplar-quality reasoning.
+
+    Args:
+        trajectory: List of execution steps
+        thinking: Agent's thinking field
+        verification: Agent's verification field
+        reflection: Agent's reflection field
+
+    Returns:
+        True if trajectory should be extracted as reasoning chain exemplar
+
+    Criteria for exemplar quality:
+    - Clear state tracking (mentions discovered classes/properties)
+    - Verification steps (checks constraints)
+    - Anti-pattern avoidance (explicitly avoids known mistakes)
+    - Step-by-step reasoning (structured THINK-ACT-VERIFY-REFLECT)
+    """
+    try:
+        from experiments.reasoning_chain_validation.behavior_analysis import analyze_reasoning_trace
+
+        # Combine reasoning fields
+        full_reasoning = f"{thinking or ''}\n\n{verification or ''}\n\n{reflection or ''}"
+
+        # Analyze quality
+        analysis = analyze_reasoning_trace(full_reasoning)
+
+        # Exemplar criteria (high bar)
+        return (
+            analysis.state_tracking_score >= 0.7 and
+            analysis.verification_score >= 0.6 and
+            analysis.step_by_step_score >= 0.7 and
+            analysis.overall_score >= 0.7
+        )
+    except ImportError:
+        # If behavior_analysis not available, use simpler heuristics
+        combined = f"{thinking or ''} {verification or ''} {reflection or ''}"
+        combined_lower = combined.lower()
+
+        # Check for state tracking keywords
+        has_state = any(kw in combined_lower for kw in [
+            'discovered', 'state:', 'classes:', 'properties:', 'found class'
+        ])
+
+        # Check for verification keywords
+        has_verification = any(kw in combined_lower for kw in [
+            'verify', 'check', 'constraint', 'domain', 'range', '✓', 'valid'
+        ])
+
+        # Check for structured reasoning
+        has_structure = any(kw in combined_lower for kw in [
+            'think:', 'act:', 'verify:', 'reflect:', 'step 1', 'step 2'
+        ])
+
+        # Require at least 2 out of 3 indicators
+        return sum([has_state, has_verification, has_structure]) >= 2
+
+
+def extract_reasoning_chain_from_trajectory(
+    task: str,
+    answer: str,
+    trajectory: list[dict],
+    sparql: Optional[str],
+    thinking: Optional[str],
+    verification: Optional[str],
+    reflection: Optional[str],
+    ontology_name: str
+) -> Optional[MemoryItem]:
+    """Extract reasoning chain as exemplar from high-quality trajectory.
+
+    Args:
+        task: Original task query
+        answer: Final answer
+        trajectory: List of execution steps
+        sparql: Final SPARQL query
+        thinking: Agent's thinking
+        verification: Agent's verification
+        reflection: Agent's reflection
+        ontology_name: Name of ontology
+
+    Returns:
+        MemoryItem with source_type='exemplar' if trajectory is exemplar-quality,
+        None otherwise
+
+    Example:
+        result = run_dspy_rlm("What is Activity?", "prov.ttl")
+        if result.converged:
+            exemplar = extract_reasoning_chain_from_trajectory(
+                "What is Activity?",
+                result.answer,
+                result.trajectory,
+                result.sparql,
+                result.thinking,
+                result.verification,
+                result.reflection,
+                "prov"
+            )
+            if exemplar:
+                backend.add_memory(exemplar)
+    """
+    # Check if trajectory is exemplar-quality
+    if not should_extract_as_exemplar(trajectory, thinking or "", verification or "", reflection or ""):
+        return None
+
+    # Estimate complexity level
+    from rlm_runtime.memory.curriculum_retrieval import estimate_query_complexity
+    level = estimate_query_complexity(task)
+
+    # Build reasoning chain content
+    content_parts = [
+        f"# Reasoning Chain: {task}",
+        "",
+        "## Reasoning Process",
+        "",
+    ]
+
+    if thinking:
+        content_parts.extend([
+            "### THINK",
+            thinking,
+            "",
+        ])
+
+    # Extract action steps from trajectory
+    if trajectory:
+        content_parts.extend([
+            "### ACT",
+            "",
+        ])
+        for i, step in enumerate(trajectory[-3:], 1):  # Last 3 steps
+            code = step.get('code', '')
+            if code.strip():
+                content_parts.append(f"**Step {i}:**")
+                content_parts.append(f"```python\n{code}\n```")
+                content_parts.append("")
+
+    if verification:
+        content_parts.extend([
+            "### VERIFY",
+            verification,
+            "",
+        ])
+
+    if reflection:
+        content_parts.extend([
+            "### REFLECT",
+            reflection,
+            "",
+        ])
+
+    if sparql:
+        content_parts.extend([
+            "## Final Query",
+            "",
+            "```sparql",
+            sparql,
+            "```",
+            "",
+        ])
+
+    content_parts.extend([
+        "## Result",
+        "",
+        answer,
+        "",
+    ])
+
+    content = "\n".join(content_parts)
+
+    # Create MemoryItem
+    title = f"Level {level} - {task[:50]}"  # Truncate task if too long
+    memory_id = MemoryItem.compute_id(title, content)
+
+    return MemoryItem(
+        memory_id=memory_id,
+        title=title,
+        description=f"Reasoning chain exemplar: {task}",
+        content=content,
+        source_type='exemplar',
+        task_query=task,
+        created_at=datetime.now(timezone.utc).isoformat(),
+        tags=[f'level-{level}', ontology_name, 'exemplar', 'reasoning-chain', 'auto-extracted'],
+        scope={
+            'ontology': [ontology_name],
+            'curriculum_level': level,
+            'transferable': False,
+        },
+        provenance={
+            'source': 'auto-extraction',
+            'extraction_method': 'trajectory_analysis',
+            'quality_threshold': 0.7,
+        },
+    )

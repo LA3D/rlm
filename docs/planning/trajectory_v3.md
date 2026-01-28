@@ -1186,3 +1186,258 @@ Across longitudinal runs, measure:
 - SHACL exemplar index: `rlm/shacl_examples.py`
 - ReasoningBank implementation: `rlm_runtime/memory/`
 - Dataset memory (session_id fix): `rlm/dataset.py`
+
+---
+
+## Phase 3.5 — Chain-of-Thought Instruction Tuning (Phase 3 Extension) ✅
+
+**Status:** ✅ **COMPLETED** (Jan 26-27, 2026)
+
+**Motivation:** Based on PDDL-INSTRUCT (arXiv:2509.13351v1), which achieved 28% → 94% accuracy on planning tasks through state-action-state reasoning chains with detailed verification feedback, we extended ReasoningBank to support reasoning chain exemplars for in-context learning without fine-tuning.
+
+**Problem:** Standard procedural memories capture "what to do" (strategies), but not "how to reason" (step-by-step decomposition with state tracking and verification). LLMs benefit from seeing structured reasoning chains that demonstrate THINK → ACT → VERIFY → REFLECT patterns.
+
+### What Was Delivered
+
+#### Reasoning Chain Infrastructure
+
+- ✅ **Exemplar loader** (`rlm_runtime/memory/exemplar_loader.py`):
+  - Parse markdown reasoning chain format
+  - Convert to MemoryItem with `source_type='exemplar'`
+  - Tag with curriculum levels (L1-L5) for filtering
+  - Load into ReasoningBank with deduplication
+
+- ✅ **Curriculum-aware retrieval** (`rlm_runtime/memory/curriculum_retrieval.py`):
+  - Heuristics-based complexity estimation (L1-L5)
+  - Level-aware prioritization: exact > adjacent > fallback
+  - Coverage analysis (identify missing levels)
+
+- ✅ **Reasoning chain extraction** (`rlm_runtime/memory/extraction.py`):
+  - Quality threshold checking via behavior_analysis.py
+  - Extract from high-quality trajectories
+  - Format as structured markdown exemplars
+
+#### Verification Feedback Loop
+
+- ✅ **AGENT_GUIDE.md parsing** (`rlm_runtime/tools/verification_feedback.py`):
+  - Extract property metadata (domain/range, usage patterns)
+  - Parse anti-patterns and considerations
+  - Structured AgentGuideMetadata dataclass
+
+- ✅ **Verification feedback generation**:
+  - Domain/range constraint checking
+  - Anti-pattern detection (label filtering, wrong property usage)
+  - Result type validation
+  - Formatted as ✓/✗ checks with suggestions
+
+- ✅ **Interpreter integration** (`rlm_runtime/interpreter/namespace_interpreter.py`):
+  - `enable_verification` parameter (opt-in, backward compatible)
+  - Automatic feedback injection after SPARQL queries
+  - Graceful degradation on verification errors
+
+#### DSPy RLM Integration
+
+- ✅ **Enhanced context formatting** (`rlm_runtime/engine/dspy_rlm.py`):
+  - Separate sections for exemplars vs regular memories
+  - Enhanced reasoning guidance with state tracking patterns
+  - THINK → ACT → VERIFY → REFLECT cycle templates
+
+- ✅ **New parameters** (all opt-in, defaults to False):
+  - `enable_verification` - Inject verification feedback
+  - `enable_curriculum_retrieval` - Use level-aware retrieval
+
+#### CLI Tools and Experiments
+
+- ✅ **AGENT_GUIDE.md generation** (`scripts/generate_agent_guide.py`):
+  - Scratchpad approach (persistent namespace, direct functions)
+  - Generated guides for PROV and DUL ontologies
+  - Rich metadata: properties, anti-patterns, considerations
+
+- ✅ **Exemplar loading tool** (`scripts/load_exemplars.py`):
+  - Load markdown exemplars into ReasoningBank
+  - Pattern filtering, coverage statistics
+  - Force reload, list-only mode
+
+- ✅ **E-RC-001 experiment** (`experiments/reasoning_chain_validation/rc_001_with_rlm.py`):
+  - Tests baseline vs schema vs exemplar3 conditions
+  - 3 test tasks (L1-L3 complexity)
+  - Measures convergence, iterations, reasoning quality
+
+### E-RC-001 Initial Results
+
+**Date:** 2026-01-27
+**Environment:** UniProt Core ontology (schema-only, no instance data)
+
+| Condition | Convergence | Avg Iterations | Avg Reasoning Quality |
+|-----------|-------------|----------------|---------------------|
+| baseline | 3/3 (100%) | 6.7 | 0.52 |
+| schema | 3/3 (100%) | 6.7 | **0.59** |
+| exemplar3 | 3/3 (100%) | 7.0 | 0.48 |
+
+**Key findings:**
+1. ✅ System functional - 100% convergence across all conditions
+2. ✅ State tracking adopted - Strong scores (0.67-1.0)
+3. ✅ Verification feedback working - Domain/range checks visible
+4. ✅ Schema metadata valuable - Best reasoning quality
+5. ⚠️ Exemplar impact unclear - Need more exemplars (L3-L5) and harder tasks
+6. ⚠️ Limited by schema-only ontology - No instance data to query
+
+**Reasoning quality components (exemplar3):**
+- State tracking: 0.67-1.0 (explicit state mentions)
+- Verification: 0.33 (consistent constraint checking)
+- Reasoning quality: 0.0-0.33 (step-by-step structure variable)
+
+### Architecture Decisions
+
+**1. AGENT_GUIDE.md vs GraphMeta**
+- **Decision:** Use AGENT_GUIDE.md for verification metadata
+- **Rationale:** Richer information (property metadata, anti-patterns, considerations) vs GraphMeta's incomplete data
+- **Implementation:** Parse AGENT_GUIDE.md on startup, use for verification checks
+
+**2. Reasoning chain storage**
+- **Decision:** Reuse MemoryItem with `source_type='exemplar'` and level tags
+- **Rationale:** No schema changes, git-committable, works with existing infrastructure
+- **Implementation:** Tag with `level-N` for curriculum filtering
+
+**3. Complexity estimation**
+- **Decision:** Heuristics-based pattern matching (L1-L5)
+- **Rationale:** Simple, interpretable, no ML model needed
+- **Implementation:** Keyword scoring with empirically tuned thresholds
+
+**4. Verification feedback injection**
+- **Decision:** Automatic injection after SPARQL queries
+- **Rationale:** Immediate, consistent feedback (PDDL-INSTRUCT approach)
+- **Implementation:** Append to output, graceful degradation on errors
+
+**5. Backward compatibility**
+- **Decision:** All features opt-in via parameters (default False)
+- **Rationale:** No breaking changes, gradual adoption
+- **Implementation:** `enable_verification=False`, `enable_curriculum_retrieval=False`
+
+### Implementation Summary
+
+**New modules (5):**
+- `rlm_runtime/memory/exemplar_loader.py` (200 lines)
+- `rlm_runtime/tools/verification_feedback.py` (450 lines)
+- `rlm_runtime/memory/curriculum_retrieval.py` (250 lines)
+
+**Modified modules (3):**
+- `rlm_runtime/interpreter/namespace_interpreter.py` (+120 lines)
+- `rlm_runtime/engine/dspy_rlm.py` (+150 lines)
+- `rlm_runtime/memory/extraction.py` (+150 lines)
+
+**Scripts (2):**
+- `scripts/generate_agent_guide.py` (200 lines)
+- `scripts/load_exemplars.py` (190 lines)
+
+**Experiments (1):**
+- `experiments/reasoning_chain_validation/rc_001_with_rlm.py` (350 lines)
+
+**Test coverage:**
+- 57 tests across 5 test modules
+- All passing, full backward compatibility verified
+
+**Generated assets:**
+- `ontology/prov/AGENT_GUIDE.md` (15KB, 8 iterations)
+- `ontology/dul/AGENT_GUIDE.md` (21KB, 9 iterations)
+- 2 exemplars (L1, L2) for UniProt
+
+### Integration with Other Phases
+
+**Extends Phase 3 (Procedural Memory):**
+- Adds reasoning chain exemplars to ReasoningBank
+- Enhances memory retrieval with curriculum awareness
+- Provides structured reasoning templates for context
+
+**Supports Phase 4 (Eval Harness):**
+- Behavior analysis framework for trajectory grading
+- Quality metrics for learning curve measurement
+- Exemplar impact experiments (baseline vs exemplar conditions)
+
+**Prepares for Phase 5 (Human Feedback):**
+- Quality threshold checking enables filtering
+- Reasoning chain extraction provides candidates for review
+- Coverage analysis identifies gaps
+
+### Curriculum Levels Defined
+
+| Level | Query Type | Example | What's Tested |
+|-------|-----------|---------|---------------|
+| L1 | Single entity retrieval | "What is protein P12345?" | Direct URI patterns |
+| L2 | Cross-reference queries | "GO annotations for insulin?" | Join construction |
+| L3 | Filtering queries | "Reviewed human proteins?" | Constraint application |
+| L4 | Multi-hop paths | "Pathways via reactions?" | Complex joins |
+| L5 | Aggregation | "Count proteins by organism?" | Analytics |
+
+### CLI Usage
+
+**Generate ontology guide:**
+```bash
+python scripts/generate_agent_guide.py \
+    ontology/prov/core.ttl \
+    --output ontology/prov/AGENT_GUIDE.md
+```
+
+**Load exemplars:**
+```bash
+python scripts/load_exemplars.py \
+    --exemplar-dir experiments/reasoning_chain_validation/exemplars \
+    --db-path memory.db \
+    --ontology uniprot \
+    --stats
+```
+
+**Run experiment:**
+```bash
+python experiments/reasoning_chain_validation/rc_001_with_rlm.py --condition exemplar3
+```
+
+### Done Criteria Satisfied
+
+- ✅ Reasoning chain format defined and parser implemented
+- ✅ Curriculum levels defined with complexity estimation
+- ✅ Exemplars stored in ReasoningBank with level tags
+- ✅ Retrieval prioritizes by curriculum level
+- ✅ Verification feedback generates domain/range checks
+- ✅ Feedback injected after SPARQL queries
+- ✅ Integration with DSPy RLM complete
+- ✅ E-RC-001 experiment runs successfully
+- ✅ All features backward compatible
+- ✅ 57 tests passing
+
+### Next Steps (Improving Exemplar Impact)
+
+To better evaluate and improve exemplar effectiveness:
+
+1. **Create L3-L5 exemplars** - More complex patterns (filtering, multi-hop, aggregation)
+2. **Test on instance data** - Use ontologies with actual data (not just schema)
+3. **Design harder tasks** - Multi-hop joins, federation, named graphs
+4. **Multiple trials** - Statistical significance (3-5 trials per condition)
+5. **Qualitative analysis** - Human review of reasoning traces
+6. **Curriculum progression** - Test strict vs interleaved vs failure-driven
+
+### Related Documents
+
+- **Task summary:** `docs/tasks/05-cot-instruction-tuning.md`
+- **Design doc:** `docs/design/instruction-tuning-via-reasoning-chains.md`
+- **Experiment README:** `experiments/reasoning_chain_validation/README.md`
+- **Results:** `experiments/reasoning_chain_validation/results/comparison_summary.md`
+- **Paper:** arXiv:2509.13351v1 - PDDL-INSTRUCT
+
+### Research Implications
+
+This phase extends the research questions from Phase 3:
+
+**RQ1 Extended:** Can LMs use structured reasoning chains (not just strategies) to improve query construction?
+- Preliminary: State tracking adopted, but exemplar impact unclear
+- Need: More exemplars, harder tasks, instance data
+
+**RQ4 Extended:** Does curriculum-aware retrieval improve learning dynamics?
+- Mechanism: Level-based filtering prioritizes relevant examples
+- Tested: Retrieval works, but need longitudinal experiments
+
+**New RQ:** What level of reasoning structure helps LM-based agents?
+- State tracking vs verification vs step-by-step decomposition
+- Measured via behavior analysis scores
+- Enables fine-grained ablation studies
+

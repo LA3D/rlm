@@ -176,3 +176,18 @@ evals/benchmarks/
 
 # Memory database (generated)
 evals/memory.db
+
+# MLflow artifacts and databases
+mlflow.db
+mlruns/
+experiments/mlflow.db
+experiments/mlruns/
+
+# Test logs and trajectories  
+*.jsonl
+experiments/test_logs/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/

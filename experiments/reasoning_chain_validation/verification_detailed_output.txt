@@ -1,0 +1,50 @@
+============================================================
+TESTING VERIFICATION FEEDBACK
+============================================================
+
+Query: What is the Activity class used for?
+Ontology: /Users/cvardema/dev/git/LA3D/rlm/ontology/prov.ttl
+Verification: ENABLED
+
+Running with verification feedback enabled...
+------------------------------------------------------------
+
+============================================================
+RESULTS
+============================================================
+
+Converged: True
+Iterations: 3
+
+Answer: The Activity class is used to represent something that occurs over a period of time and acts upon or with entities. According to the PROV ontology definition, an activity may include consuming, proces...
+
+============================================================
+CHECKING FOR VERIFICATION FEEDBACK
+============================================================
+
+Trajectory has 3 steps
+Trajectory structure: <class 'dict'>
+Keys: ['reasoning', 'code', 'output']
+✓ VERIFICATION FEEDBACK FOUND
+
+Examples:
+  Iteration 2: ## Verification Feedback
+             
+
+============================================================
+FIRST STEP (checking for SPARQL calls)
+============================================================
+
+Step contents:
+  reasoning: I need to answer "What is the Activity class used for?" using the ontology tools available. Let me follow the THINK → ACT → VERIFY → REFLECT cycle:
+
+**THINK**: 
+- I have a query about the "Activity" c...
+  code: # Step 1: Search for the Activity class
+print("=== Searching for Activity class ===")
+activity_results = search_entity("Activity", limit=10, search_in="label")
+print(f"Found {len(activity_results)} re...
+  output: === Searching for Activity class ===
+Found 7 results
+1. {'uri': 'http://www.w3.org/ns/prov#Activity', 'label': 'Activity', 'match_type': 'label'}
+2. {'uri': 'http://www.w3.org/ns/prov#ActivityInfluenc...
