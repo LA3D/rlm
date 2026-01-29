@@ -1,7 +1,40 @@
 name: CI
-on:  [workflow_dispatch, pull_request, push]
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main, master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    steps: [uses: answerdotai/workflows/nbdev-ci@master]
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+        cache-dependency-path: pyproject.toml
+
+    - name: Install dependencies
+      run: |
+        set -ux
+        python -m pip install --upgrade pip
+        pip install -U nbdev
+        pip install -e '.[dev]' || pip install -e .
+
+    - name: Check if notebooks are synced
+      run: |
+        echo "Checking if notebooks are in sync"
+        nbdev_export
+        if [[ `git status --porcelain -uno` ]]; then
+          echo "Notebooks and library are not in sync. Please run nbdev_export."
+          git status -uno
+          git diff
+          exit 1
+        fi
+
+    - name: Run tests
+      run: |
+        nbdev_test
