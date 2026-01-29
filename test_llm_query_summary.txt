@@ -1,0 +1,36 @@
+======================================================================
+llm_query() INTEGRATION TEST SUMMARY
+======================================================================
+Timestamp: 2026-01-28T11:14:08.710483
+Time: 50.3s
+Iterations: 4
+Converged: True
+
+Trajectory log: test_llm_query_trajectory.jsonl
+
+Answer:
+----------------------------------------------------------------------
+Activity in this ontology (PROV-O, the W3C Provenance Ontology) is a core class representing something that occurs over a period of time and acts upon or with entities. 
+
+**Formal Definition**: "An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities."
+
+**Key Characteristics**:
+- **Type**: owl:Class
+- **Category**: starting-point (one of the fundamental PROV concepts)
+- **Component**: entities-activities
+- **Disjoint with**: Entity (activities and entities are mutually exclusive)
+
+**Relationships**:
+- Activities can **use** entities (prov:used)
+- Activities can **generate** entities (prov:generated)
+- Activities can **invalidate** entities (prov:invalidated)
+- Activities have temporal bounds (prov:startedAtTime, prov:endedAtTime)
+- Activities can be **associated with** agents (prov:wasAssociatedWith)
+- Activities can **inform** other activities (prov:wasInformedBy)
+
+**Subclasses** (8 specific activity types):
+Accept, Contribute, Copyright, Modify, Publish, Replace, RightsAssignment, Submit
+
+Activity represents the dynamic, temporal aspect of provenance - the processes and actions that transform, use, or create entities over time.
+
+----------------------------------------------------------------------

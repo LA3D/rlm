@@ -1,11 +1,31 @@
 [build-system]
-requires = ["setuptools>=64.0"]
+requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="rlm"
-requires-python=">=3.9"
-dynamic = [ "keywords", "description", "version", "dependencies", "optional-dependencies", "readme", "license", "authors", "classifiers", "entry-points", "scripts", "urls"]
+name = "rlm"
+dynamic = ["version"]
+description = "Recursive Language Models for ontology-based query construction with progressive disclosure"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [{name = "CharlesVardeman", email = "charles.vardeman@gmail.com"}]
+keywords = ['nbdev', 'jupyter', 'notebook', 'python', 'rdf', 'sparql', 'ontology', 'llm', 'recursive-language-model']
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['fastcore', 'claudette', 'dialoghelper', 'mistletoe', 'rdflib', 'sparqlx', 'rank-bm25', 'dspy-ai']
 
-[tool.uv]
-cache-keys = [{ file = "pyproject.toml" }, { file = "settings.ini" }, { file = "setup.py" }]
+[project.urls]
+Repository = "https://github.com/LA3D/rlm"
+Documentation = "https://LA3D.github.io/rlm"
+
+[project.entry-points.nbdev]
+rlm = "rlm._modidx:d"
+
+[tool.setuptools.dynamic]
+version = {attr = "rlm.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["rlm"]
+
+[tool.nbdev]
+custom_sidebar = false
