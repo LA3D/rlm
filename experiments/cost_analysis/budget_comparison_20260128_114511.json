@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-01-28T11:45:11.947176",
+  "baseline": {
+    "config": "baseline",
+    "max_iterations": 8,
+    "max_llm_calls": 16,
+    "elapsed": 56.40271592140198,
+    "iterations": 5,
+    "converged": true,
+    "answer_length": 1184,
+    "tokens": {
+      "total_input": 14082,
+      "total_output": 3172,
+      "total_tokens": 17254,
+      "llm_calls": 5,
+      "cost": 0.089826,
+      "llm_query_attempts": 0
+    },
+    "log_path": "experiments/cost_analysis/baseline_test.jsonl"
+  },
+  "with_budget": {
+    "config": "with_budget",
+    "max_iterations": 12,
+    "max_llm_calls": 20,
+    "elapsed": 58.75571298599243,
+    "iterations": 5,
+    "converged": true,
+    "answer_length": 1313,
+    "tokens": {
+      "total_input": 13493,
+      "total_output": 3153,
+      "total_tokens": 16646,
+      "llm_calls": 5,
+      "cost": 0.08777399999999999,
+      "llm_query_attempts": 0
+    },
+    "log_path": "experiments/cost_analysis/with_budget_test.jsonl"
+  }
+}

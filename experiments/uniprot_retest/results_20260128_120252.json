@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-01-28T12:02:52.241303",
+  "ontology": "uniprot/core.ttl",
+  "results": [
+    {
+      "test_name": "L1_protein_class",
+      "query": "What is the Protein class?",
+      "elapsed": 76.81678628921509,
+      "iterations": 6,
+      "converged": true,
+      "answer": "The Protein class (http://purl.uniprot.org/core/Protein) is a fundamental OWL class in the UniProt Core ontology that represents the description of a protein entity.\n\n**Key Characteristics:**\n- **Type:** owl:Class\n- **Definition:** \"Description of a protein\"\n- **Superclass:** owl:Thing\n- **Disjoint with:** Sequence class (proteins and sequences are distinct concepts)\n\n**Subclasses:**\nThe Protein class has three main subclasses that categorize protein records:\n1. Not_Obsolete_Protein - Current, active protein records\n2. Obsolete_Protein - Deprecated protein entries\n3. Reviewed_Protein - Manually curated and validated protein records\n\n**Properties and Relationships:**\nProteins have numerous properties including:\n- annotation, classifiedWith, encodedBy, encodedIn, existence, interaction\n- chainSequenceMapping, component, domain, isolatedFrom\n- mappedCitation, potentialSequence, oldMnemonic\n\n**Constraints:**\nThe class includes OWL restrictions ensuring that:\n- The replacedBy property only points to other Protein instances\n- The replaces property only points to other Protein instances\n\n**Documentation:**\n- Defined in: http://purl.uniprot.org/core/\n- Reference: http://www.uniprot.org/help/uniprotkb\n- Example instance: http://purl.uniprot.org/uniprot/P06017\n\nThe Protein class serves as the core ontological construct for representing protein data in UniProt, enabling structured, machine-readable descriptions of protein entities and their relationships.",
+      "tokens": {
+        "total_input": 22140,
+        "total_output": 4354,
+        "total_tokens": 26494,
+        "llm_calls": 7,
+        "cost": 0.13173,
+        "llm_query_attempts": 0
+      },
+      "log_path": "experiments/uniprot_retest/L1_protein_class.jsonl"
+    },
+    {
+      "test_name": "L2_protein_properties",
+      "query": "What properties does the Protein class have?",
+      "elapsed": 57.420117139816284,
+      "iterations": 6,
+      "converged": true,
+      "answer": "The Protein class has 15 properties:\n\n**Direct Properties (domain = Protein):**\n1. annotation - links to Annotation instances\n2. chainSequenceMapping - sequence mapping information\n3. classifiedWith - links to Concept instances for classification\n4. component - proteome component, links to Part instances\n5. domain - protein domain, links to Part instances\n6. encodedBy - links to Gene instances\n7. encodedIn - links to Subcellular_Location instances\n8. existence - protein existence evidence\n9. interaction - links to Interaction instances\n10. isolatedFrom - links to Tissue instances\n11. mappedCitation - links to Citation instances\n12. oldMnemonic - old mnemonic identifier (string)\n13. potentialSequence - links to Sequence instances\n\n**Properties from OWL Restrictions:**\n14. replacedBy - indicates replacement protein (allValuesFrom Protein)\n15. replaces - indicates replaced protein (allValuesFrom Protein)\n\nThese properties define the relationships and attributes that instances of the Protein class can have in the UniProt ontology.",
+      "tokens": {
+        "total_input": 20345,
+        "total_output": 3130,
+        "total_tokens": 23475,
+        "llm_calls": 6,
+        "cost": 0.107985,
+        "llm_query_attempts": 0
+      },
+      "log_path": "experiments/uniprot_retest/L2_protein_properties.jsonl"
+    },
+    {
+      "test_name": "L2_protein_taxon",
+      "query": "What is the relationship between Protein and Taxon?",
+      "elapsed": 72.14744305610657,
+      "iterations": 7,
+      "converged": true,
+      "answer": "\nThe relationship between Protein and Taxon in this ontology is expressed through the property 'organism' (http://purl.uniprot.org/core/organism). This property connects a Protein to a Taxon, indicating \"the organism in which a protein occurs.\" It is defined as an owl:ObjectProperty with rdfs:range of up:Taxon, establishing that proteins are associated with taxonomic classifications through this property.\n",
+      "tokens": {
+        "total_input": 28361,
+        "total_output": 3905,
+        "total_tokens": 32266,
+        "llm_calls": 7,
+        "cost": 0.143658,
+        "llm_query_attempts": 0
+      },
+      "log_path": "experiments/uniprot_retest/L2_protein_taxon.jsonl"
+    }
+  ]
+}

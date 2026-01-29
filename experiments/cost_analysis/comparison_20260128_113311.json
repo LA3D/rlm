@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-01-28T11:33:11.451730",
+  "query": "What is Activity in this ontology?",
+  "ontology": "ontology/prov.ttl",
+  "max_iterations": 8,
+  "rlm": {
+    "pattern": "RLM",
+    "elapsed": 57.44162201881409,
+    "iterations": 5,
+    "converged": true,
+    "input_tokens": 29265,
+    "output_tokens": 6081,
+    "total_tokens": 35346,
+    "cost": 0.17901,
+    "tokens_per_iteration": 7069.2,
+    "answer_length": 699,
+    "log_path": "experiments/cost_analysis/rlm_cost_test.jsonl"
+  },
+  "react": {
+    "pattern": "ReAct",
+    "elapsed": 55.34720802307129,
+    "iterations": 16,
+    "converged": true,
+    "input_tokens": 61288,
+    "output_tokens": 5459,
+    "total_tokens": 66747,
+    "cost": 0.265749,
+    "tokens_per_iteration": 4171.6875,
+    "answer_length": 1465,
+    "log_path": "experiments/cost_analysis/react_cost_test.jsonl"
+  }
+}

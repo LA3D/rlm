@@ -196,6 +196,7 @@ def run_dspy_rlm(
     from rlm.ontology import GraphMeta
     from rlm_runtime.interpreter import NamespaceCodeInterpreter
     from rlm_runtime.tools.ontology_tools import make_search_entity_tool, make_sparql_select_tool
+    # Note: llm_query is built-in to DSPy RLM, no need to import
     from rlm_runtime.ontology import build_sense_card, format_sense_card
 
     # Auto-generate run_id if not provided and memory backend exists
@@ -335,6 +336,7 @@ def run_dspy_rlm(
     # Create MINIMAL bounded tools (search_entity + sparql_select)
     # Based on testing, minimal tools are 55% faster (4.5 vs 10 iterations average)
     # and work across diverse metadata conventions (PROV, SKOS, RDFS, DCTERMS)
+    # Note: llm_query() and llm_query_batched() are built-in to DSPy RLM (automatically available)
     tools = {
         'search_entity': make_search_entity_tool(meta),
         'sparql_select': make_sparql_select_tool(meta)
@@ -381,6 +383,45 @@ def run_dspy_rlm(
         "",
         "IMPORTANT: When calling SUBMIT, use keyword arguments with literal values or inline expressions.",
         "Example: SUBMIT(answer='The answer is...', sparql='SELECT...', evidence={'key': value})",
+        "",
+        "## Available Tools",
+        "",
+        "1. **search_entity(pattern, limit=10, search_in='label')** - Find entities by text match",
+        "2. **sparql_select(query)** - Execute SPARQL SELECT query",
+        "3. **llm_query(prompt)** - BUILT-IN: Delegate semantic analysis to sub-LLM (max ~500K chars)",
+        "4. **llm_query_batched(prompts)** - BUILT-IN: Query multiple prompts concurrently (faster)",
+        "",
+        "### When to Use llm_query() - Strategic Sub-LLM Delegation",
+        "",
+        "llm_query() is a BUILT-IN DSPy RLM tool for strategic decisions requiring semantic understanding.",
+        "",
+        "**Good uses** (semantic analysis):",
+        "- **Disambiguation**: 'Which of these entities is the main Activity class (not specific instance)?'",
+        "- **Validation**: 'Does this SPARQL query have syntax errors or logical issues?'",
+        "- **Filtering**: 'Which of these 20 properties are most important for defining this class?'",
+        "- **Synthesis**: 'Based on this evidence, write a 2-sentence explanation of Activity'",
+        "",
+        "**Bad uses** (use other tools instead):",
+        "- Facts → use search_entity() or sparql_select()",
+        "- String operations → use Python (split, strip, etc.)",
+        "- Math/counting → use Python (len(), sum(), etc.)",
+        "- General knowledge → focus on ontology data",
+        "",
+        "**Example delegation pattern**:",
+        "```python",
+        "# 1. Search",
+        "results = search_entity('Activity', limit=5)",
+        "print(f'Found: {results}')",
+        "",
+        "# 2. Disambiguate via sub-LLM (strategic delegation)",
+        "analysis = llm_query(",
+        "    f'Which of these is the main Activity class in PROV ontology? {results}'",
+        ")",
+        "print(f'Sub-LLM analysis: {analysis}')",
+        "",
+        "# 3. Use the finding",
+        "# ... extract URI and query ...",
+        "```",
         "",
         "## Reasoning Process with State Tracking",
         "",
@@ -461,7 +502,30 @@ def run_dspy_rlm(
                 context_parts.append("")
                 context_parts.append(regular_context)
 
+    # Add delegation guidance for sub-LLM usage
     context_parts.extend([
+        "",
+        "## Delegation Strategies",
+        "",
+        "You have access to `llm_query(prompt)` for semantic disambiguation. Use it when:",
+        "1. **Search returns no results** after 1-2 attempts for a concept",
+        "2. **Mapping natural language to URIs** (GO terms, taxon IDs, locations)",
+        "3. **Understanding relationships** between ontology concepts",
+        "",
+        "Example delegation patterns:",
+        "```python",
+        "# Instead of multiple searches for 'kinase activity':",
+        'go_term = llm_query("What is the GO term for kinase activity? Just answer with the GO ID like GO:0016301")',
+        "",
+        "# Instead of searching for organism names:",
+        'taxon_id = llm_query("What is the NCBI taxon ID for Homo sapiens? Just the number.")',
+        "",
+        "# Instead of searching for cellular locations:",
+        'location = llm_query("What is the UniProt subcellular location for mitochondria? Include the SL ID.")',
+        "```",
+        "",
+        "Delegation is faster and cheaper than brute-force search. One llm_query call costs ~$0.01",
+        "vs multiple search iterations at ~$0.10.",
         "",
         "Goal: Answer the query grounded in retrieved evidence.",
     ])
@@ -990,6 +1054,32 @@ Evidence MUST include actual data samples (sequences, labels, descriptions) NOT 
     # Inject memories into context if available
     if memory_context:
         context = context + "\n\n" + memory_context
+
+    # Add delegation guidance for sub-LLM usage
+    delegation_guidance = """
+## Delegation Strategies
+
+You have access to `llm_query(prompt)` for semantic disambiguation. Use it when:
+1. **Search returns no results** after 1-2 attempts for a concept
+2. **Mapping natural language to URIs** (GO terms, taxon IDs, locations)
+3. **Understanding relationships** between ontology concepts
+
+Example delegation patterns:
+```python
+# Instead of multiple searches for 'kinase activity':
+go_term = llm_query("What is the GO term for kinase activity? Just answer with the GO ID like GO:0016301")
+
+# Instead of searching for organism names:
+taxon_id = llm_query("What is the NCBI taxon ID for Homo sapiens? Just the number.")
+
+# Instead of searching for cellular locations:
+location = llm_query("What is the UniProt subcellular location for mitochondria? Include the SL ID.")
+```
+
+Delegation is faster and cheaper than brute-force search. One llm_query call costs ~$0.01
+vs multiple search iterations at ~$0.10.
+"""
+    context = context + "\n" + delegation_guidance
 
     # Define typed signature with explicit reasoning fields (Think-Act-Verify-Reflect)
     class QueryConstructionSig(dspy.Signature):

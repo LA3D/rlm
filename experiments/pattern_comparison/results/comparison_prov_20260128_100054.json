@@ -1,0 +1,122 @@
+{
+  "ontology": "prov",
+  "ontology_path": "ontology/prov/prov.ttl",
+  "patterns": [
+    "dspy_rlm",
+    "dspy_react"
+  ],
+  "config": {
+    "result_truncation_limit": 10000,
+    "enable_verification": true,
+    "require_agent_guide": false,
+    "max_iterations": 8,
+    "verbose": false
+  },
+  "timestamp": "20260128_100054",
+  "results": [
+    {
+      "pattern": "dspy_rlm",
+      "task_query": "What is the Protein class?",
+      "task_level": "L1",
+      "converged": false,
+      "iteration_count": 0,
+      "elapsed_seconds": 2.002716064453125e-05,
+      "answer": "",
+      "sparql": null,
+      "evidence": {},
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    },
+    {
+      "pattern": "dspy_rlm",
+      "task_query": "What is Activity in this ontology?",
+      "task_level": "L1",
+      "converged": false,
+      "iteration_count": 0,
+      "elapsed_seconds": 1.0013580322265625e-05,
+      "answer": "",
+      "sparql": null,
+      "evidence": {},
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    },
+    {
+      "pattern": "dspy_react",
+      "task_query": "What is the Protein class?",
+      "task_level": "L1",
+      "converged": false,
+      "iteration_count": 0,
+      "elapsed_seconds": 8.106231689453125e-06,
+      "answer": "",
+      "sparql": null,
+      "evidence": {},
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    },
+    {
+      "pattern": "dspy_react",
+      "task_query": "What is Activity in this ontology?",
+      "task_level": "L1",
+      "converged": false,
+      "iteration_count": 0,
+      "elapsed_seconds": 5.9604644775390625e-06,
+      "answer": "",
+      "sparql": null,
+      "evidence": {},
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    }
+  ],
+  "errors": [
+    {
+      "pattern": "dspy_rlm",
+      "task": "What is the Protein class?",
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    },
+    {
+      "pattern": "dspy_rlm",
+      "task": "What is Activity in this ontology?",
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    },
+    {
+      "pattern": "dspy_react",
+      "task": "What is the Protein class?",
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    },
+    {
+      "pattern": "dspy_react",
+      "task": "What is Activity in this ontology?",
+      "error": "Ontology not found: ontology/prov/prov.ttl"
+    }
+  ],
+  "summary": {
+    "dspy_rlm": {
+      "total_tasks": 2,
+      "converged": 0,
+      "failed": 2,
+      "convergence_rate": 0.0,
+      "avg_iterations": 0,
+      "avg_time": 1.5020370483398438e-05,
+      "total_time": 3.0040740966796875e-05,
+      "by_level": {
+        "L1": {
+          "total": 2,
+          "converged": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "dspy_react": {
+      "total_tasks": 2,
+      "converged": 0,
+      "failed": 2,
+      "convergence_rate": 0.0,
+      "avg_iterations": 0,
+      "avg_time": 7.033348083496094e-06,
+      "total_time": 1.4066696166992188e-05,
+      "by_level": {
+        "L1": {
+          "total": 2,
+          "converged": 0,
+          "rate": 0.0
+        }
+      }
+    }
+  }
+}

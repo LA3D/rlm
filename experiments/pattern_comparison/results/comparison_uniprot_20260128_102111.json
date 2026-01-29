@@ -1,0 +1,96 @@
+{
+  "ontology": "uniprot",
+  "ontology_path": "ontology/uniprot/core.ttl",
+  "patterns": [
+    "dspy_rlm"
+  ],
+  "config": {
+    "result_truncation_limit": 10000,
+    "enable_verification": true,
+    "require_agent_guide": false,
+    "max_iterations": 8,
+    "verbose": false
+  },
+  "timestamp": "20260128_102111",
+  "results": [
+    {
+      "pattern": "dspy_rlm",
+      "task_query": "What is the Protein class?",
+      "task_level": "L1",
+      "converged": true,
+      "iteration_count": 4,
+      "elapsed_seconds": 53.381210803985596,
+      "answer": "\nThe Protein class (http://purl.uniprot.org/core/Protein) is an OWL class in the UniProt Core Ontology that represents \"Description of a protein.\" \n\nKey characteristics:\n- **Type**: owl:Class\n- **Definition**: Describes protein entities in UniProt\n- **Superclass**: owl:Thing\n- **Disjoint with**: Sequence class (proteins are distinct from their sequences)\n\n**Constraints**: The class has OWL restrictions ensuring that:\n- The `replacedBy` property can only point to other Proteins\n- The `replaces` property can only point to other Proteins\n\n**Properties**: 13 properties have Protein as their domain, including:\n- annotation (for various annotations)\n- encodedBy, encodedIn (genetic relationships)\n- interaction (protein interactions)\n- classifiedWith (classification)\n- domain (protein domains)\n- existence (evidence level)\n\n**Subclasses**: Three specialized types:\n1. Not_Obsolete_Protein - Current protein records\n2. Obsolete_Protein - Deprecated protein records\n3. Reviewed_Protein - Manually reviewed protein records\n\n**Example**: http://purl.uniprot.org/uniprot/P06017\n\nThe Protein class serves as the central entity type for representing protein knowledge in UniProt's RDF representation.\n",
+      "sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?property ?value\nWHERE {\n  up:Protein ?property ?value .\n}",
+      "evidence": {
+        "class_uri": "http://purl.uniprot.org/core/Protein",
+        "class_type": "owl:Class",
+        "label": "Protein",
+        "comment": "Description of a protein.",
+        "superclass": "owl:Thing",
+        "disjoint_with": [
+          "http://purl.uniprot.org/core/Sequence"
+        ],
+        "restrictions": [
+          {
+            "property": "http://purl.uniprot.org/core/replacedBy",
+            "constraint": "allValuesFrom Protein"
+          },
+          {
+            "property": "http://purl.uniprot.org/core/replaces",
+            "constraint": "allValuesFrom Protein"
+          }
+        ],
+        "domain_properties": [
+          "annotation",
+          "chainSequenceMapping",
+          "classifiedWith",
+          "component",
+          "domain",
+          "encodedBy",
+          "encodedIn",
+          "existence",
+          "interaction",
+          "isolatedFrom"
+        ],
+        "subclasses": [
+          {
+            "uri": "http://purl.uniprot.org/core/Not_Obsolete_Protein",
+            "label": "Not obsolete protein (record)"
+          },
+          {
+            "uri": "http://purl.uniprot.org/core/Obsolete_Protein",
+            "label": "Obsolete Protein"
+          },
+          {
+            "uri": "http://purl.uniprot.org/core/Reviewed_Protein",
+            "label": "Reviewed protein (records)"
+          }
+        ],
+        "example_instance": "http://purl.uniprot.org/uniprot/P06017",
+        "defined_by": "http://purl.uniprot.org/core/",
+        "see_also": "http://www.uniprot.org/help/uniprotkb"
+      },
+      "error": null
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "dspy_rlm": {
+      "total_tasks": 1,
+      "converged": 1,
+      "failed": 0,
+      "convergence_rate": 1.0,
+      "avg_iterations": 4.0,
+      "avg_time": 53.381210803985596,
+      "total_time": 53.381210803985596,
+      "by_level": {
+        "L1": {
+          "total": 1,
+          "converged": 1,
+          "rate": 1.0
+        }
+      }
+    }
+  }
+}

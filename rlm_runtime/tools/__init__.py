@@ -21,6 +21,11 @@ from .sparql_tools import (
     make_sparql_tools,
 )
 
+from .delegation_tools import (
+    make_llm_query_tool,
+    make_llm_batch_tool,
+)
+
 __all__ = [
     "make_search_entity_tool",
     "make_describe_entity_tool",
@@ -34,4 +39,6 @@ __all__ = [
     "make_res_group_tool",
     "make_res_distinct_tool",
     "make_sparql_tools",
+    "make_llm_query_tool",
+    "make_llm_batch_tool",
 ]

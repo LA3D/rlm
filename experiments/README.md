@@ -6,8 +6,9 @@ This directory contains experiments validating and comparing different approache
 
 - **[Agent Guide Generation](#agent-guide-generation-experiment)** - Compare 4 approaches for generating AGENT_GUIDE.md documentation
 - **[Reasoning Chain Validation](#reasoning-chain-validation-experiment)** - Test PDDL-INSTRUCT style reasoning chains for SPARQL construction
+- **[Reasoning Test (L3-L4)](#reasoning-test-experiment)** - Test if complex reasoning triggers delegation in RLM
 - **Results Summary** - [PROV](#prov-results-small-ontology) | [UniProt](#uniprot-results-large-ontology)
-- **Code** - [agent_guide_generation/](./agent_guide_generation/) | [reasoning_chain_validation/](./reasoning_chain_validation/)
+- **Code** - [agent_guide_generation/](./agent_guide_generation/) | [reasoning_chain_validation/](./reasoning_chain_validation/) | [reasoning_test/](./reasoning_test/)
 
 ---
 
@@ -413,6 +414,73 @@ reasoning_chain_validation/
 
 - [ontology-kr-affordances-for-llm-reasoning.md](../docs/design/ontology-kr-affordances-for-llm-reasoning.md)
 - [instruction-tuning-via-reasoning-chains.md](../docs/design/instruction-tuning-via-reasoning-chains.md)
+
+---
+
+## Reasoning Test Experiment
+
+**Goal:** Determine if L3-L4 reasoning complexity triggers strategic delegation (`llm_query`) in RLM, or if tool-first pattern remains universal.
+
+### Background
+
+L1-L2 tests showed RLM uses a "tool-first" pattern:
+- **0 delegation attempts** on simple queries
+- Direct SPARQL construction via bounded tools
+- AGENT_GUIDE.md provides sufficient scaffolding
+- Cost: $0.11-0.13 per query (52% cheaper than ReAct)
+
+**Question:** Does this pattern scale to complex reasoning?
+
+### Test Queries (L3-L4 Complexity)
+
+| ID | Level | Query | Reasoning Challenge |
+|----|-------|-------|-------------------|
+| L3-1 | Multi-entity | "Find reviewed human proteins with kinase activity" | Coordinate 4 concepts + GO hierarchy |
+| L3-2 | Multi-hop | "What diseases involve enzymes in mitochondria?" | 2 annotation paths + transitive hierarchy |
+| L4-1 | Spatial | "Find diseases from variants in active sites" | Position overlap reasoning with FALDO |
+| L3-3 | Comparison | "How do human vs mouse proteins differ?" | Cross-organism aggregation |
+| L4-2 | Integration | "Find proteins with disease + drug targets + membrane-bound" | 3+ constraint coordination |
+
+### Metrics
+
+| Metric | Target | Interpretation |
+|--------|--------|----------------|
+| **Delegation rate** | ≥2/5 queries | Delegation emerges for complex reasoning |
+| **Cost** | < $0.25/query | Remains cheaper than ReAct baseline |
+| **Convergence** | ≥80% | Reliable within budget |
+
+### Expected Outcomes
+
+**Scenario A: Delegation emerges** ✅
+- L3-L4 triggers `llm_query()` for disambiguation/validation
+- Cost increases 20-40% but still cheaper than ReAct
+- Document delegation patterns for production use
+
+**Scenario B: Tool-first continues** ⚪
+- AGENT_GUIDE.md + tools handle L3-L4 directly
+- Cost remains low ($0.15-0.20/query)
+- Accept tool-first as optimal for RDF domain
+
+**Scenario C: Mixed results** 🔀
+- Delegation for specific challenges (spatial, GO terms)
+- Not needed for multi-entity coordination
+- Document when delegation helps
+
+### Files
+
+```
+reasoning_test/
+├── README.md                      # Full experiment design
+├── run_reasoning_test.py          # Test runner (5 queries)
+├── analyze_trajectory.py          # Trajectory visualization tool
+└── results/                       # Logs and summaries
+```
+
+### Related Analysis
+
+- [rlm-behavior-l1-l2-queries.md](../docs/analysis/rlm-behavior-l1-l2-queries.md) - L1-L2 baseline results
+- [rlm-execution-deep-dive.md](../docs/analysis/rlm-execution-deep-dive.md) - Technical execution details
+- [rlm-system-behavior-summary.md](../docs/analysis/rlm-system-behavior-summary.md) - System overview
 
 ---
 
