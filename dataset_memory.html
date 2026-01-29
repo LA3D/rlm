@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="RDF Dataset-based session memory for RLM">
+
+<title>dataset – rlm</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-000f0825b9c55ed21d14970d810c14a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="dataset – rlm">
+<meta property="og:description" content="RDF Dataset-based session memory for RLM">
+<meta property="og:site_name" content="rlm">
+<meta name="twitter:title" content="dataset – rlm">
+<meta name="twitter:description" content="RDF Dataset-based session memory for RLM">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">rlm</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./dataset_memory.html">dataset</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RLM</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ontology.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ontology</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dataset_memory.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">dataset</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./logger.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">logger</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./sparql_handles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sparql_handles</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./test_memory_solveit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Testing RLM Memory Step-by-Step</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./procedural_memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">procedural_memory</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reasoning_bank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">reasoning_bank</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./shacl_examples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SHACL Examples and Shape Indexing</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./eval_reports.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluation Reports</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RLM Tutorial: Progressive Disclosure Over RDF Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rlm_paper.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recursive Language Models</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#design-principles" id="toc-design-principles" class="nav-link" data-scroll-target="#design-principles">Design Principles</a></li>
+  </ul></li>
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports">Imports</a></li>
+  <li><a href="#datasetmeta" id="toc-datasetmeta" class="nav-link" data-scroll-target="#datasetmeta">DatasetMeta</a>
+  <ul class="collapse">
+  <li><a href="#datasetmeta-1" id="toc-datasetmeta-1" class="nav-link" data-scroll-target="#datasetmeta-1">DatasetMeta</a></li>
+  </ul></li>
+  <li><a href="#setup-function" id="toc-setup-function" class="nav-link" data-scroll-target="#setup-function">Setup Function</a></li>
+  <li><a href="#memory-operations" id="toc-memory-operations" class="nav-link" data-scroll-target="#memory-operations">Memory Operations</a>
+  <ul class="collapse">
+  <li><a href="#mem_add" id="toc-mem_add" class="nav-link" data-scroll-target="#mem_add">mem_add</a></li>
+  <li><a href="#mem_query" id="toc-mem_query" class="nav-link" data-scroll-target="#mem_query">mem_query</a></li>
+  <li><a href="#mem_retract" id="toc-mem_retract" class="nav-link" data-scroll-target="#mem_retract">mem_retract</a></li>
+  <li><a href="#mem_describe" id="toc-mem_describe" class="nav-link" data-scroll-target="#mem_describe">mem_describe</a></li>
+  </ul></li>
+  <li><a href="#scratch-graph-operations" id="toc-scratch-graph-operations" class="nav-link" data-scroll-target="#scratch-graph-operations">Scratch Graph Operations</a>
+  <ul class="collapse">
+  <li><a href="#work_create" id="toc-work_create" class="nav-link" data-scroll-target="#work_create">work_create</a></li>
+  <li><a href="#work_cleanup" id="toc-work_cleanup" class="nav-link" data-scroll-target="#work_cleanup">work_cleanup</a></li>
+  <li><a href="#work_to_mem" id="toc-work_to_mem" class="nav-link" data-scroll-target="#work_to_mem">work_to_mem</a></li>
+  </ul></li>
+  <li><a href="#snapshot-functions" id="toc-snapshot-functions" class="nav-link" data-scroll-target="#snapshot-functions">Snapshot Functions</a>
+  <ul class="collapse">
+  <li><a href="#snapshot_dataset" id="toc-snapshot_dataset" class="nav-link" data-scroll-target="#snapshot_dataset">snapshot_dataset</a></li>
+  <li><a href="#load_snapshot" id="toc-load_snapshot" class="nav-link" data-scroll-target="#load_snapshot">load_snapshot</a></li>
+  </ul></li>
+  <li><a href="#bounded-view-functions" id="toc-bounded-view-functions" class="nav-link" data-scroll-target="#bounded-view-functions">Bounded View Functions</a>
+  <ul class="collapse">
+  <li><a href="#res_distinct" id="toc-res_distinct" class="nav-link" data-scroll-target="#res_distinct">res_distinct</a></li>
+  <li><a href="#res_group" id="toc-res_group" class="nav-link" data-scroll-target="#res_group">res_group</a></li>
+  <li><a href="#res_where" id="toc-res_where" class="nav-link" data-scroll-target="#res_where">res_where</a></li>
+  <li><a href="#res_head" id="toc-res_head" class="nav-link" data-scroll-target="#res_head">res_head</a></li>
+  <li><a href="#resulttable" id="toc-resulttable" class="nav-link" data-scroll-target="#resulttable">ResultTable</a></li>
+  </ul></li>
+  <li><a href="#result-table-views-stage-2" id="toc-result-table-views-stage-2" class="nav-link" data-scroll-target="#result-table-views-stage-2">Result Table Views (Stage 2)</a>
+  <ul class="collapse">
+  <li><a href="#use-cases" id="toc-use-cases" class="nav-link" data-scroll-target="#use-cases">Use Cases</a></li>
+  <li><a href="#dataset_stats" id="toc-dataset_stats" class="nav-link" data-scroll-target="#dataset_stats">dataset_stats</a></li>
+  <li><a href="#list_graphs" id="toc-list_graphs" class="nav-link" data-scroll-target="#list_graphs">list_graphs</a></li>
+  <li><a href="#graph_sample" id="toc-graph_sample" class="nav-link" data-scroll-target="#graph_sample">graph_sample</a></li>
+  </ul></li>
+  <li><a href="#ontology-integration" id="toc-ontology-integration" class="nav-link" data-scroll-target="#ontology-integration">Ontology Integration</a>
+  <ul class="collapse">
+  <li><a href="#mount_ontology" id="toc-mount_ontology" class="nav-link" data-scroll-target="#mount_ontology">mount_ontology</a></li>
+  <li><a href="#setup_dataset_context" id="toc-setup_dataset_context" class="nav-link" data-scroll-target="#setup_dataset_context">setup_dataset_context</a></li>
+  </ul></li>
+  <li><a href="#tests" id="toc-tests" class="nav-link" data-scroll-target="#tests">Tests</a></li>
+  <li><a href="#usage-examples" id="toc-usage-examples" class="nav-link" data-scroll-target="#usage-examples">Usage Examples</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/LA3D/rlm/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset_memory.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">dataset</h1>
+</div>
+
+<div>
+  <div class="description">
+    RDF Dataset-based session memory for RLM
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>This module implements RDF Dataset-based memory for RLM sessions using named graphs:</p>
+<ul>
+<li><code>onto/&lt;name&gt;</code> - Read-only ontology graphs</li>
+<li><code>mem</code> - Mutable working memory for current session</li>
+<li><code>prov</code> - Provenance/audit trail</li>
+<li><code>work/&lt;task_id&gt;</code> - Scratch graphs for intermediate results</li>
+</ul>
+<section id="design-principles" class="level3">
+<h3 class="anchored" data-anchor-id="design-principles">Design Principles</h3>
+<ul>
+<li><strong>Session-scoped</strong>: <code>mem</code> is working memory for current RLM run</li>
+<li><strong>Handle-based access</strong>: Model sees bounded views, never raw quads</li>
+<li><strong>Provenance tracking</strong>: All <code>mem</code> changes recorded with timestamp/source/reason</li>
+<li><strong>Lazy indexing</strong>: Caches invalidated on mutation</li>
+</ul>
+</section>
+</section>
+<section id="imports" class="level2">
+<h2 class="anchored" data-anchor-id="imports">Imports</h2>
+</section>
+<section id="datasetmeta" class="level2">
+<h2 class="anchored" data-anchor-id="datasetmeta">DatasetMeta</h2>
+<p>Meta-graph navigation for RDF Dataset with lazy-cached indexes.</p>
+<hr>
+<section id="datasetmeta-1" class="level3">
+<h3 class="anchored" data-anchor-id="datasetmeta-1">DatasetMeta</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> DatasetMeta(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    dataset:Dataset, name:<span class="bu">str</span><span class="op">=</span><span class="st">'ds'</span>, session_id:<span class="bu">str</span><span class="op">=&lt;</span>factory<span class="op">&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="va">None</span>:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Meta-graph navigation for RDF Dataset.</em></p>
+<p>Provides lazy-cached indexes and bounded views over named graphs. Indexes are invalidated on any mutation to mem graph.</p>
+</section>
+</section>
+<section id="setup-function" class="level2">
+<h2 class="anchored" data-anchor-id="setup-function">Setup Function</h2>
+</section>
+<section id="memory-operations" class="level2">
+<h2 class="anchored" data-anchor-id="memory-operations">Memory Operations</h2>
+<hr>
+<section id="mem_add" class="level3">
+<h3 class="anchored" data-anchor-id="mem_add">mem_add</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mem_add(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, subject, predicate, obj, source:<span class="bu">str</span><span class="op">=</span><span class="st">'agent'</span>, reason:<span class="bu">str</span><span class="op">=</span><span class="va">None</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Add fact to mem with provenance tracking.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset subject: Subject URI or literal predicate: Predicate URI obj: Object URI or literal source: Source of this fact (default: ‘agent’) reason: Optional reason for adding</p>
+<p>Returns: Summary string</p>
+<hr>
+</section>
+<section id="mem_query" class="level3">
+<h3 class="anchored" data-anchor-id="mem_query">mem_query</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mem_query(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, sparql:<span class="bu">str</span>, limit:<span class="bu">int</span><span class="op">=</span><span class="dv">100</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Query mem graph, return bounded results.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset sparql: SPARQL query string limit: Maximum results to return</p>
+<p>Returns: List of result rows (as dicts)</p>
+<hr>
+</section>
+<section id="mem_retract" class="level3">
+<h3 class="anchored" data-anchor-id="mem_retract">mem_retract</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mem_retract(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, subject:NoneType<span class="op">=</span><span class="va">None</span>, predicate:NoneType<span class="op">=</span><span class="va">None</span>, obj:NoneType<span class="op">=</span><span class="va">None</span>, source:<span class="bu">str</span><span class="op">=</span><span class="st">'agent'</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    reason:<span class="bu">str</span><span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Remove triples with provenance.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset subject: Subject URI or None (wildcard) predicate: Predicate URI or None (wildcard) obj: Object URI/literal or None (wildcard) source: Source of this retraction reason: Optional reason for removing</p>
+<p>Returns: Summary string</p>
+<hr>
+</section>
+<section id="mem_describe" class="level3">
+<h3 class="anchored" data-anchor-id="mem_describe">mem_describe</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mem_describe(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, uri:<span class="bu">str</span>, limit:<span class="bu">int</span><span class="op">=</span><span class="dv">20</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">dict</span>:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Get bounded entity description from mem.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset uri: URI of entity to describe limit: Maximum triples to include</p>
+<p>Returns: Dict with ‘as_subject’ and ‘as_object’ triple lists</p>
+</section>
+</section>
+<section id="scratch-graph-operations" class="level2">
+<h2 class="anchored" data-anchor-id="scratch-graph-operations">Scratch Graph Operations</h2>
+<hr>
+<section id="work_create" class="level3">
+<h3 class="anchored" data-anchor-id="work_create">work_create</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> work_create(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, task_id:<span class="bu">str</span><span class="op">=</span><span class="va">None</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">tuple</span>:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Create a scratch graph for intermediate results.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset task_id: Task identifier (default: auto-generated)</p>
+<p>Returns: (graph_uri, graph) tuple</p>
+<hr>
+</section>
+<section id="work_cleanup" class="level3">
+<h3 class="anchored" data-anchor-id="work_cleanup">work_cleanup</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> work_cleanup(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, task_id:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="bu">all</span>:<span class="bu">bool</span><span class="op">=</span><span class="va">False</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Remove scratch graph(s).</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset task_id: Specific task to clean up, or None all: If True, remove all work/* graphs</p>
+<p>Returns: Summary string</p>
+<hr>
+</section>
+<section id="work_to_mem" class="level3">
+<h3 class="anchored" data-anchor-id="work_to_mem">work_to_mem</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> work_to_mem(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, task_id:<span class="bu">str</span>, source:<span class="bu">str</span><span class="op">=</span><span class="st">'work'</span>, reason:<span class="bu">str</span><span class="op">=</span><span class="va">None</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Promote triples from scratch graph to mem with provenance.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset task_id: Task identifier for work graph source: Source label for provenance reason: Optional reason for promotion</p>
+<p>Returns: Summary string</p>
+</section>
+</section>
+<section id="snapshot-functions" class="level2">
+<h2 class="anchored" data-anchor-id="snapshot-functions">Snapshot Functions</h2>
+<hr>
+<section id="snapshot_dataset" class="level3">
+<h3 class="anchored" data-anchor-id="snapshot_dataset">snapshot_dataset</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> snapshot_dataset(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, path:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, <span class="bu">format</span>:<span class="bu">str</span><span class="op">=</span><span class="st">'trig'</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Serialize dataset to TriG/N-Quads for debugging.</em></p>
+<p>Args: ds_meta: DatasetMeta to snapshot path: Output path (default: auto-generated with timestamp) format: ‘trig’ or ‘nquads’</p>
+<p>Returns: Path to snapshot file</p>
+<hr>
+</section>
+<section id="load_snapshot" class="level3">
+<h3 class="anchored" data-anchor-id="load_snapshot">load_snapshot</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_snapshot(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    path:<span class="bu">str</span>, ns:<span class="bu">dict</span>, name:<span class="bu">str</span><span class="op">=</span><span class="st">'ds'</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Load dataset from TriG/N-Quads snapshot.</em></p>
+<p>Useful for debugging/replay. Note: The snapshot preserves the original dataset name in graph URIs, so if you want to use the original name, extract it from the graph URIs.</p>
+<p>Args: path: Path to snapshot file ns: Namespace dict where Dataset will be stored name: Variable name for the Dataset handle</p>
+<p>Returns: Summary string</p>
+</section>
+</section>
+<section id="bounded-view-functions" class="level2">
+<h2 class="anchored" data-anchor-id="bounded-view-functions">Bounded View Functions</h2>
+<hr>
+<section id="res_distinct" class="level3">
+<h3 class="anchored" data-anchor-id="res_distinct">res_distinct</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> res_distinct(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    result, column:<span class="bu">str</span>, limit:<span class="bu">int</span><span class="op">=</span><span class="dv">50</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Get distinct values in a column.</em></p>
+<p>Args: result: ResultTable or list of dicts column: Column to get distinct values from limit: Maximum distinct values to return</p>
+<p>Returns: List of distinct values</p>
+<hr>
+</section>
+<section id="res_group" class="level3">
+<h3 class="anchored" data-anchor-id="res_group">res_group</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> res_group(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    result, column:<span class="bu">str</span>, limit:<span class="bu">int</span><span class="op">=</span><span class="dv">20</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Get counts grouped by column value.</em></p>
+<p>Args: result: ResultTable or list of dicts column: Column to group by limit: Maximum groups to return</p>
+<p>Returns: List of (value, count) tuples, sorted by count descending</p>
+<hr>
+</section>
+<section id="res_where" class="level3">
+<h3 class="anchored" data-anchor-id="res_where">res_where</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> res_where(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    result, column:<span class="bu">str</span>, pattern:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, value:<span class="bu">str</span><span class="op">=</span><span class="va">None</span>, limit:<span class="bu">int</span><span class="op">=</span><span class="dv">100</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Filter result rows by column value or regex pattern.</em></p>
+<p>Args: result: ResultTable or list of dicts column: Column name to filter on pattern: Optional regex pattern to match value: Optional exact value to match limit: Maximum matching rows to return (default: 100)</p>
+<p>Returns: List of matching rows</p>
+<hr>
+</section>
+<section id="res_head" class="level3">
+<h3 class="anchored" data-anchor-id="res_head">res_head</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> res_head(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    result, n:<span class="bu">int</span><span class="op">=</span><span class="dv">10</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Get first N rows of a result set.</em></p>
+<p>Args: result: ResultTable, list of dicts, or list of tuples n: Number of rows to return</p>
+<p>Returns: List of rows (same format as input)</p>
+<hr>
+</section>
+<section id="resulttable" class="level3">
+<h3 class="anchored" data-anchor-id="resulttable">ResultTable</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ResultTable(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    rows:<span class="bu">list</span>, columns:<span class="bu">list</span>, query:<span class="bu">str</span>, total_rows:<span class="bu">int</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="va">None</span>:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Wrapper for SPARQL query results with bounded view operations.</em></p>
+</section>
+</section>
+<section id="result-table-views-stage-2" class="level2">
+<h2 class="anchored" data-anchor-id="result-table-views-stage-2">Result Table Views (Stage 2)</h2>
+<p>Bounded view operations over SPARQL query results enable iterative exploration without overwhelming context:</p>
+<ul>
+<li><strong>res_head()</strong>: Preview first N rows</li>
+<li><strong>res_where()</strong>: Filter by column value or regex</li>
+<li><strong>res_group()</strong>: Aggregate and count by column</li>
+<li><strong>res_distinct()</strong>: Find unique values</li>
+</ul>
+<p>These work with <code>ResultTable</code> wrapper or plain list-of-dicts from <code>mem_query()</code>.</p>
+<section id="use-cases" class="level3">
+<h3 class="anchored" data-anchor-id="use-cases">Use Cases</h3>
+<ul>
+<li>Previewing large result sets: <code>res_head(results, 10)</code></li>
+<li>Finding specific entities: <code>res_where(results, 'name', pattern='Alice')</code></li>
+<li>Understanding data distribution: <code>res_group(results, 'category')</code></li>
+<li>Exploring unique values: <code>res_distinct(results, 'author')</code></li>
+</ul>
+<hr>
+</section>
+<section id="dataset_stats" class="level3">
+<h3 class="anchored" data-anchor-id="dataset_stats">dataset_stats</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dataset_stats(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Get dataset statistics summary.</em></p>
+<hr>
+</section>
+<section id="list_graphs" class="level3">
+<h3 class="anchored" data-anchor-id="list_graphs">list_graphs</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_graphs(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, pattern:<span class="bu">str</span><span class="op">=</span><span class="va">None</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>List named graphs, optionally filtered.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset pattern: Optional substring to filter graph URIs</p>
+<p>Returns: List of (graph_uri, triple_count) tuples</p>
+<hr>
+</section>
+<section id="graph_sample" class="level3">
+<h3 class="anchored" data-anchor-id="graph_sample">graph_sample</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> graph_sample(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, graph_uri:<span class="bu">str</span>, limit:<span class="bu">int</span><span class="op">=</span><span class="dv">10</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Get sample triples from a graph.</em></p>
+<p>Args: ds_meta: DatasetMeta containing the dataset graph_uri: URI of graph to sample limit: Maximum triples to return</p>
+<p>Returns: List of (s, p, o) tuples as strings</p>
+</section>
+</section>
+<section id="ontology-integration" class="level2">
+<h2 class="anchored" data-anchor-id="ontology-integration">Ontology Integration</h2>
+<hr>
+<section id="mount_ontology" class="level3">
+<h3 class="anchored" data-anchor-id="mount_ontology">mount_ontology</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mount_ontology(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    ds_meta:DatasetMeta, ns:<span class="bu">dict</span>, path:<span class="bu">str</span>, ont_name:<span class="bu">str</span>, index_shacl:<span class="bu">bool</span><span class="op">=</span><span class="va">True</span>, index_queries:<span class="bu">bool</span><span class="op">=</span><span class="va">True</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Mount ontology into dataset as read-only onto/<name> graph.</name></em></p>
+<p>If index_shacl=True and SHACL content detected, also builds SHACLIndex and stores in ns[’{ont_name}_shacl’].</p>
+<p>If index_queries=True and sh:SPARQLExecutable detected, also builds QueryIndex and stores in ns[’{ont_name}_queries’].</p>
+<p>Args: ds_meta: DatasetMeta containing the dataset ns: Namespace dict (for compatibility with setup_ontology_context) path: Path to ontology file ont_name: Name for the ontology index_shacl: Whether to detect and index SHACL shapes (default: True) index_queries: Whether to detect and index query templates (default: True)</p>
+<p>Returns: Summary string</p>
+<hr>
+</section>
+<section id="setup_dataset_context" class="level3">
+<h3 class="anchored" data-anchor-id="setup_dataset_context">setup_dataset_context</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> setup_dataset_context(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    ns:<span class="bu">dict</span>, name:<span class="bu">str</span><span class="op">=</span><span class="st">'ds'</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Initialize Dataset with mem/prov graphs, bind helper functions.</em></p>
+<p>Args: ns: Namespace dict where Dataset will be stored name: Variable name for the Dataset handle</p>
+<p>Returns: Summary string describing what was created</p>
+<div id="7d10cd8a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test result table views</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Add test data</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/bob'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'25'</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/charlie'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/city'</span>, <span class="st">'Boston'</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/bob'</span>, <span class="st">'http://ex.org/city'</span>, <span class="st">'NYC'</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Query and get results as list</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> mem_query(ds_meta, <span class="st">'SELECT ?s ?age WHERE { ?s &lt;http://ex.org/age&gt; ?age }'</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Test res_head</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>head <span class="op">=</span> res_head(results, n<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(head) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ res_head works: </span><span class="sc">{</span><span class="bu">len</span>(head)<span class="sc">}</span><span class="ss"> rows"</span>)</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Test res_where with exact value</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>filtered <span class="op">=</span> res_where(results, <span class="st">'age'</span>, value<span class="op">=</span><span class="st">'30'</span>)</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(filtered) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ res_where (exact) works: </span><span class="sc">{</span><span class="bu">len</span>(filtered)<span class="sc">}</span><span class="ss"> rows with age=30"</span>)</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Test res_where with pattern</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>filtered_pattern <span class="op">=</span> res_where(results, <span class="st">'s'</span>, pattern<span class="op">=</span><span class="st">'alice'</span>)</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(filtered_pattern) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ res_where (pattern) works: </span><span class="sc">{</span><span class="bu">len</span>(filtered_pattern)<span class="sc">}</span><span class="ss"> rows matching 'alice'"</span>)</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Test res_group</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>groups <span class="op">=</span> res_group(results, <span class="st">'age'</span>)</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(groups) <span class="op">==</span> <span class="dv">2</span>  <span class="co"># Two distinct ages</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> groups[<span class="dv">0</span>][<span class="dv">1</span>] <span class="op">==</span> <span class="dv">2</span>  <span class="co"># Age '30' appears twice</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ res_group works: </span><span class="sc">{</span>groups<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Test res_distinct</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>distinct_ages <span class="op">=</span> res_distinct(results, <span class="st">'age'</span>)</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(distinct_ages) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'25'</span> <span class="kw">in</span> distinct_ages <span class="kw">and</span> <span class="st">'30'</span> <span class="kw">in</span> distinct_ages</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ res_distinct works: </span><span class="sc">{</span>distinct_ages<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Test ResultTable wrapper</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>result_table <span class="op">=</span> ResultTable(</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>    rows<span class="op">=</span>results,</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[<span class="st">'s'</span>, <span class="st">'age'</span>],</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">'SELECT ?s ?age WHERE { ?s &lt;http://ex.org/age&gt; ?age }'</span>,</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>    total_rows<span class="op">=</span><span class="bu">len</span>(results)</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(result_table) <span class="op">==</span> <span class="dv">3</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ ResultTable works: </span><span class="sc">{</span>result_table<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Test result table views work with ResultTable</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>head_from_table <span class="op">=</span> res_head(result_table, n<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(head_from_table) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ res_head works with ResultTable"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ res_head works: 2 rows
+✓ res_where (exact) works: 2 rows with age=30
+✓ res_where (pattern) works: 1 rows matching 'alice'
+✓ res_group works: [('30', 2), ('25', 1)]
+✓ res_distinct works: ['25', '30']
+✓ ResultTable works: ResultTable(3 rows, columns=['s', 'age'])
+✓ res_head works with ResultTable</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))</code></pre>
+</div>
+</div>
+<div id="500465ff" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test dataset creation</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> setup_dataset_context(test_ns, name<span class="op">=</span><span class="st">'test_ds'</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'test_ds'</span> <span class="kw">in</span> test_ns</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'test_ds_meta'</span> <span class="kw">in</span> test_ns</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(test_ns[<span class="st">'test_ds_meta'</span>].session_id) <span class="op">==</span> <span class="dv">8</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Dataset creation works"</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Dataset creation works
+Created dataset 'test_ds' with session_id=cb576fb5</code></pre>
+</div>
+</div>
+<div id="620e9cbc" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test mem_add with provenance</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/knows'</span>, <span class="st">'http://ex.org/bob'</span>, </span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>                 source<span class="op">=</span><span class="st">'test'</span>, reason<span class="op">=</span><span class="st">'Testing'</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(ds_meta.mem) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(ds_meta.prov) <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ mem_add works"</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ mem_add works
+Added triple to mem: (http://ex.org/alice, http://ex.org/knows, http://ex.org/bob)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))</code></pre>
+</div>
+</div>
+<div id="722addb8" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test mem_query</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/bob'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'25'</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> mem_query(ds_meta, <span class="st">'SELECT ?s ?age WHERE { ?s &lt;http://ex.org/age&gt; ?age }'</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(results) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(<span class="st">'s'</span> <span class="kw">in</span> r <span class="kw">and</span> <span class="st">'age'</span> <span class="kw">in</span> r <span class="cf">for</span> r <span class="kw">in</span> results)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ mem_query works"</span>)</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ mem_query works
+[{'s': 'http://ex.org/alice', 'age': '30'}, {'s': 'http://ex.org/bob', 'age': '25'}]</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))</code></pre>
+</div>
+</div>
+<div id="5aee727e" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test mem_retract</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(ds_meta.mem) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> mem_retract(ds_meta, predicate<span class="op">=</span><span class="st">'http://ex.org/age'</span>, source<span class="op">=</span><span class="st">'test'</span>, reason<span class="op">=</span><span class="st">'Correction'</span>)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(ds_meta.mem) <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'Removed 1 triples'</span> <span class="kw">in</span> result</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ mem_retract works"</span>)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ mem_retract works
+Removed 1 triples from mem</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))
+&lt;ipython-input-1-e3f77e94d507&gt;:36: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))</code></pre>
+</div>
+</div>
+<div id="e615ea1c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test mem_describe</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/knows'</span>, <span class="st">'http://ex.org/bob'</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>desc <span class="op">=</span> mem_describe(ds_meta, <span class="st">'http://ex.org/alice'</span>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'as_subject'</span> <span class="kw">in</span> desc</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'as_object'</span> <span class="kw">in</span> desc</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(desc[<span class="st">'as_subject'</span>]) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ mem_describe works"</span>)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(desc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ mem_describe works
+{'uri': 'http://ex.org/alice', 'as_subject': [('http://ex.org/alice', 'http://ex.org/knows', 'http://ex.org/bob'), ('http://ex.org/alice', 'http://ex.org/age', '30')], 'as_object': []}</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))</code></pre>
+</div>
+</div>
+<div id="cde065d7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test index invalidation</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Access cached property</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>initial_version <span class="op">=</span> ds_meta._version</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> ds_meta.graph_stats</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Mutate</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Check version incremented</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> ds_meta._version <span class="op">&gt;</span> initial_version</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Index invalidation works"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Index invalidation works</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: Dataset.contexts is deprecated, use Dataset.graphs instead.
+  for ctx in self.dataset.contexts():
+&lt;ipython-input-1-3a8dafc08295&gt;:33: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))</code></pre>
+</div>
+</div>
+<div id="9a8d308f" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test work graph lifecycle</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create work graph</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>uri, graph <span class="op">=</span> work_create(ds_meta, task_id<span class="op">=</span><span class="st">'test_task'</span>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'work/test_task'</span> <span class="kw">in</span> uri</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(ds_meta.work_graphs) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Add some triples to work graph</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>graph.add((URIRef(<span class="st">'http://ex.org/alice'</span>), URIRef(<span class="st">'http://ex.org/temp'</span>), Literal(<span class="st">'value'</span>)))</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(graph) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Promote to mem</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> work_to_mem(ds_meta, <span class="st">'test_task'</span>, reason<span class="op">=</span><span class="st">'Test promotion'</span>)</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(ds_meta.mem) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'Promoted 1 triples'</span> <span class="kw">in</span> result</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleanup</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> work_cleanup(ds_meta, task_id<span class="op">=</span><span class="st">'test_task'</span>)</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'Removed 1 work'</span> <span class="kw">in</span> result</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(ds_meta.work_graphs) <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Work graph lifecycle works"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Work graph lifecycle works</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: Dataset.contexts is deprecated, use Dataset.graphs instead.
+  return [str(ctx.identifier) for ctx in self.dataset.contexts()
+&lt;ipython-input-1-661dda18a793&gt;:32: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))</code></pre>
+</div>
+</div>
+<div id="905f29c7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test snapshot</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tempfile</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Add some data</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Take snapshot</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> tempfile.NamedTemporaryFile(mode<span class="op">=</span><span class="st">'w'</span>, suffix<span class="op">=</span><span class="st">'.trig'</span>, delete<span class="op">=</span><span class="va">False</span>) <span class="im">as</span> f:</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    snapshot_path <span class="op">=</span> f.name</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> snapshot_dataset(ds_meta, path<span class="op">=</span>snapshot_path)</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> os.path.exists(snapshot_path)</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'Snapshot saved'</span> <span class="kw">in</span> result</span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Load snapshot (let it auto-detect the name 'ds' from graph URIs)</span></span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>test_ns2 <span class="op">=</span> {}</span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> load_snapshot(snapshot_path, test_ns2, name<span class="op">=</span><span class="st">'restored'</span>)</span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'restored'</span> <span class="kw">in</span> test_ns2</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'restored_meta'</span> <span class="kw">in</span> test_ns2</span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Should auto-detect original name 'ds' and use it for URIs</span></span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(test_ns2[<span class="st">'restored_meta'</span>].mem) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Also test loading with same name</span></span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>test_ns3 <span class="op">=</span> {}</span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> load_snapshot(snapshot_path, test_ns3, name<span class="op">=</span><span class="st">'ds'</span>)</span>
+<span id="cb44-31"><a href="#cb44-31" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'ds'</span> <span class="kw">in</span> test_ns3</span>
+<span id="cb44-32"><a href="#cb44-32" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'ds_meta'</span> <span class="kw">in</span> test_ns3</span>
+<span id="cb44-33"><a href="#cb44-33" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(test_ns3[<span class="st">'ds_meta'</span>].mem) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb44-34"><a href="#cb44-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-35"><a href="#cb44-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleanup</span></span>
+<span id="cb44-36"><a href="#cb44-36" aria-hidden="true" tabindex="-1"></a>os.unlink(snapshot_path)</span>
+<span id="cb44-37"><a href="#cb44-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-38"><a href="#cb44-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Snapshot roundtrip works"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Snapshot roundtrip works</code></pre>
+</div>
+</div>
+<div id="e7bd5749" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test bounded view functions</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>test_ns <span class="op">=</span> {}</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(test_ns)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>ds_meta <span class="op">=</span> test_ns[<span class="st">'ds_meta'</span>]</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Add some data</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>mem_add(ds_meta, <span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/age'</span>, <span class="st">'30'</span>)</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>work_create(ds_meta, <span class="st">'task1'</span>)</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>work_create(ds_meta, <span class="st">'task2'</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Test dataset_stats</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>stats <span class="op">=</span> dataset_stats(ds_meta)</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'mem: 1 triples'</span> <span class="kw">in</span> stats</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'work graphs: 2'</span> <span class="kw">in</span> stats</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Test list_graphs</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>graphs <span class="op">=</span> list_graphs(ds_meta)</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(graphs) <span class="op">&gt;=</span> <span class="dv">4</span>  <span class="co"># mem, prov, work/task1, work/task2</span></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Test list_graphs with pattern</span></span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>work_graphs <span class="op">=</span> list_graphs(ds_meta, pattern<span class="op">=</span><span class="st">'work/'</span>)</span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(work_graphs) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Test graph_sample</span></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>mem_uri <span class="op">=</span> <span class="ss">f'urn:rlm:</span><span class="sc">{</span>ds_meta<span class="sc">.</span>name<span class="sc">}</span><span class="ss">:mem'</span></span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>sample <span class="op">=</span> graph_sample(ds_meta, mem_uri)</span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(sample) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Bounded view functions work"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Bounded view functions work</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ds_meta.prov.add((event_uri, RLM_PROV.timestamp, Literal(datetime.utcnow().isoformat() + 'Z', datatype=XSD.dateTime)))
+&lt;ipython-input-1-338468221890&gt;:54: DeprecationWarning: Dataset.contexts is deprecated, use Dataset.graphs instead.
+  return [str(ctx.identifier) for ctx in self.dataset.contexts()
+&lt;ipython-input-1-338468221890&gt;:44: DeprecationWarning: Dataset.contexts is deprecated, use Dataset.graphs instead.
+  for ctx in self.dataset.contexts():
+&lt;ipython-input-1-0d2d1cee68f5&gt;:13: DeprecationWarning: Dataset.contexts is deprecated, use Dataset.graphs instead.
+  for ctx in ds_meta.dataset.contexts():</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="tests" class="level2">
+<h2 class="anchored" data-anchor-id="tests">Tests</h2>
+</section>
+<section id="usage-examples" class="level2">
+<h2 class="anchored" data-anchor-id="usage-examples">Usage Examples</h2>
+<div id="59a2c512" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic usage in RLM context</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>ns <span class="op">=</span> {}</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(ns)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="co"># RLM can now use: mem_add, mem_query, mem_describe, etc.</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>ns[<span class="st">'mem_add'</span>](<span class="st">'http://ex.org/alice'</span>, <span class="st">'http://ex.org/knows'</span>, <span class="st">'http://ex.org/bob'</span>)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> ns[<span class="st">'mem_query'</span>](<span class="st">'SELECT ?s ?p ?o WHERE { ?s ?p ?o }'</span>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="5d832d4c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Integration with ontology</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rlm.ontology <span class="im">import</span> setup_ontology_context</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>ns <span class="op">=</span> {}</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>setup_dataset_context(ns)</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>setup_ontology_context(<span class="st">'ontology/prov.ttl'</span>, ns, name<span class="op">=</span><span class="st">'prov'</span>)</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Mount ontology into dataset</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>ns[<span class="st">'mount_ontology'</span>](<span class="st">'ontology/prov.ttl'</span>, <span class="st">'prov'</span>)</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Now ontology is in dataset as onto/prov graph</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>graphs <span class="op">=</span> ns[<span class="st">'list_graphs'</span>]()</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(graphs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/LA3D\.github\.io\/rlm");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/LA3D/rlm/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

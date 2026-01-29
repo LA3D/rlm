@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="ReasoningBank-style procedural memory for RLM">
+
+<title>procedural_memory – rlm</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-000f0825b9c55ed21d14970d810c14a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="procedural_memory – rlm">
+<meta property="og:description" content="ReasoningBank-style procedural memory for RLM">
+<meta property="og:site_name" content="rlm">
+<meta name="twitter:title" content="procedural_memory – rlm">
+<meta name="twitter:description" content="ReasoningBank-style procedural memory for RLM">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">rlm</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./procedural_memory.html">procedural_memory</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RLM</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ontology.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ontology</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dataset_memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">dataset</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./logger.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">logger</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./sparql_handles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sparql_handles</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./test_memory_solveit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Testing RLM Memory Step-by-Step</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./procedural_memory.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">procedural_memory</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reasoning_bank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">reasoning_bank</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./shacl_examples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SHACL Examples and Shape Indexing</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./eval_reports.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluation Reports</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RLM Tutorial: Progressive Disclosure Over RDF Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rlm_paper.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Recursive Language Models</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#closed-loop-cycle" id="toc-closed-loop-cycle" class="nav-link" data-scroll-target="#closed-loop-cycle">Closed-Loop Cycle</a></li>
+  <li><a href="#design-principles" id="toc-design-principles" class="nav-link" data-scroll-target="#design-principles">Design Principles</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
+  </ul></li>
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports">Imports</a></li>
+  <li><a href="#memory-schema" id="toc-memory-schema" class="nav-link" data-scroll-target="#memory-schema">Memory Schema</a>
+  <ul class="collapse">
+  <li><a href="#memoryitem" id="toc-memoryitem" class="nav-link" data-scroll-target="#memoryitem">MemoryItem</a></li>
+  </ul></li>
+  <li><a href="#memory-store" id="toc-memory-store" class="nav-link" data-scroll-target="#memory-store">Memory Store</a>
+  <ul class="collapse">
+  <li><a href="#memorystore" id="toc-memorystore" class="nav-link" data-scroll-target="#memorystore">MemoryStore</a></li>
+  </ul></li>
+  <li><a href="#trajectory-artifact" id="toc-trajectory-artifact" class="nav-link" data-scroll-target="#trajectory-artifact">Trajectory Artifact</a>
+  <ul class="collapse">
+  <li><a href="#extract_trajectory_artifact" id="toc-extract_trajectory_artifact" class="nav-link" data-scroll-target="#extract_trajectory_artifact">extract_trajectory_artifact</a></li>
+  </ul></li>
+  <li><a href="#judge" id="toc-judge" class="nav-link" data-scroll-target="#judge">Judge</a>
+  <ul class="collapse">
+  <li><a href="#judge_trajectory" id="toc-judge_trajectory" class="nav-link" data-scroll-target="#judge_trajectory">judge_trajectory</a></li>
+  </ul></li>
+  <li><a href="#extractor" id="toc-extractor" class="nav-link" data-scroll-target="#extractor">Extractor</a>
+  <ul class="collapse">
+  <li><a href="#extract_memories" id="toc-extract_memories" class="nav-link" data-scroll-target="#extract_memories">extract_memories</a></li>
+  </ul></li>
+  <li><a href="#bm25-retrieval" id="toc-bm25-retrieval" class="nav-link" data-scroll-target="#bm25-retrieval">BM25 Retrieval</a>
+  <ul class="collapse">
+  <li><a href="#retrieve_memories" id="toc-retrieve_memories" class="nav-link" data-scroll-target="#retrieve_memories">retrieve_memories</a></li>
+  </ul></li>
+  <li><a href="#injection-formatting" id="toc-injection-formatting" class="nav-link" data-scroll-target="#injection-formatting">Injection Formatting</a>
+  <ul class="collapse">
+  <li><a href="#format_memories_for_injection" id="toc-format_memories_for_injection" class="nav-link" data-scroll-target="#format_memories_for_injection">format_memories_for_injection</a></li>
+  </ul></li>
+  <li><a href="#integration" id="toc-integration" class="nav-link" data-scroll-target="#integration">Integration</a>
+  <ul class="collapse">
+  <li><a href="#rlm_run_with_memory" id="toc-rlm_run_with_memory" class="nav-link" data-scroll-target="#rlm_run_with_memory">rlm_run_with_memory</a></li>
+  </ul></li>
+  <li><a href="#usage-examples" id="toc-usage-examples" class="nav-link" data-scroll-target="#usage-examples">Usage Examples</a></li>
+  <li><a href="#bootstrap-general-strategies" id="toc-bootstrap-general-strategies" class="nav-link" data-scroll-target="#bootstrap-general-strategies">Bootstrap General Strategies</a>
+  <ul class="collapse">
+  <li><a href="#why-bootstrap" id="toc-why-bootstrap" class="nav-link" data-scroll-target="#why-bootstrap">Why Bootstrap?</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#bootstrap_general_strategies" id="toc-bootstrap_general_strategies" class="nav-link" data-scroll-target="#bootstrap_general_strategies">bootstrap_general_strategies</a></li>
+  </ul></li>
+  <li><a href="#validation-functions" id="toc-validation-functions" class="nav-link" data-scroll-target="#validation-functions">Validation Functions</a>
+  <ul class="collapse">
+  <li><a href="#validate_no_hardcoded_uris" id="toc-validate_no_hardcoded_uris" class="nav-link" data-scroll-target="#validate_no_hardcoded_uris">validate_no_hardcoded_uris</a></li>
+  <li><a href="#validate_bootstrap_strategies" id="toc-validate_bootstrap_strategies" class="nav-link" data-scroll-target="#validate_bootstrap_strategies">validate_bootstrap_strategies</a></li>
+  <li><a href="#check_memory_deduplication" id="toc-check_memory_deduplication" class="nav-link" data-scroll-target="#check_memory_deduplication">check_memory_deduplication</a></li>
+  <li><a href="#score_generalization" id="toc-score_generalization" class="nav-link" data-scroll-target="#score_generalization">score_generalization</a></li>
+  <li><a href="#validate_retrieval_quality" id="toc-validate_retrieval_quality" class="nav-link" data-scroll-target="#validate_retrieval_quality">validate_retrieval_quality</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/LA3D/rlm/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="procedural_memory.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">procedural_memory</h1>
+</div>
+
+<div>
+  <div class="description">
+    ReasoningBank-style procedural memory for RLM
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>This module implements <strong>Stage 2.5: Procedural Memory Loop</strong> inspired by the ReasoningBank paper. The goal is to enable an RLM agent to improve over time by accumulating procedural knowledge (strategies, templates, debugging moves) without replacing evidence-based retrieval.</p>
+<section id="closed-loop-cycle" class="level3">
+<h3 class="anchored" data-anchor-id="closed-loop-cycle">Closed-Loop Cycle</h3>
+<pre><code>┌──────────┐    ┌──────────┐    ┌──────────┐
+│ RETRIEVE │───▶│ INTERACT │───▶│ EXTRACT  │
+│ (BM25)   │    │ (rlm_run)│    │ (Judge + │
+└────▲─────┘    └──────────┘    │ Extractor)│
+     │                          └─────┬─────┘
+     │                                │
+     │          ┌──────────┐          │
+     └──────────│  STORE   │◀─────────┘
+                │ (JSON)   │
+                └──────────┘</code></pre>
+</section>
+<section id="design-principles" class="level3">
+<h3 class="anchored" data-anchor-id="design-principles">Design Principles</h3>
+<ol type="1">
+<li><strong>Procedural, not episodic</strong>: Memories are strategies/checklists, not retellings</li>
+<li><strong>Bounded injection</strong>: Only title + description + 3 key bullets in prompts</li>
+<li><strong>Evidence-sensitive judgment</strong>: Success requires grounding in retrieved evidence</li>
+<li><strong>Keyword retrieval</strong>: BM25 over title/description/tags (deterministic, offline)</li>
+<li><strong>Append-only storage</strong>: Simple JSON file for experimentation</li>
+</ol>
+</section>
+<section id="reference" class="level3">
+<h3 class="anchored" data-anchor-id="reference">Reference</h3>
+<ul>
+<li><a href="https://arxiv.org/html/2509.25140v1">ReasoningBank Paper</a></li>
+</ul>
+</section>
+</section>
+<section id="imports" class="level2">
+<h2 class="anchored" data-anchor-id="imports">Imports</h2>
+</section>
+<section id="memory-schema" class="level2">
+<h2 class="anchored" data-anchor-id="memory-schema">Memory Schema</h2>
+<p>A <code>MemoryItem</code> represents a reusable procedural insight extracted from an RLM trajectory.</p>
+<p><strong>Constraints</strong>: - Items must be small enough to inject into prompts - <code>content</code> should be procedural (steps/checklist), not a retelling - Up to 3 items extracted per trajectory</p>
+<hr>
+<section id="memoryitem" class="level3">
+<h3 class="anchored" data-anchor-id="memoryitem">MemoryItem</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> MemoryItem(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span>:<span class="bu">str</span>, title:<span class="bu">str</span>, description:<span class="bu">str</span>, content:<span class="bu">str</span>, source_type:<span class="bu">str</span>, task_query:<span class="bu">str</span>, created_at:<span class="bu">str</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    access_count:<span class="bu">int</span><span class="op">=</span><span class="dv">0</span>, tags:Optional<span class="op">=</span><span class="va">None</span>, session_id:Optional<span class="op">=</span><span class="va">None</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="va">None</span>:</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>A reusable procedural memory extracted from an RLM trajectory.</em></p>
+<p>Attributes: id: Unique identifier (UUID) title: Concise identifier (≤10 words) description: One-sentence summary content: Procedural steps/checklist/template (Markdown) source_type: ‘success’ or ‘failure’ task_query: Original task that produced this memory created_at: ISO timestamp access_count: Number of times retrieved (for future consolidation) tags: Keywords for BM25 retrieval session_id: Optional session ID from DatasetMeta (links to dataset session)</p>
+<div id="9b3d8fd7" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test MemoryItem creation and serialization</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>test_item <span class="op">=</span> MemoryItem(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="st">'test-uuid'</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'SPARQL Query Pattern'</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">'Template for searching entities by label.'</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    content<span class="op">=</span><span class="st">'- Use `rdfs:label` for human-readable names</span><span class="ch">\n</span><span class="st">- Add FILTER for case-insensitive search'</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    source_type<span class="op">=</span><span class="st">'success'</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    task_query<span class="op">=</span><span class="st">'Find entities named "Activity"'</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    tags<span class="op">=</span>[<span class="st">'sparql'</span>, <span class="st">'search'</span>, <span class="st">'rdfs'</span>]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Test roundtrip</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> test_item.to_dict()</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>restored <span class="op">=</span> MemoryItem.from_dict(data)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> restored.title <span class="op">==</span> test_item.title</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> restored.tags <span class="op">==</span> test_item.tags</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ MemoryItem serialization works"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ MemoryItem serialization works</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  created_at=datetime.utcnow().isoformat(),</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="memory-store" class="level2">
+<h2 class="anchored" data-anchor-id="memory-store">Memory Store</h2>
+<p>Persistent storage for procedural memories using a simple JSON file format.</p>
+<hr>
+<section id="memorystore" class="level3">
+<h3 class="anchored" data-anchor-id="memorystore">MemoryStore</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> MemoryStore(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    memories:<span class="bu">list</span><span class="op">=&lt;</span>factory<span class="op">&gt;</span>, path:Optional<span class="op">=</span><span class="va">None</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="va">None</span>:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Persistent storage for procedural memories.</em></p>
+<p>Attributes: memories: List of MemoryItem objects path: Path to JSON file</p>
+<div id="cbc8c3a5" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test MemoryStore save/load roundtrip</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tempfile</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> tempfile.TemporaryDirectory() <span class="im">as</span> tmpdir:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    test_path <span class="op">=</span> Path(tmpdir) <span class="op">/</span> <span class="st">'test_memories.json'</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create store and add items</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    store <span class="op">=</span> MemoryStore(path<span class="op">=</span>test_path)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    item1 <span class="op">=</span> MemoryItem(</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">id</span><span class="op">=</span><span class="bu">str</span>(uuid.uuid4()),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">'Test Memory 1'</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        description<span class="op">=</span><span class="st">'First test memory'</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        content<span class="op">=</span><span class="st">'- Step 1</span><span class="ch">\n</span><span class="st">- Step 2'</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        source_type<span class="op">=</span><span class="st">'success'</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        task_query<span class="op">=</span><span class="st">'test task 1'</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        tags<span class="op">=</span>[<span class="st">'test'</span>, <span class="st">'example'</span>]</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    item2 <span class="op">=</span> MemoryItem(</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">id</span><span class="op">=</span><span class="bu">str</span>(uuid.uuid4()),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">'Test Memory 2'</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        description<span class="op">=</span><span class="st">'Second test memory'</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        content<span class="op">=</span><span class="st">'- Action A</span><span class="ch">\n</span><span class="st">- Action B'</span>,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        source_type<span class="op">=</span><span class="st">'failure'</span>,</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        task_query<span class="op">=</span><span class="st">'test task 2'</span>,</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        tags<span class="op">=</span>[<span class="st">'test'</span>]</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    store.add(item1)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    store.add(item2)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    store.save()</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load and verify</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    loaded <span class="op">=</span> MemoryStore.load(test_path)</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(loaded.memories) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> loaded.memories[<span class="dv">0</span>].title <span class="op">==</span> <span class="st">'Test Memory 1'</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> loaded.memories[<span class="dv">1</span>].source_type <span class="op">==</span> <span class="st">'failure'</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> loaded.memories[<span class="dv">0</span>].tags <span class="op">==</span> [<span class="st">'test'</span>, <span class="st">'example'</span>]</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Test corpus generation</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    corpus <span class="op">=</span> loaded.get_corpus_for_bm25()</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(corpus) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="st">'test'</span> <span class="kw">in</span> corpus[<span class="dv">0</span>]  <span class="co"># From title and tags</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"✓ MemoryStore save/load/corpus works"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ MemoryStore save/load/corpus works</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="trajectory-artifact" class="level2">
+<h2 class="anchored" data-anchor-id="trajectory-artifact">Trajectory Artifact</h2>
+<p>Extract a bounded representation of an RLM run for the judge and extractor.</p>
+<p><strong>Purpose</strong>: Summarize iterations into key steps (~10 max) with actions and outcomes.</p>
+<hr>
+<section id="extract_trajectory_artifact" class="level3">
+<h3 class="anchored" data-anchor-id="extract_trajectory_artifact">extract_trajectory_artifact</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_trajectory_artifact(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    task:<span class="bu">str</span>, answer:<span class="bu">str</span>, iterations:<span class="bu">list</span>, ns:<span class="bu">dict</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">dict</span>:</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Create bounded trajectory artifact for judge/extractor.</em></p>
+<p>Summarizes each iteration’s code blocks into 1-2 line “action + outcome”, limiting to ~10 most informative key steps.</p>
+<p>Args: task: Original task query answer: Final answer from rlm_run iterations: List of RLMIteration objects ns: Final namespace dict</p>
+<p>Returns: Dictionary with keys: - task: str - final_answer: str - iteration_count: int - converged: bool (whether final_answer was set) - key_steps: List of {iteration, action, outcome} - variables_created: List of variable names in ns - errors_encountered: List of error messages from stderr</p>
+<div id="2e54f890" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test with mock iterations</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rlm._rlmpaper_compat <span class="im">import</span> CodeBlock, REPLResult</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>mock_block1 <span class="op">=</span> CodeBlock(</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    code<span class="op">=</span><span class="st">"search('Activity')"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    result<span class="op">=</span>REPLResult(stdout<span class="op">=</span><span class="st">"Found 3 entities"</span>, stderr<span class="op">=</span><span class="va">None</span>, <span class="bu">locals</span><span class="op">=</span>{})</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>mock_block2 <span class="op">=</span> CodeBlock(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    code<span class="op">=</span><span class="st">"describe_entity('prov:Activity')"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    result<span class="op">=</span>REPLResult(stdout<span class="op">=</span><span class="st">"prov:Activity is a class"</span>, stderr<span class="op">=</span><span class="va">None</span>, <span class="bu">locals</span><span class="op">=</span>{})</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>mock_iteration <span class="op">=</span> RLMIteration(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span><span class="st">"test prompt"</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    response<span class="op">=</span><span class="st">"test response"</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    code_blocks<span class="op">=</span>[mock_block1, mock_block2],</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    final_answer<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    iteration_time<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>artifact <span class="op">=</span> extract_trajectory_artifact(</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    task<span class="op">=</span><span class="st">"What is prov:Activity?"</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    answer<span class="op">=</span><span class="st">"prov:Activity is a class"</span>,</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    iterations<span class="op">=</span>[mock_iteration],</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    ns<span class="op">=</span>{<span class="st">'result'</span>: <span class="st">'prov:Activity is a class'</span>}</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> artifact[<span class="st">'task'</span>] <span class="op">==</span> <span class="st">"What is prov:Activity?"</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> artifact[<span class="st">'iteration_count'</span>] <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> artifact[<span class="st">'converged'</span>] <span class="op">==</span> <span class="va">True</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(artifact[<span class="st">'key_steps'</span>]) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'search'</span> <span class="kw">in</span> artifact[<span class="st">'key_steps'</span>][<span class="dv">0</span>][<span class="st">'action'</span>].lower()</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(artifact[<span class="st">'variables_created'</span>]) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Trajectory artifact extraction works"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Trajectory artifact extraction works</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="judge" class="level2">
+<h2 class="anchored" data-anchor-id="judge">Judge</h2>
+<p>Classify trajectory as success or failure with evidence-sensitivity.</p>
+<p><strong>Success criteria</strong>: 1. Answer directly addresses the task 2. Answer is grounded in retrieved evidence (not hallucinated) 3. Reasoning shows systematic exploration</p>
+<p><strong>Failure indicators</strong>: 1. No answer produced (didn’t converge) 2. Answer doesn’t address the task 3. Answer makes claims without supporting evidence</p>
+<hr>
+<section id="judge_trajectory" class="level3">
+<h3 class="anchored" data-anchor-id="judge_trajectory">judge_trajectory</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> judge_trajectory(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    artifact:<span class="bu">dict</span>, ns:<span class="bu">dict</span><span class="op">=</span><span class="va">None</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">dict</span>:</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Judge trajectory success using llm_query.</em></p>
+<p>Evidence-sensitive: success requires grounding in retrieved evidence.</p>
+<p>Args: artifact: Trajectory artifact from extract_trajectory_artifact() ns: Optional namespace for additional context</p>
+<p>Returns: Dictionary with keys: - is_success: bool - reason: str - confidence: str (‘high’, ‘medium’, ‘low’) - missing: list[str] (what evidence was lacking if failure)</p>
+<div id="bc1b9f50" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test judge with real LLM (requires API key)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>test_artifact <span class="op">=</span> {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'task'</span>: <span class="st">'What is prov:Activity?'</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'final_answer'</span>: <span class="st">'prov:Activity is a class representing activities in PROV ontology'</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'iteration_count'</span>: <span class="dv">2</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'converged'</span>: <span class="va">True</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'key_steps'</span>: [</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'iteration'</span>: <span class="dv">1</span>, <span class="st">'action'</span>: <span class="st">"search('Activity')"</span>, <span class="st">'outcome'</span>: <span class="st">'Found 3 entities'</span>},</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'iteration'</span>: <span class="dv">2</span>, <span class="st">'action'</span>: <span class="st">"describe_entity('prov:Activity')"</span>, <span class="st">'outcome'</span>: <span class="st">'A class in PROV'</span>}</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'variables_created'</span>: [<span class="st">'result'</span>],</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'errors_encountered'</span>: []</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>judgment <span class="op">=</span> judge_trajectory(test_artifact)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Success: </span><span class="sc">{</span>judgment[<span class="st">'is_success'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Reason: </span><span class="sc">{</span>judgment[<span class="st">'reason'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Confidence: </span><span class="sc">{</span>judgment[<span class="st">'confidence'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="extractor" class="level2">
+<h2 class="anchored" data-anchor-id="extractor">Extractor</h2>
+<p>Extract 1-3 reusable memory items from a trajectory.</p>
+<p><strong>For successes</strong>: Emphasize why the approach worked</p>
+<p><strong>For failures</strong>: Emphasize what to avoid and recovery strategies</p>
+<p><strong>Output format</strong>: Procedural (steps/checklist/template), NOT a retelling</p>
+<hr>
+<section id="extract_memories" class="level3">
+<h3 class="anchored" data-anchor-id="extract_memories">extract_memories</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_memories(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    artifact:<span class="bu">dict</span>, judgment:<span class="bu">dict</span>, ns:<span class="bu">dict</span><span class="op">=</span><span class="va">None</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Extract up to 3 reusable memory items from trajectory.</em></p>
+<p>Args: artifact: Trajectory artifact from extract_trajectory_artifact() judgment: Judgment dict from judge_trajectory() ns: Optional namespace for additional context</p>
+<p>Returns: List of MemoryItem objects (0-3 items)</p>
+<div id="7d7346d8" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test extractor with real LLM</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>test_artifact <span class="op">=</span> {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'task'</span>: <span class="st">'Find properties of prov:Activity'</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'final_answer'</span>: <span class="st">'prov:Activity has properties: prov:startedAtTime, prov:endedAtTime'</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'iteration_count'</span>: <span class="dv">3</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'converged'</span>: <span class="va">True</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'key_steps'</span>: [</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'iteration'</span>: <span class="dv">1</span>, <span class="st">'action'</span>: <span class="st">"search('Activity')"</span>, <span class="st">'outcome'</span>: <span class="st">'Found prov:Activity'</span>},</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'iteration'</span>: <span class="dv">2</span>, <span class="st">'action'</span>: <span class="st">"describe_entity('prov:Activity')"</span>, <span class="st">'outcome'</span>: <span class="st">'A class'</span>},</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'iteration'</span>: <span class="dv">3</span>, <span class="st">'action'</span>: <span class="st">"get_properties('prov:Activity')"</span>, <span class="st">'outcome'</span>: <span class="st">'Listed properties'</span>}</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'variables_created'</span>: [<span class="st">'activity_props'</span>],</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'errors_encountered'</span>: []</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>test_judgment <span class="op">=</span> {</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'is_success'</span>: <span class="va">True</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'reason'</span>: <span class="st">'Answer grounded in ontology data'</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">'confidence'</span>: <span class="st">'high'</span>,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">'missing'</span>: []</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>memories <span class="op">=</span> extract_memories(test_artifact, test_judgment)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Extracted </span><span class="sc">{</span><span class="bu">len</span>(memories)<span class="sc">}</span><span class="ss"> memories:"</span>)</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> m <span class="kw">in</span> memories:</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>m<span class="sc">.</span>title<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"    Tags: </span><span class="sc">{</span>m<span class="sc">.</span>tags<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="bm25-retrieval" class="level2">
+<h2 class="anchored" data-anchor-id="bm25-retrieval">BM25 Retrieval</h2>
+<p>Find relevant memories for new tasks using keyword-based BM25 retrieval.</p>
+<p><strong>Searches over</strong>: title + description + tags</p>
+<hr>
+<section id="retrieve_memories" class="level3">
+<h3 class="anchored" data-anchor-id="retrieve_memories">retrieve_memories</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> retrieve_memories(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    store:MemoryStore, task:<span class="bu">str</span>, k:<span class="bu">int</span><span class="op">=</span><span class="dv">3</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Retrieve top-k relevant memories using BM25.</em></p>
+<p>Tokenizes task and searches over title + description + tags.</p>
+<p>Args: store: MemoryStore instance task: Task query string k: Number of memories to retrieve</p>
+<p>Returns: List of top-k MemoryItem objects (may be fewer if scores ≤ 0)</p>
+<div id="df3973db" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test BM25 retrieval</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>test_store <span class="op">=</span> MemoryStore()</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add diverse memories</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>test_store.add(MemoryItem(</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="bu">str</span>(uuid.uuid4()),</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'SPARQL query pattern for entity search'</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">'Use rdfs:label with FILTER for case-insensitive search.'</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    content<span class="op">=</span><span class="st">'- Step 1</span><span class="ch">\n</span><span class="st">- Step 2'</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    source_type<span class="op">=</span><span class="st">'success'</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    task_query<span class="op">=</span><span class="st">'Find entities by name'</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    tags<span class="op">=</span>[<span class="st">'sparql'</span>, <span class="st">'search'</span>, <span class="st">'entity'</span>]</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>test_store.add(MemoryItem(</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="bu">str</span>(uuid.uuid4()),</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Property exploration strategy'</span>,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">'Systematically explore properties using describe then probe.'</span>,</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    content<span class="op">=</span><span class="st">'- Action A</span><span class="ch">\n</span><span class="st">- Action B'</span>,</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    source_type<span class="op">=</span><span class="st">'success'</span>,</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    task_query<span class="op">=</span><span class="st">'What properties does X have?'</span>,</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    tags<span class="op">=</span>[<span class="st">'properties'</span>, <span class="st">'exploration'</span>]</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>test_store.add(MemoryItem(</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="bu">str</span>(uuid.uuid4()),</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Debugging failed SPARQL queries'</span>,</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">'Check syntax, namespaces, and endpoint first.'</span>,</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    content<span class="op">=</span><span class="st">'- Check 1</span><span class="ch">\n</span><span class="st">- Check 2'</span>,</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>    source_type<span class="op">=</span><span class="st">'failure'</span>,</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    task_query<span class="op">=</span><span class="st">'Query failed with error'</span>,</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>    created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    tags<span class="op">=</span>[<span class="st">'sparql'</span>, <span class="st">'debugging'</span>, <span class="st">'error'</span>]</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Test retrieval for different queries</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>results1 <span class="op">=</span> retrieve_memories(test_store, <span class="st">'How do I search for entities?'</span>, k<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(results1) <span class="op">&lt;=</span> <span class="dv">2</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">any</span>(<span class="st">'search'</span> <span class="kw">in</span> r.title.lower() <span class="kw">or</span> <span class="st">'search'</span> <span class="kw">in</span> r.tags <span class="cf">for</span> r <span class="kw">in</span> results1)</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ Retrieved </span><span class="sc">{</span><span class="bu">len</span>(results1)<span class="sc">}</span><span class="ss"> memories for 'search for entities'"</span>)</span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>results2 <span class="op">=</span> retrieve_memories(test_store, <span class="st">'My SPARQL query is broken'</span>, k<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(results2) <span class="op">&lt;=</span> <span class="dv">2</span></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">any</span>(<span class="st">'sparql'</span> <span class="kw">in</span> r.tags <span class="cf">for</span> r <span class="kw">in</span> results2)</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ Retrieved </span><span class="sc">{</span><span class="bu">len</span>(results2)<span class="sc">}</span><span class="ss"> memories for 'SPARQL query broken'"</span>)</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>results3 <span class="op">=</span> retrieve_memories(test_store, <span class="st">'What properties does prov:Activity have?'</span>, k<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"✓ Retrieved </span><span class="sc">{</span><span class="bu">len</span>(results3)<span class="sc">}</span><span class="ss"> memories for 'properties question'"</span>)</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Test access count increment</span></span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> results1[<span class="dv">0</span>].access_count <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Access count tracking works"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Retrieved 2 memories for 'search for entities'
+✓ Retrieved 2 memories for 'SPARQL query broken'
+✓ Retrieved 2 memories for 'properties question'
+✓ Access count tracking works</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  created_at=datetime.utcnow().isoformat(),
+&lt;ipython-input-1-c9306d916f1d&gt;:23: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  created_at=datetime.utcnow().isoformat(),
+&lt;ipython-input-1-c9306d916f1d&gt;:34: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  created_at=datetime.utcnow().isoformat(),</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="injection-formatting" class="level2">
+<h2 class="anchored" data-anchor-id="injection-formatting">Injection Formatting</h2>
+<p>Format retrieved memories for bounded prompt injection.</p>
+<p><strong>Output includes</strong>: - Assessment instruction - Title + description + up to 3 key bullets from content</p>
+<p><strong>Never injects full content</strong> to maintain bounded prompt size.</p>
+<hr>
+<section id="format_memories_for_injection" class="level3">
+<h3 class="anchored" data-anchor-id="format_memories_for_injection">format_memories_for_injection</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> format_memories_for_injection(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    memories:<span class="bu">list</span>, max_bullets:<span class="bu">int</span><span class="op">=</span><span class="dv">3</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Format memories for bounded prompt injection.</em></p>
+<p>Returns string with: - Assessment instruction - Title + description + key bullets from content (up to max_bullets)</p>
+<p>Args: memories: List of MemoryItem objects to format max_bullets: Maximum bullets to extract from content</p>
+<p>Returns: Formatted string for prompt injection</p>
+<div id="635bafda" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test injection formatting</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>test_memories <span class="op">=</span> [</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    MemoryItem(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">id</span><span class="op">=</span><span class="st">'test-1'</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">'SPARQL Search Pattern'</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        description<span class="op">=</span><span class="st">'Template for searching entities by label.'</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        content<span class="op">=</span><span class="st">"""- Use rdfs:label for human-readable names</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="st">- Add FILTER for case-insensitive matching</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="st">- Include LIMIT to avoid timeout</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="st">- Check for alternative label properties"""</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>        source_type<span class="op">=</span><span class="st">'success'</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        task_query<span class="op">=</span><span class="st">'test'</span>,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        tags<span class="op">=</span>[<span class="st">'sparql'</span>]</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    MemoryItem(</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">id</span><span class="op">=</span><span class="st">'test-2'</span>,</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">'Property Discovery'</span>,</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>        description<span class="op">=</span><span class="st">'Systematic approach to finding properties.'</span>,</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        content<span class="op">=</span><span class="st">"""1. Start with describe_entity() for overview</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="st">2. Use get_properties() for full list</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="st">3. Check both domain and range</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="st">4. Look for inverse properties"""</span>,</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>        source_type<span class="op">=</span><span class="st">'success'</span>,</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>        task_query<span class="op">=</span><span class="st">'test'</span>,</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>        created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>        tags<span class="op">=</span>[<span class="st">'properties'</span>]</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>formatted <span class="op">=</span> format_memories_for_injection(test_memories, max_bullets<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify format</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'## Relevant Prior Experience'</span> <span class="kw">in</span> formatted</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'assess which of these strategies'</span> <span class="kw">in</span> formatted</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'### 1. SPARQL Search Pattern'</span> <span class="kw">in</span> formatted</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'### 2. Property Discovery'</span> <span class="kw">in</span> formatted</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'Use rdfs:label'</span> <span class="kw">in</span> formatted</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'Start with describe_entity'</span> <span class="kw">in</span> formatted</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify bullet limiting (should have max 3 bullets per memory)</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> formatted.split(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>bullet_count_mem1 <span class="op">=</span> <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> l <span class="kw">in</span> lines[lines.index(<span class="st">'### 1. SPARQL Search Pattern'</span>):lines.index(<span class="st">'### 2. Property Discovery'</span>)] <span class="cf">if</span> l.strip().startswith(<span class="st">'-'</span>))</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> bullet_count_mem1 <span class="op">&lt;=</span> <span class="dv">3</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✓ Injection formatting works"</span>)</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Formatted output:"</span>)</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(formatted[:<span class="dv">300</span>] <span class="op">+</span> <span class="st">"..."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Injection formatting works
+
+Formatted output:
+## Relevant Prior Experience
+
+Before taking action, briefly assess which of these strategies apply to your current task and which do not.
+
+### 1. SPARQL Search Pattern
+Template for searching entities by label.
+Key points:
+- Use rdfs:label for human-readable names
+- Add FILTER for case-insensitive ma...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  created_at=datetime.utcnow().isoformat(),
+&lt;ipython-input-1-2dc0c9d48ca1&gt;:26: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  created_at=datetime.utcnow().isoformat(),</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="integration" class="level2">
+<h2 class="anchored" data-anchor-id="integration">Integration</h2>
+<p>Complete closed-loop: RETRIEVE → INJECT → INTERACT → EXTRACT → STORE</p>
+<hr>
+<section id="rlm_run_with_memory" class="level3">
+<h3 class="anchored" data-anchor-id="rlm_run_with_memory">rlm_run_with_memory</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rlm_run_with_memory(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    query:<span class="bu">str</span>, context:<span class="bu">str</span>, memory_store:MemoryStore, ns:<span class="bu">dict</span><span class="op">=</span><span class="va">None</span>, enable_memory_extraction:<span class="bu">bool</span><span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    persist_dataset:<span class="bu">bool</span><span class="op">=</span><span class="va">False</span>, <span class="co"># NEW: Dataset persistence</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    dataset_path:Path<span class="op">=</span><span class="va">None</span>, kwargs:VAR_KEYWORD</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">tuple</span>:</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>RLM run with procedural memory loop.</em></p>
+<p>Closed-loop cycle: 1. RETRIEVE: Get relevant memories via BM25 2. INJECT: Add to context/prompt 3. INTERACT: Run rlm_run() 4. EXTRACT: Judge + extract new memories 5. STORE: Persist new memories</p>
+<p>NEW: Dataset persistence: - If persist_dataset=True and dataset_path provided, loads snapshot before run - After run, if dataset was modified, saves snapshot - Stores snapshot path in extracted MemoryItem for lineage</p>
+<p>Args: query: Task query string context: Context string (e.g., ontology summary) memory_store: MemoryStore instance for retrieval/storage ns: Optional namespace dict enable_memory_extraction: Whether to extract and store new memories (default True) persist_dataset: Whether to persist dataset snapshots (default False) dataset_path: Optional path for dataset snapshot **kwargs: Additional arguments for rlm_run()</p>
+<p>Returns: Tuple of (answer, iterations, ns, new_memories)</p>
+<div id="2c9fe4c1" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Integration test (requires full RLM setup)</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rlm.ontology <span class="im">import</span> setup_ontology_context</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tempfile</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_memory_improves_convergence():</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Second attempt should benefit from first attempt's memory."""</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> tempfile.TemporaryDirectory() <span class="im">as</span> tmpdir:</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>        store <span class="op">=</span> MemoryStore(path<span class="op">=</span>Path(tmpdir) <span class="op">/</span> <span class="st">'test_integration.json'</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># First run - no memories</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>        ns <span class="op">=</span> {}</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>        setup_ontology_context(<span class="st">'ontology/prov.ttl'</span>, ns, name<span class="op">=</span><span class="st">'prov'</span>)</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        answer1, iters1, ns1, mems1 <span class="op">=</span> rlm_run_with_memory(</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"What is prov:Activity and what properties does it have?"</span>,</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>            ns[<span class="st">'prov_meta'</span>].summary(),</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>            store,</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>            ns<span class="op">=</span>ns</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">First run: </span><span class="sc">{</span><span class="bu">len</span>(iters1)<span class="sc">}</span><span class="ss"> iterations, </span><span class="sc">{</span><span class="bu">len</span>(mems1)<span class="sc">}</span><span class="ss"> memories extracted"</span>)</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> mem <span class="kw">in</span> mems1:</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>mem<span class="sc">.</span>title<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Second run - similar task, should retrieve memories</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>        ns2 <span class="op">=</span> {}</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>        setup_ontology_context(<span class="st">'ontology/prov.ttl'</span>, ns2, name<span class="op">=</span><span class="st">'prov'</span>)</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>        answer2, iters2, ns2, mems2 <span class="op">=</span> rlm_run_with_memory(</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>            <span class="st">"What is prov:Entity and what properties does it have?"</span>,</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>            ns2[<span class="st">'prov_meta'</span>].summary(),</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>            store,</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>            ns<span class="op">=</span>ns2</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Second run: </span><span class="sc">{</span><span class="bu">len</span>(iters2)<span class="sc">}</span><span class="ss"> iterations"</span>)</span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Total memories in store: </span><span class="sc">{</span><span class="bu">len</span>(store.memories)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Verify memories were retrieved</span></span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>        retrieved_for_second <span class="op">=</span> retrieve_memories(</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a>            store,</span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>            <span class="st">"What is prov:Entity and what properties does it have?"</span>,</span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a>            k<span class="op">=</span><span class="dv">3</span></span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Memories that would be retrieved for second run: </span><span class="sc">{</span><span class="bu">len</span>(retrieved_for_second)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> mem <span class="kw">in</span> retrieved_for_second:</span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>mem<span class="sc">.</span>title<span class="sc">}</span><span class="ss"> (accessed </span><span class="sc">{</span>mem<span class="sc">.</span>access_count<span class="sc">}</span><span class="ss"> times)"</span>)</span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-47"><a href="#cb25-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Run test</span></span>
+<span id="cb25-48"><a href="#cb25-48" aria-hidden="true" tabindex="-1"></a><span class="co"># test_memory_improves_convergence()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="usage-examples" class="level2">
+<h2 class="anchored" data-anchor-id="usage-examples">Usage Examples</h2>
+<p>End-to-end examples with PROV ontology.</p>
+<div id="a99b75ae" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Full example: Build up procedural memory over multiple queries</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rlm.ontology <span class="im">import</span> setup_ontology_context</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize memory store</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>store <span class="op">=</span> MemoryStore(path<span class="op">=</span>Path(<span class="st">'memories/prov_memories.json'</span>))</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># If store exists, load it</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> store.path.exists():</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    store <span class="op">=</span> MemoryStore.load(store.path)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(store.memories)<span class="sc">}</span><span class="ss"> existing memories"</span>)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup ontology context</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>ns <span class="op">=</span> {}</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>setup_ontology_context(<span class="st">'ontology/prov.ttl'</span>, ns, name<span class="op">=</span><span class="st">'prov'</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Series of queries</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> [</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"What is prov:Activity?"</span>,</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"What properties does prov:Activity have?"</span>,</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"How are prov:Activity and prov:Entity related?"</span>,</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, query <span class="kw">in</span> <span class="bu">enumerate</span>(queries, <span class="dv">1</span>):</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'='</span><span class="op">*</span><span class="dv">60</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Query </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>query<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'='</span><span class="op">*</span><span class="dv">60</span>)</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    answer, iterations, ns, new_memories <span class="op">=</span> rlm_run_with_memory(</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>        query,</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>        ns[<span class="st">'prov_meta'</span>].summary(),</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>        store,</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>        ns<span class="op">=</span>ns</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Answer: </span><span class="sc">{</span>answer<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Iterations: </span><span class="sc">{</span><span class="bu">len</span>(iterations)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"New memories extracted: </span><span class="sc">{</span><span class="bu">len</span>(new_memories)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> mem <span class="kw">in</span> new_memories:</span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>mem<span class="sc">.</span>title<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'='</span><span class="op">*</span><span class="dv">60</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Final memory store: </span><span class="sc">{</span><span class="bu">len</span>(store.memories)<span class="sc">}</span><span class="ss"> memories"</span>)</span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'='</span><span class="op">*</span><span class="dv">60</span>)</span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Show all memories with access counts</span></span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> mem <span class="kw">in</span> store.memories:</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span>mem<span class="sc">.</span>title<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Source: </span><span class="sc">{</span>mem<span class="sc">.</span>source_type<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Accessed: </span><span class="sc">{</span>mem<span class="sc">.</span>access_count<span class="sc">}</span><span class="ss"> times"</span>)</span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Tags: </span><span class="sc">{</span>mem<span class="sc">.</span>tags<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="bootstrap-general-strategies" class="level2">
+<h2 class="anchored" data-anchor-id="bootstrap-general-strategies">Bootstrap General Strategies</h2>
+<p><strong>Architectural Role (2026-01-19 Refactor):</strong></p>
+<p>Universal ontology exploration patterns that should be loaded into memory on startup. These strategies were previously in <code>reasoning_bank.CORE_RECIPES</code> but were moved here to align with the ReasoningBank paper’s architecture.</p>
+<p><strong>Key Insight:</strong> General strategies are <strong>LEARNED</strong> (procedural memory), not <strong>AUTHORED</strong> (recipes).</p>
+<section id="why-bootstrap" class="level3">
+<h3 class="anchored" data-anchor-id="why-bootstrap">Why Bootstrap?</h3>
+<ol type="1">
+<li><strong>Correct conceptual layer</strong>: Universal patterns belong in procedural_memory (Layer 1), not reasoning_bank (Layer 2)</li>
+<li><strong>Enable learning</strong>: Stored as MemoryItems, these can be:
+<ul>
+<li>Retrieved via BM25 (not always injected)</li>
+<li>Updated with success_rate over time</li>
+<li>Merged/consolidated with newly extracted patterns</li>
+<li>Removed if ineffective</li>
+</ul></li>
+<li><strong>Future extensibility</strong>: New strategies extracted from successful runs can be added to memory_store automatically</li>
+</ol>
+</section>
+<section id="usage" class="level3">
+<h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-time bootstrap at startup</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>memory_store <span class="op">=</span> MemoryStore()</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> strategy <span class="kw">in</span> bootstrap_general_strategies():</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    memory_store.add(strategy)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Use in RLM runs</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rlm.reasoning_bank <span class="im">import</span> rlm_run_enhanced</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>answer, iters, ns <span class="op">=</span> rlm_run_enhanced(</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    query<span class="op">=</span><span class="st">"What is Activity?"</span>,</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    context<span class="op">=</span>meta.summary(),</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    sense<span class="op">=</span>sense,</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    memory_store<span class="op">=</span>memory_store  <span class="co"># General strategies retrieved via BM25</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Note:</strong> These are <strong>seed strategies</strong> - the system can learn and add more over time via the memory extraction loop.</p>
+<hr>
+</section>
+<section id="bootstrap_general_strategies" class="level3">
+<h3 class="anchored" data-anchor-id="bootstrap_general_strategies">bootstrap_general_strategies</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bootstrap_general_strategies(</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">list</span>:</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Create general strategy memories for bootstrapping.</em></p>
+<p>These are universal patterns extracted from successful RLM runs that apply to all ontologies.</p>
+<p>Returns: List of MemoryItem objects representing general strategies</p>
+<div id="bdf8a89c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test bootstrap</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>strategies <span class="op">=</span> bootstrap_general_strategies()</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Bootstrapped </span><span class="sc">{</span><span class="bu">len</span>(strategies)<span class="sc">}</span><span class="ss"> general strategies:"</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> strategies:</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>s<span class="sc">.</span>title<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"    Tags: </span><span class="sc">{</span>s<span class="sc">.</span>tags<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"    Task: </span><span class="sc">{</span>s<span class="sc">.</span>task_query<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Test that they can be stored</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tempfile</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> tempfile.TemporaryDirectory() <span class="im">as</span> tmpdir:</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    test_path <span class="op">=</span> Path(tmpdir) <span class="op">/</span> <span class="st">'bootstrap_test.json'</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    store <span class="op">=</span> MemoryStore(path<span class="op">=</span>test_path)</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> strategy <span class="kw">in</span> strategies:</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>        store.add(strategy)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>    store.save()</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reload and verify</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    loaded <span class="op">=</span> MemoryStore.load(test_path)</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(loaded.memories) <span class="op">==</span> <span class="bu">len</span>(strategies)</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">✓ Bootstrap strategies can be saved and loaded"</span>)</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"✓ Total: </span><span class="sc">{</span><span class="bu">len</span>(loaded.memories)<span class="sc">}</span><span class="ss"> strategies"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Bootstrapped 7 general strategies:
+  - Describe Entity by Label
+    Tags: ['entity', 'search', 'describe', 'universal']
+    Task: entity_description
+  - Find Subclasses Using GraphMeta
+    Tags: ['hierarchy', 'subclass', 'graphmeta', 'universal']
+    Task: hierarchy
+  - Find Superclasses Using GraphMeta
+    Tags: ['hierarchy', 'superclass', 'graphmeta', 'universal']
+    Task: hierarchy
+  - Find Properties by Domain/Range
+    Tags: ['properties', 'domain', 'range', 'universal']
+    Task: property_discovery
+  - Pattern-Based Entity Search
+    Tags: ['search', 'pattern', 'multiple', 'universal']
+    Task: pattern_search
+  - Find Relationship Path Between Entities
+    Tags: ['relationships', 'path', 'connection', 'universal']
+    Task: relationship_discovery
+  - Navigate Class Hierarchy from Roots
+    Tags: ['hierarchy', 'exploration', 'roots', 'universal']
+    Task: hierarchy
+
+✓ Bootstrap strategies can be saved and loaded
+✓ Total: 7 strategies</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="validation-functions" class="level2">
+<h2 class="anchored" data-anchor-id="validation-functions">Validation Functions</h2>
+<p>Validation gates to ensure quality and consistency of procedural memory.</p>
+<hr>
+<section id="validate_no_hardcoded_uris" class="level3">
+<h3 class="anchored" data-anchor-id="validate_no_hardcoded_uris">validate_no_hardcoded_uris</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> validate_no_hardcoded_uris(</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    strategies:<span class="bu">list</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">bool</span>:</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Ensure strategies don’t reference specific ontology URIs.</em></p>
+<p>Universal strategies should use placeholders like {ontology}_meta instead of hardcoded ontology prefixes.</p>
+<hr>
+</section>
+<section id="validate_bootstrap_strategies" class="level3">
+<h3 class="anchored" data-anchor-id="validate_bootstrap_strategies">validate_bootstrap_strategies</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> validate_bootstrap_strategies(</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">dict</span>:</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Validate bootstrap creates valid, non-conflicting strategies.</em></p>
+<p>Checks: - Correct count (7 strategies) - All are valid MemoryItem objects - Unique titles (no duplicates) - All tagged as ‘universal’ - No hardcoded ontology-specific URIs</p>
+<p>Returns: Dictionary with ‘valid’ flag and detailed checks</p>
+<hr>
+</section>
+<section id="check_memory_deduplication" class="level3">
+<h3 class="anchored" data-anchor-id="check_memory_deduplication">check_memory_deduplication</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> check_memory_deduplication(</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    new_memory:MemoryItem, store:MemoryStore, threshold:<span class="bu">float</span><span class="op">=</span><span class="fl">0.7</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">str</span>:</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Gate 1: Check for duplicate memories.</em></p>
+<p>Uses title similarity to detect duplicates and decide action: - add: No similar memories, safe to add - merge: Similar memory exists, should combine insights - skip: Similar memory exists and is better, don’t add - replace: New memory is better, replace existing</p>
+<p>Args: new_memory: MemoryItem to check store: MemoryStore to check against threshold: Similarity threshold (0-1) for considering duplicate</p>
+<p>Returns: Action string: ‘add’, ‘merge’, ‘skip’, or ‘replace’</p>
+<hr>
+</section>
+<section id="score_generalization" class="level3">
+<h3 class="anchored" data-anchor-id="score_generalization">score_generalization</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score_generalization(</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    memory:MemoryItem</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">float</span>:</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Gate 3: Score how generalizable a memory is (0-1).</em></p>
+<p>Higher score = more general/reusable across ontologies. Lower score = specific to one ontology or situation.</p>
+<p>Scoring factors: - Penalize hardcoded URIs (prov:, sio:, http://) - Reward procedural language (use, check, try, if/then) - Reward ‘universal’ tag</p>
+<p>Args: memory: MemoryItem to score</p>
+<p>Returns: Score between 0.0 and 1.0</p>
+<hr>
+</section>
+<section id="validate_retrieval_quality" class="level3">
+<h3 class="anchored" data-anchor-id="validate_retrieval_quality">validate_retrieval_quality</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> validate_retrieval_quality(</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    memory_store:MemoryStore, test_cases:<span class="bu">list</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>)<span class="op">-&gt;</span><span class="bu">dict</span>:</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>Validate BM25 retrieves relevant memories for known queries.</em></p>
+<p>Args: memory_store: MemoryStore with strategies test_cases: List of (query, expected_tags) tuples</p>
+<p>Returns: Dictionary with validation results including success_rate</p>
+<div id="fd004592" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test validation functions</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test 1: Validate bootstrap strategies"</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> validate_bootstrap_strategies()</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Valid: </span><span class="sc">{</span>result[<span class="st">'valid'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Checks: </span><span class="sc">{</span>result[<span class="st">'checks'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Test 2: Score generalization"</span>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>test_mem <span class="op">=</span> bootstrap_general_strategies()[<span class="dv">0</span>]</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> score_generalization(test_mem)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Strategy '</span><span class="sc">{</span>test_mem<span class="sc">.</span>title<span class="sc">}</span><span class="ss">' generalization score: </span><span class="sc">{</span>score<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Test 3: Check memory deduplication"</span>)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>store <span class="op">=</span> MemoryStore()</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>strategies <span class="op">=</span> bootstrap_general_strategies()</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> strategies:</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>    store.add(s)</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Try adding a duplicate</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>duplicate <span class="op">=</span> MemoryItem(</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span><span class="op">=</span><span class="bu">str</span>(uuid.uuid4()),</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Describe Entity by Label'</span>,  <span class="co"># Same as first strategy</span></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">'Test duplicate'</span>,</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>    content<span class="op">=</span><span class="st">'Test content'</span>,</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>    source_type<span class="op">=</span><span class="st">'success'</span>,</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    task_query<span class="op">=</span><span class="st">'test'</span>,</span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    created_at<span class="op">=</span>datetime.now(timezone.utc).isoformat(),</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    tags<span class="op">=</span>[<span class="st">'test'</span>]</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>action <span class="op">=</span> check_memory_deduplication(duplicate, store, threshold<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Action for duplicate: </span><span class="sc">{</span>action<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Test 4: Validate retrieval quality"</span>)</span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>test_cases <span class="op">=</span> [</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is Activity?"</span>, [<span class="st">'entity'</span>, <span class="st">'describe'</span>]),</span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Find subclasses"</span>, [<span class="st">'hierarchy'</span>, <span class="st">'subclass'</span>]),</span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What properties does it have?"</span>, [<span class="st">'properties'</span>, <span class="st">'domain'</span>])</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>retrieval_result <span class="op">=</span> validate_retrieval_quality(store, test_cases)</span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Valid: </span><span class="sc">{</span>retrieval_result[<span class="st">'valid'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Success rate: </span><span class="sc">{</span>retrieval_result[<span class="st">'success_rate'</span>]<span class="sc">:.1%}</span><span class="ss">"</span>)</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">✓ All validation functions work"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/LA3D\.github\.io\/rlm");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/LA3D/rlm/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
