@@ -1,0 +1,1393 @@
+{
+  "ontology_info": {
+    "name": "PROV Ontology",
+    "description": "W3C Provenance Ontology for representing provenance information",
+    "total_triples": 1664,
+    "namespace": "http://www.w3.org/ns/prov#"
+  },
+  "classes": {
+    "http://www.w3.org/2002/07/owl#Thing": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#Activity": {
+      "label": "Activity",
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#ActivityInfluence": {
+      "label": "ActivityInfluence",
+      "description": "ActivityInfluence provides additional descriptions of an Activity's binary influence upon any other kind of resource. Instances of ActivityInfluence use the prov:activity property to cite the influencing Activity.",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Influence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Agent": {
+      "label": "Agent",
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#AgentInfluence": {
+      "label": "AgentInfluence",
+      "description": "AgentInfluence provides additional descriptions of an Agent's binary influence upon any other kind of resource. Instances of AgentInfluence use the prov:agent property to cite the influencing Agent.",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Influence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Association": {
+      "label": "Association",
+      "description": "An instance of prov:Association provides additional descriptions about the binary prov:wasAssociatedWith relation from an prov:Activity to some prov:Agent that had some responsiblity for it. For example, :baking prov:wasAssociatedWith :baker; prov:qualifiedAssociation [ a prov:Association; prov:agent :baker; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#AgentInfluence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Attribution": {
+      "label": "Attribution",
+      "description": "An instance of prov:Attribution provides additional descriptions about the binary prov:wasAttributedTo relation from an prov:Entity to some prov:Agent that had some responsible for it. For example, :cake prov:wasAttributedTo :baker; prov:qualifiedAttribution [ a prov:Attribution; prov:entity :baker; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#AgentInfluence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Bundle": {
+      "label": "Bundle",
+      "description": "Note that there are kinds of bundles (e.g. handwritten letters, audio recordings, etc.) that are not expressed in PROV-O, but can be still be described by PROV-O.",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Collection": {
+      "label": "Collection",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Communication": {
+      "label": "Communication",
+      "description": "An instance of prov:Communication provides additional descriptions about the binary prov:wasInformedBy relation from an informed prov:Activity to the prov:Activity that informed it. For example, :you_jumping_off_bridge prov:wasInformedBy :everyone_else_jumping_off_bridge; prov:qualifiedCommunication [ a prov:Communication; prov:activity :everyone_else_jumping_off_bridge; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#ActivityInfluence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Delegation": {
+      "label": "Delegation",
+      "description": "An instance of prov:Delegation provides additional descriptions about the binary prov:actedOnBehalfOf relation from a performing prov:Agent to some prov:Agent for whom it was performed. For example, :mixing prov:wasAssociatedWith :toddler . :toddler prov:actedOnBehalfOf :mother; prov:qualifiedDelegation [ a prov:Delegation; prov:entity :mother; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#AgentInfluence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Derivation": {
+      "label": "Derivation",
+      "description": "An instance of prov:Derivation provides additional descriptions about the binary prov:wasDerivedFrom relation from some derived prov:Entity to another prov:Entity from which it was derived. For example, :chewed_bubble_gum prov:wasDerivedFrom :unwrapped_bubble_gum; prov:qualifiedDerivation [ a prov:Derivation; prov:entity :unwrapped_bubble_gum; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#EntityInfluence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#EmptyCollection": {
+      "label": "EmptyCollection",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Collection"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#End": {
+      "label": "End",
+      "description": "An instance of prov:End provides additional descriptions about the binary prov:wasEndedBy relation from some ended prov:Activity to an prov:Entity that ended it. For example, :ball_game prov:wasEndedBy :buzzer; prov:qualifiedEnd [ a prov:End; prov:entity :buzzer; :foo :bar; prov:atTime '2012-03-09T08:05:08-05:00'^^xsd:dateTime ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#EntityInfluence",
+        "http://www.w3.org/ns/prov#InstantaneousEvent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Entity": {
+      "label": "Entity",
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#EntityInfluence": {
+      "label": "EntityInfluence",
+      "description": "EntityInfluence provides additional descriptions of an Entity's binary influence upon any other kind of resource. Instances of EntityInfluence use the prov:entity property to cite the influencing Entity.",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Influence"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Generation": {
+      "label": "Generation",
+      "description": "An instance of prov:Generation provides additional descriptions about the binary prov:wasGeneratedBy relation from a generated prov:Entity to the prov:Activity that generated it. For example, :cake prov:wasGeneratedBy :baking; prov:qualifiedGeneration [ a prov:Generation; prov:activity :baking; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#ActivityInfluence",
+        "http://www.w3.org/ns/prov#InstantaneousEvent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Influence": {
+      "label": "Influence",
+      "description": "An instance of prov:Influence provides additional descriptions about the binary prov:wasInfluencedBy relation from some influenced Activity, Entity, or Agent to the influencing Activity, Entity, or Agent. For example, :stomach_ache prov:wasInfluencedBy :spoon; prov:qualifiedInfluence [ a prov:Influence; prov:entity :spoon; :foo :bar ] . Because prov:Influence is a broad relation, the more specific relations (Communication, Delegation, End, etc.) should be used when applicable.",
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#InstantaneousEvent": {
+      "label": "InstantaneousEvent",
+      "description": "An instantaneous event, or event for short, happens in the world and marks a change in the world, in its activities and in its entities. The term 'event' is commonly used in process algebra with a similar meaning. Events represent communications or interactions; they are assumed to be atomic and instantaneous.",
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#Invalidation": {
+      "label": "Invalidation",
+      "description": "An instance of prov:Invalidation provides additional descriptions about the binary prov:wasInvalidatedBy relation from an invalidated prov:Entity to the prov:Activity that invalidated it. For example, :uncracked_egg prov:wasInvalidatedBy :baking; prov:qualifiedInvalidation [ a prov:Invalidation; prov:activity :baking; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#ActivityInfluence",
+        "http://www.w3.org/ns/prov#InstantaneousEvent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Location": {
+      "label": "Location",
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#Organization": {
+      "label": "Organization",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Person": {
+      "label": "Person",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Plan": {
+      "label": "Plan",
+      "description": "There exist no prescriptive requirement on the nature of plans, their representation, the actions or steps they consist of, or their intended goals. Since plans may evolve over time, it may become necessary to track their provenance, so plans themselves are entities. Representing the plan explicitly in the provenance can be useful for various tasks: for example, to validate the execution as represented in the provenance record, to manage expectation failures, or to provide explanations.",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#PrimarySource": {
+      "label": "PrimarySource",
+      "description": "An instance of prov:PrimarySource provides additional descriptions about the binary prov:hadPrimarySource relation from some secondary prov:Entity to an earlier, primary prov:Entity. For example, :blog prov:hadPrimarySource :newsArticle; prov:qualifiedPrimarySource [ a prov:PrimarySource; prov:entity :newsArticle; :foo :bar ] .",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Quotation": {
+      "label": "Quotation",
+      "description": "An instance of prov:Quotation provides additional descriptions about the binary prov:wasQuotedFrom relation from some taken prov:Entity from an earlier, larger prov:Entity. For example, :here_is_looking_at_you_kid prov:wasQuotedFrom :casablanca_script; prov:qualifiedQuotation [ a prov:Quotation; prov:entity :casablanca_script; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Revision": {
+      "label": "Revision",
+      "description": "An instance of prov:Revision provides additional descriptions about the binary prov:wasRevisionOf relation from some newer prov:Entity to an earlier prov:Entity. For example, :draft_2 prov:wasRevisionOf :draft_1; prov:qualifiedRevision [ a prov:Revision; prov:entity :draft_1; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Role": {
+      "label": "Role",
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#SoftwareAgent": {
+      "label": "SoftwareAgent",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Agent",
+        "http://www.w3.org/2002/07/owl#Thing"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Start": {
+      "label": "Start",
+      "description": "An instance of prov:Start provides additional descriptions about the binary prov:wasStartedBy relation from some started prov:Activity to an prov:Entity that started it. For example, :foot_race prov:wasStartedBy :bang; prov:qualifiedStart [ a prov:Start; prov:entity :bang; :foo :bar; prov:atTime '2012-03-09T08:05:08-05:00'^^xsd:dateTime ] .",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#EntityInfluence",
+        "http://www.w3.org/ns/prov#InstantaneousEvent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Usage": {
+      "label": "Usage",
+      "description": "An instance of prov:Usage provides additional descriptions about the binary prov:used relation from some prov:Activity to an prov:Entity that it used. For example, :keynote prov:used :podium; prov:qualifiedUsage [ a prov:Usage; prov:entity :podium; :foo :bar ].",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#EntityInfluence",
+        "http://www.w3.org/ns/prov#InstantaneousEvent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb4": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb9": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb16": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb19": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb35": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb39": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb58": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "n4de16fb537ae4b88a403cd3ee4559bbbb63": {
+      "label": null,
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#ServiceDescription": {
+      "label": "ServiceDescription",
+      "description": "Type for a generic provenance query service. Mainly for use in RDF provenance query service descriptions, to facilitate discovery in linked data environments.",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#SoftwareAgent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#DirectQueryService": {
+      "label": "ProvenanceService",
+      "description": "Type for a generic provenance query service. Mainly for use in RDF provenance query service descriptions, to facilitate discovery in linked data environments.",
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#SoftwareAgent"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Accept": {
+      "label": "Accept",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Contribute": {
+      "label": "Contribute\n",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Contributor": {
+      "label": "Contributor",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Role"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Copyright": {
+      "label": "Copyright",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Create": {
+      "label": "Create",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Contribute"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Creator": {
+      "label": "Creator",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Contributor"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Modify": {
+      "label": "Modify",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Publish": {
+      "label": "Publish",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Publisher": {
+      "label": "Publisher",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Role"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Replace": {
+      "label": "Replace",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#RightsAssignment": {
+      "label": "RightsAssignment",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#RightsHolder": {
+      "label": "RightsHolder",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Role"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Submit": {
+      "label": "Submit",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Dictionary": {
+      "label": "Dictionary",
+      "description": "This concept allows for the provenance of the dictionary, but also of its constituents to be expressed. Such a notion of dictionary corresponds to a wide variety of concrete data structures, such as a maps or associative arrays.",
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#EmptyDictionary": {
+      "label": "Empty Dictionary",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#EmptyCollection",
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#KeyEntityPair": {
+      "label": "Key-Entity Pair",
+      "description": null,
+      "subClassOf": [],
+      "semantic_importance": "Core PROV class"
+    },
+    "http://www.w3.org/ns/prov#Insertion": {
+      "label": "Insertion",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    },
+    "http://www.w3.org/ns/prov#Removal": {
+      "label": "Removal",
+      "description": null,
+      "subClassOf": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "semantic_importance": "Specialized PROV class"
+    }
+  },
+  "properties": {
+    "http://www.w3.org/ns/prov#actedOnBehalfOf": {
+      "label": "actedOnBehalfOf",
+      "type": "ObjectProperty",
+      "description": "An object property to express the accountability of an agent towards another agent. The subordinate agent acted on behalf of the responsible agent in an actual activity. ",
+      "domain": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Agent'] to ['http://www.w3.org/ns/prov#Agent']"
+    },
+    "http://www.w3.org/ns/prov#activity": {
+      "label": "activity",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#ActivityInfluence"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#ActivityInfluence'] to ['http://www.w3.org/ns/prov#Activity']"
+    },
+    "http://www.w3.org/ns/prov#agent": {
+      "label": "agent",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#AgentInfluence"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#AgentInfluence'] to ['http://www.w3.org/ns/prov#Agent']"
+    },
+    "http://www.w3.org/ns/prov#alternateOf": {
+      "label": "alternateOf",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#atLocation": {
+      "label": "atLocation",
+      "type": "ObjectProperty",
+      "description": "The Location of any resource.",
+      "domain": [],
+      "range": [
+        "http://www.w3.org/ns/prov#Location"
+      ],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#entity": {
+      "label": "entity",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#EntityInfluence"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#EntityInfluence'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#generated": {
+      "label": "generated",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#hadActivity": {
+      "label": "hadActivity",
+      "type": "ObjectProperty",
+      "description": "The _optional_ Activity of an Influence, which used, generated, invalidated, or was the responsibility of some Entity. This property is _not_ used by ActivityInfluence (use prov:activity instead).",
+      "domain": [
+        "http://www.w3.org/ns/prov#Influence"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Influence'] to ['http://www.w3.org/ns/prov#Activity']"
+    },
+    "http://www.w3.org/ns/prov#hadGeneration": {
+      "label": "hadGeneration",
+      "type": "ObjectProperty",
+      "description": "The _optional_ Generation involved in an Entity's Derivation.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Generation"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Derivation'] to ['http://www.w3.org/ns/prov#Generation']"
+    },
+    "http://www.w3.org/ns/prov#hadMember": {
+      "label": "hadMember",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Collection"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Collection'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#hadPlan": {
+      "label": "hadPlan",
+      "type": "ObjectProperty",
+      "description": "The _optional_ Plan adopted by an Agent in Association with some Activity. Plan specifications are out of the scope of this specification.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Association"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Plan"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Association'] to ['http://www.w3.org/ns/prov#Plan']"
+    },
+    "http://www.w3.org/ns/prov#hadPrimarySource": {
+      "label": "hadPrimarySource",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#hadRole": {
+      "label": "hadRole",
+      "type": "ObjectProperty",
+      "description": "The _optional_ Role that an Entity assumed in the context of an Activity. For example, :baking prov:used :spoon; prov:qualified [ a prov:Usage; prov:entity :spoon; prov:hadRole roles:mixing_implement ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Influence"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Role"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Influence'] to ['http://www.w3.org/ns/prov#Role']"
+    },
+    "http://www.w3.org/ns/prov#hadUsage": {
+      "label": "hadUsage",
+      "type": "ObjectProperty",
+      "description": "The _optional_ Usage involved in an Entity's Derivation.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Usage"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Derivation'] to ['http://www.w3.org/ns/prov#Usage']"
+    },
+    "http://www.w3.org/ns/prov#influenced": {
+      "label": "influenced",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#influencer": {
+      "label": "influencer",
+      "type": "ObjectProperty",
+      "description": "Subproperties of prov:influencer are used to cite the object of an unqualified PROV-O triple whose predicate is a subproperty of prov:wasInfluencedBy (e.g. prov:used, prov:wasGeneratedBy). prov:influencer is used much like rdf:object is used.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Influence"
+      ],
+      "range": [
+        "http://www.w3.org/2002/07/owl#Thing"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Influence'] to ['http://www.w3.org/2002/07/owl#Thing']"
+    },
+    "http://www.w3.org/ns/prov#invalidated": {
+      "label": "invalidated",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedAssociation": {
+      "label": "qualifiedAssociation",
+      "type": "ObjectProperty",
+      "description": "If this Activity prov:wasAssociatedWith Agent :ag, then it can qualify the Association using prov:qualifiedAssociation [ a prov:Association;  prov:agent :ag; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Association"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Association']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedAttribution": {
+      "label": "qualifiedAttribution",
+      "type": "ObjectProperty",
+      "description": "If this Entity prov:wasAttributedTo Agent :ag, then it can qualify how it was influenced using prov:qualifiedAttribution [ a prov:Attribution;  prov:agent :ag; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Attribution"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Attribution']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedCommunication": {
+      "label": "qualifiedCommunication",
+      "type": "ObjectProperty",
+      "description": "If this Activity prov:wasInformedBy Activity :a, then it can qualify how it was influenced using prov:qualifiedCommunication [ a prov:Communication;  prov:activity :a; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Communication"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Communication']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedDelegation": {
+      "label": "qualifiedDelegation",
+      "type": "ObjectProperty",
+      "description": "If this Agent prov:actedOnBehalfOf Agent :ag, then it can qualify how with prov:qualifiedResponsibility [ a prov:Responsibility;  prov:agent :ag; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Delegation"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Agent'] to ['http://www.w3.org/ns/prov#Delegation']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedDerivation": {
+      "label": "qualifiedDerivation",
+      "type": "ObjectProperty",
+      "description": "If this Entity prov:wasDerivedFrom Entity :e, then it can qualify how it was derived using prov:qualifiedDerivation [ a prov:Derivation;  prov:entity :e; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Derivation"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Derivation']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedEnd": {
+      "label": "qualifiedEnd",
+      "type": "ObjectProperty",
+      "description": "If this Activity prov:wasEndedBy Entity :e1, then it can qualify how it was ended using prov:qualifiedEnd [ a prov:End;  prov:entity :e1; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#End"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#End']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedGeneration": {
+      "label": "qualifiedGeneration",
+      "type": "ObjectProperty",
+      "description": "If this Activity prov:generated Entity :e, then it can qualify how it performed the Generation using prov:qualifiedGeneration [ a prov:Generation;  prov:entity :e; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Generation"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Generation']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedInfluence": {
+      "label": "qualifiedInfluence",
+      "type": "ObjectProperty",
+      "description": "Because prov:qualifiedInfluence is a broad relation, the more specific relations (qualifiedCommunication, qualifiedDelegation, qualifiedEnd, etc.) should be used when applicable.",
+      "domain": [],
+      "range": [
+        "http://www.w3.org/ns/prov#Influence"
+      ],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#qualifiedInvalidation": {
+      "label": "qualifiedInvalidation",
+      "type": "ObjectProperty",
+      "description": "If this Entity prov:wasInvalidatedBy Activity :a, then it can qualify how it was invalidated using prov:qualifiedInvalidation [ a prov:Invalidation;  prov:activity :a; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Invalidation"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Invalidation']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedPrimarySource": {
+      "label": "qualifiedPrimarySource",
+      "type": "ObjectProperty",
+      "description": "If this Entity prov:hadPrimarySource Entity :e, then it can qualify how using prov:qualifiedPrimarySource [ a prov:PrimarySource; prov:entity :e; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#PrimarySource"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#PrimarySource']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedQuotation": {
+      "label": "qualifiedQuotation",
+      "type": "ObjectProperty",
+      "description": "If this Entity prov:wasQuotedFrom Entity :e, then it can qualify how using prov:qualifiedQuotation [ a prov:Quotation;  prov:entity :e; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Quotation"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Quotation']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedRevision": {
+      "label": "qualifiedRevision",
+      "type": "ObjectProperty",
+      "description": "If this Entity prov:wasRevisionOf Entity :e, then it can qualify how it was revised using prov:qualifiedRevision [ a prov:Revision;  prov:entity :e; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Revision"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Revision']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedStart": {
+      "label": "qualifiedStart",
+      "type": "ObjectProperty",
+      "description": "If this Activity prov:wasStartedBy Entity :e1, then it can qualify how it was started using prov:qualifiedStart [ a prov:Start;  prov:entity :e1; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Start"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Start']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedUsage": {
+      "label": "qualifiedUsage",
+      "type": "ObjectProperty",
+      "description": "If this Activity prov:used Entity :e, then it can qualify how it used it using prov:qualifiedUsage [ a prov:Usage; prov:entity :e; :foo :bar ].",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Usage"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Usage']"
+    },
+    "http://www.w3.org/ns/prov#specializationOf": {
+      "label": "specializationOf",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#used": {
+      "label": "used",
+      "type": "ObjectProperty",
+      "description": "A prov:Entity that was used by this prov:Activity. For example, :baking prov:used :spoon, :egg, :oven .",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#wasAssociatedWith": {
+      "label": "wasAssociatedWith",
+      "type": "ObjectProperty",
+      "description": "An prov:Agent that had some (unspecified) responsibility for the occurrence of this prov:Activity.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Agent']"
+    },
+    "http://www.w3.org/ns/prov#wasAttributedTo": {
+      "label": "wasAttributedTo",
+      "type": "ObjectProperty",
+      "description": "Attribution is the ascribing of an entity to an agent.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Agent"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Agent']"
+    },
+    "http://www.w3.org/ns/prov#wasDerivedFrom": {
+      "label": "wasDerivedFrom",
+      "type": "ObjectProperty",
+      "description": "The more specific subproperties of prov:wasDerivedFrom (i.e., prov:wasQuotedFrom, prov:wasRevisionOf, prov:hadPrimarySource) should be used when applicable.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#wasEndedBy": {
+      "label": "wasEndedBy",
+      "type": "ObjectProperty",
+      "description": "End is when an activity is deemed to have ended. An end may refer to an entity, known as trigger, that terminated the activity.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#wasGeneratedBy": {
+      "label": "wasGeneratedBy",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Activity']"
+    },
+    "http://www.w3.org/ns/prov#wasInfluencedBy": {
+      "label": "wasInfluencedBy",
+      "type": "ObjectProperty",
+      "description": "Because prov:wasInfluencedBy is a broad relation, its more specific subproperties (e.g. prov:wasInformedBy, prov:actedOnBehalfOf, prov:wasEndedBy, etc.) should be used when applicable.",
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#wasInformedBy": {
+      "label": "wasInformedBy",
+      "type": "ObjectProperty",
+      "description": "An activity a2 is dependent on or informed by another activity a1, by way of some unspecified entity that is generated by a1 and used by a2.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Activity']"
+    },
+    "http://www.w3.org/ns/prov#wasInvalidatedBy": {
+      "label": "wasInvalidatedBy",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Activity']"
+    },
+    "http://www.w3.org/ns/prov#wasQuotedFrom": {
+      "label": "wasQuotedFrom",
+      "type": "ObjectProperty",
+      "description": "An entity is derived from an original entity by copying, or 'quoting', some or all of it.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#wasRevisionOf": {
+      "label": "wasRevisionOf",
+      "type": "ObjectProperty",
+      "description": "A revision is a derivation that revises an entity into a revised version.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#wasStartedBy": {
+      "label": "wasStartedBy",
+      "type": "ObjectProperty",
+      "description": "Start is when an activity is deemed to have started. A start may refer to an entity, known as trigger, that initiated the activity.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#has_anchor": {
+      "label": "has_anchor",
+      "type": "ObjectProperty",
+      "description": "Indicates anchor URI for a potentially dynamic resource instance.",
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#has_provenance": {
+      "label": "has_provenance",
+      "type": "ObjectProperty",
+      "description": "Indicates a provenance-URI for a resource; the resource identified by this property presents a provenance record about its subject or anchor resource.",
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#has_query_service": {
+      "label": "hasProvenanceService",
+      "type": "ObjectProperty",
+      "description": "Indicates a provenance query service that can access provenance related to its subject or anchor resource.",
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#describesService": {
+      "label": "describesService",
+      "type": "ObjectProperty",
+      "description": "relates a generic provenance query service resource (type prov:ServiceDescription) to a specific query service description (e.g. a prov:DirectQueryService or a sd:Service).",
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#pingback": {
+      "label": "provenance pingback",
+      "type": "ObjectProperty",
+      "description": "Relates a resource to a provenance pingback service that may receive additional provenance links about the resource.",
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/2002/07/owl#topObjectProperty": {
+      "label": null,
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#dictionary": {
+      "label": "dictionary",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Insertion",
+        "http://www.w3.org/ns/prov#Removal"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Insertion', 'http://www.w3.org/ns/prov#Removal'] to ['http://www.w3.org/ns/prov#Dictionary']"
+    },
+    "http://www.w3.org/ns/prov#derivedByInsertionFrom": {
+      "label": "derivedByInsertionFrom",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Dictionary'] to ['http://www.w3.org/ns/prov#Dictionary']"
+    },
+    "http://www.w3.org/ns/prov#derivedByRemovalFrom": {
+      "label": "derivedByRemovalFrom",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Dictionary'] to ['http://www.w3.org/ns/prov#Dictionary']"
+    },
+    "http://www.w3.org/ns/prov#insertedKeyEntityPair": {
+      "label": "insertedKeyEntityPair",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Insertion"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#KeyEntityPair"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Insertion'] to ['http://www.w3.org/ns/prov#KeyEntityPair']"
+    },
+    "http://www.w3.org/ns/prov#hadDictionaryMember": {
+      "label": "hadDictionaryMember",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#KeyEntityPair"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Dictionary'] to ['http://www.w3.org/ns/prov#KeyEntityPair']"
+    },
+    "http://www.w3.org/ns/prov#pairEntity": {
+      "label": "pairKey",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#KeyEntityPair"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#KeyEntityPair'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedInsertion": {
+      "label": "qualifiedInsertion",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Insertion"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Dictionary'] to ['http://www.w3.org/ns/prov#Insertion']"
+    },
+    "http://www.w3.org/ns/prov#qualifiedRemoval": {
+      "label": "qualifiedRemoval",
+      "type": "ObjectProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Dictionary"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Removal"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Dictionary'] to ['http://www.w3.org/ns/prov#Removal']"
+    },
+    "http://www.w3.org/ns/prov#asInBundle": {
+      "label": "asInBundle",
+      "type": "ObjectProperty",
+      "description": "prov:asInBundle is used to specify which bundle the general entity of a prov:mentionOf property is described.\n\nWhen :x prov:mentionOf :y and :y is described in Bundle :b, the triple :x prov:asInBundle :b is also asserted to cite the Bundle in which :y was described.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Bundle"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Bundle']"
+    },
+    "http://www.w3.org/ns/prov#mentionOf": {
+      "label": "mentionOf",
+      "type": "ObjectProperty",
+      "description": "prov:mentionOf is used to specialize an entity as described in another bundle. It is to be used in conjuction with prov:asInBundle.\n\nprov:asInBundle is used to cite the Bundle in which the generalization was mentioned.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/ns/prov#Entity']"
+    },
+    "http://www.w3.org/ns/prov#atTime": {
+      "label": "atTime",
+      "type": "DatatypeProperty",
+      "description": "The time at which an InstantaneousEvent occurred, in the form of xsd:dateTime.",
+      "domain": [
+        "http://www.w3.org/ns/prov#InstantaneousEvent"
+      ],
+      "range": [
+        "http://www.w3.org/2001/XMLSchema#dateTime"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#InstantaneousEvent'] to ['http://www.w3.org/2001/XMLSchema#dateTime']"
+    },
+    "http://www.w3.org/ns/prov#endedAtTime": {
+      "label": "endedAtTime",
+      "type": "DatatypeProperty",
+      "description": "The time at which an activity ended. See also prov:startedAtTime.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/2001/XMLSchema#dateTime"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/2001/XMLSchema#dateTime']"
+    },
+    "http://www.w3.org/ns/prov#generatedAtTime": {
+      "label": "generatedAtTime",
+      "type": "DatatypeProperty",
+      "description": "The time at which an entity was completely created and is available for use.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/2001/XMLSchema#dateTime"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/2001/XMLSchema#dateTime']"
+    },
+    "http://www.w3.org/ns/prov#invalidatedAtTime": {
+      "label": "invalidatedAtTime",
+      "type": "DatatypeProperty",
+      "description": "The time at which an entity was invalidated (i.e., no longer usable).",
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [
+        "http://www.w3.org/2001/XMLSchema#dateTime"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Entity'] to ['http://www.w3.org/2001/XMLSchema#dateTime']"
+    },
+    "http://www.w3.org/ns/prov#startedAtTime": {
+      "label": "startedAtTime",
+      "type": "DatatypeProperty",
+      "description": "The time at which an activity started. See also prov:endedAtTime.",
+      "domain": [
+        "http://www.w3.org/ns/prov#Activity"
+      ],
+      "range": [
+        "http://www.w3.org/2001/XMLSchema#dateTime"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Activity'] to ['http://www.w3.org/2001/XMLSchema#dateTime']"
+    },
+    "http://www.w3.org/ns/prov#value": {
+      "label": "value",
+      "type": "DatatypeProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Entity"
+      ],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#provenanceUriTemplate": {
+      "label": "provenanceUriTemplate",
+      "type": "DatatypeProperty",
+      "description": "Relates a provenance service to a URI template string for constructing provenance-URIs.",
+      "domain": [],
+      "range": [],
+      "usage": "General property"
+    },
+    "http://www.w3.org/ns/prov#pairKey": {
+      "label": "pairKey",
+      "type": "DatatypeProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#KeyEntityPair"
+      ],
+      "range": [
+        "http://www.w3.org/2000/01/rdf-schema#Literal"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#KeyEntityPair'] to ['http://www.w3.org/2000/01/rdf-schema#Literal']"
+    },
+    "http://www.w3.org/ns/prov#removedKey": {
+      "label": "removedKey",
+      "type": "DatatypeProperty",
+      "description": null,
+      "domain": [
+        "http://www.w3.org/ns/prov#Removal"
+      ],
+      "range": [
+        "http://www.w3.org/2000/01/rdf-schema#Literal"
+      ],
+      "usage": "Connects ['http://www.w3.org/ns/prov#Removal'] to ['http://www.w3.org/2000/01/rdf-schema#Literal']"
+    }
+  },
+  "class_hierarchy": {
+    "root_classes": [
+      "http://www.w3.org/ns/prov#Activity",
+      "http://www.w3.org/ns/prov#Agent",
+      "http://www.w3.org/ns/prov#Entity",
+      "http://www.w3.org/ns/prov#Influence",
+      "http://www.w3.org/ns/prov#InstantaneousEvent",
+      "http://www.w3.org/ns/prov#Location",
+      "http://www.w3.org/ns/prov#Role",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb4",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb9",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb16",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb19",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb35",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb39",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb58",
+      "n4de16fb537ae4b88a403cd3ee4559bbbb63",
+      "http://www.w3.org/ns/prov#Dictionary",
+      "http://www.w3.org/ns/prov#KeyEntityPair"
+    ],
+    "parent_to_children": {
+      "http://www.w3.org/ns/prov#Influence": [
+        "http://www.w3.org/ns/prov#ActivityInfluence",
+        "http://www.w3.org/ns/prov#AgentInfluence",
+        "http://www.w3.org/ns/prov#EntityInfluence"
+      ],
+      "http://www.w3.org/ns/prov#AgentInfluence": [
+        "http://www.w3.org/ns/prov#Association",
+        "http://www.w3.org/ns/prov#Attribution",
+        "http://www.w3.org/ns/prov#Delegation"
+      ],
+      "http://www.w3.org/ns/prov#Entity": [
+        "http://www.w3.org/ns/prov#Bundle",
+        "http://www.w3.org/ns/prov#Collection",
+        "http://www.w3.org/ns/prov#Plan"
+      ],
+      "http://www.w3.org/ns/prov#ActivityInfluence": [
+        "http://www.w3.org/ns/prov#Communication",
+        "http://www.w3.org/ns/prov#Generation",
+        "http://www.w3.org/ns/prov#Invalidation"
+      ],
+      "http://www.w3.org/ns/prov#EntityInfluence": [
+        "http://www.w3.org/ns/prov#Derivation",
+        "http://www.w3.org/ns/prov#End",
+        "http://www.w3.org/ns/prov#Start",
+        "http://www.w3.org/ns/prov#Usage"
+      ],
+      "http://www.w3.org/ns/prov#Collection": [
+        "http://www.w3.org/ns/prov#EmptyCollection"
+      ],
+      "http://www.w3.org/ns/prov#InstantaneousEvent": [
+        "http://www.w3.org/ns/prov#End",
+        "http://www.w3.org/ns/prov#Generation",
+        "http://www.w3.org/ns/prov#Invalidation",
+        "http://www.w3.org/ns/prov#Start",
+        "http://www.w3.org/ns/prov#Usage"
+      ],
+      "http://www.w3.org/ns/prov#Agent": [
+        "http://www.w3.org/ns/prov#Organization",
+        "http://www.w3.org/ns/prov#Person",
+        "http://www.w3.org/ns/prov#SoftwareAgent"
+      ],
+      "http://www.w3.org/ns/prov#Derivation": [
+        "http://www.w3.org/ns/prov#PrimarySource",
+        "http://www.w3.org/ns/prov#Quotation",
+        "http://www.w3.org/ns/prov#Revision",
+        "http://www.w3.org/ns/prov#Insertion",
+        "http://www.w3.org/ns/prov#Removal"
+      ],
+      "http://www.w3.org/2002/07/owl#Thing": [
+        "http://www.w3.org/ns/prov#SoftwareAgent"
+      ],
+      "http://www.w3.org/ns/prov#SoftwareAgent": [
+        "http://www.w3.org/ns/prov#ServiceDescription",
+        "http://www.w3.org/ns/prov#DirectQueryService"
+      ],
+      "http://www.w3.org/ns/prov#Activity": [
+        "http://www.w3.org/ns/prov#Accept",
+        "http://www.w3.org/ns/prov#Contribute",
+        "http://www.w3.org/ns/prov#Copyright",
+        "http://www.w3.org/ns/prov#Modify",
+        "http://www.w3.org/ns/prov#Publish",
+        "http://www.w3.org/ns/prov#Replace",
+        "http://www.w3.org/ns/prov#RightsAssignment",
+        "http://www.w3.org/ns/prov#Submit"
+      ],
+      "http://www.w3.org/ns/prov#Role": [
+        "http://www.w3.org/ns/prov#Contributor",
+        "http://www.w3.org/ns/prov#Publisher",
+        "http://www.w3.org/ns/prov#RightsHolder"
+      ],
+      "http://www.w3.org/ns/prov#Contribute": [
+        "http://www.w3.org/ns/prov#Create"
+      ],
+      "http://www.w3.org/ns/prov#Contributor": [
+        "http://www.w3.org/ns/prov#Creator"
+      ],
+      "http://www.w3.org/ns/prov#EmptyCollection": [
+        "http://www.w3.org/ns/prov#EmptyDictionary"
+      ],
+      "http://www.w3.org/ns/prov#Dictionary": [
+        "http://www.w3.org/ns/prov#EmptyDictionary"
+      ]
+    }
+  },
+  "query_patterns": [
+    {
+      "name": "Find all activities",
+      "sparql": "SELECT ?activity WHERE { ?activity a prov:Activity . }",
+      "description": "Retrieve all Activity instances"
+    },
+    {
+      "name": "Find entities generated by an activity",
+      "sparql": "SELECT ?entity WHERE { ?activity prov:generated ?entity . }",
+      "description": "Find all entities produced by activities"
+    },
+    {
+      "name": "Trace agent responsibilities",
+      "sparql": "SELECT ?agent ?activity WHERE { ?activity prov:wasAssociatedWith ?agent . }",
+      "description": "Find agents responsible for activities"
+    },
+    {
+      "name": "Find entity derivations",
+      "sparql": "SELECT ?derived ?original WHERE { ?derived prov:wasDerivedFrom ?original . }",
+      "description": "Track entity derivation chains"
+    },
+    {
+      "name": "Get all properties of an entity",
+      "sparql": "SELECT ?p ?o WHERE { <entity_uri> ?p ?o . }",
+      "description": "Retrieve all properties and values for a specific entity"
+    }
+  ],
+  "key_insights": {
+    "core_concepts": [
+      "Activity - Actions that occur over time",
+      "Entity - Physical/digital/conceptual things",
+      "Agent - Entities that bear responsibility"
+    ],
+    "main_relationships": [
+      "wasGeneratedBy - Links entities to activities that created them",
+      "used - Links activities to entities they consumed",
+      "wasAssociatedWith - Links activities to responsible agents",
+      "wasDerivedFrom - Links entities in derivation chains"
+    ],
+    "use_cases": [
+      "Scientific data provenance tracking",
+      "Document version history",
+      "Workflow execution tracking",
+      "Attribution and responsibility chains"
+    ]
+  }
+}

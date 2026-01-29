@@ -1,0 +1,110 @@
+{
+  "timestamp": "2026-01-29T11:15:07.026218",
+  "ontology": "UniProt core",
+  "ontology_triples": 2816,
+  "endpoint": "https://sparql.uniprot.org/sparql/",
+  "guide_creation": {
+    "success": true,
+    "elapsed_seconds": 0,
+    "lm_calls": 0,
+    "total_tokens": 0,
+    "cost_usd": 0
+  },
+  "queries": [
+    {
+      "query_id": "simple_schema",
+      "question": "What are the main classes in the UniProt core ontology?",
+      "complexity": "Simple - schema exploration (should use local ontology only)",
+      "condition_a_no_guide": {
+        "success": true,
+        "elapsed_seconds": 45.383403,
+        "answer": "Annotation, Attribution, Catalytic Activity, Citation, Cluster (UniRef), Disease, Enzyme, Enzyme Regulation, Excluded proteome, Family Membership Statement, Interaction, Journal, Method, Molecule, Not Obsolete, Obsolete, Organelle, Protein part, Interaction participant, Pathway, Plasmid, Protein, Protein existence evidence, Proteome, Proteome_Component, Taxon rank, Resource, Reviewed, Sequence, Status, Strain, Structured_Name, Subcellular Location, Taxon, Tissue, Transposon",
+        "queries_executed": "[]",
+        "result_handles": [],
+        "lm_calls": 6,
+        "input_tokens": 24639,
+        "output_tokens": 2197,
+        "total_tokens": 26836,
+        "cost_usd": 0.10687200000000002
+      },
+      "condition_b_with_guide": {
+        "success": true,
+        "elapsed_seconds": 44.135161,
+        "answer": "The main classes in the UniProt core ontology are:\n\n**Core Entity Classes:**\n1. Protein - Represents protein entries\n2. Gene - Represents genes that encode proteins\n3. Taxon - Represents organisms/taxonomic classifications\n4. Sequence - Represents protein sequences\n5. Molecule - Represents molecular entities\n\n**Additional Important Classes:**\n- Annotation - Base class for various types of annotations\n- Enzyme - Represents enzymes (specialized proteins)\n- Citation - Represents scientific citations/references\n- Database - Represents external databases\n- Journal - Represents scientific journals\n- Proteome - Represents complete protein sets\n- Pathway - Represents biological pathways\n- Tissue - Represents tissue types\n\nThe five core entity classes (Protein, Gene, Taxon, Sequence, Molecule) form the foundation of the UniProt knowledge base, with Annotation and its many subclasses providing detailed information about these entities.",
+        "queries_executed": "[]",
+        "result_handles": [],
+        "lm_calls": 5,
+        "input_tokens": 16922,
+        "output_tokens": 2149,
+        "total_tokens": 19071,
+        "cost_usd": 0.08300099999999999
+      }
+    },
+    {
+      "query_id": "relationship_schema",
+      "question": "What property connects Protein to Taxon in the UniProt schema?",
+      "complexity": "Relationship - schema navigation (should use local ontology only)",
+      "condition_a_no_guide": {
+        "success": true,
+        "elapsed_seconds": 84.156356,
+        "answer": "organism",
+        "queries_executed": "['\\nPREFIX up: <http://purl.uniprot.org/core/>\\n\\nSELECT ?protein ?taxon\\nWHERE {\\n  ?protein a up:Protein .\\n  ?protein up:organism ?taxon .\\n}\\nLIMIT 5\\n']",
+        "result_handles": [
+          "verification"
+        ],
+        "lm_calls": 9,
+        "input_tokens": 68304,
+        "output_tokens": 3646,
+        "total_tokens": 71950,
+        "cost_usd": 0.259602
+      },
+      "condition_b_with_guide": {
+        "success": true,
+        "elapsed_seconds": 34.845363,
+        "answer": "organism",
+        "queries_executed": "['\\nPREFIX up: <http://purl.uniprot.org/core/>\\n\\nSELECT ?protein ?taxon\\nWHERE {\\n    ?protein a up:Protein .\\n    ?protein up:organism ?taxon .\\n}\\nLIMIT 5\\n']",
+        "result_handles": [
+          "verify_organism_property"
+        ],
+        "lm_calls": 4,
+        "input_tokens": 12903,
+        "output_tokens": 1532,
+        "total_tokens": 14435,
+        "cost_usd": 0.061689
+      }
+    },
+    {
+      "query_id": "instance_data",
+      "question": "Show me 5 example proteins from the UniProt database with their names.",
+      "complexity": "Instance data - requires remote query (should query endpoint with LIMIT)",
+      "condition_a_no_guide": {
+        "success": true,
+        "elapsed_seconds": 49.491801,
+        "answer": "1. 8-amino-7-oxononanoate synthase (http://purl.uniprot.org/uniprot/A0A000)\n2. asparagine synthase (glutamine-hydrolyzing) (http://purl.uniprot.org/uniprot/A0A004)\n3. asparagine synthase (glutamine-hydrolyzing) (http://purl.uniprot.org/uniprot/A0A006)\n4. Mutator family transposase (http://purl.uniprot.org/uniprot/A0A009H7Z2)\n5. Outermembrane protein exposed to the bacterial surface (http://purl.uniprot.org/uniprot/A0A009H967)",
+        "queries_executed": "['\\nPREFIX up: <http://purl.uniprot.org/core/>\\n\\nSELECT ?protein ?name\\nWHERE {\\n    ?protein a up:Protein .\\n    ?protein up:recommendedName ?recName .\\n    ?recName up:fullName ?name .\\n}\\nLIMIT 5\\n']",
+        "result_handles": [
+          "protein_names"
+        ],
+        "lm_calls": 6,
+        "input_tokens": 29882,
+        "output_tokens": 1765,
+        "total_tokens": 31647,
+        "cost_usd": 0.116121
+      },
+      "condition_b_with_guide": {
+        "success": true,
+        "elapsed_seconds": 37.820269,
+        "answer": "5 Example Proteins from UniProt:\n\n1. A0A000: 8-amino-7-oxononanoate synthase\n2. A0A001: MoeD5\n3. A0A002: MoeJ5\n4. A0A003: MoeE5\n5. A0A004: asparagine synthase (glutamine-hydrolyzing)",
+        "queries_executed": "['\\nPREFIX up: <http://purl.uniprot.org/core/>\\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\\n\\nSELECT ?protein ?name\\nWHERE {\\n    ?protein a up:Protein .\\n    ?protein rdfs:label ?name .\\n}\\nLIMIT 5\\n']",
+        "result_handles": [
+          "protein_names"
+        ],
+        "lm_calls": 5,
+        "input_tokens": 16910,
+        "output_tokens": 1993,
+        "total_tokens": 18903,
+        "cost_usd": 0.080625
+      }
+    }
+  ]
+}

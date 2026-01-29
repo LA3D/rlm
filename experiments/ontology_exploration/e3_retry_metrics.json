@@ -1,0 +1,19 @@
+{
+  "experiment": "e3_retry_higher_limits",
+  "timestamp": "2026-01-28T15:56:28.583523",
+  "ontology": "prov.ttl",
+  "ontology_size": 1664,
+  "elapsed_seconds": 217.650398,
+  "iterations": 0,
+  "lm_calls": 13,
+  "input_tokens": 31137,
+  "output_tokens": 10379,
+  "total_tokens": 41516,
+  "estimated_cost_usd": 0.24909599999999998,
+  "token_tracking_method": "dspy_history",
+  "variables_created": 48,
+  "guide_json_length": 41517,
+  "json_valid": false,
+  "llm_query_detected": false,
+  "grounding_stats": {}
+}

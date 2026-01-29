@@ -1,0 +1,21 @@
+{
+  "query": "What activities can generate entities?",
+  "timestamp": "2026-01-29T09:41:54.614203",
+  "guide_summary_length": 935,
+  "condition_a_no_guide": {
+    "success": true,
+    "elapsed_seconds": 59.350088,
+    "lm_calls": 6,
+    "tokens": 30278,
+    "cost_usd": 0.13041,
+    "sparql": "PREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?activity\nWHERE {\n  ?activity rdfs:label \"Activity\" .\n  ?property rdfs:domain ?activity .\n  ?property rdfs:label \"generated\" .\n}"
+  },
+  "condition_b_with_guide": {
+    "success": true,
+    "elapsed_seconds": 35.455003,
+    "lm_calls": 5,
+    "tokens": 22827,
+    "cost_usd": 0.091125,
+    "sparql": "PREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?activity ?label\nWHERE {\n  {\n    # Get the Activity class itself\n    BIND(prov:Activity AS ?activity)\n    OPTIONAL { ?activity rdfs:label ?label }\n  }\n  UNION\n  {\n    # Get all subclasses of Activity\n    ?activity rdfs:subClassOf* prov:Activity .\n    OPTIONAL { ?activity rdfs:label ?label }\n  }\n}\nORDER BY ?activity"
+  }
+}

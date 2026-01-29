@@ -1,0 +1,71 @@
+=== EXPLORATION NOTES ===
+
+# UniProt Core Ontology Exploration
+
+## Basic Statistics
+- **Total triples**: 2,816
+- **Total classes**: 214 (175 named classes, 39 blank node classes)
+- **Named classes with labels**: 169
+- **Properties**: 163 total
+  - Object Properties: 80
+  - Datatype Properties: 83
+  - Functional Properties: 38
+- **SubClass relationships**: 168
+
+## Namespaces
+Primary namespace: http://purl.uniprot.org/core/
+Additional namespaces include: OWL, RDF, RDFS, FOAF, SKOS, DC Terms, and others
+
+## Class Categories (Sample)
+Major class types found include:
+- **Annotation types**: Active Site, Binding Site, Function, Catalytic Activity, Disease Annotation, etc.
+- **Structural elements**: Chain, Domain, Helix, Strand, Turn, Coiled-Coil
+- **Sequence features**: Modified Sequence, Alternative Products, Natural Variant, Mutagenesis
+- **Molecular entities**: Protein, Enzyme, DNA, RNA, Gene
+- **Publication/Citation**: Citation, Journal Citation, Book Citation, Published Citation
+- **Taxonomic/Organizational**: Taxon, Organism, Strain, Tissue
+- **Database references**: Database (description of), Cluster (UniRef)
+
+## Class Hierarchy Patterns
+The ontology shows clear hierarchical organization:
+- **Biophysicochemical Property** has subclasses: Absorption, Kinetics, pH Dependence, Redox Potential, Temperature Dependence
+- **Site** has subclasses: Active Site, Binding Site
+- **Annotation** is a major superclass with many subclasses including Activity Regulation, Disease Annotation, Function, etc.
+- Many domain-specific annotation types are subclasses of general annotation classes
+
+## Property Patterns
+Properties connect:
+- Proteins to annotations (annotation, classified with)
+- Enzymes to catalytic activities (catalytic activity, catalyzed reaction)
+- Sequences to structural features (chainSequenceMapping)
+- Resources to citations (citation, attribution)
+- Entities to taxonomic information (organism, taxon)
+- Cross-references to external databases (database)
+
+Properties show functional relationships like domain/range constraints linking specific class types.
+
+
+=== DOMAIN SUMMARY ===
+
+The UniProt Core ontology is a comprehensive bioinformatics ontology designed to represent knowledge about proteins and their properties. It provides a formal framework for describing:
+
+**Core Domain**: Protein biology, structure, function, and annotation
+
+**Primary Purpose**: This ontology enables structured representation of protein data including:
+- Protein sequences and their variants (natural, experimental)
+- Structural features (domains, sites, regions, secondary structure elements)
+- Functional information (enzyme activities, binding sites, cellular roles)
+- Annotations describing biological context (disease associations, tissue expression, developmental stages)
+- Molecular interactions and relationships
+- Provenance and evidence (citations, attributions)
+- Taxonomic context (organisms, strains)
+
+**Key Conceptual Areas**:
+1. **Proteins as central entities** - with extensive annotation capabilities
+2. **Sequence features** - structural and functional regions within proteins
+3. **Catalytic activity** - enzyme functions and reaction mechanisms
+4. **Biological context** - cellular locations, tissues, developmental stages
+5. **Evidence and attribution** - linking claims to publications and sources
+6. **Cross-references** - integration with external biological databases
+
+**Intended Use**: This ontology supports semantic queries over protein data, integration of heterogeneous biological databases, and reasoning about protein properties and relationships. It's particularly valuable for bioinformatics applications requiring standardized representation of protein knowledge from the UniProt knowledge base.

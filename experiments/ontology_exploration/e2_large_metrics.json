@@ -1,0 +1,18 @@
+{
+  "experiment": "e2_large_ontology",
+  "timestamp": "2026-01-28T15:41:04.884918",
+  "ontology": "core.ttl",
+  "ontology_size": 2816,
+  "elapsed_seconds": 74.365893,
+  "iterations": 0,
+  "lm_calls": 8,
+  "input_tokens": 2768,
+  "output_tokens": 922,
+  "total_tokens": 3690,
+  "estimated_cost_usd": 0.022134,
+  "token_tracking_method": "dspy_history",
+  "variables_created": 35,
+  "exploration_notes_length": 2061,
+  "domain_summary_length": 1630,
+  "llm_query_detected": false
+}

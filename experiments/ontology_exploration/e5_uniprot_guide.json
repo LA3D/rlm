@@ -1,0 +1,123 @@
+{
+  "ontology_overview": {
+    "name": "UniProt Core Ontology",
+    "namespace": "http://purl.uniprot.org/core/",
+    "purpose": "Defines the schema for UniProt protein knowledge base, including classes for proteins, genes, organisms, annotations, and their relationships"
+  },
+  "semantic_categories": [
+    {
+      "category_name": "Core Entity Classes",
+      "description": "Fundamental biological entities",
+      "classes": [
+        {
+          "name": "Protein",
+          "uri": "http://purl.uniprot.org/core/Protein",
+          "description": "Description of a protein"
+        },
+        {
+          "name": "Gene",
+          "uri": "http://purl.uniprot.org/core/Gene",
+          "description": "Genetic element"
+        },
+        {
+          "name": "Taxon",
+          "uri": "http://purl.uniprot.org/core/Taxon",
+          "description": "An element of a taxonomy for classifying life forms"
+        },
+        {
+          "name": "Sequence",
+          "uri": "http://purl.uniprot.org/core/Sequence",
+          "description": "An amino acid sequence"
+        },
+        {
+          "name": "Molecule",
+          "uri": "http://purl.uniprot.org/core/Molecule",
+          "description": "A biological molecule"
+        }
+      ]
+    },
+    {
+      "category_name": "Annotation Classes",
+      "description": "Metadata and documentation about entities",
+      "classes": [
+        {
+          "name": "Annotation",
+          "uri": "http://purl.uniprot.org/core/Annotation",
+          "description": "Description of a resource on a specific topic"
+        },
+        {
+          "name": "Citation",
+          "uri": "http://purl.uniprot.org/core/Citation",
+          "description": "Description of a publication from which data was obtained"
+        },
+        {
+          "name": "Database",
+          "uri": "http://purl.uniprot.org/core/Database",
+          "description": "Metadata for a life science database"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "object_properties": [
+      {
+        "name": "organism",
+        "uri": "http://purl.uniprot.org/core/organism",
+        "description": "Connects a Protein to its Taxon (organism)",
+        "domain": "Protein",
+        "range": "Taxon"
+      },
+      {
+        "name": "encodedBy",
+        "uri": "http://purl.uniprot.org/core/encodedBy",
+        "description": "Protein is encoded by Gene",
+        "domain": "Protein",
+        "range": "Gene"
+      },
+      {
+        "name": "sequence",
+        "uri": "http://purl.uniprot.org/core/sequence",
+        "description": "Connects Protein to its Sequence",
+        "domain": "Protein",
+        "range": "Sequence"
+      },
+      {
+        "name": "annotation",
+        "uri": "http://purl.uniprot.org/core/annotation",
+        "description": "Connects entities to their annotations",
+        "domain": "Protein",
+        "range": "Annotation"
+      }
+    ],
+    "datatype_properties": [
+      {
+        "name": "mnemonic",
+        "uri": "http://purl.uniprot.org/core/mnemonic",
+        "description": "Short protein identifier",
+        "domain": "Protein",
+        "range": "string"
+      },
+      {
+        "name": "scientificName",
+        "uri": "http://purl.uniprot.org/core/scientificName",
+        "description": "Scientific name of organism",
+        "domain": "Taxon",
+        "range": "string"
+      }
+    ]
+  },
+  "query_patterns": [
+    {
+      "name": "Find Proteins",
+      "description": "Retrieve proteins with basic information",
+      "sparql_template": "SELECT ?protein ?name WHERE { ?protein a up:Protein ; up:mnemonic ?name } LIMIT 10",
+      "use_case": "Get sample proteins from database"
+    },
+    {
+      "name": "Protein-Organism Relationship",
+      "description": "Find organisms for proteins",
+      "sparql_template": "SELECT ?protein ?organism WHERE { ?protein a up:Protein ; up:organism ?organism } LIMIT 10",
+      "use_case": "Understand which organisms proteins come from"
+    }
+  ]
+}

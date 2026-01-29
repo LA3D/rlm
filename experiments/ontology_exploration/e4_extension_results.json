@@ -1,0 +1,108 @@
+{
+  "timestamp": "2026-01-29T10:21:56.899425",
+  "guide_summary_length": 935,
+  "guide_cost_usd": 0.2491,
+  "queries": [
+    {
+      "query_id": "simple",
+      "question": "What activities can generate entities?",
+      "complexity": "Simple - direct property lookup",
+      "condition_a_no_guide": {
+        "success": true,
+        "elapsed_seconds": 43.137879,
+        "sparql": "PREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?activity\nWHERE {\n  ?activity rdfs:subClassOf prov:Activity .\n}\nORDER BY ?activity",
+        "explanation": "This SPARQL query retrieves all subclasses of prov:Activity from the PROV ontology. \n\nIn the PROV model, activities are entities that occur over time and can generate, use, or invalidate entities. The query identifies specific types of activities defined in the ontology by finding all classes that are direct subclasses of prov:Activity.\n\nThe query returns 8 activity types that can generate entities:\n- Accept: An activity representing acceptance\n- Contribute: An activity representing contribution\n- Copyright: An activity related to copyright\n- Modify: An activity that modifies entities\n- Publish: An activity that publishes entities\n- Replace: An activity that replaces entities\n- RightsAssignment: An activity assigning rights\n- Submit: An activity representing submission\n\nThese activities can all generate entities through the prov:wasGeneratedBy property (or its inverse prov:generated), which connects entities to the activities that created them.",
+        "lm_calls": 6,
+        "input_tokens": 29858,
+        "output_tokens": 2082,
+        "total_tokens": 31940,
+        "cost_usd": 0.120804
+      },
+      "condition_b_with_guide": {
+        "success": true,
+        "elapsed_seconds": 28.039358,
+        "sparql": "\nPREFIX prov: <http://www.w3.org/ns/prov#>\n\nSELECT DISTINCT ?activity\nWHERE {\n  ?activity a prov:Activity .\n  ?activity prov:generated ?entity .\n}\n",
+        "explanation": "This SPARQL query finds all Activities that can generate Entities in the PROV ontology.\n\nThe query works by:\n1. Looking for resources typed as prov:Activity\n2. Filtering to only those Activities that have the prov:generated property pointing to some Entity\n3. The prov:generated property represents the relationship where an Activity produces/creates an Entity\n4. DISTINCT ensures we only get unique Activities even if they generated multiple Entities\n\nThe result returns all Activities that have actually generated at least one Entity.",
+        "lm_calls": 4,
+        "input_tokens": 14101,
+        "output_tokens": 1383,
+        "total_tokens": 15484,
+        "cost_usd": 0.06304799999999999
+      }
+    },
+    {
+      "query_id": "relationship",
+      "question": "How are agents related to activities?",
+      "complexity": "Relationship - multi-hop navigation",
+      "condition_a_no_guide": {
+        "success": true,
+        "elapsed_seconds": 80.25157,
+        "sparql": "PREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\n# Query to find how agents are related to activities\nSELECT DISTINCT ?property ?propertyLabel ?domain ?range ?comment\nWHERE {\n  {\n    # Direct relationship: Activity to Agent\n    ?property rdfs:domain prov:Activity ;\n              rdfs:range prov:Agent .\n  }\n  UNION\n  {\n    # Qualified relationship: Activity to Association (which references Agent)\n    ?property rdfs:domain prov:Activity ;\n              rdfs:range prov:Association .\n  }\n  \n  OPTIONAL { ?property rdfs:label ?propertyLabel }\n  OPTIONAL { ?property rdfs:comment ?comment }\n}\nORDER BY ?property",
+        "explanation": "Agents are related to activities in the PROV ontology through two main patterns:\n\n1. **Direct Relationship - prov:wasAssociatedWith**:\n   - Domain: prov:Activity\n   - Range: prov:Agent\n   - Meaning: An Activity wasAssociatedWith an Agent that had some responsibility for the occurrence of the Activity.\n   - This is the primary, simple way to express that an agent was involved in an activity.\n\n2. **Qualified Relationship - prov:qualifiedAssociation**:\n   - Domain: prov:Activity\n   - Range: prov:Association\n   - The prov:Association class (a subclass of prov:AgentInfluence) provides additional details about the relationship.\n   - This qualified pattern allows specifying additional information such as:\n     * The specific agent involved (via prov:agent)\n     * The role the agent played\n     * The plan the agent followed\n   - This is the more detailed way to describe how an agent was associated with an activity.\n\nBoth patterns express that agents have responsibility for activities, with the qualified form providing richer description of the association.",
+        "lm_calls": 8,
+        "input_tokens": 37279,
+        "output_tokens": 4850,
+        "total_tokens": 42129,
+        "cost_usd": 0.184587
+      },
+      "condition_b_with_guide": {
+        "success": true,
+        "elapsed_seconds": 45.359375,
+        "sparql": "\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?activity ?agent ?association\nWHERE {\n  ?activity a prov:Activity .\n  ?activity prov:wasAssociatedWith ?agent .\n  ?agent a prov:Agent .\n  \n  OPTIONAL {\n    ?activity prov:qualifiedAssociation ?association .\n    ?association prov:agent ?agent .\n  }\n}\n",
+        "explanation": "\nAgents are related to Activities through the prov:wasAssociatedWith property.\n\nIn the W3C PROV ontology:\n- Activities (prov:Activity) are associated with Agents (prov:Agent) via the prov:wasAssociatedWith property\n- This relationship indicates that the agent had some responsibility for the occurrence of the activity\n- The relationship can be simple (direct wasAssociatedWith) or qualified (using prov:qualifiedAssociation)\n\nThe SPARQL query retrieves:\n1. Activities that are associated with agents\n2. The agents responsible for those activities\n3. Optionally, any qualified Association instances that provide additional details about the relationship\n\nThe core semantic is: \"An Activity wasAssociatedWith an Agent who had responsibility for it.\"\n",
+        "lm_calls": 5,
+        "input_tokens": 20382,
+        "output_tokens": 2242,
+        "total_tokens": 22624,
+        "cost_usd": 0.094776
+      }
+    },
+    {
+      "query_id": "semantic",
+      "question": "What is the difference between Generation and Derivation?",
+      "complexity": "Semantic - conceptual understanding",
+      "condition_a_no_guide": {
+        "success": true,
+        "elapsed_seconds": 52.383248,
+        "sparql": "\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?class ?label ?definition ?comment ?superclass\nWHERE {\n  VALUES ?class { prov:Generation prov:Derivation }\n  \n  ?class rdfs:label ?label .\n  \n  OPTIONAL { ?class prov:definition ?definition }\n  OPTIONAL { ?class rdfs:comment ?comment }\n  OPTIONAL { ?class rdfs:subClassOf ?superclass }\n}\nORDER BY ?class\n",
+        "explanation": "The key differences between Generation and Derivation in the PROV ontology are:\n\n1. **Relationship Type:**\n   - Generation: Relates an Entity to an Activity (subclass of ActivityInfluence)\n   - Derivation: Relates an Entity to another Entity (subclass of EntityInfluence)\n\n2. **Conceptual Meaning:**\n   - Generation: The completion of production of a NEW entity by an activity. The entity did not exist before generation and becomes available for usage after this generation.\n   - Derivation: A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.\n\n3. **Focus:**\n   - Generation: Focuses on HOW an entity was created (by which activity)\n   - Derivation: Focuses on WHAT an entity was derived from (from which other entity)\n\n4. **Unqualified Forms:**\n   - Generation: Uses prov:wasGeneratedBy property\n   - Derivation: Uses prov:wasDerivedFrom property\n\nIn summary: Generation answers \"which activity created this?\", while Derivation answers \"which entity was this based on?\". Generation is about the act of creation, while Derivation is about the lineage between entities.",
+        "lm_calls": 8,
+        "input_tokens": 37866,
+        "output_tokens": 2968,
+        "total_tokens": 40834,
+        "cost_usd": 0.15811799999999998
+      },
+      "condition_b_with_guide": {
+        "success": true,
+        "elapsed_seconds": 39.270972,
+        "sparql": "\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?class ?label ?definition ?superClass ?unqualifiedForm\nWHERE {\n  VALUES ?class { prov:Generation prov:Derivation }\n  \n  ?class rdfs:label ?label .\n  \n  OPTIONAL { ?class prov:definition ?definition . }\n  OPTIONAL { ?class rdfs:subClassOf ?superClass . }\n  OPTIONAL { ?class prov:unqualifiedForm ?unqualifiedForm . }\n}\nORDER BY ?label\n",
+        "explanation": "This SPARQL query retrieves key information to understand the difference between Generation and Derivation in the W3C PROV ontology.\n\nThe query selects:\n1. **label**: The human-readable name of each class\n2. **definition**: The formal definition from the PROV ontology\n3. **superClass**: The parent classes, which show their categorical differences (Generation is an ActivityInfluence, Derivation is an EntityInfluence)\n4. **unqualifiedForm**: The related binary properties (wasGeneratedBy vs wasDerivedFrom)\n\nKey differences revealed:\n- **Generation** represents the completion of production of a new entity BY an activity. It describes the Activity\u2192Entity relationship where something is created.\n- **Derivation** represents a transformation of one entity into another entity. It describes the Entity\u2192Entity relationship where something is constructed, updated, or transformed from a pre-existing entity.\n- Generation is a subclass of ActivityInfluence (involving activities), while Derivation is a subclass of EntityInfluence (involving entities).\n- Generation uses wasGeneratedBy relation, Derivation uses wasDerivedFrom relation.\n\nIn summary: Generation is about creating (activity creates entity), while Derivation is about transforming (entity comes from another entity).",
+        "lm_calls": 5,
+        "input_tokens": 22782,
+        "output_tokens": 2124,
+        "total_tokens": 24906,
+        "cost_usd": 0.100206
+      }
+    }
+  ],
+  "aggregate": {
+    "successful_queries": 3,
+    "total_queries": 3,
+    "total_time_no_guide": 175.772697,
+    "total_time_with_guide": 112.669705,
+    "total_cost_no_guide": 0.46350899999999995,
+    "total_cost_with_guide": 0.25803,
+    "total_tokens_no_guide": 114903,
+    "total_tokens_with_guide": 63014,
+    "total_calls_no_guide": 22,
+    "total_calls_with_guide": 14,
+    "avg_time_no_guide": 58.590899,
+    "avg_time_with_guide": 37.55656833333333,
+    "avg_cost_no_guide": 0.15450299999999997,
+    "avg_cost_with_guide": 0.08600999999999999,
+    "avg_tokens_no_guide": 38301.0,
+    "avg_tokens_with_guide": 21004.666666666668,
+    "savings_per_query": 0.06849299999999998,
+    "break_even_queries": 3.6368680011096033
+  }
+}
