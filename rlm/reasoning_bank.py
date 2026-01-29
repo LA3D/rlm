@@ -6,11 +6,11 @@
 __all__ = ['ONTOLOGY_RECIPES', 'Recipe', 'classify_task_type', 'retrieve_ontology_recipes', 'format_recipes_for_injection',
            'inject_context', 'rlm_run_enhanced', 'validate_memory_recipe_separation']
 
-# %% ../nbs/06_reasoning_bank.ipynb #a282f136
+# %% ../nbs/06_reasoning_bank.ipynb #170582dd
 from dataclasses import dataclass
 from typing import Optional
 
-# %% ../nbs/06_reasoning_bank.ipynb #fe04fdca
+# %% ../nbs/06_reasoning_bank.ipynb #358a31c1
 @dataclass
 class Recipe:
     """A procedural recipe for ontology exploration.
@@ -41,7 +41,7 @@ class Recipe:
         ]
         return '\n'.join(lines)
 
-# %% ../nbs/06_reasoning_bank.ipynb #d4162c3e
+# %% ../nbs/06_reasoning_bank.ipynb #b98cdff0
 # Ontology-specific recipes only
 # General strategies are now in procedural_memory.bootstrap_general_strategies()
 
@@ -57,7 +57,7 @@ ONTOLOGY_RECIPES = [
 ]
 
 
-# %% ../nbs/06_reasoning_bank.ipynb #0feed99e
+# %% ../nbs/06_reasoning_bank.ipynb #8be8fcee
 def classify_task_type(query: str) -> str:
     """Classify query into task type for recipe selection.
     
@@ -139,7 +139,7 @@ def format_recipes_for_injection(recipes: list[Recipe]) -> str:
     
     return '\n'.join(sections)
 
-# %% ../nbs/06_reasoning_bank.ipynb #f8d2bcdc
+# %% ../nbs/06_reasoning_bank.ipynb #eb1e0687
 def inject_context(
     query: str,
     base_context: str,
@@ -203,7 +203,7 @@ def inject_context(
     return '\n\n'.join(sections)
 
 
-# %% ../nbs/06_reasoning_bank.ipynb #d28fe844
+# %% ../nbs/06_reasoning_bank.ipynb #59d9df07
 def rlm_run_enhanced(
     query: str,
     context: str,
@@ -248,7 +248,7 @@ def rlm_run_enhanced(
     return rlm_run(query, enhanced_context, ns=ns, **kwargs)
 
 
-# %% ../nbs/06_reasoning_bank.ipynb #539d0129
+# %% ../nbs/06_reasoning_bank.ipynb #f7970a8b
 def validate_memory_recipe_separation(memory_store) -> dict:
     """Ensure general strategies aren't duplicated in ONTOLOGY_RECIPES.
     

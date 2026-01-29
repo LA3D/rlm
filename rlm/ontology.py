@@ -949,7 +949,7 @@ Provide a concise sense document with:
     ns[name] = sense_doc
     return f"Built sense document into '{name}': {len(label_props)} label properties, {len(desc_props)} description properties, {len(hier)} root branches"
 
-# %% ../nbs/01_ontology.ipynb #b7de03c4
+# %% ../nbs/01_ontology.ipynb #dbde1129
 import json
 
 # Sense Card schema (always injected, compact)
@@ -1012,7 +1012,7 @@ def validate_sense_grounding(sense: dict, meta: GraphMeta) -> dict:
     }
 
 
-# %% ../nbs/01_ontology.ipynb #7744e079
+# %% ../nbs/01_ontology.ipynb #e7c4c54b
 def build_sense_structured(
     path: str,
     name: str = 'sense',
@@ -1178,7 +1178,7 @@ def build_sense_structured(
     return result
 
 
-# %% ../nbs/01_ontology.ipynb #6b191327
+# %% ../nbs/01_ontology.ipynb #c7acb47a
 def format_sense_card(card: dict) -> str:
     """Format sense card for context injection (~500 chars).
 
@@ -1270,7 +1270,7 @@ def get_sense_context(query: str, sense: dict) -> str:
     return context
 
 
-# %% ../nbs/01_ontology.ipynb #89602ab1
+# %% ../nbs/01_ontology.ipynb #4f16e2c7
 def validate_sense_precondition(sense: dict, meta) -> dict:
     """Gate 0: Validate sense data before RLM operations.
     

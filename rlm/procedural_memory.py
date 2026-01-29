@@ -549,7 +549,7 @@ def rlm_run_with_memory(
     
     return answer, iterations, ns, new_memories
 
-# %% ../nbs/05_procedural_memory.ipynb #effb9aba
+# %% ../nbs/05_procedural_memory.ipynb #a9132547
 def bootstrap_general_strategies() -> list[MemoryItem]:
     """Create general strategy memories for bootstrapping.
     
@@ -675,7 +675,7 @@ Tip: Avoid deep recursion - explore breadth-first for overview.""",
     
     return strategies
 
-# %% ../nbs/05_procedural_memory.ipynb #72b34239
+# %% ../nbs/05_procedural_memory.ipynb #36cfd179
 def validate_no_hardcoded_uris(strategies: list[MemoryItem]) -> bool:
     """Ensure strategies don't reference specific ontology URIs.
     
@@ -693,7 +693,7 @@ def validate_no_hardcoded_uris(strategies: list[MemoryItem]) -> bool:
     return True
 
 
-# %% ../nbs/05_procedural_memory.ipynb #7357a483
+# %% ../nbs/05_procedural_memory.ipynb #814223cf
 def validate_bootstrap_strategies() -> dict:
     """Validate bootstrap creates valid, non-conflicting strategies.
     
@@ -723,7 +723,7 @@ def validate_bootstrap_strategies() -> dict:
     }
 
 
-# %% ../nbs/05_procedural_memory.ipynb #448c26a5
+# %% ../nbs/05_procedural_memory.ipynb #b411fe1d
 def check_memory_deduplication(
     new_memory: MemoryItem,
     store: MemoryStore,
@@ -766,7 +766,7 @@ def check_memory_deduplication(
     return 'add'  # No duplicates found
 
 
-# %% ../nbs/05_procedural_memory.ipynb #fdbcf7a7
+# %% ../nbs/05_procedural_memory.ipynb #5c40a9a4
 def score_generalization(memory: MemoryItem) -> float:
     """Gate 3: Score how generalizable a memory is (0-1).
     
@@ -804,7 +804,7 @@ def score_generalization(memory: MemoryItem) -> float:
     return max(0.0, min(1.0, score))
 
 
-# %% ../nbs/05_procedural_memory.ipynb #7092ef6f
+# %% ../nbs/05_procedural_memory.ipynb #7fce9b1c
 def validate_retrieval_quality(
     memory_store: MemoryStore,
     test_cases: list[tuple[str, list[str]]]
