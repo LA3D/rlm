@@ -27,9 +27,9 @@ jobs:
     - name: Check if notebooks are synced
       run: |
         echo "Checking if notebooks are in sync"
-        nbdev_export
+        nbdev-export
         if [[ `git status --porcelain -uno` ]]; then
-          echo "Notebooks and library are not in sync. Please run nbdev_export."
+          echo "Notebooks and library are not in sync. Please run nbdev-export."
           git status -uno
           git diff
           exit 1
@@ -37,4 +37,4 @@ jobs:
 
     - name: Run tests
       run: |
-        nbdev_test
+        nbdev-test
