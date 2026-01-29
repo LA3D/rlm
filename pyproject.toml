@@ -28,4 +28,26 @@ version = {attr = "rlm.__version__"}
 include = ["rlm"]
 
 [tool.nbdev]
+doc_path = "_docs"
+lib_path = "rlm"
+nbs_path = "nbs"
+recursive = true
+tst_flags = "notest"
+version = "0.0.1"
+min_python = "3.12"
+license = "apache2"
+black_formatting = false
+doc_host = "https://LA3D.github.io"
+doc_baseurl = "/rlm"
+git_url = "https://github.com/LA3D/rlm"
+lib_name = "rlm"
+title = "rlm"
+branch = "main"
 custom_sidebar = false
+user = "LA3D"
+author = "CharlesVardeman"
+author_email = "charles.vardeman@gmail.com"
+copyright = "2026 onwards, CharlesVardeman"
+status = "3"
+audience = "Developers"
+language = "English"
