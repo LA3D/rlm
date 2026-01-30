@@ -30,22 +30,33 @@ class MemStore:
         self._items[item.id] = item
         return item.id
 
-    def search(self, q:str, k:int=5) -> list[dict]:
-        "Return IDs + titles + descs ONLY (not content)."
-        # Simple: score by word overlap
-        qwords = set(q.lower().split())
+    def search(self, q:str, k:int=6, polarity:str=None) -> list[dict]:
+        "Return IDs + titles + descs ONLY. Filter by `polarity` ('success'|'failure'|'seed')."
+        # Normalize: lowercase, remove punctuation, split
+        import string
+        trans = str.maketrans('', '', string.punctuation)
+        qwords = set(q.lower().translate(trans).split())
         scored = []
         for item in self._items.values():
-            words = set(f"{item.title} {item.desc} {' '.join(item.tags)}".lower().split())
+            # Filter by polarity if specified
+            if polarity and item.src != polarity: continue
+            text = f"{item.title} {item.desc} {' '.join(item.tags)}".lower().translate(trans)
+            words = set(text.split())
             score = len(qwords & words)
             if score > 0: scored.append((score, item))
         scored.sort(key=lambda x: -x[0])
-        return [{'id': o.id, 'title': o.title, 'desc': o.desc} for _,o in scored[:k]]
+        return [{'id': o.id, 'title': o.title, 'desc': o.desc, 'src': o.src} for _,o in scored[:k]]
 
     def get(self, ids:list[str], max_n:int=3) -> list[Item]:
         "Return full items (hard cap enforced)."
         if len(ids) > max_n: raise ValueError(f"Requested {len(ids)} items, max is {max_n}")
         return [self._items[i] for i in ids if i in self._items]
+
+    def quote(self, id:str, max_chars:int=500) -> str:
+        "Return bounded excerpt of item content."
+        item = self._items.get(id)
+        if not item: return ""
+        return item.content[:max_chars] + ("..." if len(item.content) > max_chars else "")
 
     def all(self) -> list[Item]: return list(self._items.values())
 

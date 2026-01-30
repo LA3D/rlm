@@ -39,16 +39,21 @@ class Builder:
         if self.cfg.l0.on: parts.append(l0_sense.pack(g, self.cfg.l0.budget))
         if self.cfg.l1.on: parts.append(l1_schema.pack(g, self.cfg.l1.budget))
         if self.cfg.l2.on and mem:
-            hits = mem.search(task, k=3)
-            if hits:
-                items = mem.get([h['id'] for h in hits])
+            # Top-K success + top-K failure retrieval
+            k_success, k_failure = 2, 1  # Configurable defaults
+            success_hits = mem.search(task, k=k_success, polarity='success')
+            failure_hits = mem.search(task, k=k_failure, polarity='failure')
+            seed_hits = mem.search(task, k=1, polarity='seed')  # General strategies
+            all_ids = [h['id'] for h in success_hits + failure_hits + seed_hits]
+            if all_ids:
+                items = mem.get(all_ids, max_n=len(all_ids))  # Allow all retrieved
                 parts.append(l2_mem.pack(items, self.cfg.l2.budget))
         if self.cfg.l3.on and self.cfg.guide_text:
             parts.append(l3_guide.pack(self.cfg.guide_text, self.cfg.l3.budget))
         return '\n\n'.join(parts)
 
-    def tools(self, store:Store, g_path:str) -> dict:
-        "Build tool dict for dspy.RLM."
+    def tools(self, store:Store, g_path:str, mem:MemStore=None) -> dict:
+        "Build tool dict for dspy.RLM. Includes graph, context, and memory tools."
         # Set module globals
         G._store = store
 
@@ -57,18 +62,43 @@ class Builder:
         ref = store.put(g_path, 'graph')
         G._graphs[ref.key] = g
 
-        # Return bounded tools with correct DSPy signatures
         # DSPy RLM calls tools as: tool(args, kwargs) where:
         #   args = actual arguments (value, list, etc)
         #   kwargs = keyword arguments dict
-        return {
+
+        # Graph tools (bounded ontology access)
+        tools = {
             'g_stats': lambda args, kwargs: G.g_stats(ref),
             'g_query': lambda args, kwargs: G.g_query(ref, args if isinstance(args, str) else (args[0] if args else kwargs.get('q', '')), kwargs.get('limit', 100)),
             'g_sample': lambda args, kwargs: G.g_sample(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('n', 10))),
             'g_classes': lambda args, kwargs: G.g_classes(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('limit', 50))),
             'g_props': lambda args, kwargs: G.g_props(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('limit', 50))),
             'g_describe': lambda args, kwargs: G.g_describe(ref, args if isinstance(args, str) else (args[0] if args else kwargs.get('uri', '')), kwargs.get('limit', 20)),
+            # Context tools (bounded blob access)
             'ctx_peek': lambda args, kwargs: store.peek(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', '')), args[1] if isinstance(args, list) and len(args) > 1 else kwargs.get('n', 200)),
             'ctx_slice': lambda args, kwargs: store.slice(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', '')), args[1] if isinstance(args, list) and len(args) > 1 else kwargs.get('start', 0), args[2] if isinstance(args, list) and len(args) > 2 else kwargs.get('end', 100)),
             'ctx_stats': lambda args, kwargs: store.stats(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', ''))),
         }
+
+        # Memory tools (Mode 2: tool-mediated retrieval)
+        if mem:
+            tools.update({
+                'mem_search': lambda args, kwargs: mem.search(
+                    args if isinstance(args, str) else (args[0] if args else kwargs.get('q', '')),
+                    kwargs.get('k', 6),
+                    kwargs.get('polarity', None)
+                ),
+                'mem_get': lambda args, kwargs: [
+                    {'id': o.id, 'title': o.title, 'desc': o.desc, 'content': o.content, 'src': o.src}
+                    for o in mem.get(
+                        args if isinstance(args, list) else ([args] if args else kwargs.get('ids', [])),
+                        kwargs.get('max_n', 3)
+                    )
+                ],
+                'mem_quote': lambda args, kwargs: mem.quote(
+                    args if isinstance(args, str) else (args[0] if args else kwargs.get('id', '')),
+                    kwargs.get('max_chars', 500)
+                ),
+            })
+
+        return tools
