@@ -1,0 +1,29 @@
+@prefix ex: <https://www.bgee.org/sparql/.well-known/sparql-examples/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:030 a sh:SPARQLExecutable,
+        sh:SPARQLSelectExecutable ;
+    rdfs:comment "Where is human APOC1 expressed in the post-juvenile stage? (optimized version without strain and sex filters)"@en ;
+    sh:prefixes _:sparql_examples_prefixes ;
+    sh:select """PREFIX orth: <http://purl.org/net/orth#>
+PREFIX genex: <http://purl.org/genex#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX up: <http://purl.uniprot.org/core/>
+
+SELECT DISTINCT ?anat ?anatName ?stage {
+	?seq a orth:Gene .
+	?seq genex:isExpressedIn ?condition .
+	?seq rdfs:label "APOC1" .
+	?condition genex:hasAnatomicalEntity ?anat .
+	?anat rdfs:label ?anatName .
+	?condition genex:hasAnatomicalEntity obo:GO_0005575 .
+	?condition genex:hasDevelopmentalStage ?stage .
+	?stage rdfs:label "post-juvenile" .
+	?seq orth:organism ?organism .
+	?organism obo:RO_0002162 ?species .
+	?species a up:Taxon .
+	?species up:commonName "human" .
+}""" ;
+    schema:target <https://www.bgee.org/sparql/> .

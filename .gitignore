@@ -191,3 +191,8 @@ experiments/test_logs/
 *.egg-info/
 dist/
 build/
+
+# Downloaded ontologies: keep compressed (.gz), ignore uncompressed versions
+ontology/rheadb/*.rdf
+ontology/nextprot/*.ttl
+ontology/bgee/*.rdf

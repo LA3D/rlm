@@ -1,0 +1,1231 @@
+@prefix : <http://purl.org/genex#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://purl.org/genex#> .
+
+<http://purl.org/genex> rdf:type owl:Ontology ;
+                         owl:versionIRI <http://purl.org/genex/0.2> ;
+                         owl:imports <http://purl.obolibrary.org/obo/caro.owl> ,
+                                     <http://purl.obolibrary.org/obo/iao.owl> ,
+                                     <http://purl.obolibrary.org/obo/ro.owl> ,
+                                     <http://purl.org/lscr> ,
+                                     <http://purl.org/net/orth/2.0> ,
+                                     <http://www.ebi.ac.uk/efo/efo.owl> ,
+                                     <http://www.w3.org/2004/02/skos/core> ;
+                         <http://purl.org/dc/terms/abstract> "Expression patterns are a major feature of gene description, and are captured in many expression related databases (e.g., Bgee, Expression Atlas, GENEVESTIGATOR, or Tissue). Yet comparison and interoperability among these heterogeneous data sources or providers is limited by a lack of agreement for describing knowledge of gene expression. Ontologies are recognized as an interesting approach to achieve a consensus for knowledge representation, and allow to leverage semantic interoperability, but are lacking for the domain of gene expression. The Relational Ontology (RO) contains preliminary efforts to define terms for describing this domain. Notably, it contains `expressed in` and `expresses` properties (i.e., relations). Nonetheless, further work was necessary to address the following issue: the representation of additional information related to gene expression, such as developmental stages, as well as absent in and highly expressed relations. Furthermore, we reuse parts of the data schemas of the ORTH and UniProt core ontologies to provide the capacity to interoperate with other biological databases from different knowledge domains which are still relevant to the gene expression domain. Moreover, different gene expression databases use distinct confidence scores to assert expressed in or absent in relations. Finally, the GenEx ontology is fully adopted by Bgee, a gene expression database, as its core data schema to structure the Bgee RDF data accessible via its SPARQL endpoint at [https://www.bgee.org/sparql/](https://www.bgee.org/sparql/)."@en ;
+                         <http://purl.org/dc/terms/bibliographicCitation> "Ana Claudia Sima, Tarcisio Mendes de Farias, Erich Zbinden, Maria Anisimova, Manuel Gil, Heinz Stockinger, Kurt Stockinger, Marc Robinson-Rechavi, Christophe Dessimoz, Enabling semantic queries across federated bioinformatics databases, Database, Volume 2019, 2019, baz106, <a href=\"https://doi.org/10.1093/database/baz106\">https://doi.org/10.1093/database/baz106</a>" ;
+                         <http://purl.org/dc/terms/contributor> <https://orcid.org/0000-0002-2170-853X> ,
+                                                                <https://orcid.org/0000-0002-3099-3117> ,
+                                                                <https://orcid.org/0000-0002-3175-5372> ,
+                                                                <https://orcid.org/0000-0002-3437-3329> ,
+                                                                <https://orcid.org/0000-0002-9415-5104> ;
+                         <http://purl.org/dc/terms/created> "2019-01-25"^^xsd:date ;
+                         <http://purl.org/dc/terms/creator> <https://orcid.org/0000-0002-3175-5372> ;
+                         <http://purl.org/dc/terms/description> "The GenEx ontology is designed to capture and structure gene expression information provided by databases such as Bgee."@en ;
+                         <http://purl.org/dc/terms/issue> "2019-11-07"^^xsd:date ;
+                         <http://purl.org/dc/terms/license> <https://creativecommons.org/publicdomain/zero/1.0/> ;
+                         <http://purl.org/dc/terms/modified> "2024-04-30"^^xsd:date ;
+                         <http://purl.org/dc/terms/publisher> <https://www.sib.swiss> ;
+                         <http://purl.org/dc/terms/title> "Gene expression (GenEx) ontology"@en ;
+                         <http://purl.org/ontology/bibo/status> <http://purl.org/ontology/bibo/status/accepted> ;
+                         <http://purl.org/vocab/vann/preferredNamespacePrefix> "genex" ;
+                         <http://purl.org/vocab/vann/preferredNamespaceUri> : ;
+                         <http://purl.org/vocommons/voaf#extends> <http://purl.obolibrary.org/obo/ro.owl> ;
+                         <http://schema.org/codeRepository> "https://github.com/biosoda/genex"^^xsd:anyURI ;
+                         <http://schema.org/image> <http://biosoda.expasy.org/genex/images/Picture1.png> ;
+                         rdfs:seeAlso <http://purl.obolibrary.org/obo/ro.owl> ,
+                                      <https://bioschemas.org> ,
+                                      <https://schema.org> ;
+                         owl:versionInfo "0.2" ;
+                         <https://w3id.org/widoco/vocab#introduction> """There is a general lack of a comprehensive ontology to serve as a data schema for describing knowledge in the field of gene expression. This may seem surprising, considering the ubiquity of gene expression analyses in molecular biology and the existence of multiple well-established resources for gene expression, such as Bgee, Expression Atlas (EA), GENEVESTIGATOR, RefEx (Reference Expression dataset) or the Tissue Expression database. We note here that different gene expression databases often use distinct criteria to assert expressed in or absent in relations.
+
+To the best of our knowledge, at least 3 semantic models currently exist as initial attempts to structure gene expression related data: the Relation Ontology (RO), the Expression Atlas semantic model (discontinued) and Bioschema.org / Schema.org. The Relation Ontology and Schema.org define only a few terms within the domain of gene expression and is not uniquely designed for this knowledge domain. Notably, they contain an  'expressed in' relation. The Expression Atlas defines a semantic model related to gene expression that mainly focuses on modelling the Expression Atlas data itself and not the domain of gene expression generally. In this EA model, additional data interpretations (i.e., semantics) are not explicitly represented, such as a given gene is expressed or lowly expressed in some sample relative to others. Although it would be possible to obtain this information through a more complex query on the Expression Atlas SPARQL endpoint (currently discontinued), we lack an explicit representation, which would allow us to compare gene expression data from these different databases.
+
+To provide a first step toward a general-purpose gene expression ontology, we defined a semantic model called GenEx. GenEx is aligned with the Relation Ontology and Expression Atlas models to facilitate interoperability with existing RDF stores. Furthermore, we reuse parts of the data schemas of the ORTH and UniProtKB core ontologies to provide an easy way to interoperate with other biological databases from different knowledge domains that are relevant to the gene expression domain. For example, integrating orthology and gene expression data are relevant since we might want to predict gene expression conservation for orthologous genes.
+
+GenEx is designed to capture and structure gene expression information at a higher level relative to others.
+By doing so, we intend to model the data meanings which are expected by the end-users such as biologists. For example, often biologists are not interested in knowing expression scores, that depend on the method used or data transformations. Rather, for instance, they might look for an interpretation of expression scores, such as whether a gene is highly expressed. 
+GenEx was defined by using the [OWL 2 Description Logics (DL)](https://www.w3.org/TR/owl2-overview/).
+The methodology to develop GenEx was inspired by the Simplified Agile Methodology for Ontology Development [SAMOD](http://essepuntato.github.io/samod/).  
+         
+We defined a concept for describing absence of gene expression so-called  [genex:AbsenceExpression](#AbsenceExpression). The  [genex:AbsenceExpression](#AbsenceExpression) class is a subclass of  the complement of [genex:Expression](#Expression) class (i.e.,  [genex:AbsenceExpression](#AbsenceExpression) ⊑ ¬[genex:Expression](#Expression).  [genex:Expression](#Expression) is the concept for representing gene expression according to a given experimental condition (e.g. sex and anatomical entity). [genex:AbsenceExpression](#AbsenceExpression) is not equivalent to the negation of the  [genex:Expression](#Expression) because it may lack experiments to conclude that a gene is expressed (i.e., missing gene expression information). Therefore, solely data processed from experiments which confirm no presence of expression are described by using the  [genex:AbsenceExpression](#AbsenceExpression) class. We highlight that the [Bgee database](https://bgee.org) provides absence of expression, Bastian et al. in [(1)](https://doi.org/10.1093/nar/gkaa793) describe how the absence of expression information is computed in the Bgee database by also discussing about expression calls.  
+
+We mostly considered to reuse the following ontologies:
+
+- The [Relation Ontology (RO)](http://www.obofoundry.org/ontology/ro.html). For example, we reuse ro:RO_0002245 OWL object property labelled as “over-expressed in” or “highly expressed”. In DL, we can formalise as follows: ∃[ro:RO_0002245](#http://purl.obolibrary.org/obo/RO_0002245).⊤ ⊑ [orth:SequenceUnit](#http://purl.org/net/orth#SequenceUnit) where [orth:SequenceUnit](#http://purl.org/net/orth#SequenceUnit) is the inferred domain of  [ro:RO_0002245](#http://purl.obolibrary.org/obo/RO_0002245) and ⊤ is the top concept (i.e., [owl:Thing](https://www.w3.org/TR/2004/REC-owl-semantics-20040210/#owl_Thing) term).
+- The [Orthology (ORTH) ontology](http://qfo.github.io/OrthologyOntology/). For example, we reuse the [orth:SequenceUnit](#http://purl.org/net/orth#SequenceUnit) class (i.e., [orth:SequenceUnit](#http://purl.org/net/orth#SequenceUnit) ⊑ ⊤). The reuse of terms and a part of the data schema of ORTH ontology significantly facilitate the integration with orthology databases (e.g. OMA). In doing so, we address the use case of predicting presence or absence of expression for orthologous genes.   
+- The [Experimental Factor Ontology (EFO)](https://www.ebi.ac.uk/efo/). This ontology provides a description of various experimental variables (e.g., organism part, material entity and developmental stage) available in EBI databases such as EA. In GenEx, we mainly reuse classes such as [efo:EFO_0000635](#http://www.ebi.ac.uk/efo/EFO_0000635) (labelled “organism part”),    [efo:EFO_0005135](#http://www.ebi.ac.uk/efo/EFO_0005135) (labelled “strain”), and  [efo:EFO_0000399](#http://www.ebi.ac.uk/efo/EFO_0000399) (labelled “developmental stage”). 
+- The [Confidence Information Ontology (CIO)](http://www.obofoundry.org/ontology/cio.html) classes as instance values of the [genex:hasConfidenceLevel](#hasConfidenceLevel) OWL object property. In the GenEx context, CIO classes  are individuals to represent the confidence levels of gene expression predictions. This is possible in OWL 2 thanks to [punning](https://www.w3.org/TR/owl2-new-features/#F12:_Punning) .  The following DL constraint is stated ⊤ ⊑∀[genex:hasConfidenceLevel](#hasConfidenceLevel).{[cio:0000029](#http://purl.obolibrary.org/obo/CIO_0000029), [cio:0000030](#http://purl.obolibrary.org/obo/CIO_0000030), [cio:0000031](#http://purl.obolibrary.org/obo/CIO_0000031)}. This means that the [genex:hasConfidenceLevel](#hasConfidenceLevel) property values (i.e., property range) can only be  “high confidence level”', “medium confidence level”, or “low confidence level”.     
+- The Uber-anatomy (UBERON) ontology. In the GenEx context, UBERON classes  are considered as individuals
+of genex:AnatomicalEntity or [efo:EFO_0000399](#http://www.ebi.ac.uk/efo/EFO_0000399)  (i.e., developmental stage) classes. The classes of the developmental stage per species ontologies in the [wiki](#https://github.com/obophenotype/developmental-stage-ontologies/wiki) developmental-stage-ontologies wiki</a> are also considered as individuals of [efo:EFO_0000399](#http://www.ebi.ac.uk/efo/EFO_0000399)  class. Therefore, for GenEx, these ontologies are controlled vocabularies assigned as values of [genex:hasDevelopmentalStage](#hasDevelopmentalStage) and genex:hasAnatomicalEntity OWL object properties. These properties describe gene expression experimental conditions. In UBERON, despite the “life cycle stage” term is a synonym of “developmental stage” EFO term, we decided to reuse EFO “developmental stage” term in GenEx rather than UBERON one. This is because we want to separate the UBERON terms which are considered as OWL individuals in the GenEx context (by applying [OWL 2 punning](https://www.w3.org/TR/owl2-new-features/#F12:_Punning) feature) and the “developmental stage” class from EFO.  
+
+One of the main semantic modelling issues GenEx addresses is to provide terms and a data schema for explicitly describing and structuring multiple combined conditions for gene expression. For example, the HBB human gene is highly expressed in the cerebellum of 6-12 year-old child stage. Thus, experiments to derive this conclusion were mainly performed under two conditions: a human developmental stage and the cerebellum anatomical entity.
+In GenEx, we explicitly define a relation for each experimental condition such as the [genex:hasAnatomicalEntity](#hasAnatomicalEntity) property assigned with an [Uber-anatomy (UBERON)](http://uberon.github.io/) class as value by [punning](https://www.w3.org/TR/owl2-new-features/#F12:_Punning). We reuse [Experimental Factor Ontology (EFO)](https://www.ebi.ac.uk/efo/) classes instead of  defining literals. 
+
+As a limitation, at present, GenEx does not support differential expression analysis such as included in the Expression Atlas RDF schema (that is discontinued). This is because we mostly focus on describing information that may be extracted from the present state of the Bgee database. GenEx can be viewed as a start point towards an ontology to structure gene expression information. We consider GenEx a semantic model rather than an ontology. This is because, currently, it is not necessarily a shared conceptualisation among all stakeholders of interest, which include but not only the following gene expression database teams Bgee, Expression Atlas, GENEVESTIGATOR, and Tissue, and others (e.g., the Model Organisms Databases).  
+""" .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.obolibrary.org/obo/IAO_0000112
+<http://purl.obolibrary.org/obo/IAO_0000112> rdf:type owl:AnnotationProperty ;
+                                             rdfs:label "example of usage" .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000115
+<http://purl.obolibrary.org/obo/IAO_0000115> rdf:type owl:AnnotationProperty ;
+                                             rdfs:label "definition" .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000116
+<http://purl.obolibrary.org/obo/IAO_0000116> rdf:type owl:AnnotationProperty ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/iao.owl> ;
+                                             rdfs:label "editor note"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000232
+<http://purl.obolibrary.org/obo/IAO_0000232> rdf:type owl:AnnotationProperty ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/iao.owl> ;
+                                             rdfs:label "curator note"@en .
+
+
+###  http://purl.obolibrary.org/obo/IAO_0000600
+<http://purl.obolibrary.org/obo/IAO_0000600> rdf:type owl:AnnotationProperty ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/iao.owl> ;
+                                             rdfs:label "elucidation"@en .
+
+
+###  http://purl.org/dc/elements/1.1/description
+<http://purl.org/dc/elements/1.1/description> rdfs:range rdfs:Literal .
+
+
+###  http://purl.org/dc/terms/abstract
+<http://purl.org/dc/terms/abstract> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/bibliographicCitation
+<http://purl.org/dc/terms/bibliographicCitation> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/created
+<http://purl.org/dc/terms/created> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/description
+<http://purl.org/dc/terms/description> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/issue
+<http://purl.org/dc/terms/issue> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/modified
+<http://purl.org/dc/terms/modified> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/publisher
+<http://purl.org/dc/terms/publisher> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/net/orth#inDatabase
+<http://purl.org/net/orth#inDatabase> rdf:type owl:AnnotationProperty ;
+                                      rdfs:comment "A property to define the database an orthology dataset belongs to."@en ;
+                                      rdfs:label "in database"@en ;
+                                      rdfs:domain <http://purl.org/net/orth#OrthologyDataset> .
+
+
+###  http://purl.org/ontology/bibo/status
+<http://purl.org/ontology/bibo/status> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/vocab/vann/example
+<http://purl.org/vocab/vann/example> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/vocab/vann/preferredNamespacePrefix
+<http://purl.org/vocab/vann/preferredNamespacePrefix> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/vocab/vann/preferredNamespaceUri
+<http://purl.org/vocab/vann/preferredNamespaceUri> rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/vocommons/voaf#extends
+<http://purl.org/vocommons/voaf#extends> rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/codeRepository
+<http://schema.org/codeRepository> rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/image
+<http://schema.org/image> rdf:type owl:AnnotationProperty .
+
+
+###  http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation
+<http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation> rdf:type owl:AnnotationProperty ;
+                                                             <http://purl.obolibrary.org/obo/IAO_0000115> "http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation is an annotation property that is drawn from NCI_Thesaurus" ;
+                                                             <http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation> "http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation is an annotation property that is drawn from NCI_Thesaurus" ;
+                                                             rdfs:subPropertyOf <http://www.ebi.ac.uk/efo/definition_citation> .
+
+
+###  http://www.ebi.ac.uk/efo/alternative_term
+<http://www.ebi.ac.uk/efo/alternative_term> rdf:type owl:AnnotationProperty ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "An alternative label for a given entity such as a commonly used abbreviation or synonym. " ;
+                                            rdfs:label "alternative_term" .
+
+
+###  http://www.ebi.ac.uk/efo/definition_citation
+<http://www.ebi.ac.uk/efo/definition_citation> rdf:type owl:AnnotationProperty ;
+                                               <http://purl.obolibrary.org/obo/IAO_0000115> "A definition citation is a document, ontology class, person or organization from which the definition of the class is derived. It is used in the same sense as a citation in literature, in that the definition may have been derived from these sources or that this definition is related to these source." .
+
+
+###  http://www.ebi.ac.uk/efo/source_definition
+<http://www.ebi.ac.uk/efo/source_definition> rdf:type owl:AnnotationProperty .
+
+
+###  http://www.geneontology.org/formats/oboInOwl#id
+<http://www.geneontology.org/formats/oboInOwl#id> rdf:type owl:AnnotationProperty .
+
+
+###  http://www.geneontology.org/formats/oboInOwl#inSubset
+<http://www.geneontology.org/formats/oboInOwl#inSubset> rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2004/02/skos/core#altLabel
+<http://www.w3.org/2004/02/skos/core#altLabel> rdf:type owl:AnnotationProperty ;
+                                               rdfs:comment "The range of skos:altLabel is the class of RDF plain literals."@en ,
+                                                            "skos:prefLabel, skos:altLabel and skos:hiddenLabel are pairwise disjoint properties."@en ;
+                                               rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> ;
+                                               rdfs:label "alternative label"@en ;
+                                               <http://www.w3.org/2004/02/skos/core#definition> "An alternative lexical label for a resource."@en ;
+                                               <http://www.w3.org/2004/02/skos/core#example> "Acronyms, abbreviations, spelling variants, and irregular plural/singular forms may be included among the alternative labels for a concept. Mis-spelled terms are normally included as hidden labels (see skos:hiddenLabel)."@en ;
+                                               rdfs:subPropertyOf rdfs:label .
+
+
+###  http://www.w3.org/2004/02/skos/core#changeNote
+<http://www.w3.org/2004/02/skos/core#changeNote> rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2004/02/skos/core#definition
+<http://www.w3.org/2004/02/skos/core#definition> rdf:type owl:AnnotationProperty ;
+                                                 rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> ;
+                                                 rdfs:label "definition"@en ;
+                                                 <http://www.w3.org/2004/02/skos/core#definition> "A statement or formal explanation of the meaning of a concept."@en ;
+                                                 rdfs:subPropertyOf <http://www.w3.org/2004/02/skos/core#note> .
+
+
+###  http://www.w3.org/2004/02/skos/core#example
+<http://www.w3.org/2004/02/skos/core#example> rdf:type owl:AnnotationProperty ;
+                                              rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> ;
+                                              rdfs:label "example"@en ;
+                                              <http://www.w3.org/2004/02/skos/core#definition> "An example of the use of a concept."@en ;
+                                              rdfs:subPropertyOf <http://www.w3.org/2004/02/skos/core#note> .
+
+
+###  http://www.w3.org/2004/02/skos/core#note
+<http://www.w3.org/2004/02/skos/core#note> rdf:type owl:AnnotationProperty ;
+                                           rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> ;
+                                           rdfs:label "note"@en ;
+                                           <http://www.w3.org/2004/02/skos/core#definition> "A general note, for any purpose."@en ;
+                                           <http://www.w3.org/2004/02/skos/core#scopeNote> "This property may be used directly, or as a super-property for more specific note types."@en .
+
+
+###  http://www.w3.org/2004/02/skos/core#scopeNote
+<http://www.w3.org/2004/02/skos/core#scopeNote> rdf:type owl:AnnotationProperty ;
+                                                rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> ;
+                                                rdfs:label "scope note"@en ;
+                                                <http://www.w3.org/2004/02/skos/core#definition> "A note that helps to clarify the meaning and/or the use of a concept."@en ;
+                                                rdfs:subPropertyOf <http://www.w3.org/2004/02/skos/core#note> .
+
+
+###  http://www.w3.org/ns/org#memberOf
+<http://www.w3.org/ns/org#memberOf> rdf:type owl:AnnotationProperty .
+
+
+###  http://xmlns.com/foaf/0.1/name
+<http://xmlns.com/foaf/0.1/name> rdf:type owl:AnnotationProperty .
+
+
+###  https://w3id.org/widoco/vocab#introduction
+<https://w3id.org/widoco/vocab#introduction> rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Datatypes
+#################################################################
+
+###  http://www.w3.org/2001/XMLSchema#date
+xsd:date rdf:type rdfs:Datatype .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://purl.obolibrary.org/obo/CDAO_0000194
+<http://purl.obolibrary.org/obo/CDAO_0000194> rdf:type owl:ObjectProperty ;
+                                              rdfs:label "part_of" .
+
+
+###  http://purl.obolibrary.org/obo/RO_0001018
+<http://purl.obolibrary.org/obo/RO_0001018> rdf:type owl:ObjectProperty ;
+                                            rdfs:label "contained in"@en .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002162
+<http://purl.obolibrary.org/obo/RO_0002162> rdf:type owl:ObjectProperty ;
+                                            <http://purl.org/vocab/vann/example> """@prefix bgee-species: <https://bgee.org/species/> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+@prefix up: <http://purl.uniprot.org/core/> .
+@prefix up-taxon: <http://purl.uniprot.org/taxonomy/> .
+
+bgee-species:10090 rdf:type orth:Organism ;
+    obo:RO_0002162  up-taxon:10090  .
+up-taxon:10090 rdf:type up:Taxon ;
+    up:scientificName \"Mus musculus\". """ ;
+                                            rdfs:comment "Connects a biological entity to its taxon of origin."@en ;
+                                            rdfs:label "in taxon"@en .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002206
+<http://purl.obolibrary.org/obo/RO_0002206> rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf <http://purl.obolibrary.org/obo/RO_0002330> ;
+                                            owl:inverseOf <http://purl.obolibrary.org/obo/RO_0002292> ;
+                                            rdfs:domain <http://purl.obolibrary.org/obo/BFO_0000002> ;
+                                            rdfs:range <http://purl.obolibrary.org/obo/BFO_0000004> ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000112> "'neural crest cell'  SubClassOf expresses some 'Wnt1 gene'" ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "x expressed in y if and only if there is a gene expression process (GO:0010467) that occurs in y, and one of the following holds: (i) x is a gene, and x is transcribed into a transcript as part of the gene expression process (ii) x is a transcript, and the transcription of x is part of the gene expression process (iii) x is a mature gene product such as a protein, and x was translated or otherwise processes from a transcript that was transcribed as part of this gene expression process" ;
+                                            <http://purl.org/vocab/vann/example> """@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <ttp://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+
+obo:UBERON_0000310 rdf:type genex:AnatomicalEntity .
+oma:ENSMUSG00000002396 rdf:type orth:Gene ;
+    obo:RO_0002206 obo:UBERON_0000310 .""" ;
+                                            rdfs:label "expressed in"@en .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002245
+<http://purl.obolibrary.org/obo/RO_0002245> rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf :isExpressedIn ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "g is over-expressed in t iff g is expressed in t, and the expression level of g is increased relative to some background." ;
+                                            rdfs:label "over-expressed in" ;
+                                            <http://www.w3.org/2004/02/skos/core#altLabel> "highly expressed in"@en .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002246
+<http://purl.obolibrary.org/obo/RO_0002246> rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf :isExpressedIn ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "g is under-expressed in t iff g is expressed in t, and the expression level of g is decreased relative to some background." ;
+                                            rdfs:label "under-expressed in" .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002291
+<http://purl.obolibrary.org/obo/RO_0002291> rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf :isExpressedIn ;
+                                            owl:inverseOf <http://purl.obolibrary.org/obo/RO_0002293> ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "x is ubiquitously expressed in y if and only if x is expressed in y, and the majority of cells in y express x" ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000116> "Revisit this term after coordinating with SO/SOM. The domain of this relation should be a sequence, as an instance of a DNA molecule is only expressed in the cell of which it is a part." ;
+                                            rdfs:label "ubiquitously expressed in"@en .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002292
+<http://purl.obolibrary.org/obo/RO_0002292> rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf <http://purl.obolibrary.org/obo/RO_0002330> ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "Inverse of 'expressed in'" ;
+                                            <http://purl.org/vocab/vann/example> """@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <ttp://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+
+obo:UBERON_0000310 rdf:type genex:AnatomicalEntity ;
+    obo:RO_0002292 oma:ENSMUSG00000002396 .
+oma:ENSMUSG00000002396 rdf:type orth:Gene .  """ ;
+                                            rdfs:label "expresses"@en .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002293
+<http://purl.obolibrary.org/obo/RO_0002293> rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf <http://purl.obolibrary.org/obo/RO_0002292> ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "inverse of ubiquiotously expressed in" ;
+                                            <http://www.geneontology.org/formats/oboInOwl#inSubset> <http://purl.obolibrary.org/obo/RO_0002259> ;
+                                            rdfs:label "ubiquitously expresses"@en .
+
+
+###  http://purl.obolibrary.org/obo/RO_0002330
+<http://purl.obolibrary.org/obo/RO_0002330> rdf:type owl:ObjectProperty ;
+                                            rdfs:domain <http://purl.obolibrary.org/obo/BFO_0000002> ;
+                                            rdfs:range <http://purl.obolibrary.org/obo/BFO_0000002> ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000115> "holds between two entities when some genome-level process such as gene expression is involved. This includes transcriptional, spliceosomal events. These relations can be used between either macromolecule entities (such as regions of nucleic acid) or between their abstract informational counterparts." ;
+                                            <http://purl.obolibrary.org/obo/IAO_0000232> "Do not use this relation directly. It is intended as a grouping for a diverse set of relations, all involving the genome of an organism" ;
+                                            rdfs:label "genomically related to"@en .
+
+
+###  http://purl.org/genex#hasAnatomicalEntity
+:hasAnatomicalEntity rdf:type owl:ObjectProperty ,
+                              owl:FunctionalProperty ;
+                     rdfs:domain :ExpressionCondition ;
+                     rdfs:range :AnatomicalEntity ;
+                     <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+@prefix efo: <http://www.ebi.ac.uk/efo/> .
+
+bgee:EXPRESSION_CONDITION_134065 rdf:type genex:ExpressionCondition ;
+  genex:hasAnatomicalEntity obo:UBERON_0000080 .
+obo:UBERON_0000080  rdf:type genex:AnatomicalEntity. """ ;
+                     rdfs:label "has anatomical entity"@en .
+
+
+###  http://purl.org/genex#hasConfidenceLevel
+:hasConfidenceLevel rdf:type owl:ObjectProperty ,
+                             owl:FunctionalProperty ;
+                    rdfs:domain [ rdf:type owl:Class ;
+                                  owl:unionOf ( :AbsenceExpression
+                                                :Expression
+                                              )
+                                ] ;
+                    rdfs:range [ rdf:type owl:Class ;
+                                 owl:oneOf ( <http://purl.obolibrary.org/obo/CIO_0000029>
+                                             <http://purl.obolibrary.org/obo/CIO_0000030>
+                                             <http://purl.obolibrary.org/obo/CIO_0000031>
+                                           )
+                               ] ;
+                    <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_546588859 rdf:type genex:Expression ;
+    genex:hasConfidenceLevel obo:CIO_0000029 . """ ;
+                    rdfs:label "has expression or absence confidence level"@en .
+
+
+###  http://purl.org/genex#hasDevelopmentalStage
+:hasDevelopmentalStage rdf:type owl:ObjectProperty ,
+                                owl:FunctionalProperty ;
+                       rdfs:domain :ExpressionCondition ;
+                       rdfs:range <http://www.ebi.ac.uk/efo/EFO_0000399> ;
+                       <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+@prefix efo: <http://www.ebi.ac.uk/efo/> .
+
+bgee:EXPRESSION_CONDITION_134065 rdf:type genex:ExpressionCondition ;
+  genex:hasDevelopmentalStage obo:UBERON_0000113 .
+obo:UBERON_0000113  rdf:type efo:EFO_0000399 . """ ;
+                       rdfs:label "has a developmental stage"@en .
+
+
+###  http://purl.org/genex#hasExpressionCharacteristic
+:hasExpressionCharacteristic rdf:type owl:ObjectProperty ,
+                                      owl:FunctionalProperty ;
+                             rdfs:domain :Expression ;
+                             rdfs:range [ rdf:type owl:Class ;
+                                          owl:oneOf ( :AVERAGE_EXPRESSED
+                                                      :HIGHLY_EXPRESSED
+                                                      :HIGH_EXPRESSED
+                                                      :LOWLY_EXPRESSED
+                                                      :LOW_EXPRESSED
+                                                      :UBIQUITOUSLY_EXPRESSED
+                                                    )
+                                        ] ;
+                             <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_546588859 rdf:type genex:Expression ;
+    genex:hasExpressionCharacteristic  genex:AVERAGE_EXPRESSED . """ ;
+                             rdfs:label "has expression level characteristic"@en .
+
+
+###  http://purl.org/genex#hasExpressionCondition
+:hasExpressionCondition rdf:type owl:ObjectProperty ;
+                        rdfs:domain [ rdf:type owl:Class ;
+                                      owl:unionOf ( :AbsenceExpression
+                                                    :Expression
+                                                  )
+                                    ] ;
+                        rdfs:range :ExpressionCondition ;
+                        <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix orth: <http://purl.org/net/orth#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_546588859 rdf:type genex:Expression ;
+    genex:hasExpressionCondition bgee:EXPRESSION_CONDITION_354899 . 
+bgee:EXPRESSION_CONDITION_354899 rdf:type genex:ExpressionCondition . """ ;
+                        rdfs:label "has an expression condition"@en ;
+                        <http://www.w3.org/2004/02/skos/core#altLabel> "has an experimental condition"@en .
+
+
+###  http://purl.org/genex#hasSequenceUnit
+:hasSequenceUnit rdf:type owl:ObjectProperty ;
+                 rdfs:domain [ rdf:type owl:Class ;
+                               owl:unionOf ( :AbsenceExpression
+                                             :Expression
+                                           )
+                             ] ;
+                 rdfs:range <http://purl.org/net/orth#SequenceUnit> ;
+                 <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+@prefix orth: <http://purl.org/net/orth#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_546588859 rdf:type genex:Expression ;
+    genex:hasSequenceUnit oma:ENSMUSG00000022751 .
+oma:ENSMUSG00000022751 a orth:Gene . """ ;
+                 rdfs:label "has sequence unit"@en .
+
+
+###  http://purl.org/genex#hasStrain
+:hasStrain rdf:type owl:ObjectProperty ,
+                    owl:FunctionalProperty ;
+           rdfs:domain :ExpressionCondition ;
+           rdfs:range <http://www.ebi.ac.uk/efo/EFO_0005135> ;
+           <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+@prefix efo: <http://www.ebi.ac.uk/efo/> .
+
+bgee:EXPRESSION_CONDITION_134065 rdf:type genex:ExpressionCondition ;
+  genex:hasStrain bgee:STRAIN_3d4eba69908860b0d838be983fd7f9c8 .
+bgee:STRAIN_3d4eba69908860b0d838be983fd7f9c8  rdf:type efo:EFO_0005135  ;
+    rdfs:label \"wild-type\" """ ;
+           rdfs:label "has strain"@en .
+
+
+###  http://purl.org/genex#isAbsentIn
+:isAbsentIn rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf <http://purl.obolibrary.org/obo/RO_0002330> ;
+            rdfs:domain <http://purl.org/net/orth#SequenceUnit> ;
+            rdfs:range [ rdf:type owl:Class ;
+                         owl:unionOf ( :AnatomicalEntity
+                                       :ExpressionCondition
+                                       <http://www.ebi.ac.uk/efo/EFO_0000399>
+                                       <http://www.ebi.ac.uk/efo/EFO_0005135>
+                                     )
+                       ] ;
+            rdfs:comment "A sequence unit is absent (not expressed) in some expression condition (e.g. anatomical entity and/or developmental stage). Examples how to assign this property (at a high level of abstraction): GeneA \"is absent in\" Brain; GeneA \"is abent in\" adult stage."@en ,
+                         """Recommendation: prefer to instatiate 'absence of gene expression' and 'gene expression experiment condition' classes to represent Gene expression data. For example,  rather than materializing this property at the data store level, it shoud be inferred by applying the logical rules:   
+rule1- 'expressed gene'(?e),'has an expression condition'(?e, ?cond), 'has sequence unit'(?e, ?seq) -> 'is expressed in'(?seq, ?cond); 
+rule2- 'expressed gene'(?e),'has an expression condition'(?e, ?cond), 'has a developmental stage'(?cond, ?stage), 'has sequence unit'(?e, ?seq) -> 'is expressed in'(?seq, ?stage)
+rule3-  'expressed gene'(?e),'has an expression condition'(?e, ?cond), 'has strain'(?cond, ?strain), 'has sequence unit'(?e, ?seq) -> 'is expressed in'(?seq, ?strain)
+rule4- 'expressed gene'(?e),'has an expression condition'(?e, ?cond), 'has anatomical entity'(?cond, ?anat), 'has sequence unit'(?e, ?seq) -> 'is expressed in'(?seq, ?anat)
+
+These rules are currently defined in Genex ontology as a SWRL (Semantic Web Rule Language) rule. It can be tanslated into another semantic web language such as  RIF."""@en ;
+            rdfs:label "is absent in"@en ;
+            <http://www.w3.org/2004/02/skos/core#altLabel> "is not expressed in"@en .
+
+
+###  http://purl.org/genex#isExpressedIn
+:isExpressedIn rdf:type owl:ObjectProperty ;
+               rdfs:subPropertyOf <http://purl.obolibrary.org/obo/RO_0002206> ;
+               rdfs:domain <http://purl.org/net/orth#SequenceUnit> ;
+               rdfs:range [ rdf:type owl:Class ;
+                            owl:unionOf ( :AnatomicalEntity
+                                          :ExpressionCondition
+                                          <http://www.ebi.ac.uk/efo/EFO_0000399>
+                                          <http://www.ebi.ac.uk/efo/EFO_0005135>
+                                        )
+                          ] ;
+               <http://purl.org/vocab/vann/example> """@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <ttp://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+
+obo:UBERON_0000310 rdf:type genex:AnatomicalEntity .
+oma:ENSMUSG00000002396 rdf:type orth:Gene ;
+    genex:isExpressedIn obo:UBERON_0000310 .""" ;
+               rdfs:comment "A sequence unit (e.g. gene) is present (expressed) in some expression condition (e.g. anatomical entity and/or developmental stage). Examples how to assign this property (at a high level of abstraction): GeneA \"is expressed in\" Brain; GeneA \"is expressed in\" adult stage."@en ,
+                            """Recommendation: prefer to instatiate 'expressed gene' and 'gene expression experiment condition' classes to represent Gene expression data. For example,  rather than materializing this property at the data store level, it shoud be inferred by applying the logical rules:   
+- 'absence of gene expression'(?e),'has an expression condition'(?e, ?cond), 'has sequence unit'(?e, ?seq) -> 'is absent in'(?seq, ?cond); 
+- 'absence of gene expression'?e),'has an expression condition'(?e, ?cond), 'has a developmental stage'(?cond, ?stage), 'has sequence unit'(?e, ?seq) -> 'is absent in'(?seq, ?stage)
+-  'absence of gene expression'(?e),'has an expression condition'(?e, ?cond), 'has strain'(?cond, ?strain), 'has sequence unit'(?e, ?seq) -> 'is absent in'(?seq, ?strain)
+- 'absence of gene expression'(?e),'has an expression condition'(?e, ?cond), 'has anatomical entity'(?cond, ?anat), 'has sequence unit'(?e, ?seq) -> 'is absent in'(?seq, ?anat)
+
+These rules are currently defined in Genex ontology as a SWRL (Semantic Web Rule Language) rule. It can be tanslated into another semantic web language such as  RIF."""@en ;
+               rdfs:label "is expressed in"@en .
+
+
+###  http://purl.org/net/orth#organism
+<http://purl.org/net/orth#organism> rdf:type owl:ObjectProperty ;
+                                    rdfs:domain <http://purl.org/net/orth#SequenceUnit> ;
+                                    rdfs:range <http://purl.org/net/orth#Organism> ;
+                                    <http://purl.org/vocab/vann/example> """@prefix bgee-species: <https://bgee.org/species/> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+
+oma:ENSMUSG00000002396 rdf:type orth:Gene ;
+    orth:organism  bgee-species:10090 .""" .
+
+
+###  http://purl.uniprot.org/core/rank
+<http://purl.uniprot.org/core/rank> rdf:type owl:ObjectProperty ,
+                                             owl:FunctionalProperty ;
+                                    rdfs:domain <http://purl.uniprot.org/core/Taxon> ;
+                                    rdfs:range <http://purl.uniprot.org/core/Rank> ;
+                                    rdfs:comment "The rank of a taxon." .
+
+
+###  http://purl.uniprot.org/core/replaces
+<http://purl.uniprot.org/core/replaces> rdf:type owl:ObjectProperty ;
+                                        rdfs:domain <http://purl.uniprot.org/core/Taxon> ;
+                                        rdfs:range <http://purl.uniprot.org/core/Taxon> ;
+                                        rdfs:comment "A resource that is replaced by this resource." .
+
+
+###  http://semanticscience.org/resource/SIO_010078
+<http://semanticscience.org/resource/SIO_010078> rdf:type owl:ObjectProperty ;
+                                                 rdfs:label "encodes"@en .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://purl.org/dc/elements/1.1/description
+<http://purl.org/dc/elements/1.1/description> rdf:type owl:DatatypeProperty .
+
+
+###  http://purl.org/dc/terms/identifier
+<http://purl.org/dc/terms/identifier> rdf:type owl:DatatypeProperty ;
+                                      rdfs:range rdfs:Literal ;
+                                      <http://purl.org/dc/terms/description> "Recommended practice is to identify the resource by means of a string conforming to an identification system. Examples include International Standard Book Number (ISBN), Digital Object Identifier (DOI), and Uniform Resource Name (URN).  Persistent identifiers should be provided as HTTP URIs."@en ;
+                                      rdfs:comment "An unambiguous reference to the resource within a given context."@en ;
+                                      rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+                                      rdfs:label "Identifier"@en .
+
+
+###  http://purl.org/genex#hasExpressionLevel
+:hasExpressionLevel rdf:type owl:DatatypeProperty ;
+                    rdfs:domain [ rdf:type owl:Class ;
+                                  owl:unionOf ( :AbsenceExpression
+                                                :Expression
+                                              )
+                                ] ;
+                    rdfs:range xsd:double ;
+                    <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_546588859 rdf:type genex:Expression ;
+    genex:hasExpressionLevel 83.9292 . """ ;
+                    rdfs:label "has expression level score"@en ;
+                    <http://www.w3.org/2004/02/skos/core#altLabel> "expression score"@en .
+
+
+###  http://purl.org/genex#hasFDRpvalue
+:hasFDRpvalue rdf:type owl:DatatypeProperty ;
+              rdfs:domain [ rdf:type owl:Class ;
+                            owl:unionOf ( :AbsenceExpression
+                                          :Expression
+                                        )
+                          ] ;
+              rdfs:range xsd:double ;
+              <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_546588859 rdf:type genex:Expression ;
+    genex:hasFDRpvalue 0.00188199 . """ ;
+              rdfs:label "has false discovery rate p-value"@en ;
+              <http://www.w3.org/2004/02/skos/core#altLabel> "has FDR p-value"@en .
+
+
+###  http://purl.org/genex#hasSex
+:hasSex rdf:type owl:DatatypeProperty ,
+                 owl:FunctionalProperty ;
+        rdfs:domain :ExpressionCondition ;
+        rdfs:range [ rdf:type rdfs:Datatype ;
+                     owl:oneOf [ rdf:type rdf:List ;
+                                 rdf:first "NA" ;
+                                 rdf:rest [ rdf:type rdf:List ;
+                                            rdf:first "any" ;
+                                            rdf:rest [ rdf:type rdf:List ;
+                                                       rdf:first "female" ;
+                                                       rdf:rest [ rdf:type rdf:List ;
+                                                                  rdf:first "hermaphrodite" ;
+                                                                  rdf:rest [ rdf:type rdf:List ;
+                                                                             rdf:first "male" ;
+                                                                             rdf:rest [ rdf:type rdf:List ;
+                                                                                        rdf:first "mixed" ;
+                                                                                        rdf:rest [ rdf:type rdf:List ;
+                                                                                                   rdf:first "not annotated" ;
+                                                                                                   rdf:rest rdf:nil
+                                                                                                 ]
+                                                                                      ]
+                                                                           ]
+                                                                ]
+                                                     ]
+                                          ]
+                               ]
+                   ] ;
+        <http://purl.org/dc/terms/modified> "2021-06-04"^^xsd:date ;
+        <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_CONDITION_134065 rdf:type genex:ExpressionCondition ;
+  genex:hasSex \"any\" . """ ;
+        <http://www.w3.org/2004/02/skos/core#changeNote> "Added the following value in the range list: any." .
+
+
+###  http://purl.uniprot.org/core/commonName
+<http://purl.uniprot.org/core/commonName> rdf:type owl:DatatypeProperty ,
+                                                   owl:FunctionalProperty ;
+                                          rdfs:range xsd:string ;
+                                          <http://purl.org/vocab/vann/example> """@prefix up: <http://purl.uniprot.org/core/> .
+@prefix up-taxon: <http://purl.uniprot.org/taxonomy/> .
+up-taxon:10090 rdf:type up:Taxon ;
+    up:commonName \"mouse\" . """ ;
+                                          rdfs:isDefinedBy "http://purl.uniprot.org/core/" ;
+                                          rdfs:label "common name" .
+
+
+###  http://purl.uniprot.org/core/mnemonic
+<http://purl.uniprot.org/core/mnemonic> rdf:type owl:DatatypeProperty ;
+                                        rdfs:range xsd:string ;
+                                        rdfs:comment "A easy to remember identifier for a UniProtKB entry, but it is not a stable identifier and should not be used by programs to identify entries."@en ,
+                                                     "A rememberable string that can be used to find entries, not a stable identifier!" ;
+                                        rdfs:label "Mnemonic" ;
+                                        rdfs:seeAlso "http://www.uniprot.org/manual/entry_name" .
+
+
+###  http://purl.uniprot.org/core/scientificName
+<http://purl.uniprot.org/core/scientificName> rdf:type owl:DatatypeProperty ,
+                                                       owl:FunctionalProperty ;
+                                              rdfs:range xsd:string ;
+                                              <http://purl.org/vocab/vann/example> """@prefix up: <http://purl.uniprot.org/core/> .
+@prefix up-taxon: <http://purl.uniprot.org/taxonomy/> .
+up-taxon:10090 rdf:type up:Taxon ;
+    up:scientificName \"Mus musculus\". """ ;
+                                              rdfs:isDefinedBy "http://purl.uniprot.org/core/" ;
+                                              rdfs:label "scientific name" .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://purl.obolibrary.org/obo/BFO_0000001
+<http://purl.obolibrary.org/obo/BFO_0000001> rdf:type owl:Class ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000116> "BFO 2 Reference: In all areas of empirical inquiry we encounter general terms of two sorts. First are general terms which refer to universals or types:animaltuberculosissurgical procedurediseaseSecond, are general terms used to refer to groups of entities which instantiate a given universal but do not correspond to the extension of any subuniversal of that universal because there is nothing intrinsic to the entities in question by virtue of which they – and only they – are counted as belonging to the given group. Examples are: animal purchased by the Emperortuberculosis diagnosed on a Wednesdaysurgical procedure performed on a patient from Stockholmperson identified as candidate for clinical trial #2056-555person who is signatory of Form 656-PPVpainting by Leonardo da VinciSuch terms, which represent what are called ‘specializations’ in [81"@en ,
+                                                                                          "Entity doesn't have a closure axiom because the subclasses don't necessarily exhaust all possibilites. For example Werner Ceusters 'portions of reality' include 4 sorts, entities (as BFO construes them), universals, configurations, and relations. It is an open question as to whether entities as construed in BFO will at some point also include these other portions of reality. See, for example, 'How to track absolutely everything' at http://www.referent-tracking.com/_RTU/papers/CeustersICbookRevised.pdf"@en ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000600> "An entity is anything that exists or has existed or will exist. (axiom label in BFO2 Reference: [001-001])"@en ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/bfo.owl> ;
+                                             rdfs:label "entity"@en .
+
+
+###  http://purl.obolibrary.org/obo/BFO_0000002
+<http://purl.obolibrary.org/obo/BFO_0000002> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001> ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000116> "BFO 2 Reference: Continuant entities are entities which can be sliced to yield parts only along the spatial dimension, yielding for example the parts of your table which we call its legs, its top, its nails. ‘My desk stretches from the window to the door. It has spatial parts, and can be sliced (in space) in two. With respect to time, however, a thing is a continuant.’ [60, p. 240"@en ,
+                                                                                          "Continuant doesn't have a closure axiom because the subclasses don't necessarily exhaust all possibilites. For example, in an expansion involving bringing in some of Ceuster's other portions of reality, questions are raised as to whether universals are continuants"@en ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000600> "A continuant is an entity that persists, endures, or continues to exist through time while maintaining its identity. (axiom label in BFO2 Reference: [008-002])"@en ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/bfo.owl> ;
+                                             rdfs:label "continuant"@en .
+
+
+###  http://purl.obolibrary.org/obo/BFO_0000004
+<http://purl.obolibrary.org/obo/BFO_0000004> rdf:type owl:Class ;
+                                             rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000002> ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000112> "a chair"@en ,
+                                                                                          "a heart"@en ,
+                                                                                          "a leg"@en ,
+                                                                                          "a molecule"@en ,
+                                                                                          "a spatial region"@en ,
+                                                                                          "an atom"@en ,
+                                                                                          "an orchestra."@en ,
+                                                                                          "an organism"@en ,
+                                                                                          "the bottom right portion of a human torso"@en ,
+                                                                                          "the interior of your mouth"@en ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000115> "b is an independent continuant = Def. b is a continuant which is such that there is no c and no t such that b s-depends_on c at t. (axiom label in BFO2 Reference: [017-002])"@en ;
+                                             rdfs:isDefinedBy <http://purl.obolibrary.org/obo/bfo.owl> ;
+                                             rdfs:label "independent continuant"@en .
+
+
+###  http://purl.obolibrary.org/obo/CARO_0000000
+<http://purl.obolibrary.org/obo/CARO_0000000> rdf:type owl:Class ;
+                                              rdfs:subClassOf :AnatomicalEntity ;
+                                              <http://purl.obolibrary.org/obo/IAO_0000115> "A part of a multicellular organism that is either an immaterial entity or a material entity with granularity above the level of a protein complex.  Or, a substance produced by a multicellular organism with granularity above the level of a protein complex." ;
+                                              <http://www.geneontology.org/formats/oboInOwl#id> "CARO:0000000" ;
+                                              rdfs:comment "Following BFO, material anatomical entities may have immaterial parts (the lumen of your stomach is part of your stomach).  The granularity limit follows the limits set by the Gene Ontology on the granularity limit for GO:cellular_component. Note that substances produced by an organism (sweat, feaces, urine) do not need to be part of an organism to qualify as an anatomical structure." ;
+                                              rdfs:label "anatomical entity" .
+
+
+###  http://purl.obolibrary.org/obo/CARO_0030000
+<http://purl.obolibrary.org/obo/CARO_0030000> rdf:type owl:Class ;
+                                              rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000004> ;
+                                              <http://purl.obolibrary.org/obo/IAO_0000115> "Entity that is, is part of, or derived from an organism, virus, or viroid or a collection of them." ;
+                                              rdfs:comment "Important for alignment with Darwin Core class \"Organism\"." ;
+                                              rdfs:label "biological entity" .
+
+
+###  http://purl.obolibrary.org/obo/CDAO_0000140
+<http://purl.obolibrary.org/obo/CDAO_0000140> rdf:type owl:Class ;
+                                              rdfs:comment "Basic unit of graphs and trees"@en ;
+                                              rdfs:label "Node" .
+
+
+###  http://purl.obolibrary.org/obo/NCIT_C14250
+<http://purl.obolibrary.org/obo/NCIT_C14250> rdf:type owl:Class ;
+                                             owl:equivalentClass <http://purl.org/net/orth#Organism> ;
+                                             rdfs:label "Organism" .
+
+
+###  http://purl.obolibrary.org/obo/OBI_0000181
+<http://purl.obolibrary.org/obo/OBI_0000181> rdf:type owl:Class ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000115> "A population is a group of material entities consisting of individuals which share a particular characteristic such as inhabiting a particular region or area or ability to interbreed." ;
+                                             rdfs:label "population" .
+
+
+###  http://purl.obolibrary.org/obo/SO_0000104
+<http://purl.obolibrary.org/obo/SO_0000104> rdf:type owl:Class ;
+                                            owl:equivalentClass <http://purl.org/net/orth#Protein> ;
+                                            rdfs:label "polypeptide" .
+
+
+###  http://purl.obolibrary.org/obo/SO_0000704
+<http://purl.obolibrary.org/obo/SO_0000704> rdf:type owl:Class ;
+                                            owl:equivalentClass <http://purl.org/net/orth#Gene> ;
+                                            rdfs:label "gene" .
+
+
+###  http://purl.org/genex#AbsenceExpression
+:AbsenceExpression rdf:type owl:Class ;
+                   rdfs:subClassOf [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
+                                                            owl:onProperty :hasExpressionCondition ;
+                                                            owl:someValuesFrom :ExpressionCondition
+                                                          ]
+                                                          [ rdf:type owl:Restriction ;
+                                                            owl:onProperty :hasSequenceUnit ;
+                                                            owl:someValuesFrom <http://purl.org/net/orth#SequenceUnit>
+                                                          ]
+                                                        ) ;
+                                     rdf:type owl:Class
+                                   ] ,
+                                   [ rdf:type owl:Class ;
+                                     owl:complementOf :Expression
+                                   ] ;
+                   <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+@prefix orth: <http://purl.org/net/orth#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:NOT_EXPRESSED_310632766 rdf:type genex:AbsenceExpression ;
+    genex:hasExpressionLevel 6.44034 ;
+    genex:hasConfidenceLevel obo:CIO_0000029 ;
+    genex:hasFDRpvalue 1.0 ;
+    genex:hasSequenceUnit oma:ENSXETG00000010593 ;
+    genex:hasExpressionCondition bgee:EXPRESSION_CONDITION_134065 . """ ;
+                   rdfs:label "absence of gene expression"@en ;
+                   <http://www.w3.org/2004/02/skos/core#altLabel> "Not expressed gene"@en ,
+                                                                  "Not expressed sequence unit"@en .
+
+
+###  http://purl.org/genex#AnatomicalEntity
+:AnatomicalEntity rdf:type owl:Class ;
+                  rdfs:subClassOf <http://purl.obolibrary.org/obo/CARO_0030000> ;
+                  <http://purl.org/vocab/vann/example> """@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <ttp://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+
+obo:UBERON_0000310 rdf:type genex:AnatomicalEntity ;
+    dcterms:description \"The upper ventral region of the torso of an organism.\" ;
+    rdfs:label \"breast\" .  """ ;
+                  rdfs:comment "An anatomical entity can be an organism part (e.g. brain, blood, liver and so on) or a material anatomical entity such as a cell." ;
+                  rdfs:label "Anatomical entity"@en .
+
+
+###  http://purl.org/genex#Expression
+:Expression rdf:type owl:Class ;
+            rdfs:subClassOf [ owl:intersectionOf ( [ rdf:type owl:Restriction ;
+                                                     owl:onProperty :hasExpressionCondition ;
+                                                     owl:someValuesFrom :ExpressionCondition
+                                                   ]
+                                                   [ rdf:type owl:Restriction ;
+                                                     owl:onProperty :hasSequenceUnit ;
+                                                     owl:someValuesFrom <http://purl.org/net/orth#SequenceUnit>
+                                                   ]
+                                                 ) ;
+                              rdf:type owl:Class
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty :hasExpressionCharacteristic ;
+                              owl:allValuesFrom [ rdf:type owl:Class ;
+                                                  owl:oneOf ( :AVERAGE_EXPRESSED
+                                                              :HIGHLY_EXPRESSED
+                                                              :HIGH_EXPRESSED
+                                                              :LOWLY_EXPRESSED
+                                                              :LOW_EXPRESSED
+                                                              :UBIQUITOUSLY_EXPRESSED
+                                                            )
+                                                ]
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty :hasExpressionLevel ;
+                              owl:allValuesFrom xsd:double
+                            ] ;
+            <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+@prefix orth: <http://purl.org/net/orth#> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_546588859 rdf:type genex:Expression ;
+    genex:hasExpressionLevel 83.9292 ;
+    genex:hasConfidenceLevel obo:CIO_0000029 ;
+    genex:hasFDRpvalue 0.00188199 ;
+    genex:hasSequenceUnit oma:ENSMUSG00000022751 ;
+    genex:hasExpressionCondition bgee:EXPRESSION_CONDITION_354899 . """ ;
+            rdfs:comment "All sequence units (e.g. Gene) that are expressed in some condition (e.g. organ and/or adult stage)."@en ;
+            rdfs:label "gene expression"@en ;
+            <http://www.w3.org/2004/02/skos/core#altLabel> "expression"@en ,
+                                                           "sequence unit expression"@en .
+
+
+###  http://purl.org/genex#ExpressionCondition
+:ExpressionCondition rdf:type owl:Class ;
+                     owl:equivalentClass [ rdf:type owl:Class ;
+                                           owl:unionOf ( [ rdf:type owl:Restriction ;
+                                                           owl:onProperty :hasAnatomicalEntity ;
+                                                           owl:someValuesFrom :AnatomicalEntity
+                                                         ]
+                                                         [ rdf:type owl:Restriction ;
+                                                           owl:onProperty :hasDevelopmentalStage ;
+                                                           owl:someValuesFrom <http://www.ebi.ac.uk/efo/EFO_0000399>
+                                                         ]
+                                                         [ rdf:type owl:Restriction ;
+                                                           owl:onProperty :hasStrain ;
+                                                           owl:someValuesFrom <http://www.ebi.ac.uk/efo/EFO_0005135>
+                                                         ]
+                                                         [ rdf:type owl:Restriction ;
+                                                           owl:onProperty :hasSex ;
+                                                           owl:someValuesFrom xsd:string
+                                                         ]
+                                                       )
+                                         ] ;
+                     rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                       owl:onProperty <http://purl.obolibrary.org/obo/RO_0002162> ;
+                                       owl:allValuesFrom <http://purl.uniprot.org/core/Taxon>
+                                     ] ;
+                     <http://purl.org/vocab/vann/example> """@prefix bgee: <http://bgee.org/#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix genex: <http://purl.org/genex#> .
+
+bgee:EXPRESSION_CONDITION_134065 rdf:type genex:ExpressionCondition ;
+  genex:hasSex \"any\";
+  genex:hasStrain bgee:STRAIN_3d4eba69908860b0d838be983fd7f9c8 ;
+  genex:hasAnatomicalEntity obo:UBERON_0000080 ;
+  genex:hasDevelopmentalStage obo:UBERON_0000113  . """ ;
+                     rdfs:comment "A sequence unit (e.g. Gene) is expressed in some expression condition (e.g. anatomical entity and/or developmental stage)."@en ;
+                     rdfs:label "gene expression experiment condition"@en ;
+                     <http://www.w3.org/2004/02/skos/core#altLabel> "expression condition"@en ,
+                                                                    "sequence unit expression condition"@en .
+
+
+###  http://purl.org/net/orth#Gene
+<http://purl.org/net/orth#Gene> rdf:type owl:Class ;
+                                rdfs:subClassOf <http://purl.org/net/orth#SequenceUnit> ,
+                                                [ rdf:type owl:Restriction ;
+                                                  owl:onProperty <http://purl.org/net/orth#organism> ;
+                                                  owl:someValuesFrom <http://purl.org/net/orth#Organism>
+                                                ] ,
+                                                [ rdf:type owl:Restriction ;
+                                                  owl:onProperty <http://purl.obolibrary.org/obo/RO_0001018> ;
+                                                  owl:allValuesFrom <http://semanticscience.org/resource/SIO_000750>
+                                                ] ;
+                                <http://purl.org/vocab/vann/example> """@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <ttp://purl.obolibrary.org/obo/> .
+@prefix oma: <http://omabrowser.org/ontology/oma#GENE_> .
+@prefix orth: <http://purl.org/net/orth#> .
+
+oma:ENSG00000130208 rdf:type orth:Gene ;
+    dcterms:description \"apolipoprotein C1 [Source:HGNC Symbol;Acc:HGNC:607]\" ;
+    rdfs:label \"first trimester of gestation (cow)\";
+    dcterms:identifier \"ENSG00000130208\" .  """ ;
+                                rdfs:label "Gene"@en .
+
+
+###  http://purl.org/net/orth#GeneTreeNode
+<http://purl.org/net/orth#GeneTreeNode> rdf:type owl:Class ;
+                                        rdfs:subClassOf <http://purl.obolibrary.org/obo/CDAO_0000140> ;
+                                        rdfs:comment "A node of a tree whose leaf nodes are sequence units and whose internal nodes are clusters of homologs"@en ;
+                                        rdfs:label "Gene tree node"@en .
+
+
+###  http://purl.org/net/orth#Organism
+<http://purl.org/net/orth#Organism> rdf:type owl:Class ;
+                                    rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                      owl:onProperty <http://purl.obolibrary.org/obo/RO_0002162> ;
+                                                      owl:someValuesFrom <http://purl.uniprot.org/core/Taxon>
+                                                    ] ;
+                                    rdfs:comment "A living being, such as an animal, a plant, a bacterium, or a fungus., Any individual living (or previously living) being. Example: animal, human being. An organim can be associated to a taxon such as \"Homo Sapiens\", NCBI taxonomy identifier: 9606."@en ;
+                                    rdfs:label "Organism"@en ;
+                                    <http://www.w3.org/2004/02/skos/core#altLabel> "Living being"@en .
+
+
+###  http://purl.org/net/orth#Protein
+<http://purl.org/net/orth#Protein> rdf:type owl:Class ;
+                                   rdfs:subClassOf <http://purl.org/net/orth#SequenceUnit> ,
+                                                   [ rdf:type owl:Restriction ;
+                                                     owl:onProperty <http://purl.org/net/orth#organism> ;
+                                                     owl:someValuesFrom <http://purl.org/net/orth#Organism>
+                                                   ] ,
+                                                   [ rdf:type owl:Restriction ;
+                                                     owl:onProperty <http://purl.obolibrary.org/obo/RO_0001018> ;
+                                                     owl:allValuesFrom <http://semanticscience.org/resource/SIO_000750>
+                                                   ] ;
+                                   rdfs:label "Protein"@en .
+
+
+###  http://purl.org/net/orth#SequenceUnit
+<http://purl.org/net/orth#SequenceUnit> rdf:type owl:Class ;
+                                        rdfs:subClassOf <http://purl.org/net/orth#GeneTreeNode> ;
+                                        rdfs:comment "protein or DNA sequence as a unit of comparison"@en ;
+                                        rdfs:label "Sequence unit"@en .
+
+
+###  http://purl.org/net/orth#Subgene
+<http://purl.org/net/orth#Subgene> rdf:type owl:Class ;
+                                   rdfs:subClassOf <http://purl.org/net/orth#SequenceUnit> ,
+                                                   [ rdf:type owl:Restriction ;
+                                                     owl:onProperty <http://purl.obolibrary.org/obo/CDAO_0000194> ;
+                                                     owl:someValuesFrom <http://purl.org/net/orth#Gene>
+                                                   ] ;
+                                   rdfs:comment "A region of the sequence of the gene"@en ;
+                                   rdfs:label "gene region"@en ,
+                                              "region of a gene"@en ,
+                                              "subgene"@en .
+
+
+###  http://purl.uniprot.org/core/Rank
+<http://purl.uniprot.org/core/Rank> rdf:type owl:Class ;
+                                    rdfs:comment "A rank of a taxon." ;
+                                    rdfs:label "Taxon rank" .
+
+
+###  http://purl.uniprot.org/core/Taxon
+<http://purl.uniprot.org/core/Taxon> rdf:type owl:Class ;
+                                     rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                                       owl:onProperty <http://purl.uniprot.org/core/replaces> ;
+                                                       owl:allValuesFrom <http://purl.uniprot.org/core/Taxon>
+                                                     ] ,
+                                                     [ rdf:type owl:Restriction ;
+                                                       owl:onProperty <http://purl.uniprot.org/core/mnemonic> ;
+                                                       owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                                       owl:onDataRange xsd:string
+                                                     ] ;
+                                     <http://purl.org/vocab/vann/example> """@prefix up: <http://purl.uniprot.org/core/> .
+@prefix up-taxon: <http://purl.uniprot.org/taxonomy/> .
+up-taxon:10090 rdf:type up:Taxon ;
+    up:rank up:Species . """ ;
+                                     rdfs:comment "An element of a taxonomy for classifying life forms." ;
+                                     rdfs:label "Taxon" ;
+                                     rdfs:seeAlso "http://www.ncbi.nlm.nih.gov/books/NBK54428/" .
+
+
+###  http://semanticscience.org/resource/SIO_000750
+<http://semanticscience.org/resource/SIO_000750> rdf:type owl:Class ;
+                                                 rdfs:comment "A database is a data store such as relational, hierarchical and graph databases."@en ;
+                                                 rdfs:label "database"@en .
+
+
+###  http://www.ebi.ac.uk/efo/EFO_0000001
+<http://www.ebi.ac.uk/efo/EFO_0000001> rdf:type owl:Class ;
+                                       owl:disjointWith <http://www.geneontology.org/formats/oboInOwl#ObsoleteClass> ;
+                                       <http://purl.obolibrary.org/obo/IAO_0000115> "An experimental factor in Array Express which are essentially the variable aspects of an experiment design which can be used to describe an experiment, or set of experiments, in an increasingly detailed manner. This upper level class is really used to give a root class from which applications can rely on and not be tied to upper ontology classses which do change." ;
+                                       <http://www.ebi.ac.uk/efo/alternative_term> "ExperimentalFactor" ;
+                                       rdfs:comment "Concept naming convention is lower case natural naming with spaces, when necessary captials should be used, for example disease factor, HIV, breast carcinoma, Ewing's sarcoma" ;
+                                       rdfs:label "experimental factor" .
+
+
+###  http://www.ebi.ac.uk/efo/EFO_0000399
+<http://www.ebi.ac.uk/efo/EFO_0000399> rdf:type owl:Class ;
+                                       rdfs:subClassOf <http://www.ifomis.org/bfo/1.1/span#ProcessualEntity> ;
+                                       <http://purl.obolibrary.org/obo/IAO_0000115> "A developmental stage is spatiotemporal region encompassing some part of the life cycle of an organism, e.g. blastula stage" ;
+                                       <http://purl.org/vocab/vann/example> """@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <ttp://purl.obolibrary.org/obo/> .
+@prefix efo: <http://www.ebi.ac.uk/efo/> .
+
+obo:BtauDv_0000007 rdf:type efo:EFO_0000399 ;
+    dcterms:description \"Embryo development period during the first 3 months of gestation, up to day 90 of development.\" ;
+    rdfs:label \"first trimester of gestation (cow)\". """ ;
+                                       <http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation> "NCIt:C43531" ;
+                                       <http://www.ebi.ac.uk/efo/alternative_term> "development stage" ,
+                                                                                   "developmental_stage" ,
+                                                                                   "life cycle stage" ;
+                                       rdfs:comment "This branch will be replaced by, and if necessary merged with an Uberon import in future." ;
+                                       rdfs:label "developmental stage" .
+
+
+###  http://www.ebi.ac.uk/efo/EFO_0000635
+<http://www.ebi.ac.uk/efo/EFO_0000635> rdf:type owl:Class ;
+                                       rdfs:subClassOf :AnatomicalEntity ,
+                                                       <http://www.ifomis.org/bfo/1.1/snap#MaterialEntity> ;
+                                       <http://purl.obolibrary.org/obo/IAO_0000112> "tissue, organ, system, sperm, blood or body location (arm)." ;
+                                       <http://purl.obolibrary.org/obo/IAO_0000115> "The part of organism's anatomy or substance arising from an organism from which the biomaterial was derived, excludes cells. E.g. tissue, organ, system, sperm, blood or body location (arm)." ;
+                                       <http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation> "NCIt:C103199" ;
+                                       <http://www.ebi.ac.uk/efo/alternative_term> "organism_part" ;
+                                       rdfs:label "organism part" .
+
+
+###  http://www.ebi.ac.uk/efo/EFO_0005135
+<http://www.ebi.ac.uk/efo/EFO_0005135> rdf:type owl:Class ;
+                                       rdfs:subClassOf <http://purl.obolibrary.org/obo/OBI_0000181> ;
+                                       <http://purl.obolibrary.org/obo/IAO_0000115> "A population of organisms that is geneticaly different from others of the same species and possessing a set of defined characteristics." ;
+                                       <http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation> "NCIt:C95501" ;
+                                       rdfs:label "strain"@en .
+
+
+###  http://www.geneontology.org/formats/oboInOwl#ObsoleteClass
+<http://www.geneontology.org/formats/oboInOwl#ObsoleteClass> rdf:type owl:Class .
+
+
+###  http://www.ifomis.org/bfo/1.1/snap#MaterialEntity
+<http://www.ifomis.org/bfo/1.1/snap#MaterialEntity> rdf:type owl:Class ;
+                                                    rdfs:subClassOf <http://www.ebi.ac.uk/efo/EFO_0000001> ;
+                                                    <http://purl.obolibrary.org/obo/IAO_0000112> "A heart, a human, a fly, a microarray." ;
+                                                    <http://purl.obolibrary.org/obo/IAO_0000115> "A material entity is an entity that exists in full during the length of time of its existence, persists through this time while maintaining its identity and has no temporal parts. For example a heart, a human, a fly, a microarray." ;
+                                                    <http://www.ebi.ac.uk/efo/alternative_term> "material type" ;
+                                                    <http://www.ebi.ac.uk/efo/source_definition> "An independent continuant [snap:IndependentContinuant] that is spatially extended whose identity is independent of that of other entities and can be maintained through time. Note: Material entity [snap:MaterialEntity] subsumes object [snap:Object], fiat object part [snap:FiatObjectPart], and object aggregate [snap:ObjectAggregate], which assume a three level theory of granularity, which is inadequate for some domains, such as biology." ;
+                                                    rdfs:label "material entity" .
+
+
+###  http://www.ifomis.org/bfo/1.1/span#ProcessualEntity
+<http://www.ifomis.org/bfo/1.1/span#ProcessualEntity> rdf:type owl:Class ;
+                                                      rdfs:subClassOf <http://www.ebi.ac.uk/efo/EFO_0000001> ;
+                                                      <http://purl.obolibrary.org/obo/IAO_0000115> "A process is an entity that exists in time by occurring or happening, has temporal parts and always involves and depends on some entity during the time it occurs." ;
+                                                      <http://www.ebi.ac.uk/efo/NCI_Thesaurus_definition_citation> "NCIt:C29862" ;
+                                                      rdfs:label "process" .
+
+
+###  http://xmlns.com/foaf/0.1/Organization
+<http://xmlns.com/foaf/0.1/Organization> rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://purl.obolibrary.org/obo/CIO_0000029
+<http://purl.obolibrary.org/obo/CIO_0000029> rdf:type owl:NamedIndividual ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000115> "A confidence level representing a high trust in an evidence." ;
+                                             <http://www.geneontology.org/formats/oboInOwl#id> "CIO:0000029" ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/cio.owl"^^xsd:anyURI ;
+                                             rdfs:label "high confidence level" .
+
+
+###  http://purl.obolibrary.org/obo/CIO_0000030
+<http://purl.obolibrary.org/obo/CIO_0000030> rdf:type owl:NamedIndividual ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000115> "A confidence level representing a moderate trust in an evidence." ;
+                                             <http://www.geneontology.org/formats/oboInOwl#id> "CIO:0000030" ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/cio.owl"^^xsd:anyURI ;
+                                             rdfs:label "medium confidence level" .
+
+
+###  http://purl.obolibrary.org/obo/CIO_0000031
+<http://purl.obolibrary.org/obo/CIO_0000031> rdf:type owl:NamedIndividual ;
+                                             <http://purl.obolibrary.org/obo/IAO_0000115> "A confidence level representing an absence of trust in an evidence." ;
+                                             <http://www.geneontology.org/formats/oboInOwl#id> "CIO:0000031" ;
+                                             rdfs:isDefinedBy "http://purl.obolibrary.org/obo/cio.owl"^^xsd:anyURI ;
+                                             rdfs:label "low confidence level" .
+
+
+###  http://purl.org/genex#AVERAGE_EXPRESSED
+:AVERAGE_EXPRESSED rdf:type owl:NamedIndividual ;
+                   rdfs:label "average expressed"@en .
+
+
+###  http://purl.org/genex#HIGHLY_EXPRESSED
+:HIGHLY_EXPRESSED rdf:type owl:NamedIndividual ;
+                  rdfs:comment "g is highly expressed in t iff g is expressed in t, and the expression level of g is increased relative to some background i.e all gene expressions taking into account a given gene expression condition."@en ;
+                  rdfs:label "highly expressed"@en ;
+                  <http://www.w3.org/2004/02/skos/core#altLabel> "over expressed"@en .
+
+
+###  http://purl.org/genex#HIGH_EXPRESSED
+:HIGH_EXPRESSED rdf:type owl:NamedIndividual ;
+                rdfs:label "high expressed"@en .
+
+
+###  http://purl.org/genex#LOWLY_EXPRESSED
+:LOWLY_EXPRESSED rdf:type owl:NamedIndividual ;
+                 rdfs:comment "g is lowly expressed in t iff g is expressed in t, and the expression level of g is decreased relative to some background."@en ;
+                 rdfs:label "lowly expressed"@en ;
+                 <http://www.w3.org/2004/02/skos/core#altLabel> "under expressed"@en .
+
+
+###  http://purl.org/genex#LOW_EXPRESSED
+:LOW_EXPRESSED rdf:type owl:NamedIndividual ;
+               rdfs:label "low expressed"@en .
+
+
+###  http://purl.org/genex#UBIQUITOUSLY_EXPRESSED
+:UBIQUITOUSLY_EXPRESSED rdf:type owl:NamedIndividual ;
+                        rdfs:comment "x is ubiquitously expressed in y if and only if x is expressed in y, and the majority of cells in y express x."@en ;
+                        rdfs:label "ubiquitously expressed"@en .
+
+
+###  http://purl.uniprot.org/core/Species
+<http://purl.uniprot.org/core/Species> rdf:type owl:NamedIndividual ,
+                                                <http://purl.uniprot.org/core/Rank> ;
+                                       rdfs:label "Taxonomic rank Species" .
+
+
+###  https://www.sib.swiss
+<https://www.sib.swiss> rdf:type owl:NamedIndividual ,
+                                 <http://xmlns.com/foaf/0.1/Organization> ;
+                        <http://xmlns.com/foaf/0.1/homepage> "https://www.sib.swiss" ;
+                        <http://xmlns.com/foaf/0.1/name> "SIB Swiss Institute of Bioinformatics"@en .
+
+
+###  https://www.unil.ch
+<https://www.unil.ch> rdf:type owl:NamedIndividual ,
+                               <http://xmlns.com/foaf/0.1/Organization> ;
+                      <http://xmlns.com/foaf/0.1/homepage> "https://www.unil.ch" ;
+                      <http://xmlns.com/foaf/0.1/name> "University of Lausanne"@en .
+
+
+#################################################################
+#    Annotations
+#################################################################
+
+<http://purl.org/dc/elements/1.1/description> <http://purl.org/dc/terms/description> "Description may include but is not limited to: an abstract, a table of contents, a graphical representation, or a free-text account of the resource."@en ;
+                                              rdfs:comment "An account of the resource."@en ;
+                                              rdfs:isDefinedBy <http://purl.org/dc/elements/1.1/> ;
+                                              rdfs:label "Description"@en .
+
+
+<http://purl.org/dc/elements/1.1/identifier> <http://purl.org/dc/terms/description> "Recommended best practice is to identify the resource by means of a string conforming to a formal identification system. "@en ;
+                                             rdfs:comment "An unambiguous reference to the resource within a given context."@en ;
+                                             rdfs:isDefinedBy <http://purl.org/dc/elements/1.1/> ;
+                                             rdfs:label "Identifier"@en .
+
+
+<http://purl.org/dc/terms/description> <http://purl.org/dc/terms/description> "Description may include but is not limited to: an abstract, a table of contents, a graphical representation, or a free-text account of the resource."@en ;
+                                       rdfs:comment "An account of the resource."@en ;
+                                       rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+                                       rdfs:label "Description"@en .
+
+
+<https://orcid.org/0000-0002-2170-853X> <http://www.w3.org/ns/org#memberOf> <https://www.sib.swiss> ;
+                                        <http://xmlns.com/foaf/0.1/name> "Christophe Dessimoz"@en .
+
+
+<https://orcid.org/0000-0002-3099-3117> <http://www.w3.org/ns/org#memberOf> <https://www.sib.swiss> ;
+                                        <http://xmlns.com/foaf/0.1/name> "Julien Wollbrett"@en .
+
+
+<https://orcid.org/0000-0002-3175-5372> <http://www.w3.org/ns/org#memberOf> <https://www.sib.swiss> ;
+                                        <http://xmlns.com/foaf/0.1/name> "Tarcisio Mendes de Farias"@en .
+
+
+<https://orcid.org/0000-0002-3437-3329> <http://www.w3.org/ns/org#memberOf> <https://www.unil.ch> ;
+                                        <http://xmlns.com/foaf/0.1/name> "Marc Robinson-Rechavi"@en .
+
+
+<https://orcid.org/0000-0002-9415-5104> <http://www.w3.org/ns/org#memberOf> <https://www.sib.swiss> ;
+                                        <http://xmlns.com/foaf/0.1/name> "Frederic Bastian"@en .
+
+
+###  Generated by the OWL API (version 5.1.18) https://github.com/owlcs/owlapi/
