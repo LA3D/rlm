@@ -25,8 +25,19 @@ Across `experiments/ontology_exploration/`, `experiments/cost_analysis/`, and `e
 ### 3) Deterministic schema constraints can beat exemplars
 `experiments/reasoning_chain_validation/results/comparison_summary.md` suggests that adding domain/range constraints and anti-pattern guardrails improved reasoning quality more reliably than adding a small number of exemplars in that setup. This motivates a first-class “schema/constraints” layer distinct from learned procedural memory.
 
-### 4) The executor matters, so memory/context must be executor-agnostic
-`experiments/agent_guide_generation/README.md` indicates that Scratchpad-style execution (persistent namespace + lightweight history) can outperform “current RLM” patterns for some tasks (especially long-form guide synthesis). `experiments/cost_analysis/comparison_20260128_113311.json` shows cost/latency tradeoffs across execution patterns. Therefore, the memory stack should be reusable across DSPy RLM, DSPy ReAct, and Scratchpad.
+### 4) The executor matters less than data structure
+`experiments/agent_guide_generation/README.md` indicates that Scratchpad-style execution (persistent namespace + lightweight history) can outperform "current RLM" patterns for some tasks. However, `experiments/ontology_exploration/` (E1-E5) demonstrates that **DSPy RLM works well for query construction tasks** (44-53% cost reduction with guides, 100% convergence). The memory stack should be reusable across executors, but **executor ablation is not a priority**—the ontology_exploration experiments already validate RLM effectiveness.
+
+### 5) Handles, not payloads (RLM v2 invariants)
+From `rlm_notes.md`: the difference between "RLM as a scalable scaffold" and "an agent that slowly turns into a summarizer" is **data structure**. Critical invariants:
+
+- **Treat prompt/context/memory as REPL state, not chat history**
+- **Store handles (IDs, references), not payloads (full text)**
+- **Make recursion programmatic** (Python loops + batched LLM calls), not "sub-agent vibes"
+- **Avoid Finish(answer) trap**: return variables, then `SUBMIT(answer=var)`
+- **Instrument prompt leakage**: measure whether context leaks into iterative history
+
+> "A lot of 'RLM quality' is downstream of how you structure the environment, tools, and the 'shape' of information you let leak back into the iterative prompt."
 
 ---
 
@@ -107,6 +118,74 @@ Policies define behavior on top of the substrate:
 
 ---
 
+## RLM-Friendly Tool API (Foundation)
+
+Before running experiments, implement a tool API that enforces the "handles, not payloads" principle. This is the **most important implementation detail** for RLM quality.
+
+### Handle Pattern (Required)
+
+Large data should be represented as references, not raw text:
+
+```python
+class BlobRef:
+    def __init__(self, key: str, n: int):
+        self.key, self.n = key, n
+    def __repr__(self):
+        return f"BlobRef(key={self.key!r}, n={self.n})"
+```
+
+The REPL sees `BlobRef(key='graph_001', n=1664)`, not 400K characters.
+
+### Context Inspection Tools (Bounded)
+
+Force "inspect before load" as a tool contract:
+
+```python
+ctx_stats(ref)                    # → length, line count, checksum
+ctx_peek(ref, n=200)              # → short preview
+ctx_slice(ref, start, end)        # → bounded excerpt
+ctx_find(ref, pattern, k=20)      # → offsets + tiny snippets
+```
+
+### Memory Retrieval Tools (Two-Phase)
+
+Separate search (IDs only) from fetch (full content, capped):
+
+```python
+mem_search(query, k=6, polarity=None, role=None)  # → IDs + titles + 1-line descriptions
+mem_get(ids)                                       # → full items (hard cap: refuse >N items)
+mem_quote(id, max_chars)                          # → bounded excerpt if needed
+```
+
+### Write Tools (No Stdout)
+
+Tools that write should not print verbose output:
+
+```python
+mem_add(...)        # → writes to store, returns confirmation
+event_log(obj)      # → writes to SQLite, no stdout
+```
+
+### Tool API Contract
+
+All tools MUST:
+- Return JSON / dicts (structured, parseable)
+- Avoid printing to stdout (bloats history)
+- Return bounded results (explicit caps)
+- Represent large objects as references (never full payloads)
+
+### Prompt Leakage Instrumentation
+
+Every experiment run should log:
+- Total characters printed to stdout
+- Total size of `variables_info` (or proxy: number/type of variables + previews)
+- Number of times a tool returned >X chars
+- Number of subcalls
+
+This enables correlating "RLM quality" with "context leakage."
+
+---
+
 ## Runtime Integration Modes (A Critical Ablation)
 
 There are two ways for the agent to “use memory”:
@@ -128,22 +207,21 @@ Recommendation: implement both; default to **auto-inject**; explicitly compare m
 We want experiments that isolate:
 - which layers help (L0/L1/L2/L3),
 - which packers help (full vs summary; strict budgets),
-- which executor works best under the same context stack,
+- whether handle-based tools prevent prompt leakage,
 - whether closed-loop learning improves over time.
+
+**Note on executor comparison**: `experiments/ontology_exploration/` (E1-E5) already validates that DSPy RLM works well for query construction (44-53% cost reduction, 100% convergence). We skip executor ablation and focus on **memory architecture**.
 
 ### Benchmarks / task suites
 Use existing task suites so we can compare across patterns:
 
-1) **Query construction suite (L1–L5)**  
+1) **Query construction suite (L1–L5)**
    - Use tasks from `experiments/pattern_comparison/` (entity lookup → relationships → multi-hop → filtering → aggregation).
 
-2) **Ontology materialization → query (two-phase workflow)**  
+2) **Ontology materialization → query (two-phase workflow)**
    - Leverage artifacts and approach from `experiments/ontology_exploration/`:
      - Phase 1: materialize guide (L3 full artifact)
      - Phase 2: inject packed summary (L3 packer)
-
-3) **Agent guide generation (separate track)**  
-   - Use `experiments/agent_guide_generation/` to test executor choice (Scratchpad vs RLM vs ReAct) under the same memory layers.
 
 ### Metrics (minimal set)
 - **Convergence**: did we produce an answer (and/or valid SPARQL)?
@@ -151,87 +229,113 @@ Use existing task suites so we can compare across patterns:
   - query tasks: correctness + anti-pattern avoidance (re-use reasoning-chain validation checks where possible)
   - guide tasks: rubric/judge score + grounded URI coverage
 - **Efficiency**: time, tokens, LLM calls, iterations, tool calls
+- **Prompt leakage**: stdout chars, variables_info size, large-return count (NEW)
 - **Memory health** (when L2 enabled): size, duplicate rate, novelty rate, win-rate drift, usage distribution
 
 ---
 
-### Phase 0: Baselines (no learning)
+### Phase 0: Layer Ablation (no learning)
 
-**E0 — Baseline executor performance**
-- Executors: DSPy RLM vs ReAct (and Scratchpad when applicable)
-- Layers: base only
+**E1 — Baseline (no memory layers)**
+- Layers: none (base instructions only)
 - Tasks: query suite (L1–L5)
+- Purpose: establish baseline for layer comparisons
 
-**E1 — L0 Ont-Sense only**
-- Compare to E0 to measure deterministic sense-card value.
+**E2 — L0 Ont-Sense only**
+- Add deterministic sense card (namespaces, core entities, affordances)
+- Compare to E1 to measure sense-card value
 
-**E2 — L1 constraints only**
-- Add domain/range + anti-pattern guardrails (no exemplars).
-- Goal: validate “constraints help” in the broader suite.
+**E3 — L1 constraints only**
+- Add domain/range + anti-pattern guardrails (no exemplars)
+- Goal: validate "constraints help" independent of learned memory
 
-**E3 — L3 guide-summary only**
-- Materialize guide once, then inject only a compact summary (E4-style packing).
-- Track break-even point: guide creation cost amortized over N queries.
+**E4 — L3 guide-summary only**
+- Materialize guide once, then inject only a compact summary (E4-style packing)
+- Track break-even point: guide creation cost amortized over N queries
 
-**E4 — L2 procedural memory retrieval-only (seeded)**
+**E5 — L2 procedural memory retrieval-only (seeded)**
 - Seed bank with a small curated pack:
   - success strategies (what to do)
   - failure guardrails (what not to do)
-- No extraction, no consolidation.
+- No extraction, no consolidation
 
-**E5 — Full layer cake**
-- Enable L0 + L1 + L2 + L3 simultaneously.
-- Goal: measure additive/synergistic gains and detect redundancy.
+**E6 — Full layer cake**
+- Enable L0 + L1 + L2 + L3 simultaneously
+- Goal: measure additive/synergistic gains and detect redundancy
 
-**E6 — Retrieval policy ablation**
-- Compare Mode 1 (auto-inject) vs Mode 2 (tool-mediated) under identical budgets.
+**E7 — Prompt leakage ablation** (NEW)
+- **Condition A**: Naive tools (return full payloads, verbose stdout)
+- **Condition B**: Handle-based tools (BlobRef pattern, two-phase retrieval)
+- Measure: context size per iteration, total iterations, cost, convergence
+- Goal: validate that handle pattern improves RLM quality
+
+**E8 — Retrieval policy ablation**
+- Compare Mode 1 (auto-inject) vs Mode 2 (tool-mediated) under identical budgets
 
 ---
 
 ### Phase 1: Closed-loop learning (ReasoningBank proper)
 
-**E7 — Closed loop: judge + extract (append-only)**
-- After each task: judge success/failure; extract up to N memories into L2 store.
-- No consolidation/forgetting yet.
-- Track extraction quality and whether later tasks improve.
+**E9 — Closed loop: judge + extract (append-only)**
+- After each task: judge success/failure; extract up to N memories into L2 store
+- No consolidation/forgetting yet
+- Track extraction quality and whether later tasks improve
 
-**E8 — Add consolidation**
-- Merge/supersede/discard decisions per new memory item; track duplicate rate.
+**E10 — Add consolidation**
+- Merge/supersede/discard decisions per new memory item; track duplicate rate
 
-**E9 — Add forgetting**
-- Bound active memory size; keep floors for both success and failure items.
+**E11 — Add forgetting**
+- Bound active memory size; keep floors for both success and failure items
 
-**E10 — MaTTS-style rollouts**
-- Run N rollouts per task; select best by judge.
+**E12 — MaTTS-style rollouts**
+- Run N rollouts per task; select best by judge
 - Extraction:
   - v0: extract from best only
   - v1: contrastive extraction using all rollouts (success vs failure)
 
 ---
 
-### Phase 2: Executor cross-over (same memory stack, different runtime)
+### Phase 2: Analysis (optional)
 
-Re-run selected experiments (E2/E5/E7) across executors:
-- Scratchpad (for long synthesis / materialization / guide generation)
-- DSPy RLM vs DSPy ReAct (for cost/latency and convergence tradeoffs)
+If Phase 0-1 results warrant deeper investigation:
 
-Goal: validate the memory stack is executor-agnostic and quantify interactions (some layers may benefit some executors more).
+**E13 — Layer interaction analysis**
+- Re-run E6 (full layer cake) with ablated subsets to detect which layer combinations have synergy vs redundancy
+
+**E14 — Executor cross-over** (if needed)
+- Re-run selected experiments across executors (Scratchpad, ReAct)
+- Only if Phase 0-1 suggests executor-specific interactions
+- Note: `experiments/ontology_exploration/` already shows RLM is effective, so this is low priority
 
 ---
 
-## Updated “Implementation Tasks” (Experiment-first, reuse runtime primitives)
+## Implementation Priorities
 
-This README previously suggested implementing a fresh store/tools/prompts stack inside `experiments/reasoningbank/`.
-In this repo, substantial primitives already exist in runtime code (SQLite memory, extraction/judging hooks, trajectory logging).
+### Priority 1: RLM-Friendly Tool API
 
-Updated recommendation:
+The **most important** implementation work is the handle-based tool API (see "RLM-Friendly Tool API" section above). This is the foundation that determines RLM quality.
 
-- Keep **generic memory primitives** (store/retrieve/log/extract) in `rlm_runtime/`.
-- Implement **ReasoningBank experiments** here as glue/config:
-  - runners that assemble layer toggles + budgets + executor choice
-  - curated packs (seed procedural items, schema constraints, exemplars)
-  - summary packers (especially for L3 guides)
-  - reports (JSONL + markdown summaries)
+Implementation steps:
+1. Create `BlobRef` wrapper for large data (graphs, documents, memory items)
+2. Implement bounded context tools: `ctx_stats`, `ctx_peek`, `ctx_slice`, `ctx_find`
+3. Implement two-phase memory tools: `mem_search` (IDs only), `mem_get` (capped), `mem_quote` (bounded)
+4. Add prompt leakage instrumentation to trajectory logging
+
+### Priority 2: Layer Packers
+
+Each layer needs a packer that enforces budgets:
+- L0 packer: sense card (≤600 chars)
+- L1 packer: constraint list + anti-patterns (≤1000 chars)
+- L2 packer: top-K success + top-K failure (configurable budget)
+- L3 packer: guide summary (≤1000 chars, like E4's 935-char summary)
+
+### Priority 3: Experiment Runners
+
+Leverage existing `rlm_runtime/` primitives (SQLite memory, trajectory logging). Implement here:
+- Runners that assemble layer toggles + budgets
+- Curated seed packs (success strategies, failure guardrails, schema constraints)
+- Reports (JSONL + markdown summaries)
+- Leakage analysis scripts
 
 ---
 

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "find_by_label",
+    "title": "Find Entity by Label",
+    "desc": "Use SPARQL FILTER with regex on rdfs:label to find entities",
+    "content": "1. Use `g_stats()` to check label property\n2. Query with FILTER regex(?label, 'pattern') on label property\n3. LIMIT results to avoid overwhelming output",
+    "src": "seed",
+    "tags": ["search", "label", "sparql"]
+  },
+  {
+    "id": "explore_properties",
+    "title": "Explore Properties of Class",
+    "desc": "Find properties where a class appears in domain or range",
+    "content": "1. Query for ?prop WHERE { ?prop rdfs:domain <ClassURI> }\n2. Also query for ?prop WHERE { ?prop rdfs:range <ClassURI> }\n3. Use `g_describe()` to get details about each property",
+    "src": "seed",
+    "tags": ["properties", "domain", "range"]
+  },
+  {
+    "id": "check_hierarchy",
+    "title": "Navigate Class Hierarchy",
+    "desc": "Find subclasses or superclasses using rdfs:subClassOf",
+    "content": "1. For subclasses: ?sub rdfs:subClassOf <ClassURI>\n2. For superclasses: <ClassURI> rdfs:subClassOf ?super\n3. Check formalism level first - some ontologies materialize hierarchies",
+    "src": "seed",
+    "tags": ["hierarchy", "subclass", "sparql"]
+  },
+  {
+    "id": "bounded_exploration",
+    "title": "Use Bounded Tools First",
+    "desc": "Always use bounded tools (sample, peek, stats) before full queries",
+    "content": "1. Call `g_stats()` to understand size\n2. Use `g_sample()` to see example triples\n3. Use `g_classes()` or `g_props()` with limits\n4. Only then construct SPARQL queries based on what you found",
+    "src": "seed",
+    "tags": ["exploration", "tools", "bounded"]
+  },
+  {
+    "id": "avoid_unbounded_queries",
+    "title": "Avoid Unbounded SPARQL Queries",
+    "desc": "Always use LIMIT in SPARQL queries to prevent context bloat",
+    "content": "1. Add LIMIT clause to every SELECT query\n2. Start with LIMIT 10 for exploration\n3. Increase limit only if needed and results are small\n4. Use FILTER to narrow results instead of fetching everything",
+    "src": "seed",
+    "tags": ["sparql", "anti-pattern", "limit"]
+  }
+]
