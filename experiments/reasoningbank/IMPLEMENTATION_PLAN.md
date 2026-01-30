@@ -941,3 +941,254 @@ log_event('run_complete', {
 **Why Fresh Implementation**: The existing `rlm_runtime` code embodies assumptions (curriculum levels, TAVR fields, verification feedback, sqlite backend) that are experimental variables to TEST, not baseline infrastructure to assume. This suite needs to validate whether those features actually help.
 
 **Critical Addition**: DSPy RLM tool signature requirements were discovered during implementation and are now documented. This was not anticipated in the original plan but is essential for tool functionality.
+
+---
+
+## Remote SPARQL Endpoints: Agentic Discovery Architecture
+
+This section documents the architecture for querying remote SPARQL endpoints (UniProt, Rhea, Wikidata, etc.) using an agentic discovery approach rather than pre-loaded static context.
+
+### Key Insight: Discover, Don't Pre-Load
+
+**Problem with static context**: Pre-loading endpoint descriptions into L0 assumes what the agent needs to know. This causes:
+- Context bloat (26+ federated endpoints × metadata each)
+- Stale information (endpoint capabilities change)
+- Role confusion (static preambles can trigger refusals on biomedical queries)
+
+**Solution**: Agent discovers endpoint capabilities through bounded tools, learning what it needs when it needs it.
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  L0 Sense Card (existing approach - minimal)                    │
+│  - Primary ontology metadata                                    │
+│  - Mention: "Federated endpoints available via tools"           │
+│  - NO static endpoint descriptions or role preambles            │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Agentic Discovery Tools                                        │
+│                                                                 │
+│  Static Discovery (from SHACL examples):                        │
+│  - federated_endpoints(path) → Ref                              │
+│  - endpoints_list(ref, limit) → [{name, url, example_count}]    │
+│                                                                 │
+│  Dynamic Discovery (from endpoints themselves):                 │
+│  - service_desc(url) → Ref  (GET with content negotiation)      │
+│  - service_desc_graphs(ref, limit) → [named graphs]             │
+│  - service_desc_features(ref, limit) → [supported features]     │
+│                                                                 │
+│  Schema Exploration (from local ontology copies):               │
+│  - ont_load(path) → Ref                                         │
+│  - ont_classes(ref, limit) → [class URIs]                       │
+│  - ont_properties(ref, limit) → [property URIs]                 │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  SHACL Examples → Task Corpus                                   │
+│                                                                 │
+│  Examples are NOT procedural memory. They are TASKS:            │
+│  - 636 competency questions (from UniProt SHACL examples)       │
+│  - Agent runs on these → trajectories                           │
+│  - Trajectories get judged → success/failure                    │
+│  - Strategies extracted → L2 procedural memory                  │
+│                                                                 │
+│  What goes into L2:                                             │
+│  - "When querying protein-disease associations, explore         │
+│     up:Disease_Annotation class first" (STRATEGY)               │
+│  NOT:                                                           │
+│  - "Q: List proteins linked to Alzheimer's                      │
+│     SPARQL: SELECT..." (RAW EXAMPLE)                            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### SPARQL 1.1 Service Description
+
+Endpoints self-describe via [SPARQL 1.1 Service Description](https://www.w3.org/TR/sparql11-service-description/). This is accessed via HTTP GET on the endpoint URL with content negotiation:
+
+```python
+def service_desc(url: str) -> Ref:
+    """Fetch endpoint service description.
+
+    GET {url}
+    Accept: text/turtle, application/rdf+xml;q=0.9
+
+    Returns handle to parsed RDF graph.
+    """
+    resp = requests.get(
+        url,
+        headers={'Accept': 'text/turtle, application/rdf+xml;q=0.9'},
+        timeout=30
+    )
+    g = Graph().parse(data=resp.text, format='turtle')
+
+    # Return handle, not the graph
+    return Ref(key, 'service_desc', len(g), len(resp.text), url)
+```
+
+The service description includes:
+- `sd:namedGraph` - Available named graphs
+- `sd:feature` - Supported features (UnionDefaultGraph, BasicFederatedQuery, etc.)
+- `sd:defaultDataset` - Default dataset configuration
+- `sd:resultFormat` - Supported result formats
+
+### Tool Specifications (RLM Pattern)
+
+All tools follow the established pattern:
+- **Handles not payloads**: Return `Ref` with metadata
+- **Two-phase retrieval**: Stats/list first, then bounded content
+- **Source attribution**: All returns include `source`
+- **Bounded returns**: Hard caps enforced
+- **DSPy signatures**: `lambda args, kwargs:`
+
+#### `tools/endpoint_tools.py` (~150 LOC)
+
+```python
+@dataclass
+class Ref:
+    key: str
+    dtype: str      # 'service_desc', 'registry', 'ontology'
+    rows: int       # triple/item count
+    sz: int         # char count
+    source: str     # URL or path for attribution
+
+class EndpointTools:
+    """RLM-friendly endpoint exploration tools."""
+
+    # Static discovery (from SHACL examples)
+    def federated_endpoints(self, ontology_path: str) -> Ref: ...
+    def endpoints_list(self, ref_key: str, limit: int = 10) -> list[dict]: ...
+
+    # Dynamic discovery (service description)
+    def service_desc(self, url: str) -> Ref: ...
+    def service_desc_stats(self, ref_key: str) -> dict: ...
+    def service_desc_graphs(self, ref_key: str, limit: int = 20) -> dict: ...
+    def service_desc_features(self, ref_key: str, limit: int = 20) -> dict: ...
+    def service_desc_sample(self, ref_key: str, n: int = 10) -> dict: ...
+
+    # DSPy-compatible interface
+    def as_dspy_tools(self) -> dict[str, Callable]: ...
+```
+
+### SHACL Task Corpus
+
+SHACL examples from `ontology/uniprot/examples/` become the **task corpus** for Phase 1 closed-loop learning:
+
+#### `tools/shacl_tasks.py` (~80 LOC)
+
+```python
+@dataclass
+class Task:
+    id: str                    # Example filename
+    query: str                 # Competency question (rdfs:comment)
+    expected_sparql: str       # Reference SPARQL (sh:select)
+    endpoint: str              # Target endpoint (schema:target)
+    keywords: list[str]        # Tags (schema:keywords)
+
+def load_shacl_tasks(ontology_path: str) -> list[Task]:
+    """Load SHACL examples as tasks for ReasoningBank learning.
+
+    These are NOT injected as context. They are TASKS the agent runs on.
+    Successful trajectories get strategies extracted into L2.
+    """
+```
+
+### Learning Flow
+
+1. **Load task corpus**: `tasks = load_shacl_tasks('ontology/uniprot')`
+
+2. **Agent runs on task**:
+   ```python
+   # Task: "List proteins associated with Alzheimer's disease"
+   # Agent explores using tools:
+   sd = service_desc('https://sparql.uniprot.org/sparql/')
+   graphs = service_desc_graphs(sd.key)
+   ont = ont_load('ontology/uniprot/core.owl')
+   classes = ont_classes(ont.key, 20)
+   # Agent constructs query based on exploration
+   ```
+
+3. **Judge trajectory**: Success/failure based on query validity and answer quality
+
+4. **Extract strategy** (if successful):
+   ```python
+   Item(
+       title="UniProt disease annotation pattern",
+       content="""When querying protein-disease associations:
+       1. Explore up:Disease_Annotation class
+       2. Use up:annotation to link proteins to annotations
+       3. Filter by annotation type
+       Pattern: ?protein up:annotation ?ann . ?ann a up:Disease_Annotation""",
+       src='success',
+       tags=['uniprot', 'disease', 'annotation']
+   )
+   ```
+
+5. **Store in L2**: Strategy becomes retrievable procedural memory
+
+### File Structure (Updated)
+
+```
+experiments/reasoningbank/
+├── tools/                       # SPARQL endpoint tools
+│   ├── __init__.py
+│   ├── endpoint_tools.py        # Service description + discovery (~150 LOC)
+│   ├── shacl_tasks.py           # Task corpus loader (~80 LOC)
+│   ├── discovery.py             # Federated endpoint discovery (EXISTS)
+│   ├── uniprot_examples.py      # SHACL example parser (EXISTS)
+│   └── sparql.py                # SPARQL query tools (EXISTS)
+│
+├── core/                        # Foundation (unchanged)
+├── packers/                     # Layer packers (unchanged)
+├── ctx/                         # Context builder (unchanged)
+├── run/                         # Experiment runners (unchanged)
+└── ...
+```
+
+### Integration with Phase 1 (E9-E12)
+
+The SHACL task corpus enables closed-loop learning:
+
+```python
+# run/phase1.py (updated)
+
+def run_closed_loop_sparql(
+    ontology_path: str,
+    mem: MemStore,
+    max_tasks: int = 50
+):
+    """Run closed-loop learning on SHACL task corpus."""
+    from tools.shacl_tasks import load_shacl_tasks
+
+    tasks = load_shacl_tasks(ontology_path)[:max_tasks]
+
+    for task in tasks:
+        # Run with endpoint tools available
+        res = run_with_endpoint_tools(task.query, task.endpoint, mem)
+
+        # Judge (can compare to expected_sparql)
+        j = judge_sparql(res, task.expected_sparql)
+
+        # Extract strategy if successful
+        if j['success']:
+            items = extract_strategy(res, task)
+            for item in items:
+                mem.add(item)
+```
+
+### Why This Matters for Refusals
+
+**The key insight**: Biomedical queries trigger refusals due to **role ambiguity**, not topic sensitivity.
+
+- **Static preamble** approach: "You are a SPARQL query interface to UniProt..."
+  - Still triggers refusals because the competency question appears without context
+
+- **Agentic discovery** approach: Agent explores endpoints, discovers capabilities, constructs queries
+  - The exploration trajectory provides natural context
+  - Agent's actions demonstrate it's doing database retrieval, not giving medical advice
+  - Successful trajectories teach strategies like "frame results as database records"
+
+The strategies extracted from successful trajectories implicitly encode how to frame queries to minimize refusals, without explicit "role framing" text.

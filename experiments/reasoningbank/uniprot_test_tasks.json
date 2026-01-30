@@ -1,0 +1,20 @@
+[
+  {
+    "id": "protein_lookup",
+    "query": "What is a Protein in the UniProt ontology?",
+    "description": "Analogous to PROV 'What is Activity?' - asks about a core class",
+    "expected_type": "entity_lookup"
+  },
+  {
+    "id": "protein_properties",
+    "query": "What properties does the Protein class have in UniProt?",
+    "description": "Analogous to PROV 'What properties does Activity have?' - property discovery",
+    "expected_type": "property_query"
+  },
+  {
+    "id": "annotation_types",
+    "query": "What are the different types of Annotations in UniProt?",
+    "description": "Analogous to PROV 'What are subclasses of Entity?' - hierarchy exploration",
+    "expected_type": "hierarchy"
+  }
+]

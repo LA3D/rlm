@@ -233,8 +233,8 @@ class SPARQLTools:
         """Get metadata about stored result including source attribution."""
         return self.store.stats(ref_key)
 
-    def sparql_describe(self, uri: str, limit: int = 20) -> dict:
-        """Describe a URI - return bounded dict of properties.
+    def sparql_describe(self, uri: str, limit: int = 20) -> Ref:
+        """Describe a URI as handle. Use sparql_peek to inspect.
 
         Queries {name} for properties of the given URI.
         """.format(name=self.name)
@@ -247,30 +247,26 @@ class SPARQLTools:
         """
         rows = self._execute(query, limit=limit)
 
-        # Format as dict with attribution
-        result = {'uri': uri, 'source': self.name, 'properties': {}}
+        # Format as text with property-value pairs
+        lines = [f"URI: {uri}", f"Source: {self.name}", ""]
         for row in rows:
             if 'error' in row:
-                result['error'] = row['error']
+                lines.append(f"Error: {row['error']}")
                 break
             p = row.get('p', '')
             o = row.get('o', '')
             # Shorten predicate
             p_short = p.split('/')[-1].split('#')[-1]
-            if p_short in result['properties']:
-                if isinstance(result['properties'][p_short], list):
-                    result['properties'][p_short].append(o[:100])
-                else:
-                    result['properties'][p_short] = [result['properties'][p_short], o[:100]]
-            else:
-                result['properties'][p_short] = o[:100]
+            lines.append(f"{p_short}: {o[:100]}")
 
-        return result
+        content = '\n'.join(lines)
+        preview = f"Description of {uri.split('/')[-1]} from {self.name}"
+        return self.store.put(content, 'describe', preview)
 
-    def sparql_classes(self, limit: int = 50) -> dict:
-        """List available classes (bounded).
+    def sparql_classes(self, limit: int = 50) -> Ref:
+        """List available classes as handle. Use sparql_peek to inspect.
 
-        Returns classes defined in {name} database.
+        Returns handle to classes defined in {name} database.
         """.format(name=self.name)
         query = f"""
         {self._prefixes}
@@ -281,16 +277,14 @@ class SPARQLTools:
         """
         rows = self._execute(query, limit=limit)
         classes = [r.get('class', '') for r in rows if 'error' not in r]
-        return {
-            'source': self.name,
-            'count': len(classes),
-            'classes': classes,
-        }
+        content = '\n'.join(classes)
+        preview = f"{len(classes)} classes from {self.name}"
+        return self.store.put(content, 'classes', preview)
 
-    def sparql_properties(self, limit: int = 50) -> dict:
-        """List available properties (bounded).
+    def sparql_properties(self, limit: int = 50) -> Ref:
+        """List available properties as handle. Use sparql_peek to inspect.
 
-        Returns properties defined in {name} database.
+        Returns handle to properties defined in {name} database.
         """.format(name=self.name)
         query = f"""
         {self._prefixes}
@@ -305,14 +299,12 @@ class SPARQLTools:
         """
         rows = self._execute(query, limit=limit)
         props = [r.get('prop', '') for r in rows if 'error' not in r]
-        return {
-            'source': self.name,
-            'count': len(props),
-            'properties': props,
-        }
+        content = '\n'.join(props)
+        preview = f"{len(props)} properties from {self.name}"
+        return self.store.put(content, 'properties', preview)
 
-    def sparql_find(self, pattern: str, limit: int = 20) -> dict:
-        """Find URIs matching pattern (label search).
+    def sparql_find(self, pattern: str, limit: int = 20) -> Ref:
+        """Find URIs matching pattern as handle. Use sparql_peek to inspect.
 
         Searches {name} for entities with labels containing the pattern.
         """.format(name=self.name)
@@ -327,17 +319,14 @@ class SPARQLTools:
         LIMIT {min(limit, 50)}
         """
         rows = self._execute(query, limit=limit)
-        results = [{'uri': r.get('uri', ''), 'label': r.get('label', '')[:80]}
+        results = [f"{r.get('uri', '')}\t{r.get('label', '')[:80]}"
                    for r in rows if 'error' not in r]
-        return {
-            'source': self.name,
-            'pattern': pattern,
-            'count': len(results),
-            'results': results,
-        }
+        content = '\n'.join(results)
+        preview = f"{len(results)} matches for '{pattern}' in {self.name}"
+        return self.store.put(content, 'find', preview)
 
-    def sparql_sample(self, class_uri: str, n: int = 5) -> dict:
-        """Get sample instances of a class (bounded).
+    def sparql_sample(self, class_uri: str, n: int = 5) -> Ref:
+        """Get sample instances as handle. Use sparql_peek to inspect.
 
         Retrieves sample instances from {name} database.
         """.format(name=self.name)
@@ -350,14 +339,11 @@ class SPARQLTools:
         LIMIT {min(n, 20)}
         """
         rows = self._execute(query, limit=n)
-        instances = [{'uri': r.get('instance', ''), 'label': r.get('label', '')[:80]}
+        instances = [f"{r.get('instance', '')}\t{r.get('label', '')[:80]}"
                      for r in rows if 'error' not in r]
-        return {
-            'source': self.name,
-            'class': class_uri,
-            'count': len(instances),
-            'instances': instances,
-        }
+        content = '\n'.join(instances)
+        preview = f"{len(instances)} instances of {class_uri.split('/')[-1]} from {self.name}"
+        return self.store.put(content, 'sample', preview)
 
     def sparql_count(self, query: str) -> dict:
         """Execute COUNT query, return single count value with attribution."""

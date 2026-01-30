@@ -89,7 +89,14 @@ def run(
 
     try:
         if verbose: print(f"  Executing RLM...")
+
+        # Capture history length before call
+        history_before = len(dspy.settings.lm.history) if hasattr(dspy.settings, 'lm') and hasattr(dspy.settings.lm, 'history') else 0
+
         res = rlm(context=ctx, question=task)
+
+        # Capture history length after call
+        history_after = len(dspy.settings.lm.history) if hasattr(dspy.settings, 'lm') and hasattr(dspy.settings.lm, 'history') else 0
 
         # Extract history and token usage
         history = []
@@ -104,10 +111,36 @@ def run(
                         for entry in inspection[-3:]:
                             print(f"    {str(entry)[:200]}")
 
-        # Get token usage
-        lm_usage = {}
-        if hasattr(res, 'get_lm_usage'):
-            lm_usage = res.get_lm_usage() or {}
+        # Get token usage from DSPy LM history (only calls from this run)
+        lm_usage = {
+            'total_calls': 0,
+            'prompt_tokens': 0,
+            'completion_tokens': 0,
+            'total_tokens': 0,
+            'cache_read_tokens': 0,
+            'cache_creation_tokens': 0,
+            'total_cost': 0.0
+        }
+        try:
+            if hasattr(dspy.settings, 'lm') and hasattr(dspy.settings.lm, 'history'):
+                # Only extract usage from calls made during this RLM run
+                relevant_calls = dspy.settings.lm.history[history_before:history_after]
+
+                for call in relevant_calls:
+                    lm_usage['total_calls'] += 1
+
+                    # Extract usage from call dict
+                    usage = call.get('usage', {})
+                    lm_usage['prompt_tokens'] += usage.get('prompt_tokens', 0)
+                    lm_usage['completion_tokens'] += usage.get('completion_tokens', 0)
+                    lm_usage['total_tokens'] += usage.get('total_tokens', 0)
+                    lm_usage['cache_read_tokens'] += usage.get('cache_read_input_tokens', 0)
+                    lm_usage['cache_creation_tokens'] += usage.get('cache_creation_input_tokens', 0)
+                    lm_usage['total_cost'] += call.get('cost', 0.0)
+        except Exception as e:
+            if verbose:
+                print(f"  Warning: Could not extract token usage: {e}")
+            lm_usage['error'] = str(e)
 
         log_event('run_complete', {
             'converged': True,

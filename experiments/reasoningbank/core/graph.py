@@ -34,27 +34,32 @@ def g_query(ref:Ref, q:str, limit:int=100) -> Ref:
     txt = '\n'.join(str(row) for row in res)
     return _store.put(txt, 'results')
 
-def g_sample(ref:Ref, n:int=10) -> str:
-    "Return `n` sample triples as text."
+def g_sample(ref:Ref, n:int=10) -> Ref:
+    "Return `n` sample triples as handle. Use ctx_peek to inspect."
     g = _graphs[ref.key]
     triples = list(g)[:n]
-    return '\n'.join(f"{s} {p} {o}" for s,p,o in triples)
+    content = '\n'.join(f"{s} {p} {o}" for s,p,o in triples)
+    return _store.put(content, 'sample')
 
-def g_classes(ref:Ref, limit:int=50) -> list[str]:
-    "Return class URIs (bounded)."
+def g_classes(ref:Ref, limit:int=50) -> Ref:
+    "Return class URIs as handle. Use ctx_peek to inspect."
     g = _graphs[ref.key]
-    return [str(c) for c in list(g.subjects(RDF.type, OWL.Class))[:limit]]
+    classes = [str(c) for c in list(g.subjects(RDF.type, OWL.Class))[:limit]]
+    content = '\n'.join(classes)
+    return _store.put(content, 'classes')
 
-def g_props(ref:Ref, limit:int=50) -> list[str]:
-    "Return property URIs (bounded)."
+def g_props(ref:Ref, limit:int=50) -> Ref:
+    "Return property URIs as handle. Use ctx_peek to inspect."
     g = _graphs[ref.key]
     props = list(g.subjects(RDF.type, OWL.ObjectProperty))
     props += list(g.subjects(RDF.type, OWL.DatatypeProperty))
-    return [str(p) for p in props[:limit]]
+    content = '\n'.join([str(p) for p in props[:limit]])
+    return _store.put(content, 'properties')
 
-def g_describe(ref:Ref, uri:str, limit:int=20) -> str:
-    "Return triples about `uri` (bounded)."
+def g_describe(ref:Ref, uri:str, limit:int=20) -> Ref:
+    "Return triples about `uri` as handle. Use ctx_peek to inspect."
     g = _graphs[ref.key]
     subj = URIRef(uri)
     triples = list(g.triples((subj, None, None)))[:limit]
-    return '\n'.join(f"{p} {o}" for _,p,o in triples)
+    content = '\n'.join(f"{p} {o}" for _,p,o in triples)
+    return _store.put(content, 'describe')

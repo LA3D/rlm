@@ -1,0 +1,272 @@
+[
+  {
+    "exp": "E1",
+    "task": "protein_lookup",
+    "query": "What is a Protein in the UniProt ontology?",
+    "converged": true,
+    "iters": 10,
+    "answer": "A Protein in the UniProt ontology represents the fundamental entity that captures a unique protein sequence along with its comprehensive biological information. Specifically:\n\n**Core Definition**: A Protein is a semantic object that represents a specific amino acid sequence and serves as the central node connecting various types of biological data in the UniProt knowledge base.\n\n**Key Characteristics**:\n1. **Sequence Entity**: Each Protein instance represents a unique amino acid sequence, which serves as the primary identifier\n2. **Biological Context Container**: Aggregates functional annotations, structural information, taxonomic classification, gene relationships, pathway involvement, and disease associations\n3. **Knowledge Integration Point**: Connects genes (via up:encodedBy), organisms (via up:organism), functional classifications (via up:classifiedWith), and literature references (via up:citation)\n4. **Hierarchical Organization**: Can relate to protein isoforms, protein families, and functional domains\n\nThe Protein class in UniProt's RDF representation goes beyond simple sequence data to provide a rich, interoperable semantic object that integrates comprehensive biological knowledge for computational analysis and cross-database interoperability.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?property ?value WHERE {\n  up:Protein ?property ?value .\n  FILTER(?property IN (rdfs:label, rdfs:comment, skos:definition, owl:equivalentClass, rdfs:subClassOf))\n}",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E1",
+    "task": "protein_properties",
+    "query": "What properties does the Protein class have in UniProt?",
+    "converged": true,
+    "iters": 12,
+    "answer": "The Protein class in UniProt has numerous properties that can be categorized into several groups:\n\n**Core Properties:**\n- up:sequence - links to the amino acid sequence\n- up:organism - links to the taxonomic organism  \n- up:mnemonic - the entry name/mnemonic identifier\n- up:reviewed - indicates if entry is reviewed (Swiss-Prot) or unreviewed (TrEMBL)\n- up:created - creation date\n- up:modified - last modification date\n- up:version - entry version number\n\n**Sequence-Related Properties:**\n- up:chain - links to the mature protein chain\n- up:length - sequence length\n- up:mass - molecular mass\n\n**Annotation Properties:**\n- up:annotation - links to various annotation types (function, catalytic activity, pathways, subcellular location, tissue specificity, disease associations, post-translational modifications)\n- up:classifiedWith - links to classification systems\n- up:enzyme - enzyme classification numbers\n- up:pathway - pathway associations\n\n**Cross-Reference Properties:**\n- rdfs:seeAlso - general cross-references to external databases\n- up:database - specific database cross-references (PDB, GO, KEGG, etc.)\n\n**Identification Properties:**\n- up:alternativeName - alternative protein names\n- up:recommendedName - recommended protein name\n- up:shortName - short name variants\n- up:fullName - full protein names\n\n**Gene-Related Properties:**\n- up:encodedBy - links to the encoding gene\n- up:gene - gene information\n\n**Feature Properties:**\n- up:domain - protein domains\n- up:region - functional regions\n- up:site - important sites (active sites, binding sites, etc.)\n- up:signalPeptide - signal peptide information\n- up:transmembraneRegion - transmembrane regions\n\n**Structural Properties:**\n- up:structure3D - links to 3D structure information\n\n**Additional Properties:**\n- up:cofactor - cofactor information\n- up:interaction - protein-protein interactions\n- up:similarity - similarity to other proteins\n- up:caution - cautionary notes\n- up:miscellaneous - miscellaneous annotations\n\n**Standard RDF Properties:**\n- rdf:type - typically up:Protein\n- rdfs:label - human-readable label\n- rdfs:comment - general comments\n\nThese properties provide a comprehensive framework for representing protein data in UniProt's RDF format.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT DISTINCT ?property ?propertyType ?label ?comment ?domain\nWHERE {\n  {\n    # Properties with explicit domain\n    ?property rdfs:domain up:Protein .\n    OPTIONAL { ?property rdf:type ?propertyType }\n  }\n  UNION\n  {\n    # Properties actually used with Protein instances\n    ?protein a up:Protein .\n    ?protein ?property ?value .\n    OPTIONAL { ?property rdf:type ?propertyType }\n    OPTIONAL { ?property rdfs:domain ?domain }\n  }\n  OPTIONAL { ?property rdfs:label ?label }\n  OPTIONAL { ?property rdfs:comment ?comment }\n}\nORDER BY ?property\nLIMIT 100",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E1",
+    "task": "annotation_types",
+    "query": "What are the different types of Annotations in UniProt?",
+    "converged": true,
+    "iters": 11,
+    "answer": "The different types of Annotations in UniProt include:\n\n**Sequence Annotations:**\n- Active Site Annotation - amino acids directly involved in enzymatic activity\n- Binding Site Annotation - regions that bind to other molecules  \n- Site Annotation - interesting single amino acid sites\n- Metal Binding Annotation - metal ion binding sites\n- DNA Binding Annotation - DNA-binding regions\n- Nucleotide Binding Annotation - ATP, GTP, NAD+ binding sites\n\n**Structural Features:**\n- Domain Annotation - distinct functional and structural units\n- Repeat Annotation - internal sequence repeats\n- Motif Annotation - short sequence motifs of biological significance\n- Coiled Coil Annotation - coiled coil regions\n- Compositionally Biased Region Annotation - regions of compositional bias\n\n**Post-translational Modifications:**\n- Modified Residue Annotation - modified amino acids (phosphorylation, methylation, etc.)\n- Glycosylation Site Annotation - N-linked and O-linked glycosylation\n- Lipidation Site Annotation - myristoylation, palmitoylation, prenylation\n- Cross Link Annotation - covalent bonds between residues\n- Disulfide Bond Annotation - cysteine cross-links\n\n**Topological Features:**\n- Signal Peptide Annotation - N-terminal signal sequences\n- Transit Peptide Annotation - targeting sequences for organelles\n- Propeptide Annotation - parts of protein removed during maturation\n- Chain Annotation - mature protein after processing\n- Peptide Annotation - released active peptides\n- Transmembrane Annotation - membrane-spanning regions\n\n**Experimental Information:**\n- Mutagenesis Annotation - site-directed mutagenesis experiments\n- Natural Variant Annotation - natural variants and polymorphisms\n- Sequence Conflict Annotation - sequence discrepancies between sources\n- Non Standard Residue Annotation - unusual amino acids\n- Sequence Uncertainty Annotation - uncertain regions\n\n**Regional/Structural Annotations:**\n- Region Annotation - regions of biological interest\n- Turn Annotation - turns in protein structure\n- Beta Strand Annotation - beta sheet components\n- Helix Annotation - alpha helical regions\n\nThese annotations provide comprehensive functional, structural, and experimental information about proteins in the UniProt database.",
+    "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?annotationType ?label WHERE {\n    ?annotationType rdfs:subClassOf up:Annotation .\n    OPTIONAL { ?annotationType rdfs:label ?label }\n}\nORDER BY ?annotationType\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E2",
+    "task": "protein_lookup",
+    "query": "What is a Protein in the UniProt ontology?",
+    "converged": true,
+    "iters": 13,
+    "answer": "In the UniProt ontology, a Protein is a core biological class that represents a biological macromolecule consisting of one or more polypeptide chains that has achieved a functional three-dimensional structure. \n\nKey characteristics of the Protein class in UniProt:\n\n1. **Molecular Entity**: Represents the complete, functional protein molecule as it exists in biological systems\n2. **Structural Organization**: Encompasses proteins with defined secondary, tertiary, and potentially quaternary structure  \n3. **Functional Unit**: Represents proteins as functional biological entities capable of performing specific cellular roles\n4. **Instance Scope**: Individual protein entries in UniProt correspond to instances of this class\n\nThe Protein class serves as the foundational concept around which the entire UniProt knowledge representation is organized, enabling semantic queries across protein sequence, structure, function, and annotation data. It typically inherits from more general biomolecule classes and has specialized subclasses for different protein types like enzymes, receptors, and transporters.\n\nThis class connects to properties describing sequence, structure, function, localization, and interactions, making it the primary entity for protein-centric data integration in the UniProt RDF schema ontology.",
+    "sparql": "\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?label ?description ?comment ?superClass\nWHERE {\n  ?protein a owl:Class .\n  ?protein rdfs:label ?label .\n  FILTER(str(?label) = \"Protein\")\n  OPTIONAL { ?protein dcterms:description ?description }\n  OPTIONAL { ?protein rdfs:comment ?comment }\n  OPTIONAL { ?protein rdfs:subClassOf ?superClass }\n}\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E2",
+    "task": "protein_properties",
+    "query": "What properties does the Protein class have in UniProt?",
+    "converged": true,
+    "iters": 14,
+    "answer": "The Protein class in UniProt has various properties including:\n\n1. **Identification Properties**:\n   - up:mnemonic - protein mnemonic name\n   - up:recommendedName - recommended protein name\n   - up:alternativeName - alternative protein names\n   - up:submittedName - submitted names\n\n2. **Sequence Properties**:\n   - up:sequence - amino acid sequence\n   - up:mass - molecular mass\n   - up:length - sequence length\n\n3. **Classification Properties**:\n   - up:classifiedWith - classification terms\n   - up:organism - source organism\n   - up:proteome - proteome membership\n\n4. **Functional Properties**:\n   - up:enzyme - enzyme classification\n   - up:catalyticActivity - catalytic activities\n   - up:cofactor - required cofactors\n   - up:pathway - metabolic pathways\n\n5. **Structural Properties**:\n   - up:domain - protein domains\n   - up:region - functional regions\n   - up:site - functional sites\n\n6. **Annotation Properties**:\n   - up:annotation - various annotations\n   - up:comment - textual comments\n   - up:evidence - supporting evidence\n\nThese properties allow comprehensive description of protein entries in the UniProt knowledge base.",
+    "sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX dcterms: <http://purl.org/dc/terms/>\n\nSELECT DISTINCT ?property ?propertyLabel ?propertyType ?description\nWHERE {\n  # Find properties that have Protein as their domain\n  ?property rdfs:domain up:Protein .\n  ?property rdfs:label ?propertyLabel .\n  ?property a ?propertyType .\n  OPTIONAL { ?property dcterms:description ?description }\n  \n  # Filter for actual properties (not just any resource)\n  FILTER(?propertyType IN (owl:ObjectProperty, owl:DatatypeProperty, rdf:Property))\n}\nORDER BY ?propertyLabel",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E2",
+    "task": "annotation_types",
+    "query": "What are the different types of Annotations in UniProt?",
+    "converged": true,
+    "iters": 11,
+    "answer": "The different types of annotations in UniProt include:\n\n1. **Sequence Features**: Active sites, binding sites, domains, secondary structures, modified residues, signal peptides, transmembrane regions, natural variants\n\n2. **Functional Annotations**: Protein names, gene names, EC numbers, catalytic activities, cofactors, pathway involvement, GO terms for biological processes and molecular functions\n\n3. **Structural Information**: 3D structure references, structural domains, topology, quaternary structure\n\n4. **Localization and Targeting**: Subcellular location, tissue specificity, developmental stage expression, cellular components\n\n5. **Interaction and Regulation**: Protein-protein interactions, subunit composition, regulatory mechanisms, post-translational modifications\n\n6. **Disease and Phenotype**: Disease associations, phenotype descriptions, clinical significance of variants\n\n7. **Cross-references**: Database links to EMBL, RefSeq, PDB, pathway databases, ortholog/paralog relationships\n\n8. **Experimental Evidence**: Evidence codes, literature references, experimental methods\n\nThese are organized in the UniProt RDF schema as specialized annotation classes like Sequence_Annotation, Function_Annotation, Disease_Annotation, Subcellular_Location_Annotation, and others.",
+    "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nSELECT DISTINCT ?annotationType ?label WHERE {\n  ?annotationType rdfs:subClassOf* up:Annotation .\n  ?annotationType a owl:Class .\n  OPTIONAL { ?annotationType rdfs:label ?label }\n}\nORDER BY ?label\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E3",
+    "task": "protein_lookup",
+    "query": "What is a Protein in the UniProt ontology?",
+    "converged": true,
+    "iters": 10,
+    "answer": "A Protein in the UniProt ontology is a central entity class that represents biological protein molecules. It serves as a hub connecting various types of biological information:\n\n**Key Characteristics:**\n- It's a distinct class that is disjoint from Citations, Clusters, and Sequences (cannot be classified as these simultaneously)\n- Represents actual protein molecules with their biological properties and relationships\n\n**Core Properties:**\n- `annotation`: Links to detailed biological annotations\n- `encodedBy`: Connected to the Gene that encodes the protein\n- `encodedIn`: Specifies the Subcellular_Location where the protein is found\n- `domain` and `component`: References structural Parts of the protein\n- `interaction`: Links to molecular Interactions involving the protein  \n- `classifiedWith`: Associates with Concept classifications\n\n**Structural Role:**\nThe Protein class acts as a central connecting point in the UniProt ontology, linking genetic information (genes), structural information (domains, components), functional information (annotations, interactions), and cellular context (subcellular locations). This makes it a comprehensive representation of protein knowledge that integrates sequence, structure, function, and localization data.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?protein ?annotation ?gene ?location ?domain ?component ?interaction ?classification\nWHERE {\n  ?protein a up:Protein .\n\n  OPTIONAL { ?protein up:annotation ?annotation }\n  OPTIONAL { ?protein up:encodedBy ?gene }\n  OPTIONAL { ?protein up:encodedIn ?location }\n  OPTIONAL { ?protein up:domain ?domain }\n  OPTIONAL { ?protein up:component ?component }\n  OPTIONAL { ?protein up:interaction ?interaction }\n  OPTIONAL { ?protein up:classifiedWith ?classification }\n}\nLIMIT 100",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E3",
+    "task": "protein_properties",
+    "query": "What properties does the Protein class have in UniProt?",
+    "converged": true,
+    "iters": 8,
+    "answer": "The Protein class in UniProt has several key properties based on the schema constraints:\n\n**Core Properties (with their ranges):**\n- `annotation` \u2192 Annotation\n- `classifiedWith` \u2192 Concept  \n- `component` \u2192 Part\n- `domain` \u2192 Part\n- `encodedBy` \u2192 Gene\n- `encodedIn` \u2192 Subcellular_Location\n- `interaction` \u2192 Interaction\n\n**Properties with Cardinality Constraints:**\n- `cellularComponent` - exactly 1 (mandatory)\n- `orientation` - max 1 (optional)\n- `topology` - max 1 (optional)\n\n**Total Properties:** The SPARQL query returns 13 distinct properties that have Protein as their domain, indicating there are additional properties beyond those explicitly listed in the schema constraints.\n\n**Schema Notes:** Protein entities are disjoint from Citation and Cluster entities, meaning they cannot be mixed in the same query. The Protein class serves as a central hub in the UniProt ontology, connecting to genes, cellular locations, interactions, annotations, and structural/functional components.",
+    "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?property ?range\nWHERE {\n  ?property rdfs:domain up:Protein .\n  OPTIONAL { ?property rdfs:range ?range }\n}\nORDER BY ?property\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E3",
+    "task": "annotation_types",
+    "query": "What are the different types of Annotations in UniProt?",
+    "converged": true,
+    "iters": 13,
+    "answer": "Based on the UniProt knowledge base structure and the fact that you found 26 annotation types, here are the typical/common annotation types that are subclasses of `up:Annotation` in UniProt:\n\n## Core Functional Annotations\n- **Function_Annotation** - General protein function descriptions\n- **Catalytic_Activity_Annotation** - Enzymatic reactions and EC numbers\n- **Cofactor_Annotation** - Required cofactors and prosthetic groups\n- **Pathway_Annotation** - Metabolic and signaling pathway involvement\n\n## Structural Annotations\n- **Domain_Annotation** - Protein domains and repeats\n- **Region_Annotation** - Functional regions and binding sites\n- **Site_Annotation** - Specific functional sites (active sites, binding sites)\n- **Modified_Residue_Annotation** - Post-translational modifications\n- **Cross_Link_Annotation** - Disulfide bonds and other cross-links\n- **Signal_Peptide_Annotation** - Signal sequences\n- **Transit_Peptide_Annotation** - Organellar targeting sequences\n- **Propeptide_Annotation** - Propeptide regions\n\n## Localization and Transport\n- **Subcellular_Location_Annotation** - Cellular compartment localization\n- **Transmembrane_Annotation** - Membrane-spanning regions\n- **Topological_Domain_Annotation** - Membrane topology\n\n## Interaction and Regulation\n- **Subunit_Annotation** - Protein complex formation and quaternary structure\n- **Tissue_Specificity_Annotation** - Expression patterns across tissues\n- **Developmental_Stage_Annotation** - Temporal expression patterns\n- **Induction_Annotation** - Regulatory conditions\n\n## Disease and Phenotype\n- **Disease_Annotation** - Disease associations\n- **Polymorphism_Annotation** - Genetic variants and their effects\n- **Mutagenesis_Annotation** - Experimental mutation data\n\n## Similarity and Evolution\n- **Similarity_Annotation** - Sequence and structural similarities\n- **Caution_Annotation** - Warnings about sequence or annotation issues\n\n## Technical Annotations\n- **Sequence_Conflict_Annotation** - Discrepancies between sources\n- **Alternative_Splicing_Annotation** - Splice variants (though this might be handled differently)\n\nThese 26 annotation types cover the major categories of biological information that UniProt systematically captures for proteins, ranging from basic functional descriptions to detailed structural features, regulatory information, and disease associations.",
+    "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?annotationType ?label\nWHERE {\n  ?annotationType rdfs:subClassOf up:Annotation .\n  OPTIONAL { ?annotationType rdfs:label ?label }\n}\nORDER BY ?annotationType\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E4",
+    "task": "protein_lookup",
+    "query": "What is a Protein in the UniProt ontology?",
+    "converged": true,
+    "iters": 10,
+    "answer": "A Protein in the UniProt ontology represents the fundamental entity that captures a unique protein sequence along with its comprehensive biological information. Specifically:\n\n**Core Definition**: A Protein is a semantic object that represents a specific amino acid sequence and serves as the central node connecting various types of biological data in the UniProt knowledge base.\n\n**Key Characteristics**:\n1. **Sequence Entity**: Each Protein instance represents a unique amino acid sequence, which serves as the primary identifier\n2. **Biological Context Container**: Aggregates functional annotations, structural information, taxonomic classification, gene relationships, pathway involvement, and disease associations\n3. **Knowledge Integration Point**: Connects genes (via up:encodedBy), organisms (via up:organism), functional classifications (via up:classifiedWith), and literature references (via up:citation)\n4. **Hierarchical Organization**: Can relate to protein isoforms, protein families, and functional domains\n\nThe Protein class in UniProt's RDF representation goes beyond simple sequence data to provide a rich, interoperable semantic object that integrates comprehensive biological knowledge for computational analysis and cross-database interoperability.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?property ?value WHERE {\n  up:Protein ?property ?value .\n  FILTER(?property IN (rdfs:label, rdfs:comment, skos:definition, owl:equivalentClass, rdfs:subClassOf))\n}",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E4",
+    "task": "protein_properties",
+    "query": "What properties does the Protein class have in UniProt?",
+    "converged": true,
+    "iters": 12,
+    "answer": "The Protein class in UniProt has numerous properties that can be categorized into several groups:\n\n**Core Properties:**\n- up:sequence - links to the amino acid sequence\n- up:organism - links to the taxonomic organism  \n- up:mnemonic - the entry name/mnemonic identifier\n- up:reviewed - indicates if entry is reviewed (Swiss-Prot) or unreviewed (TrEMBL)\n- up:created - creation date\n- up:modified - last modification date\n- up:version - entry version number\n\n**Sequence-Related Properties:**\n- up:chain - links to the mature protein chain\n- up:length - sequence length\n- up:mass - molecular mass\n\n**Annotation Properties:**\n- up:annotation - links to various annotation types (function, catalytic activity, pathways, subcellular location, tissue specificity, disease associations, post-translational modifications)\n- up:classifiedWith - links to classification systems\n- up:enzyme - enzyme classification numbers\n- up:pathway - pathway associations\n\n**Cross-Reference Properties:**\n- rdfs:seeAlso - general cross-references to external databases\n- up:database - specific database cross-references (PDB, GO, KEGG, etc.)\n\n**Identification Properties:**\n- up:alternativeName - alternative protein names\n- up:recommendedName - recommended protein name\n- up:shortName - short name variants\n- up:fullName - full protein names\n\n**Gene-Related Properties:**\n- up:encodedBy - links to the encoding gene\n- up:gene - gene information\n\n**Feature Properties:**\n- up:domain - protein domains\n- up:region - functional regions\n- up:site - important sites (active sites, binding sites, etc.)\n- up:signalPeptide - signal peptide information\n- up:transmembraneRegion - transmembrane regions\n\n**Structural Properties:**\n- up:structure3D - links to 3D structure information\n\n**Additional Properties:**\n- up:cofactor - cofactor information\n- up:interaction - protein-protein interactions\n- up:similarity - similarity to other proteins\n- up:caution - cautionary notes\n- up:miscellaneous - miscellaneous annotations\n\n**Standard RDF Properties:**\n- rdf:type - typically up:Protein\n- rdfs:label - human-readable label\n- rdfs:comment - general comments\n\nThese properties provide a comprehensive framework for representing protein data in UniProt's RDF format.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT DISTINCT ?property ?propertyType ?label ?comment ?domain\nWHERE {\n  {\n    # Properties with explicit domain\n    ?property rdfs:domain up:Protein .\n    OPTIONAL { ?property rdf:type ?propertyType }\n  }\n  UNION\n  {\n    # Properties actually used with Protein instances\n    ?protein a up:Protein .\n    ?protein ?property ?value .\n    OPTIONAL { ?property rdf:type ?propertyType }\n    OPTIONAL { ?property rdfs:domain ?domain }\n  }\n  OPTIONAL { ?property rdfs:label ?label }\n  OPTIONAL { ?property rdfs:comment ?comment }\n}\nORDER BY ?property\nLIMIT 100",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E4",
+    "task": "annotation_types",
+    "query": "What are the different types of Annotations in UniProt?",
+    "converged": true,
+    "iters": 11,
+    "answer": "The different types of Annotations in UniProt include:\n\n**Sequence Annotations:**\n- Active Site Annotation - amino acids directly involved in enzymatic activity\n- Binding Site Annotation - regions that bind to other molecules  \n- Site Annotation - interesting single amino acid sites\n- Metal Binding Annotation - metal ion binding sites\n- DNA Binding Annotation - DNA-binding regions\n- Nucleotide Binding Annotation - ATP, GTP, NAD+ binding sites\n\n**Structural Features:**\n- Domain Annotation - distinct functional and structural units\n- Repeat Annotation - internal sequence repeats\n- Motif Annotation - short sequence motifs of biological significance\n- Coiled Coil Annotation - coiled coil regions\n- Compositionally Biased Region Annotation - regions of compositional bias\n\n**Post-translational Modifications:**\n- Modified Residue Annotation - modified amino acids (phosphorylation, methylation, etc.)\n- Glycosylation Site Annotation - N-linked and O-linked glycosylation\n- Lipidation Site Annotation - myristoylation, palmitoylation, prenylation\n- Cross Link Annotation - covalent bonds between residues\n- Disulfide Bond Annotation - cysteine cross-links\n\n**Topological Features:**\n- Signal Peptide Annotation - N-terminal signal sequences\n- Transit Peptide Annotation - targeting sequences for organelles\n- Propeptide Annotation - parts of protein removed during maturation\n- Chain Annotation - mature protein after processing\n- Peptide Annotation - released active peptides\n- Transmembrane Annotation - membrane-spanning regions\n\n**Experimental Information:**\n- Mutagenesis Annotation - site-directed mutagenesis experiments\n- Natural Variant Annotation - natural variants and polymorphisms\n- Sequence Conflict Annotation - sequence discrepancies between sources\n- Non Standard Residue Annotation - unusual amino acids\n- Sequence Uncertainty Annotation - uncertain regions\n\n**Regional/Structural Annotations:**\n- Region Annotation - regions of biological interest\n- Turn Annotation - turns in protein structure\n- Beta Strand Annotation - beta sheet components\n- Helix Annotation - alpha helical regions\n\nThese annotations provide comprehensive functional, structural, and experimental information about proteins in the UniProt database.",
+    "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?annotationType ?label WHERE {\n    ?annotationType rdfs:subClassOf up:Annotation .\n    OPTIONAL { ?annotationType rdfs:label ?label }\n}\nORDER BY ?annotationType\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E5",
+    "task": "protein_lookup",
+    "query": "What is a Protein in the UniProt ontology?",
+    "converged": true,
+    "iters": 13,
+    "answer": "In the UniProt ontology, a Protein (up:Protein) is the central class representing individual protein entities. It serves as the fundamental building block for organizing protein sequences and their associated biological information.\n\nKey aspects of the Protein class:\n\n**Definition**: The Protein class represents a protein entity with its sequence, functional properties, and biological context within the UniProt knowledge base.\n\n**Role**: It acts as the primary connection point linking protein sequence data with comprehensive biological knowledge including:\n- Sequence information and variants\n- Functional annotations and activities  \n- Structural data and domains\n- Taxonomic classification and organism relationships\n- Gene associations and encoding relationships\n- Pathway involvement and biological processes\n- Disease relationships and clinical relevance\n- Protein family classifications\n- Subcellular localizations\n- Protein-protein interactions\n\n**Hierarchical Position**: The Protein class sits within UniProt's ontological hierarchy, having both superclasses (broader biological concepts) and subclasses (specific protein types, isoforms, and variants).\n\n**Integration Function**: It enables semantic integration of diverse protein-related data types, allowing complex biological queries that span genomic, structural, functional, and evolutionary information across different species and biological systems.\n\nThe Protein class essentially embodies UniProt's standardized representation of what constitutes a protein entity in their semantic knowledge graph, facilitating data interoperability and sophisticated biological data analysis.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\nSELECT ?property ?value ?comment WHERE {\n  {\n    up:Protein ?property ?value .\n    OPTIONAL { ?property rdfs:comment ?comment }\n  }\n  UNION\n  {\n    up:Protein rdfs:subClassOf ?superClass .\n    BIND(rdfs:subClassOf as ?property)\n    BIND(?superClass as ?value)\n    OPTIONAL { ?superClass rdfs:comment ?comment }\n  }\n  UNION\n  {\n    ?subClass rdfs:subClassOf up:Protein .\n    BIND(\"hasSubClass\" as ?property)\n    BIND(?subClass as ?value)\n    OPTIONAL { ?subClass rdfs:comment ?comment }\n  }\n}\nORDER BY ?property",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E5",
+    "task": "protein_properties",
+    "query": "What properties does the Protein class have in UniProt?",
+    "converged": true,
+    "iters": 12,
+    "answer": "The Protein class in UniProt (up:Protein) has 13 properties associated with it. These properties can be found by querying for all properties where the rdfs:domain is up:Protein. The SPARQL query returns the property URIs and their optional labels, providing a complete list of properties that belong to the Protein class in the UniProt knowledge base.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?prop ?label WHERE {\n  ?prop rdfs:domain up:Protein .\n  OPTIONAL { ?prop rdfs:label ?label }\n} ORDER BY ?prop",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E5",
+    "task": "annotation_types",
+    "query": "What are the different types of Annotations in UniProt?",
+    "converged": true,
+    "iters": 10,
+    "answer": "UniProt provides several different types of annotations for proteins:\n\n1. **Function Annotations** (up:Function_Annotation) - Describe protein function and biological processes\n2. **Domain Annotations** (up:Domain_Annotation) - Identify protein domains and structural features  \n3. **Signal Peptide Annotations** (up:Signal_Peptide_Annotation) - Mark signal peptide sequences\n4. **Transmembrane Annotations** (up:Transmembrane_Annotation) - Identify transmembrane regions\n5. **Active Site Annotations** (up:Active_Site_Annotation) - Mark catalytically active residues\n6. **Binding Site Annotations** (up:Binding_Site_Annotation) - Identify ligand binding sites\n7. **Modified Residue Annotations** (up:Modified_Residue_Annotation) - Post-translational modifications\n8. **Glycosylation Annotations** (up:Glycosylation_Annotation) - Glycosylation sites\n9. **Disease Annotations** (up:Disease_Annotation) - Disease associations\n10. **Pathway Annotations** (up:Pathway_Annotation) - Metabolic and signaling pathways\n11. **Subcellular Location Annotations** (up:Subcellular_Location_Annotation) - Cellular localization\n\nAdditionally, UniProt includes:\n- **Gene Ontology (GO) Annotations** - Linked via up:classifiedWith predicate\n- **Enzyme Classification** - Via up:enzyme predicate\n- **Protein Interactions** - Via up:interaction predicate\n\nThese annotations provide comprehensive functional, structural, and biological information about proteins in the UniProt database.",
+    "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?annotationType (COUNT(?annotation) AS ?count) WHERE {\n  ?protein up:annotation ?annotation .\n  ?annotation a ?annotationType .\n\n  FILTER(?annotationType != up:Annotation)\n  FILTER(STRSTARTS(STR(?annotationType), \"http://purl.uniprot.org/core/\"))\n}\nGROUP BY ?annotationType\nORDER BY DESC(?count)",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E6",
+    "task": "protein_lookup",
+    "query": "What is a Protein in the UniProt ontology?",
+    "converged": true,
+    "iters": 9,
+    "answer": "A Protein in the UniProt ontology is a central entity class that represents protein molecules and their associated biological information. \n\nKey characteristics of the Protein class:\n\n**Properties and Relationships:**\n- Has annotations (annotation \u2192 Annotation)\n- Can be classified with concepts (classifiedWith \u2192 Concept) \n- Contains structural components and domains (component, domain \u2192 Part)\n- Is encoded by genes (encodedBy \u2192 Gene)\n- Is located in subcellular locations (encodedIn \u2192 Subcellular_Location)\n- Participates in molecular interactions (interaction \u2192 Interaction)\n\n**Constraints:**\n- Disjoint from Citation and Cluster classes (cannot be mixed in queries)\n- Follows OWL-DL formalism with specific anti-patterns\n\n**Biological Significance:**\nThe Protein class represents structured biological entities with hierarchical organization (domains, components), genetic encoding, cellular localization, functional classification, and interaction capabilities. This reflects UniProt's comprehensive approach to protein information management for biological research and bioinformatics applications.\n\n**Ontological Context:**\nPart of a substantial ontology with 2816 triples and 214 classes, integrated with core biological ontologies (faldo, RDF standards) and designed for systematic protein data representation.",
+    "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX dcterms: <http://purl.org/dc/terms/>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nSELECT ?property ?value WHERE {\n  up:Protein ?property ?value .\n  FILTER(?property IN (rdfs:label, dcterms:description, rdfs:comment, owl:disjointWith))\n} \nUNION\nSELECT ?property ?range WHERE {\n  ?property rdfs:domain up:Protein .\n  ?property rdfs:range ?range .\n}\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E6",
+    "task": "protein_properties",
+    "query": "What properties does the Protein class have in UniProt?",
+    "converged": true,
+    "iters": 12,
+    "answer": "The Protein class in UniProt has the following properties:\n\n**Core Properties with Protein as Domain:**\n1. annotation - connects Protein to Annotation (allows multiple annotations per protein)\n2. classifiedWith - connects Protein to Concept (for functional/structural classifications)\n3. component - connects Protein to Part (protein components/subunits)\n4. domain - connects Protein to Part (protein domains)\n5. encodedBy - connects Protein to Gene (the gene that encodes the protein)\n6. encodedIn - connects Protein to Subcellular_Location (where protein is located)\n7. interaction - connects Protein to Interaction (protein-protein interactions)\n\n**Additional Properties:**\n8. commonName - functional property (single-valued name for the protein)\n9. alternativeName - connects to Structured_Name (alternative naming)\n\n**Properties with Cardinality Constraints:**\n- cellularComponent: exactly 1 (each protein must have exactly one cellular component)\n- orientation: max 1 (proteins can have at most one orientation)\n- topology: max 1 (proteins can have at most one topology)\n\n**Important Notes:**\n- The Protein class is disjoint with Citation and Cluster classes\n- Properties like annotation, component, domain, and interaction allow multiple values\n- The encodedBy and encodedIn properties establish key biological relationships",
+    "sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?property ?label WHERE {\n  ?property rdfs:domain up:Protein .\n  OPTIONAL { ?property rdfs:label ?label }\n}\nORDER BY ?property",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  },
+  {
+    "exp": "E6",
+    "task": "annotation_types",
+    "query": "What are the different types of Annotations in UniProt?",
+    "converged": true,
+    "iters": 10,
+    "answer": "The different types of Annotations in UniProt include:\n\n**Functional Annotations:**\n- Function (general protein function)\n- Catalytic activity (enzymatic reactions)\n- Cofactor (required cofactors and prosthetic groups)\n- Activity regulation (regulatory mechanisms)\n- Pathway (metabolic and signaling pathways)\n\n**Structural Annotations:**\n- Domain and repeat (functional/structural domains)\n- Secondary structure (alpha helices, beta strands)\n- Motif (sequence motifs and patterns)\n- Region of interest (functionally important regions)\n- Coiled coil regions\n\n**Sequence Annotations:**\n- Chain (mature protein after processing)\n- Signal peptide (N-terminal signal sequences)\n- Transit peptide (organellar targeting)\n- Modified residue (post-translational modifications)\n- Glycosylation site (N-linked and O-linked)\n- Cross-link (disulfide bonds)\n\n**Subcellular Location Annotations:**\n- Subcellular location (cellular compartment)\n- Topology (membrane topology)\n- Transmembrane (transmembrane regions)\n\n**Expression Annotations:**\n- Tissue specificity\n- Developmental stage\n- Induction conditions\n\n**Interaction Annotations:**\n- Subunit (protein complex composition)\n- Binding site (molecular binding sites)\n\n**Pathology Annotations:**\n- Disease (associated diseases)\n- Natural variant (sequence variants)\n- Mutagenesis (experimental results)\n\n**Biophysicochemical Properties:**\n- pH dependence\n- Temperature dependence\n- Kinetic parameters\n\n**Gene Ontology Annotations:**\n- Molecular function\n- Biological process  \n- Cellular component\n\nThese annotations use controlled vocabularies and evidence codes to ensure consistency and indicate reliability.",
+    "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nSELECT DISTINCT ?annotationType ?label ?description WHERE {\n  ?annotationType rdfs:subClassOf* up:Annotation .\n  OPTIONAL { ?annotationType rdfs:label ?label }\n  OPTIONAL { ?annotationType rdfs:comment ?description }\n}\nORDER BY ?annotationType\n",
+    "leakage": {
+      "stdout_chars": 0,
+      "large_returns": 0,
+      "subcalls": 0,
+      "vars_n": 0
+    }
+  }
+]

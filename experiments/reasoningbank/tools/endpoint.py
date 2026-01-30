@@ -41,3 +41,57 @@ class EndpointConfig:
         for prefix, uri in self.prefixes.items():
             lines.append(f"PREFIX {prefix}: <{uri}>")
         return '\n'.join(lines)
+
+
+# Pre-configured endpoints
+ENDPOINTS = {
+    'uniprot': EndpointConfig(
+        url='https://sparql.uniprot.org/sparql/',
+        name='UniProt',
+        authority='UniProt Consortium (EMBL-EBI, SIB, PIR)',
+        domain='protein sequences and functional information',
+        prefixes={
+            'up': 'http://purl.uniprot.org/core/',
+            'taxon': 'http://purl.uniprot.org/taxonomy/',
+            'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+            'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+            'owl': 'http://www.w3.org/2002/07/owl#',
+            'skos': 'http://www.w3.org/2004/02/skos/core#',
+        },
+        default_limit=100,
+        max_limit=1000,
+        timeout=30,
+    ),
+    'wikidata': EndpointConfig(
+        url='https://query.wikidata.org/sparql',
+        name='Wikidata',
+        authority='Wikimedia Foundation',
+        domain='general knowledge',
+        prefixes={
+            'wd': 'http://www.wikidata.org/entity/',
+            'wdt': 'http://www.wikidata.org/prop/direct/',
+            'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+            'skos': 'http://www.w3.org/2004/02/skos/core#',
+        },
+        default_limit=100,
+        max_limit=1000,
+        timeout=30,
+    ),
+}
+
+
+def get_endpoint(name: str) -> EndpointConfig:
+    """Get pre-configured endpoint by name.
+
+    Args:
+        name: One of 'uniprot', 'wikidata'
+
+    Returns:
+        EndpointConfig for the specified endpoint
+
+    Raises:
+        KeyError: If endpoint name not recognized
+    """
+    if name not in ENDPOINTS:
+        raise KeyError(f"Unknown endpoint: {name}. Available: {list(ENDPOINTS.keys())}")
+    return ENDPOINTS[name]
