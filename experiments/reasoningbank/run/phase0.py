@@ -44,7 +44,17 @@ EXPS = {
 def run_phase0(exps:list[str], tasks:list[dict], ont:str, out:str, verbose:bool=True):
     "Run layer ablation experiments."
     from pathlib import Path
+    from experiments.reasoningbank.core.mem import MemStore
     Path(out).mkdir(parents=True, exist_ok=True)
+
+    # Load seed memory for E5 and E6
+    mem = MemStore()
+    seed_path = 'experiments/reasoningbank/seed/strategies.json'
+    if Path(seed_path).exists():
+        mem.load(seed_path)
+        print(f"Loaded {len(mem.all())} seed strategies from {seed_path}")
+    else:
+        print(f"Warning: Seed strategies not found at {seed_path}")
 
     results = []
     for exp in exps:
@@ -61,7 +71,9 @@ def run_phase0(exps:list[str], tasks:list[dict], ont:str, out:str, verbose:bool=
             print(f"\n[{exp}] Task: {t['id']} - {t['query']}")
             log_path = f"{out}/{exp}_{t['id']}_trajectory.jsonl"
 
-            res = run(t['query'], ont, cfg, verbose=verbose, log_path=log_path)
+            # Pass memory for E5 and E6 (experiments with L2 enabled)
+            exp_mem = mem if cfg.l2.on else None
+            res = run(t['query'], ont, cfg, mem=exp_mem, verbose=verbose, log_path=log_path)
             print(f"  ✓ Completed: {res.iters} iters, converged={res.converged}")
             results.append({
                 'exp': exp, 'task': t['id'],
