@@ -58,15 +58,17 @@ class Builder:
         G._graphs[ref.key] = g
 
         # Return bounded tools with correct DSPy signatures
-        # DSPy calls tools with (args, kwargs) so we need to accept those
+        # DSPy RLM calls tools as: tool(args, kwargs) where:
+        #   args = actual arguments (value, list, etc)
+        #   kwargs = keyword arguments dict
         return {
-            'g_stats': lambda *args, **kwargs: G.g_stats(ref),
-            'g_query': lambda *args, **kwargs: G.g_query(ref, args[0] if args else kwargs.get('q', ''), kwargs.get('limit', 100)),
-            'g_sample': lambda *args, **kwargs: G.g_sample(ref, args[0] if args else kwargs.get('n', 10)),
-            'g_classes': lambda *args, **kwargs: G.g_classes(ref, args[0] if args else kwargs.get('limit', 50)),
-            'g_props': lambda *args, **kwargs: G.g_props(ref, args[0] if args else kwargs.get('limit', 50)),
-            'g_describe': lambda *args, **kwargs: G.g_describe(ref, args[0] if args else kwargs.get('uri', ''), kwargs.get('limit', 20)),
-            'ctx_peek': lambda *args, **kwargs: store.peek(args[0] if args else kwargs.get('k', ''), args[1] if len(args) > 1 else kwargs.get('n', 200)),
-            'ctx_slice': lambda *args, **kwargs: store.slice(args[0] if args else kwargs.get('k', ''), args[1] if len(args) > 1 else kwargs.get('start', 0), args[2] if len(args) > 2 else kwargs.get('end', 100)),
-            'ctx_stats': lambda *args, **kwargs: store.stats(args[0] if args else kwargs.get('k', '')),
+            'g_stats': lambda args, kwargs: G.g_stats(ref),
+            'g_query': lambda args, kwargs: G.g_query(ref, args if isinstance(args, str) else (args[0] if args else kwargs.get('q', '')), kwargs.get('limit', 100)),
+            'g_sample': lambda args, kwargs: G.g_sample(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('n', 10))),
+            'g_classes': lambda args, kwargs: G.g_classes(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('limit', 50))),
+            'g_props': lambda args, kwargs: G.g_props(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('limit', 50))),
+            'g_describe': lambda args, kwargs: G.g_describe(ref, args if isinstance(args, str) else (args[0] if args else kwargs.get('uri', '')), kwargs.get('limit', 20)),
+            'ctx_peek': lambda args, kwargs: store.peek(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', '')), args[1] if isinstance(args, list) and len(args) > 1 else kwargs.get('n', 200)),
+            'ctx_slice': lambda args, kwargs: store.slice(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', '')), args[1] if isinstance(args, list) and len(args) > 1 else kwargs.get('start', 0), args[2] if isinstance(args, list) and len(args) > 2 else kwargs.get('end', 100)),
+            'ctx_stats': lambda args, kwargs: store.stats(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', ''))),
         }
