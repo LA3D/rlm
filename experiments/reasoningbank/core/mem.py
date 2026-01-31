@@ -60,6 +60,24 @@ class MemStore:
 
     def all(self) -> list[Item]: return list(self._items.values())
 
+    def consolidate(self, items: list[Item]) -> list[str]:
+        """Add items to memory store (append-only).
+
+        Per ReasoningBank paper: minimal consolidation strategy.
+        No deduplication, no merging - simple append.
+
+        Args:
+            items: List of Item objects to add
+
+        Returns:
+            List of added item IDs
+        """
+        added = []
+        for item in items:
+            self._items[item.id] = item
+            added.append(item.id)
+        return added
+
     def save(self, path:str):
         "Save all items to JSON file."
         with open(path, 'w') as f: json.dump([asdict(o) for o in self._items.values()], f)
