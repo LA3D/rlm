@@ -27,6 +27,7 @@ def run_closed_loop_uniprot(
     endpoint: str = 'uniprot',
     do_extract: bool = True,
     verbose: bool = False,
+    dedup: bool = True,
 ) -> list[dict]:
     """Run E9-E12 closed-loop learning with UniProt endpoint.
 
@@ -40,6 +41,7 @@ def run_closed_loop_uniprot(
         endpoint: SPARQL endpoint name ('uniprot', 'wikidata', etc.)
         do_extract: If True, extract procedures from trajectories
         verbose: If True, print detailed LLM inputs/outputs
+        dedup: If True, deduplicate during consolidation (default: True)
 
     Returns:
         List of result dicts for each task with keys:
@@ -75,7 +77,7 @@ def run_closed_loop_uniprot(
         if do_extract:
             items = extract(res, t['query'], j, verbose=verbose)
             if items:
-                added_ids = mem.consolidate(items)
+                added_ids = mem.consolidate(items, dedup=dedup)
                 record['items'] = items
                 for item in items:
                     polarity = f"[{item.src}]"
@@ -109,6 +111,13 @@ if __name__ == '__main__':
     parser.add_argument('--load-mem', metavar='FILE', help='Load memory from JSON file')
     parser.add_argument('--save-mem', metavar='FILE', help='Save memory to JSON file')
 
+    # MaTTS options
+    parser.add_argument('--matts', action='store_true', help='Enable MaTTS parallel scaling')
+    parser.add_argument('--matts-k', type=int, default=3, help='Number of MaTTS rollouts (default: 3)')
+
+    # Deduplication control
+    parser.add_argument('--no-dedup', action='store_true', help='Disable deduplication during consolidation')
+
     args = parser.parse_args()
 
     if args.test:
@@ -140,23 +149,58 @@ if __name__ == '__main__':
         print(f"Active layers: {', '.join(active) if active else 'L2:memory (default)'}")
         print(f"Endpoint: {args.endpoint}")
 
+        # Dedup flag
+        dedup = not args.no_dedup
+        if not dedup:
+            print("Deduplication: DISABLED")
+
         # Load tasks
         with open(args.tasks) as f:
             tasks = json.load(f)
         print(f"Loaded {len(tasks)} tasks from {args.tasks}")
 
-        # Run closed-loop
-        results = run_closed_loop_uniprot(
-            tasks, args.ont, mem, cfg,
-            endpoint=args.endpoint,
-            do_extract=args.extract,
-            verbose=args.verbose
-        )
+        if args.matts:
+            # MaTTS mode: import and use from phase1
+            from experiments.reasoningbank.run.phase1 import run_matts_parallel
+            from experiments.reasoningbank.run.rlm_uniprot import run_uniprot
+
+            print(f"MaTTS mode: {args.matts_k} rollouts per task")
+            print("Note: MaTTS for UniProt uses local ontology runner")
+
+            results = []
+            for t in tasks:
+                print(f"\nTask: {t['id']}")
+                # MaTTS uses local ontology path - for UniProt, use the ontology dir
+                res, items = run_matts_parallel(
+                    t['query'], args.ont, mem, cfg,
+                    k=args.matts_k, verbose=args.verbose, dedup=dedup
+                )
+                status = '✓' if res.converged else '✗'
+                print(f"  {status} Answer: {res.answer[:80]}...")
+                for item in items:
+                    print(f"  [{item.src}] Extracted: {item.title[:50]}")
+                results.append({
+                    'task_id': t['id'],
+                    'query': t['query'],
+                    'converged': res.converged,
+                    'answer': res.answer,
+                    'sparql': res.sparql,
+                    'items': items,
+                })
+        else:
+            # Standard closed-loop mode
+            results = run_closed_loop_uniprot(
+                tasks, args.ont, mem, cfg,
+                endpoint=args.endpoint,
+                do_extract=args.extract,
+                verbose=args.verbose,
+                dedup=dedup
+            )
 
         # Save memory if specified
         save_path = args.save_mem or (
             'experiments/reasoningbank/results/phase1_uniprot_memory.json'
-            if args.extract else None
+            if args.extract or args.matts else None
         )
         if save_path:
             mem.save(save_path)
@@ -165,5 +209,5 @@ if __name__ == '__main__':
         # Print summary
         print(f"\n=== Results Summary ===")
         for r in results:
-            status = '✓' if r['judgment']['success'] else '✗'
+            status = '✓' if r.get('judgment', {}).get('success', r.get('converged', False)) else '✗'
             print(f"{status} {r['task_id']}: {len(r['items'])} items extracted")

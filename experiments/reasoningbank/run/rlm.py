@@ -32,6 +32,12 @@ class Result:
     iters: int
     leakage: Metrics
     trace: list[dict]
+    trajectory: list[dict] = None  # List of {code, output} execution steps
+    thinking: str|None = None      # Extended thinking content (if available)
+
+    def __post_init__(self):
+        if self.trajectory is None:
+            self.trajectory = []
 
 def run(
     task: str,
@@ -154,6 +160,68 @@ def run(
         if log_path and history:
             log_event('history', {'entries': [str(h)[:500] for h in history]})
 
+        # Extract execution trajectory from RLM history
+        exec_trajectory = []
+        if history:
+            try:
+                import re
+
+                # Extract code blocks and outputs from RLM history
+                for i, entry in enumerate(history):
+                    try:
+                        # Get response text
+                        response_text = None
+                        if 'outputs' in entry and isinstance(entry.get('outputs'), list):
+                            outputs_list = entry['outputs']
+                            if outputs_list and len(outputs_list) > 0:
+                                response_text = outputs_list[0]
+                        elif 'response' in entry and entry.get('response'):
+                            response = entry['response']
+                            if hasattr(response, 'choices') and response.choices:
+                                if len(response.choices) > 0:
+                                    choice = response.choices[0]
+                                    if hasattr(choice, 'message') and choice.message:
+                                        response_text = choice.message.content
+
+                        if response_text:
+                            # Extract code block from this iteration
+                            code_pattern = r'\[\[\s*##\s*code\s*##\s*\]\]\s*```python\s+(.*?)\s*```'
+                            code_match = re.search(code_pattern, str(response_text), re.DOTALL | re.IGNORECASE)
+
+                            if code_match:
+                                code = code_match.group(1).strip()
+
+                                # Try to get output from next iteration's user message (REPL history)
+                                output = "(output not captured)"
+                                try:
+                                    if i + 1 < len(history) and 'messages' in history[i + 1]:
+                                        next_messages = history[i + 1].get('messages', [])
+                                        if next_messages and len(next_messages) >= 2:
+                                            if next_messages[1].get('role') == 'user':
+                                                user_content = next_messages[1].get('content', '')
+                                                # Look for the last step in REPL history
+                                                repl_pattern = r'===\s*Step\s+\d+\s*===.*?Code:.*?```python.*?```.*?Output:\s*(.*?)(?=\n===|\Z)'
+                                                repl_matches = list(re.finditer(repl_pattern, user_content, re.DOTALL | re.IGNORECASE))
+                                                if repl_matches:
+                                                    # Get the last step's output
+                                                    last_match = repl_matches[-1]
+                                                    output = last_match.group(1).strip()[:1000]  # Limit to 1000 chars
+                                except Exception:
+                                    # If output extraction fails, use default
+                                    pass
+
+                                exec_trajectory.append({
+                                    'code': code,
+                                    'output': output
+                                })
+                    except Exception:
+                        # Skip this entry if parsing fails
+                        continue
+            except Exception as e:
+                if verbose:
+                    print(f"  Warning: Trajectory extraction failed: {e}")
+                # Continue with empty trajectory
+
         return Result(
             answer=getattr(res, 'answer', str(res)),
             sparql=getattr(res, 'sparql', None),
@@ -161,6 +229,7 @@ def run(
             iters=len(history),
             leakage=inst.metrics,
             trace=trajectory,
+            trajectory=exec_trajectory,
         )
     except Exception as e:
         log_event('run_error', {'error': str(e), 'type': type(e).__name__})
@@ -171,4 +240,5 @@ def run(
             iters=0,
             leakage=inst.metrics,
             trace=trajectory,
+            trajectory=[],
         )

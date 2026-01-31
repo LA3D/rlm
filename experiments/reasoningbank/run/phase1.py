@@ -17,6 +17,28 @@ from experiments.reasoningbank.run.rlm import run, Result
 from experiments.reasoningbank.ctx.builder import Cfg, Layer
 
 
+# Trajectory formatting helper
+
+def format_trajectory(trajectory: list[dict], max_chars: int = 2000) -> str:
+    """Format execution trajectory for prompt injection.
+
+    Args:
+        trajectory: List of {code, output} dicts from RLM execution
+        max_chars: Maximum total characters to return
+
+    Returns:
+        Formatted string showing execution steps
+    """
+    if not trajectory:
+        return "(no trajectory captured)"
+    parts = []
+    for i, step in enumerate(trajectory, 1):
+        code = step.get('code', '')
+        output = str(step.get('output', ''))[:300]
+        parts.append(f"Step {i}:\n```python\n{code}\n```\n→ {output}")
+    return "\n".join(parts)[:max_chars]
+
+
 # DSPy Signatures for Judge/Extract
 
 class TrajectoryJudge(dspy.Signature):
@@ -32,6 +54,7 @@ class TrajectoryJudge(dspy.Signature):
 class SuccessExtractor(dspy.Signature):
     """Extract transferable strategies from a successful trajectory."""
     task: str = dspy.InputField(desc="The original question/task")
+    trajectory: str = dspy.InputField(desc="Full execution trajectory showing reasoning steps")
     answer: str = dspy.InputField(desc="The successful answer")
     sparql: str = dspy.InputField(desc="The SPARQL query that worked")
 
@@ -42,12 +65,34 @@ class SuccessExtractor(dspy.Signature):
 class FailureExtractor(dspy.Signature):
     """Extract lessons from a failed trajectory."""
     task: str = dspy.InputField(desc="The original question/task")
+    trajectory: str = dspy.InputField(desc="Full execution trajectory showing reasoning steps")
     answer: str = dspy.InputField(desc="The failed/incomplete answer")
     sparql: str = dspy.InputField(desc="The SPARQL query (if any)")
     failure_reason: str = dspy.InputField(desc="Why the trajectory failed")
 
     title: str = dspy.OutputField(desc="Short title for this lesson (≤10 words)")
     pitfall: str = dspy.OutputField(desc="Description of what went wrong and how to avoid it")
+
+
+class ContrastiveExtractor(dspy.Signature):
+    """Extract lessons by contrasting success vs failure trajectories."""
+    task: str = dspy.InputField(desc="The original question/task")
+    success_traj: str = dspy.InputField(desc="Successful execution trajectory")
+    failure_traj: str = dspy.InputField(desc="Failed execution trajectory")
+    success_answer: str = dspy.InputField(desc="Answer from successful trajectory")
+    failure_answer: str = dspy.InputField(desc="Answer from failed trajectory")
+
+    title: str = dspy.OutputField(desc="Short title for this lesson (≤10 words)")
+    lesson: str = dspy.OutputField(desc="What distinguished success from failure")
+
+
+class PatternExtractor(dspy.Signature):
+    """Extract common patterns from multiple successful trajectories."""
+    task: str = dspy.InputField(desc="The original question/task")
+    trajectories: str = dspy.InputField(desc="Multiple successful trajectories separated by ---")
+
+    title: str = dspy.OutputField(desc="Short title for this pattern (≤10 words)")
+    pattern: str = dspy.OutputField(desc="Common pattern observed across successes")
 
 
 def judge(res: Result, task: str, verbose: bool = False) -> dict:
@@ -81,7 +126,8 @@ def judge(res: Result, task: str, verbose: bool = False) -> dict:
         return {'success': False, 'reason': f'Judgment failed: {e}'}
 
 
-def extract(res: Result, task: str, judgment: dict, verbose: bool = False) -> list[Item]:
+def extract(res: Result, task: str, judgment: dict, verbose: bool = False,
+             temperature: float = 1.0) -> list[Item]:
     """Extract procedures from trajectory using polarity-aware extractors.
 
     Uses SuccessExtractor for successful trajectories, FailureExtractor for
@@ -92,24 +138,27 @@ def extract(res: Result, task: str, judgment: dict, verbose: bool = False) -> li
         task: The original question/task
         judgment: dict with 'success' and 'reason' from judge()
         verbose: If True, print LLM inputs/outputs
+        temperature: LLM temperature for extraction (paper uses 1.0 for diversity)
 
     Returns:
         List of 1-3 Item objects with appropriate 'src' polarity
     """
     items = []
     max_items = 3  # Per ReasoningBank paper
+    traj_text = format_trajectory(res.trajectory)
 
     if judgment['success']:
         # Success extraction: transferable strategies
         if verbose:
             print(f"  [extract:success] inputs:")
             print(f"    task: {task[:100]}")
+            print(f"    trajectory: {traj_text[:200]}...")
             print(f"    answer: {res.answer[:200]}...")
             print(f"    sparql: {(res.sparql or '')[:100]}")
 
-        ext = dspy.Predict(SuccessExtractor)
+        ext = dspy.Predict(SuccessExtractor, temperature=temperature)
         try:
-            e = ext(task=task, answer=res.answer, sparql=res.sparql or "")
+            e = ext(task=task, trajectory=traj_text, answer=res.answer, sparql=res.sparql or "")
             item = Item(
                 id=Item.make_id(e.title, e.procedure),
                 title=e.title[:100],
@@ -130,14 +179,16 @@ def extract(res: Result, task: str, judgment: dict, verbose: bool = False) -> li
         if verbose:
             print(f"  [extract:failure] inputs:")
             print(f"    task: {task[:100]}")
+            print(f"    trajectory: {traj_text[:200]}...")
             print(f"    answer: {res.answer[:200]}...")
             print(f"    sparql: {(res.sparql or '')[:100]}")
             print(f"    failure_reason: {judgment['reason']}")
 
-        ext = dspy.Predict(FailureExtractor)
+        ext = dspy.Predict(FailureExtractor, temperature=temperature)
         try:
             e = ext(
                 task=task,
+                trajectory=traj_text,
                 answer=res.answer,
                 sparql=res.sparql or "",
                 failure_reason=judgment['reason']
@@ -160,6 +211,183 @@ def extract(res: Result, task: str, judgment: dict, verbose: bool = False) -> li
 
     return items[:max_items]
 
+
+def contrastive_extract(task: str, success_res: Result, failure_res: Result,
+                        verbose: bool = False, temperature: float = 1.0) -> list[Item]:
+    """Extract lessons by contrasting successful vs failed trajectories.
+
+    Args:
+        task: The original question/task
+        success_res: Result from successful trajectory
+        failure_res: Result from failed trajectory
+        verbose: If True, print LLM inputs/outputs
+        temperature: LLM temperature for extraction
+
+    Returns:
+        List of contrastive lesson Items
+    """
+    if verbose:
+        print(f"  [extract:contrastive] comparing success vs failure")
+
+    ext = dspy.Predict(ContrastiveExtractor, temperature=temperature)
+    try:
+        e = ext(
+            task=task,
+            success_traj=format_trajectory(success_res.trajectory),
+            failure_traj=format_trajectory(failure_res.trajectory),
+            success_answer=success_res.answer,
+            failure_answer=failure_res.answer,
+        )
+        item = Item(
+            id=Item.make_id(e.title, e.lesson),
+            title=e.title[:100],
+            desc=f"Contrastive: {task[:40]}",
+            content=e.lesson,
+            src='contrastive',
+            tags=['matts'],
+        )
+        if verbose:
+            print(f"  [extract:contrastive] title: {e.title}")
+            print(f"  [extract:contrastive] lesson: {e.lesson[:200]}...")
+        return [item]
+    except Exception as ex:
+        print(f"  Contrastive extraction failed: {ex}")
+        return []
+
+
+def extract_common_patterns(task: str, successes: list[Result],
+                            verbose: bool = False, temperature: float = 1.0) -> list[Item]:
+    """Extract common patterns from multiple successful trajectories.
+
+    Args:
+        task: The original question/task
+        successes: List of successful Result objects
+        verbose: If True, print LLM inputs/outputs
+        temperature: LLM temperature for extraction
+
+    Returns:
+        List of pattern Items
+    """
+    if verbose:
+        print(f"  [extract:pattern] analyzing {len(successes)} successes")
+
+    ext = dspy.Predict(PatternExtractor, temperature=temperature)
+    try:
+        trajs = "\n---\n".join([format_trajectory(r.trajectory) for r in successes])
+        e = ext(task=task, trajectories=trajs)
+        item = Item(
+            id=Item.make_id(e.title, e.pattern),
+            title=e.title[:100],
+            desc=f"Pattern: {task[:40]}",
+            content=e.pattern,
+            src='pattern',
+            tags=['matts'],
+        )
+        if verbose:
+            print(f"  [extract:pattern] title: {e.title}")
+            print(f"  [extract:pattern] pattern: {e.pattern[:200]}...")
+        return [item]
+    except Exception as ex:
+        print(f"  Pattern extraction failed: {ex}")
+        return []
+
+
+def run_matts_parallel(
+    task: str,
+    ont: str,
+    mem: MemStore,
+    cfg: Cfg = None,
+    k: int = 3,
+    verbose: bool = False,
+    dedup: bool = True,
+) -> tuple[Result, list[Item]]:
+    """Run k parallel trajectories, select best, extract contrastively (MaTTS).
+
+    Memory-aware Test-Time Scaling: runs multiple rollouts in parallel,
+    judges each, selects the best, and extracts contrastive lessons from
+    comparing successes and failures.
+
+    Args:
+        task: The question/task to run
+        ont: Path to ontology file
+        mem: MemStore instance for procedural memory
+        cfg: Layer configuration
+        k: Number of parallel rollouts (default: 3)
+        verbose: If True, print detailed output
+        dedup: If True, deduplicate extracted items
+
+    Returns:
+        Tuple of (best Result, list of extracted Items)
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    if cfg is None:
+        cfg = Cfg()
+
+    if verbose:
+        print(f"  [matts] Running {k} parallel rollouts...")
+
+    # 1. Run k rollouts in parallel
+    def run_one(_):
+        return run(task, ont, cfg, mem)
+
+    with ThreadPoolExecutor(max_workers=k) as ex:
+        results = list(ex.map(run_one, range(k)))
+
+    if verbose:
+        print(f"  [matts] Completed {len(results)} rollouts")
+
+    # 2. Judge all results
+    judgments = [judge(res, task, verbose=False) for res in results]
+
+    if verbose:
+        success_count = sum(1 for j in judgments if j['success'])
+        print(f"  [matts] Judgments: {success_count}/{k} successful")
+
+    # 3. Categorize results
+    successes = [(i, results[i]) for i, j in enumerate(judgments) if j['success']]
+    failures = [(i, results[i]) for i, j in enumerate(judgments) if not j['success']]
+
+    # 4. Select best result (prefer success, then lowest iterations)
+    if successes:
+        best_idx = min(successes, key=lambda x: x[1].iters)[0]
+    else:
+        # All failed - pick one with most iterations (tried hardest)
+        best_idx = max(range(len(results)), key=lambda i: results[i].iters)
+
+    best_result = results[best_idx]
+    best_judgment = judgments[best_idx]
+
+    if verbose:
+        status = '✓' if best_judgment['success'] else '✗'
+        print(f"  [matts] Selected result #{best_idx}: {status} ({best_result.iters} iters)")
+
+    # 5. Extract items
+    items = []
+
+    # 5a. Contrastive extraction (success vs failure)
+    if successes and failures:
+        success_res = successes[0][1]
+        failure_res = failures[0][1]
+        items.extend(contrastive_extract(task, success_res, failure_res, verbose))
+
+    # 5b. Pattern extraction (multiple successes)
+    if len(successes) >= 2:
+        success_results = [r for _, r in successes]
+        items.extend(extract_common_patterns(task, success_results, verbose))
+
+    # 5c. Standard extraction from best result
+    items.extend(extract(best_result, task, best_judgment, verbose))
+
+    # 6. Consolidate with deduplication
+    if items:
+        added = mem.consolidate(items, dedup=dedup)
+        if verbose:
+            print(f"  [matts] Consolidated {len(added)}/{len(items)} items")
+
+    return best_result, items
+
+
 def run_closed_loop(
     tasks: list[dict],
     ont: str,
@@ -167,6 +395,7 @@ def run_closed_loop(
     cfg: Cfg = None,
     do_extract: bool = True,
     verbose: bool = False,
+    dedup: bool = True,
 ) -> list[dict]:
     """Run E9-E12 closed-loop learning.
 
@@ -179,6 +408,7 @@ def run_closed_loop(
         cfg: Layer configuration (defaults to L2-only if None)
         do_extract: If True, extract procedures from trajectories
         verbose: If True, print detailed LLM inputs/outputs
+        dedup: If True, deduplicate during consolidation (default: True)
 
     Returns:
         List of result dicts for each task with keys:
@@ -214,7 +444,7 @@ def run_closed_loop(
         if do_extract:
             items = extract(res, t['query'], j, verbose=verbose)
             if items:
-                added_ids = mem.consolidate(items)
+                added_ids = mem.consolidate(items, dedup=dedup)
                 record['items'] = items
                 for item in items:
                     polarity = f"[{item.src}]"
@@ -318,6 +548,13 @@ if __name__ == '__main__':
     parser.add_argument('--load-mem', metavar='FILE', help='Load memory from JSON file')
     parser.add_argument('--save-mem', metavar='FILE', help='Save memory to JSON file')
 
+    # MaTTS options
+    parser.add_argument('--matts', action='store_true', help='Enable MaTTS parallel scaling')
+    parser.add_argument('--matts-k', type=int, default=3, help='Number of MaTTS rollouts (default: 3)')
+
+    # Deduplication control
+    parser.add_argument('--no-dedup', action='store_true', help='Disable deduplication during consolidation')
+
     args = parser.parse_args()
 
     if args.test:
@@ -348,6 +585,11 @@ if __name__ == '__main__':
         if cfg.l3.on: active.append('L3:guide')
         print(f"Active layers: {', '.join(active) if active else 'L2:memory (default)'}")
 
+        # Dedup flag
+        dedup = not args.no_dedup
+        if not dedup:
+            print("Deduplication: DISABLED")
+
         # Full closed-loop run
         tasks = [
             {'id': 'entity_lookup', 'query': 'What is Activity?'},
@@ -355,10 +597,35 @@ if __name__ == '__main__':
             {'id': 'hierarchy', 'query': 'What are the subclasses of Entity?'},
         ]
 
-        results = run_closed_loop(tasks, args.ont, mem, cfg, args.extract, verbose=args.verbose)
+        if args.matts:
+            # MaTTS mode: run each task with parallel rollouts
+            print(f"MaTTS mode: {args.matts_k} rollouts per task")
+            results = []
+            for t in tasks:
+                print(f"\nTask: {t['id']}")
+                res, items = run_matts_parallel(
+                    t['query'], args.ont, mem, cfg,
+                    k=args.matts_k, verbose=args.verbose, dedup=dedup
+                )
+                status = '✓' if res.converged else '✗'
+                print(f"  {status} Answer: {res.answer[:80]}...")
+                for item in items:
+                    print(f"  [{item.src}] Extracted: {item.title[:50]}")
+                results.append({
+                    'task_id': t['id'],
+                    'query': t['query'],
+                    'converged': res.converged,
+                    'answer': res.answer,
+                    'sparql': res.sparql,
+                    'items': items,
+                })
+        else:
+            # Standard closed-loop mode
+            results = run_closed_loop(tasks, args.ont, mem, cfg, args.extract,
+                                      verbose=args.verbose, dedup=dedup)
 
         # Save memory if specified
-        save_path = args.save_mem or ('experiments/reasoningbank/results/phase1_memory.json' if args.extract else None)
+        save_path = args.save_mem or ('experiments/reasoningbank/results/phase1_memory.json' if args.extract or args.matts else None)
         if save_path:
             mem.save(save_path)
             print(f"\nMemory saved: {len(mem.all())} items → {save_path}")
@@ -366,5 +633,5 @@ if __name__ == '__main__':
         # Print summary
         print(f"\n=== Results Summary ===")
         for r in results:
-            status = '✓' if r['judgment']['success'] else '✗'
+            status = '✓' if r.get('judgment', {}).get('success', r.get('converged', False)) else '✗'
             print(f"{status} {r['task_id']}: {len(r['items'])} items extracted")

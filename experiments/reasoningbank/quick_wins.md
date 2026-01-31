@@ -32,6 +32,16 @@ Each memory item has three components:
 - **Description**: One-sentence summary
 - **Content**: Distilled reasoning steps, decision rationales, operational insights
 
+### 5. Memory Item Sources (src field)
+
+| Source | Description | Extraction Method |
+|--------|-------------|-------------------|
+| `success` | Transferable strategies from successful trajectories | `SuccessExtractor` |
+| `failure` | Lessons learned from failed trajectories | `FailureExtractor` |
+| `seed` | Pre-seeded procedures (manually curated) | Manual |
+| `contrastive` | Lessons from comparing success vs failure | `ContrastiveExtractor` (MaTTS) |
+| `pattern` | Common patterns across multiple successes | `PatternExtractor` (MaTTS) |
+
 ---
 
 ## RLM-Style Memory Access (Handles, Not Payloads)
@@ -471,8 +481,12 @@ After implementation:
 - [x] `judge()` returns binary success/failure with reason
 - [x] `extract()` produces 1-3 `Item` objects with title/description/content
 - [x] `extract()` uses different prompts for success vs failure
-- [x] `consolidate()` simply appends (no dedup/merge)
+- [x] `extract()` receives full trajectory (not just answer/SPARQL)
+- [x] `extract()` uses temperature=1.0 for diversity (per paper)
+- [x] `consolidate()` supports deduplication (default on, `--no-dedup` to disable)
 - [x] Integration test: single task → judge → extract → consolidate
+- [x] MaTTS: parallel rollouts → judge all → select best → contrastive extraction
+- [x] CLI flags for all new features
 
 ---
 
@@ -484,14 +498,39 @@ All four steps implemented and tested:
 
 | Component | File | Status |
 |-----------|------|--------|
-| `TrajectoryJudge` signature | `run/phase1.py:22-29` | Done |
-| `SuccessExtractor` signature | `run/phase1.py:32-39` | Done |
-| `FailureExtractor` signature | `run/phase1.py:42-50` | Done |
-| `judge()` function | `run/phase1.py:53-75` | Done |
-| `extract()` function | `run/phase1.py:78-136` | Done |
-| `consolidate()` method | `core/mem.py:63-79` | Done |
-| `run_closed_loop()` integration | `run/phase1.py:138-167` | Done |
-| `test_judge_extract()` mock test | `run/phase1.py:170-220` | Done |
+| `TrajectoryJudge` signature | `run/phase1.py` | Done |
+| `SuccessExtractor` signature | `run/phase1.py` | Done (+ trajectory input) |
+| `FailureExtractor` signature | `run/phase1.py` | Done (+ trajectory input) |
+| `judge()` function | `run/phase1.py` | Done |
+| `extract()` function | `run/phase1.py` | Done (+ trajectory, temperature=1.0) |
+| `consolidate()` method | `core/mem.py` | Done (+ dedup parameter) |
+| `run_closed_loop()` integration | `run/phase1.py` | Done (+ dedup parameter) |
+| `test_judge_extract()` mock test | `run/phase1.py` | Done |
+
+### Paper Alignment Updates (2026-01-31)
+
+Additional components implemented to align with ReasoningBank paper methodology:
+
+| Component | File | Status |
+|-----------|------|--------|
+| `format_trajectory()` helper | `run/phase1.py` | Done |
+| `title_similarity()` | `core/mem.py` | Done |
+| `content_jaccard()` | `core/mem.py` | Done |
+| `find_similar()` method | `core/mem.py` | Done |
+| `ContrastiveExtractor` signature | `run/phase1.py` | Done |
+| `PatternExtractor` signature | `run/phase1.py` | Done |
+| `contrastive_extract()` | `run/phase1.py` | Done |
+| `extract_common_patterns()` | `run/phase1.py` | Done |
+| `run_matts_parallel()` | `run/phase1.py` | Done |
+| `Result.trajectory` field | `run/rlm.py` | Done |
+| `Result.thinking` field | `run/rlm.py` | Done |
+
+**Key Changes**:
+
+1. **Trajectory Access**: Extractors now receive full execution trajectory, not just final answer/SPARQL
+2. **Extraction Temperature**: Set to 1.0 per paper (diverse extractions)
+3. **Deduplication**: Similarity-based dedup added to `consolidate()` (default on, `--no-dedup` to disable)
+4. **MaTTS**: Memory-aware Test-Time Scaling with parallel rollouts + contrastive extraction
 
 ### Test Results
 
@@ -526,19 +565,72 @@ Memory store: 3 items
 python -m experiments.reasoningbank.run.phase1 --test -v
 
 # Full pipeline (with L0 sense card)
-# Currently requires modifying cfg in code - see next steps
-python -m experiments.reasoningbank.run.phase1 --ont ontology/prov.ttl --extract -v
+python -m experiments.reasoningbank.run.phase1 --ont ontology/prov.ttl --l0 --extract -v
+
+# With L0 + L1 layers
+python -m experiments.reasoningbank.run.phase1 --ont ontology/prov.ttl --l0 --l1 --extract -v
+
+# MaTTS mode (3 parallel rollouts per task)
+python -m experiments.reasoningbank.run.phase1 --ont ontology/prov.ttl --l0 --matts --matts-k 3
+
+# Disable deduplication (for comparison experiments)
+python -m experiments.reasoningbank.run.phase1 --ont ontology/prov.ttl --l0 --extract --no-dedup
+
+# Save/load memory across runs
+python -m experiments.reasoningbank.run.phase1 --ont ontology/prov.ttl --l0 --extract \
+    --load-mem results/prev_memory.json \
+    --save-mem results/new_memory.json
+
+# UniProt endpoint
+python -m experiments.reasoningbank.run.phase1_uniprot --ont ontology/uniprot --l0 --extract
 ```
+
+### CLI Arguments
+
+| Flag | Description |
+|------|-------------|
+| `--ont PATH` | Ontology path (default: `ontology/prov.ttl`) |
+| `--l0` | Enable L0 sense card (~600 chars) |
+| `--l1` | Enable L1 schema constraints (~1000 chars) |
+| `--l3` | Enable L3 guide summary (~1000 chars) |
+| `--extract` | Enable procedure extraction |
+| `--matts` | Enable MaTTS parallel scaling |
+| `--matts-k N` | Number of MaTTS rollouts (default: 3) |
+| `--no-dedup` | Disable deduplication during consolidation |
+| `--load-mem FILE` | Load memory from JSON file |
+| `--save-mem FILE` | Save memory to JSON file |
+| `-v, --verbose` | Verbose output |
+| `--test` | Run mock test (no RLM calls) |
 
 ---
 
-## Deferred (Per Paper's Approach)
+## Deferred vs Implemented
 
-The following are explicitly deferred based on the paper's design choices:
+### Now Implemented
 
-1. **Complex Consolidation** (merge/dedupe): Paper says "minimal consolidation strategy"
-2. **Forgetting/Eviction**: Not implemented in paper, mentioned as future work
-3. **MaTTS (Test-Time Scaling)**: Phase 2 feature after basic loop works
+The following were originally deferred but are now implemented:
+
+1. **✅ Deduplication**: Similarity-based dedup via `title_similarity()` + `content_jaccard()`
+   - Title threshold: 0.8, Content threshold: 0.75
+   - Same polarity required (success vs failure don't dedupe each other)
+   - Controlled via `--no-dedup` CLI flag
+
+2. **✅ MaTTS (Test-Time Scaling)**: Parallel rollouts with contrastive extraction
+   - `run_matts_parallel(task, ont, mem, cfg, k=3)` runs k parallel trajectories
+   - Selects best result (prefer success, lowest iterations)
+   - Contrastive extraction: compares success vs failure trajectories
+   - Pattern extraction: finds common patterns across multiple successes
+   - Controlled via `--matts` and `--matts-k` CLI flags
+
+3. **✅ Trajectory Access**: Full execution trajectory passed to extractors
+   - `Result.trajectory`: List of {code, output} execution steps
+   - `format_trajectory()`: Formats trajectory for prompt injection
+   - Extractors now see intermediate reasoning, not just final answer
+
+### Still Deferred
+
+1. **Forgetting/Eviction**: Not implemented in paper, mentioned as future work
+2. **Complex Merging**: No semantic merging of similar items (dedup just skips duplicates)
 
 ### Near-Term Upgrades (After Phase 1 Works)
 
@@ -563,22 +655,28 @@ The paper achieved strong results (up to 34.2% improvement) with this minimal ap
 
 ## Next Steps
 
-### Immediate (Before More Experiments)
+### Completed ✅
 
-1. **Add `--l0` flag to CLI** - Enable L0 sense card from command line
-2. **Add `--cfg` parameter to `run_closed_loop()`** - Allow passing layer configuration
-3. **Persist memory across runs** - Load/save memory to enable cumulative learning
+1. **~~Add `--l0` flag to CLI~~** - Done
+2. **~~Add `--cfg` parameter to `run_closed_loop()`~~** - Done via CLI flags
+3. **~~Persist memory across runs~~** - Done via `--load-mem` / `--save-mem`
+4. **~~MaTTS parallel scaling~~** - Done via `--matts` / `--matts-k`
+5. **~~Deduplication~~** - Done (default on, `--no-dedup` to disable)
+6. **~~Trajectory access for extractors~~** - Done
 
 ### Near-Term
 
 1. **Run multi-task closed-loop** - Process several tasks, observe memory growth
 2. **Test memory retrieval** - Verify extracted procedures help subsequent queries
-3. **Add L1 schema layer** - Test if schema constraints improve grounding further
+3. **Deduplication effectiveness** - Compare E9a results with/without dedup
+4. **MaTTS evaluation** - Compare single rollout vs k=3 rollouts
 
 ### Experiments to Run
 
-| Experiment | Question | Layers |
-|------------|----------|--------|
-| E9a | Does memory accumulation help? | L0 + L2 (memory) |
-| E9b | L0 vs L0+L1 grounding | Compare sense card alone vs with schema |
-| E9c | Success vs failure memory | Retrieve only success, only failure, or both |
+| Experiment | Question | Layers | Status |
+|------------|----------|--------|--------|
+| E9a | Does memory accumulation help? | L0 + L2 (memory) | ✅ Run |
+| E9b | L0 vs L0+L1 grounding | Compare sense card alone vs with schema | Planned |
+| E9c | Success vs failure memory | Retrieve only success, only failure, or both | Planned |
+| E12 | MaTTS effectiveness | L0 + MaTTS (k=3) vs single rollout | Ready |
+| E13 | Dedup effectiveness | Compare with/without deduplication | Ready |

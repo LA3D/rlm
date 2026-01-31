@@ -24,16 +24,33 @@ This project uses **uv** for package management with a **shared environment** at
 # Activate the shared uv environment
 source ~/uvws/.venv/bin/activate
 
-# Install/update project dependencies from settings.ini
+# Install/update project dependencies (defined in pyproject.toml)
 uv pip install fastcore claudette dialoghelper mistletoe rdflib sparqlx
 
 # Or install in editable mode
 uv pip install -e .
 ```
 
-**Adding dependencies**: Update `settings.ini` `requirements` field, then run `uv pip install <package>` or `uv pip install -e .`
+**Adding dependencies**: Update `pyproject.toml` `dependencies` field (under `[project]`), then run `uv pip install <package>` or `uv pip install -e .`
+
+**nbdev configuration**: Project settings are in `pyproject.toml` under `[tool.nbdev]` (nbdev 2.4+ uses pyproject.toml instead of settings.ini)
 
 **Do not** create new venvs with `python -m venv` or similar.
+
+### System Dependencies: Deno
+
+DSPy's RLM module requires **Deno** for sandboxed code execution (via Pyodide/WASM). Install via Homebrew:
+
+```bash
+brew install deno
+```
+
+**Why Deno?** DSPy's `PythonInterpreter` uses Deno to run sandboxed Python code via Pyodide (Python compiled to WebAssembly), providing isolated code execution without Docker containers.
+
+**Verify installation:**
+```bash
+deno --version
+```
 
 ## Project Structure
 
@@ -70,8 +87,8 @@ rlm/
 ├── evals/                  # Evaluation framework
 ├── ontology/               # RDF/OWL ontologies (32 files)
 ├── tests/                  # Unit/integration/live tests
-├── settings.ini            # nbdev configuration
-└── pyproject.toml          # Build configuration
+├── pyproject.toml          # Build configuration + nbdev settings
+└── nbs/nbdev.yml           # Quarto config (auto-generated)
 ```
 
 ## Development Workflow
@@ -79,8 +96,12 @@ rlm/
 ### Setup (First Time)
 
 ```bash
+# 1. Install Deno (required for DSPy RLM sandboxing)
+brew install deno
+
+# 2. Activate uv environment and install Python dependencies
 source ~/uvws/.venv/bin/activate
-uv pip install fastcore claudette dialoghelper mistletoe rdflib sparqlx
+uv pip install fastcore claudette dialoghelper mistletoe rdflib sparqlx dspy-ai
 ```
 
 ### Working with nbdev Notebooks
@@ -90,7 +111,7 @@ uv pip install fastcore claudette dialoghelper mistletoe rdflib sparqlx
 **DO NOT EDIT**: `rlm/*.py` (auto-generated from notebooks)
 **EXCEPTION**: `rlm/_rlmpaper_compat.py` (manually maintained protocol artifacts)
 
-**DO EDIT**: `nbs/*.ipynb`, `docs/*.md`, `settings.ini`
+**DO EDIT**: `nbs/*.ipynb`, `docs/*.md`, `pyproject.toml`
 
 #### nbdev Commands
 
@@ -309,7 +330,7 @@ Instead, we:
 
 ### Key Dependencies
 
-From `settings.ini`:
+From `pyproject.toml` (`[project.dependencies]`):
 - `fastcore` - Fast.ai utilities
 - `claudette` - Claude API wrapper (legacy backend)
 - `dspy-ai` - DSPy framework (v2 backend)
