@@ -17,6 +17,7 @@ from experiments.reasoningbank.core.instrument import Metrics, Instrumented
 from experiments.reasoningbank.ctx.builder import Cfg
 from experiments.reasoningbank.tools.sparql import SPARQLTools, create_tools
 from experiments.reasoningbank.packers import l0_sense, l1_schema, l2_mem, l3_guide
+from experiments.reasoningbank.ctx.cache import build_with_cache
 
 # Configure DSPy with Anthropic model if not already configured
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
@@ -66,18 +67,15 @@ def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None
         print(f"Warning: No core ontology found in {ont_path}")
         return ""
 
-    # Load ontology for L0/L1
-    g = Graph().parse(str(ont_file))
-
-    # L0: Sense card
+    # L0: Sense card (cached)
     if cfg.l0.on:
-        sense_card = l0_sense.pack(g, cfg.l0.budget)
+        sense_card = build_with_cache(str(ont_file), 'l0', cfg.l0.budget, l0_sense.pack)
         if sense_card:
             parts.append(sense_card)
 
-    # L1: Schema constraints
+    # L1: Schema constraints (cached)
     if cfg.l1.on:
-        constraints = l1_schema.pack(g, cfg.l1.budget)
+        constraints = build_with_cache(str(ont_file), 'l1', cfg.l1.budget, l1_schema.pack)
         if constraints:
             parts.append(constraints)
 

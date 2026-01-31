@@ -50,9 +50,9 @@ def run(
     # Load graph
     g = Graph().parse(graph_path)
 
-    # Build context
+    # Build context (with caching for L0/L1)
     builder = Builder(cfg)
-    ctx = builder.build(g, task, mem)
+    ctx = builder.build(g, task, mem, g_path=graph_path)
 
     # Build tools
     store = Store()

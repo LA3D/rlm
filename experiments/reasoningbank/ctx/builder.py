@@ -13,6 +13,7 @@ from experiments.reasoningbank.core.blob import Store, Ref
 from experiments.reasoningbank.core.mem import MemStore
 from experiments.reasoningbank.core import graph as G
 from experiments.reasoningbank.packers import l0_sense, l1_schema, l2_mem, l3_guide
+from experiments.reasoningbank.ctx.cache import build_with_cache
 
 @dataclass
 class Layer:
@@ -33,11 +34,33 @@ class Builder:
     "Assembles layer cake context for injection."
     def __init__(self, cfg:Cfg): self.cfg = cfg
 
-    def build(self, g:Graph, task:str, mem:MemStore=None) -> str:
-        "Build context string from enabled layers."
+    def build(self, g: Graph, task: str, mem: MemStore = None, g_path: str = None) -> str:
+        """Build context string from enabled layers.
+
+        Args:
+            g: RDF graph
+            task: Query string (for L2 retrieval)
+            mem: Memory store (for L2)
+            g_path: Optional path to graph file (enables L0/L1 caching)
+
+        Returns:
+            Assembled context string
+        """
         parts = []
-        if self.cfg.l0.on: parts.append(l0_sense.pack(g, self.cfg.l0.budget))
-        if self.cfg.l1.on: parts.append(l1_schema.pack(g, self.cfg.l1.budget))
+
+        # L0/L1 with optional caching
+        if self.cfg.l0.on:
+            if g_path:
+                parts.append(build_with_cache(g_path, 'l0', self.cfg.l0.budget, l0_sense.pack))
+            else:
+                parts.append(l0_sense.pack(g, self.cfg.l0.budget))
+
+        if self.cfg.l1.on:
+            if g_path:
+                parts.append(build_with_cache(g_path, 'l1', self.cfg.l1.budget, l1_schema.pack))
+            else:
+                parts.append(l1_schema.pack(g, self.cfg.l1.budget))
+
         if self.cfg.l2.on and mem:
             # Top-K success + top-K failure retrieval
             k_success, k_failure = 2, 1  # Configurable defaults
