@@ -1,11 +1,14 @@
 """SPARQL tools following ReasoningBank constraints.
 
 Key design principles (from rlm_notes.md):
-1. Return handles (Ref), not payloads - REPL sees metadata, not 400K chars
+1. Return serializable handle dicts, not Ref objects - survives DSPy sandbox serialization
 2. Bounded returns - all tools enforce caps
 3. No stdout bloat - return dicts/JSON, don't print
 4. Two-phase retrieval - stats/search first, get content on demand
 5. DSPy RLM signature - `lambda args, kwargs:` for tool wrappers
+
+Handle dict format: {'key': str, 'dtype': str, 'size': int, 'rows': int, 'preview': str, 'source': str}
+Use sparql_peek(result['key']) to inspect handle contents.
 
 Usage:
     from experiments.reasoningbank.tools.sparql import SPARQLTools
@@ -48,6 +51,17 @@ class Ref:
     def __repr__(self):
         src = f" from {self.source}" if self.source else ""
         return f"Ref({self.key!r}, {self.dtype}, {self.rows} rows, {self.sz} chars{src})"
+
+    def to_handle(self) -> dict:
+        """Convert to serializable handle dict for DSPy sandbox."""
+        return {
+            'key': self.key,
+            'dtype': self.dtype,
+            'size': self.sz,
+            'rows': self.rows,
+            'preview': self.prev,
+            'source': self.source,
+        }
 
 
 class ResultStore:
@@ -197,12 +211,11 @@ class SPARQLTools:
 
     # === Bounded Tool API ===
 
-    def sparql_query(self, query: str, limit: int = None) -> Ref:
-        """Execute SELECT query, return handle to results (capped at limit).
+    def sparql_query(self, query: str, limit: int = None) -> dict:
+        """Execute SELECT query, return handle dict. Use sparql_peek(result['key']) to inspect.
 
         This tool queries the {name} database ({authority}).
         Results are database records from an authoritative source.
-        Use sparql_peek/sparql_slice to inspect results.
         """.format(name=self.name, authority=self.authority)
         limit = limit or self.default_limit
 
@@ -218,7 +231,7 @@ class SPARQLTools:
         else:
             preview = str(rows[0]) if rows else "empty"
 
-        return self.store.put(rows, 'results', preview)
+        return self.store.put(rows, 'results', preview).to_handle()
 
     def sparql_peek(self, ref_key: str, n: int = 5) -> list[dict]:
         """Peek at first n rows of result (bounded to 20 max)."""
@@ -233,8 +246,8 @@ class SPARQLTools:
         """Get metadata about stored result including source attribution."""
         return self.store.stats(ref_key)
 
-    def sparql_describe(self, uri: str, limit: int = 20) -> Ref:
-        """Describe a URI as handle. Use sparql_peek to inspect.
+    def sparql_describe(self, uri: str, limit: int = 20) -> dict:
+        """Describe a URI as handle dict. Use sparql_peek(result['key']) to inspect.
 
         Queries {name} for properties of the given URI.
         """.format(name=self.name)
@@ -261,10 +274,10 @@ class SPARQLTools:
 
         content = '\n'.join(lines)
         preview = f"Description of {uri.split('/')[-1]} from {self.name}"
-        return self.store.put(content, 'describe', preview)
+        return self.store.put(content, 'describe', preview).to_handle()
 
-    def sparql_classes(self, limit: int = 50) -> Ref:
-        """List available classes as handle. Use sparql_peek to inspect.
+    def sparql_classes(self, limit: int = 50) -> dict:
+        """List available classes as handle dict. Use sparql_peek(result['key']) to inspect.
 
         Returns handle to classes defined in {name} database.
         """.format(name=self.name)
@@ -279,10 +292,10 @@ class SPARQLTools:
         classes = [r.get('class', '') for r in rows if 'error' not in r]
         content = '\n'.join(classes)
         preview = f"{len(classes)} classes from {self.name}"
-        return self.store.put(content, 'classes', preview)
+        return self.store.put(content, 'classes', preview).to_handle()
 
-    def sparql_properties(self, limit: int = 50) -> Ref:
-        """List available properties as handle. Use sparql_peek to inspect.
+    def sparql_properties(self, limit: int = 50) -> dict:
+        """List available properties as handle dict. Use sparql_peek(result['key']) to inspect.
 
         Returns handle to properties defined in {name} database.
         """.format(name=self.name)
@@ -301,10 +314,10 @@ class SPARQLTools:
         props = [r.get('prop', '') for r in rows if 'error' not in r]
         content = '\n'.join(props)
         preview = f"{len(props)} properties from {self.name}"
-        return self.store.put(content, 'properties', preview)
+        return self.store.put(content, 'properties', preview).to_handle()
 
-    def sparql_find(self, pattern: str, limit: int = 20) -> Ref:
-        """Find URIs matching pattern as handle. Use sparql_peek to inspect.
+    def sparql_find(self, pattern: str, limit: int = 20) -> dict:
+        """Find URIs matching pattern as handle dict. Use sparql_peek(result['key']) to inspect.
 
         Searches {name} for entities with labels containing the pattern.
         """.format(name=self.name)
@@ -323,10 +336,10 @@ class SPARQLTools:
                    for r in rows if 'error' not in r]
         content = '\n'.join(results)
         preview = f"{len(results)} matches for '{pattern}' in {self.name}"
-        return self.store.put(content, 'find', preview)
+        return self.store.put(content, 'find', preview).to_handle()
 
-    def sparql_sample(self, class_uri: str, n: int = 5) -> Ref:
-        """Get sample instances as handle. Use sparql_peek to inspect.
+    def sparql_sample(self, class_uri: str, n: int = 5) -> dict:
+        """Get sample instances as handle dict. Use sparql_peek(result['key']) to inspect.
 
         Retrieves sample instances from {name} database.
         """.format(name=self.name)
@@ -343,7 +356,7 @@ class SPARQLTools:
                      for r in rows if 'error' not in r]
         content = '\n'.join(instances)
         preview = f"{len(instances)} instances of {class_uri.split('/')[-1]} from {self.name}"
-        return self.store.put(content, 'sample', preview)
+        return self.store.put(content, 'sample', preview).to_handle()
 
     def sparql_count(self, query: str) -> dict:
         """Execute COUNT query, return single count value with attribution."""
@@ -481,12 +494,14 @@ def test_endpoint(endpoint_name: str = "uniprot"):
     info = tools.endpoint_info()
     print(f"Authority: {info['authority']}")
 
-    # Test simple query
-    ref = tools.sparql_query("SELECT ?s WHERE { ?s a owl:Class } LIMIT 5")
-    print(f"Query returned: {ref}")
+    # Test simple query - now returns dict handle
+    handle = tools.sparql_query("SELECT ?s WHERE { ?s a owl:Class } LIMIT 5")
+    print(f"Query returned: {handle}")
+    assert isinstance(handle, dict), "Should return dict handle"
+    assert 'key' in handle, "Handle should have 'key'"
 
-    # Peek at results
-    rows = tools.sparql_peek(ref.key, 3)
+    # Peek at results using handle['key']
+    rows = tools.sparql_peek(handle['key'], 3)
     print(f"First 3 rows: {rows}")
 
     return tools
