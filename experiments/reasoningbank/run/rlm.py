@@ -199,13 +199,21 @@ def run(
                                         if next_messages and len(next_messages) >= 2:
                                             if next_messages[1].get('role') == 'user':
                                                 user_content = next_messages[1].get('content', '')
-                                                # Look for the last step in REPL history
-                                                repl_pattern = r'===\s*Step\s+\d+\s*===.*?Code:.*?```python.*?```.*?Output:\s*(.*?)(?=\n===|\Z)'
-                                                repl_matches = list(re.finditer(repl_pattern, user_content, re.DOTALL | re.IGNORECASE))
-                                                if repl_matches:
-                                                    # Get the last step's output
-                                                    last_match = repl_matches[-1]
-                                                    output = last_match.group(1).strip()[:1000]  # Limit to 1000 chars
+                                                # Extract REPL history section
+                                                repl_section_match = re.search(
+                                                    r'\[\[\s*##\s*repl_history\s*##\s*\]\](.*?)\[\[\s*##',
+                                                    user_content,
+                                                    re.DOTALL
+                                                )
+                                                if repl_section_match:
+                                                    repl_history = repl_section_match.group(1)
+                                                    # Find all outputs in REPL history
+                                                    # Format: "Output (XXX chars):\n<content>"
+                                                    output_pattern = r'Output[^:]*:\s*(.*?)(?=\n===\s*Step|\Z)'
+                                                    output_matches = re.findall(output_pattern, repl_history, re.DOTALL)
+                                                    if output_matches:
+                                                        # Get the last output (most recent step)
+                                                        output = output_matches[-1].strip()[:1000]  # Limit to 1000 chars
                                 except Exception:
                                     # If output extraction fails, use default
                                     pass
