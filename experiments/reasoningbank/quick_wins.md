@@ -680,3 +680,386 @@ The paper achieved strong results (up to 34.2% improvement) with this minimal ap
 | E9c | Success vs failure memory | Retrieve only success, only failure, or both | Planned |
 | E12 | MaTTS effectiveness | L0 + MaTTS (k=3) vs single rollout | Ready |
 | E13 | Dedup effectiveness | Compare with/without deduplication | Ready |
+
+---
+
+## Known Issues
+
+### Malformed Output: Handles vs Data (2026-01-31)
+
+**Problem**: Agent trajectory shows character-by-character iteration instead of actual data:
+
+```
+Step 3:
+```python
+classes = g_classes(g)
+for c in classes:
+    print(c)
+```
+→ R
+  e
+  f
+  (
+  '
+  ...
+```
+
+**Root Cause**: The `g_classes()` function returns a `Ref` object (handle), not actual data. When the agent tries to iterate over it, Python throws a `TypeError` (Ref is not iterable). DSPy RLM catches this error and stringifies the Ref object as part of the error message. The agent code then iterates over that string representation character-by-character.
+
+**Call chain**:
+1. Agent: `for c in g_classes(g):`
+2. Python: `TypeError: 'Ref' object is not iterable`
+3. DSPy RLM: Catches error, formats as string including `str(classes)` → `"Ref('abc', classes, 120 chars)"`
+4. Agent (next iteration): Gets error message, tries to parse it, iterates over the string
+
+**Impact**: Pollutes trajectory with garbage, wastes iterations, confuses extractors.
+
+### Solution Options
+
+#### Option 1: Return Actual Data Instead of Refs (Quick Fix)
+
+**Location**: `experiments/reasoningbank/core/graph.py`
+
+**Change**:
+```python
+# Before (returns handle)
+def g_classes(ref: Ref, limit: int = 50) -> Ref:
+    g = _graphs[ref.key]
+    classes = [str(c) for c in list(g.subjects(RDF.type, OWL.Class))[:limit]]
+    content = '\n'.join(classes)
+    return _store.put(content, 'classes')  # Returns Ref
+
+# After (returns list)
+def g_classes(ref: Ref, limit: int = 50) -> list[str]:
+    g = _graphs[ref.key]
+    return [str(c) for c in list(g.subjects(RDF.type, OWL.Class))[:limit]]
+```
+
+**Pros**: Simple, immediate fix
+**Cons**: Violates "handles not dumps" principle, may cause context bloat for large results
+
+**Affected functions**: `g_classes()`, `g_props()`, `g_search()`, `g_sparql()`, and other functions returning `Ref`
+
+---
+
+#### Option 2: Fix DSPy RLM Error Handling (Complex)
+
+**Goal**: Make DSPy RLM return a clean, parseable error when code execution fails, rather than stringifying arbitrary objects.
+
+**Investigation Required**:
+1. Understand DSPy RLM's `PythonInterpreter` error handling
+2. Find where TypeErrors are caught and formatted
+3. Modify to return structured error without stringified objects
+
+**Estimated Complexity**: High
+- Requires understanding DSPy internals
+- May need to subclass or monkey-patch DSPy's REPL
+- Risk of breaking other error handling
+
+**Benefits**: Preserves "handles not dumps" pattern, cleaner error messages
+
+---
+
+#### Option 3: Make Ref Iterable (Partial Solution)
+
+**Location**: `experiments/reasoningbank/core/blob.py`
+
+**Change**:
+```python
+@dataclass
+class Ref:
+    key: str
+    dtype: str
+    sz: int
+    prev: str
+
+    def __iter__(self):
+        """Yield lines from stored content."""
+        content = _blobs[self.key]
+        return iter(content.split('\n'))
+
+    def __len__(self):
+        """Return line count."""
+        content = _blobs[self.key]
+        return len(content.split('\n'))
+```
+
+**Pros**: Allows iteration over handles without full dump
+**Cons**:
+- Still exposes full content (defeats purpose of handles)
+- May encourage unbounded iteration
+- Doesn't fix the underlying error handling issue
+
+---
+
+### Recommendation
+
+**Short-term**: Option 1 (return actual data) for `g_classes()` only
+- Classes are small (typically <100 URIs)
+- Iterating over classes is a common pattern
+- Other large-result functions keep returning Refs
+
+**Medium-term**: Option 2 (fix DSPy RLM error handling)
+- Cleaner architecture
+- Preserves progressive disclosure
+- Better error messages for all cases
+
+**Current Status**: INVESTIGATING (see Option 2 Investigation below)
+
+---
+
+## Option 2 Investigation: DSPy RLM Error Handling
+
+### DSPy RLM Architecture Overview
+
+DSPy RLM uses a sandboxed Python interpreter (`PythonInterpreter`) that runs code via Deno + Pyodide (WebAssembly). The key components:
+
+1. **`dspy.ReAct`** - The reasoning loop that calls code execution
+2. **`PythonInterpreter`** - Executes code in sandboxed environment
+3. **Observation formatting** - How outputs/errors get formatted back to the LLM
+
+### Files to Investigate
+
+| File | Purpose |
+|------|---------|
+| `dspy/predict/react.py` | ReAct loop, observation handling |
+| `dspy/primitives/python_interpreter.py` | Code execution, error catching |
+| `dspy/utils/sandbox.py` | Deno/Pyodide sandbox interface |
+
+### Key Questions
+
+1. Where does DSPy catch execution errors?
+2. How does it format error messages?
+3. Can we customize the error format without modifying DSPy?
+4. Can we provide a custom `PythonInterpreter` subclass?
+
+### Investigation Findings (2026-01-31)
+
+**Error Handling Chain Traced:**
+
+```
+1. Agent code: `classes = g_classes(g); for c in classes: print(c)`
+
+2. g_classes() tool called:
+   - python_interpreter.py:249-255 handles tool call
+   - result = tools["g_classes"](...)  → Returns Ref object
+   - is_json = isinstance(result, (list, dict))  → False
+   - response["result"] = str(result)  → "Ref('abc123', 'classes', 120 chars)"
+   - Sends STRING back to sandbox!
+
+3. Sandbox (runner.js):
+   - Receives tool response with result_type="string"
+   - Returns the string "Ref('abc123', 'classes', 120 chars)"
+   - Variable `classes` is now a STRING, not a Ref
+
+4. Agent code continues: `for c in classes:`
+   - Iterates over string character-by-character
+   - Outputs: R, e, f, (, ', a, b, c, ...
+```
+
+**Root Cause Identified:**
+
+The issue is **NOT** in error handling - it's in **tool result serialization**:
+
+```python
+# python_interpreter.py:252
+"result": json.dumps(result) if is_json else str(result or ""),
+```
+
+When tools return non-JSON-serializable objects (like `Ref`):
+1. `isinstance(result, (list, dict))` → False
+2. `str(result)` → String representation
+3. Sandbox receives a **string**, not the original object
+4. Agent code iterates over the string
+
+**This is expected DSPy behavior** - tools must return JSON-serializable data.
+
+### Option 2 Implementation Approaches
+
+#### Approach 2a: Custom Tool Wrapper (Recommended)
+
+Create a wrapper that converts `Ref` → data before DSPy serializes:
+
+```python
+# experiments/reasoningbank/core/tool_wrapper.py
+
+def wrap_tools_for_dspy(tools: dict, blob_store: Store) -> dict:
+    """Wrap tools to convert Ref objects to serializable data."""
+
+    def unwrap_ref(obj):
+        from experiments.reasoningbank.core.blob import Ref
+        if isinstance(obj, Ref):
+            content = blob_store.get(obj.key)
+            if obj.dtype == 'classes':
+                return content.split('\n')  # List of URIs
+            elif obj.dtype == 'sparql':
+                return {'results': content}  # Dict
+            else:
+                return content  # String
+        return obj
+
+    wrapped = {}
+    for name, fn in tools.items():
+        def make_wrapper(original_fn):
+            def wrapper(*args, **kwargs):
+                result = original_fn(*args, **kwargs)
+                return unwrap_ref(result)
+            wrapper.__name__ = original_fn.__name__
+            wrapper.__doc__ = original_fn.__doc__
+            return wrapper
+        wrapped[name] = make_wrapper(fn)
+
+    return wrapped
+```
+
+**Integration:**
+```python
+# experiments/reasoningbank/run/rlm.py
+tools = builder.tools(store, graph_path)
+tools = wrap_tools_for_dspy(tools, store)  # <-- Add this
+inst = Instrumented(tools)
+```
+
+**Pros:**
+- Simple, localized change
+- Works with existing DSPy infrastructure
+- Preserves "handles not dumps" pattern in our code (Ref still used internally)
+
+**Cons:**
+- Must remember to wrap tools
+- Data is fully serialized when crossing sandbox boundary
+
+**Estimated effort:** ~30 LOC, 1 hour
+
+---
+
+#### Approach 2b: Custom Interpreter Subclass
+
+Subclass `PythonInterpreter` to override `_handle_tool_call`:
+
+```python
+class RefAwarePythonInterpreter(PythonInterpreter):
+    """Interpreter that converts Ref objects in tool results."""
+
+    def __init__(self, blob_store: Store, **kwargs):
+        super().__init__(**kwargs)
+        self._blob_store = blob_store
+
+    def _handle_tool_call(self, request: dict) -> None:
+        # Same as parent, but unwrap Ref before serializing
+        ...
+```
+
+**Pros:**
+- Centralized fix
+- Transparent to tool implementations
+
+**Cons:**
+- Tightly coupled to DSPy internals
+- May break with DSPy updates
+- More complex implementation
+
+**Estimated effort:** ~80 LOC, 3 hours
+
+---
+
+#### Approach 2c: Make Ref JSON-Serializable
+
+Add `__iter__` and JSON serialization to Ref:
+
+```python
+@dataclass
+class Ref:
+    key: str
+    dtype: str
+    sz: int
+    prev: str
+    _store: Store = field(repr=False)  # Reference to blob store
+
+    def __iter__(self):
+        """Yield items when iterated."""
+        content = self._store.get(self.key)
+        if self.dtype == 'classes':
+            return iter(content.split('\n'))
+        return iter([content])
+
+    def to_json(self):
+        """Serialize to JSON-compatible structure."""
+        content = self._store.get(self.key)
+        if self.dtype == 'classes':
+            return content.split('\n')
+        return content
+```
+
+**Pros:**
+- Ref becomes directly usable
+
+**Cons:**
+- Still exposes full data when serialized
+- Requires passing store reference to every Ref
+- Defeats "handles not dumps" purpose
+
+**Estimated effort:** ~40 LOC, 1.5 hours
+
+---
+
+### CORRECTED UNDERSTANDING (Per rlm_notes.md)
+
+**The Ref pattern is CORRECT for RLM!** But there's a critical issue:
+
+**Ref objects can't cross the DSPy serialization boundary.**
+
+When DSPy serializes tool returns:
+```python
+# python_interpreter.py:252
+"result": json.dumps(result) if is_json else str(result or ""),
+```
+
+A `Ref` becomes the **string** `"Ref('classes_0', classes, 120 chars)"`, not a Ref object.
+
+So even if the LLM understood to call `ctx_peek(classes.key)`:
+```python
+classes = g_classes(g)  # STRING "Ref('classes_0', classes, 120 chars)"
+content = ctx_peek(classes.key)  # ERROR: str has no attribute 'key'
+```
+
+**The handle pattern breaks at serialization.**
+
+---
+
+### REVISED RECOMMENDATION: Return Serializable Handles
+
+Per `rlm_notes.md`: "Store only IDs/paths in variables, not raw text"
+
+**Return dicts (JSON-serializable) instead of Ref objects:**
+
+```python
+def g_classes(ref:Ref, limit:int=50) -> dict:
+    "Return handle dict for class URIs. Use ctx_peek(result['key']) to inspect."
+    g = _graphs[ref.key]
+    classes = [str(c) for c in list(g.subjects(RDF.type, OWL.Class))[:limit]]
+    content = '\n'.join(classes)
+    ref = _store.put(content, 'classes')
+    return {
+        'key': ref.key,
+        'dtype': ref.dtype,
+        'size': ref.sz,
+        'preview': ref.prev[:80]
+    }
+```
+
+This:
+1. **Survives serialization** (dict is JSON)
+2. **Preserves handle pattern** (LLM sees metadata, not payload)
+3. **Enables inspection** (`ctx_peek(classes['key'])` works)
+
+**Implementation:**
+
+1. Update `experiments/reasoningbank/core/graph.py`
+   - `g_query()`, `g_sample()`, `g_classes()`, `g_props()`, `g_describe()` return dicts
+2. Update docstrings to show dict structure
+3. Test with "What is Activity?"
+
+**Estimated effort:** ~20 LOC changes, 30 minutes
+
+**Status:** READY TO IMPLEMENT
