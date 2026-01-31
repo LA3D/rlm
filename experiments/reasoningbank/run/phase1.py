@@ -164,6 +164,7 @@ def run_closed_loop(
     tasks: list[dict],
     ont: str,
     mem: MemStore,
+    cfg: Cfg = None,
     do_extract: bool = True,
     verbose: bool = False,
 ) -> list[dict]:
@@ -175,6 +176,7 @@ def run_closed_loop(
         tasks: List of dicts with 'id' and 'query' keys
         ont: Path to ontology file
         mem: MemStore instance for procedural memory
+        cfg: Layer configuration (defaults to L2-only if None)
         do_extract: If True, extract procedures from trajectories
         verbose: If True, print detailed LLM inputs/outputs
 
@@ -184,7 +186,8 @@ def run_closed_loop(
         - judgment: {success, reason}
         - items: list of extracted Item objects
     """
-    cfg = Cfg(l2=Layer(True, 2000))
+    if cfg is None:
+        cfg = Cfg(l2=Layer(True, 2000))
     results = []
 
     for t in tasks:
@@ -305,26 +308,60 @@ if __name__ == '__main__':
     parser.add_argument('--extract', action='store_true', help='Enable extraction')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
     parser.add_argument('--test', action='store_true', help='Run mock test (no RLM calls)')
+
+    # Layer configuration
+    parser.add_argument('--l0', action='store_true', help='Enable L0 sense card (~600 chars)')
+    parser.add_argument('--l1', action='store_true', help='Enable L1 schema constraints (~1000 chars)')
+    parser.add_argument('--l3', action='store_true', help='Enable L3 guide summary (~1000 chars)')
+
+    # Memory persistence
+    parser.add_argument('--load-mem', metavar='FILE', help='Load memory from JSON file')
+    parser.add_argument('--save-mem', metavar='FILE', help='Save memory to JSON file')
+
     args = parser.parse_args()
 
     if args.test:
         # Test judge/extract with mock data (cheap, no RLM)
         test_judge_extract(verbose=args.verbose)
     else:
-        # Full closed-loop run
+        # Initialize memory
         mem = MemStore()
+
+        # Load existing memory if specified
+        if args.load_mem:
+            mem.load(args.load_mem)
+            print(f"Loaded {len(mem.all())} items from {args.load_mem}")
+
+        # Build layer configuration from CLI args
+        cfg = Cfg(
+            l0=Layer(args.l0, 600),
+            l1=Layer(args.l1, 1000),
+            l2=Layer(True, 2000),  # Always on for memory retrieval
+            l3=Layer(args.l3, 1000),
+        )
+
+        # Show active layers
+        active = []
+        if cfg.l0.on: active.append('L0:sense')
+        if cfg.l1.on: active.append('L1:schema')
+        if cfg.l2.on: active.append('L2:memory')
+        if cfg.l3.on: active.append('L3:guide')
+        print(f"Active layers: {', '.join(active) if active else 'L2:memory (default)'}")
+
+        # Full closed-loop run
         tasks = [
             {'id': 'entity_lookup', 'query': 'What is Activity?'},
             {'id': 'property_find', 'query': 'What properties does Activity have?'},
             {'id': 'hierarchy', 'query': 'What are the subclasses of Entity?'},
         ]
 
-        results = run_closed_loop(tasks, args.ont, mem, args.extract, verbose=args.verbose)
+        results = run_closed_loop(tasks, args.ont, mem, cfg, args.extract, verbose=args.verbose)
 
-        # Save memory
-        if args.extract:
-            mem.save('experiments/reasoningbank/results/phase1_memory.json')
-            print(f"\nMemory saved: {len(mem.all())} items")
+        # Save memory if specified
+        save_path = args.save_mem or ('experiments/reasoningbank/results/phase1_memory.json' if args.extract else None)
+        if save_path:
+            mem.save(save_path)
+            print(f"\nMemory saved: {len(mem.all())} items → {save_path}")
 
         # Print summary
         print(f"\n=== Results Summary ===")
