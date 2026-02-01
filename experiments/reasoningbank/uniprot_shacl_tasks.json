@@ -1,0 +1,577 @@
+[
+  {
+    "id": "001",
+    "query": "What are the species present in Bgee?",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?species WHERE {\n    ?species a up:Taxon .\n    ?species up:rank up:Species .\n}",
+    "complexity": "simple",
+    "keywords": []
+  },
+  {
+    "id": "100_uniprot_organelles_or_plasmids",
+    "query": "List the proteins encoded by a gene that is located in an organelle other than the nucleus, or on a plasmid rather than a chromosome. In these cases the gene location is stored with encodedIn properties. Note that if a plasmid has several names, they are listed as multiple rdfs:label properties.",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?protein \n    ?plasmidOrOrganelle\n    ?label\nWHERE {\n    ?protein a up:Protein ;\n      up:encodedIn ?plasmidOrOrganelle .\n    OPTIONAL {\n        ?plasmidOrOrganelle rdfs:label ?label .\n    }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "list",
+      "chromosome"
+    ]
+  },
+  {
+    "id": "102_uniprot_primary_accession",
+    "query": "Extracting an UniProtKB primary accession from our IRIs. Is done with a bit of string manipulation. While UniProt primary accession are unique within UniProtKB they may be reused by accident or itentionally by other data sources. If we provided them as strings (not IRI) and if you used them in a query that way, you might accidentaly retrieve completely wrong records.",
+    "expected_sparql": "PREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?primaryAccession\n  ?protein\nWHERE {\n  ?protein a up:Protein .\n  BIND(substr(str(?protein), strlen(str(uniprotkb:))+1) AS ?primaryAccession)\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "identifier",
+      "mapping"
+    ]
+  },
+  {
+    "id": "103_uniprot_proteome_location_of_gene",
+    "query": "List UniProtKB proteins with genetic replicon that they are encoded on using the Proteome data.",
+    "expected_sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  DISTINCT\n    ?proteomeData\n    ?replicon\n    ?proteome  \nWHERE {\n  # reviewed entries (UniProtKB/Swiss-Prot)\n  ?protein up:reviewed true . \n  # restricted to Human taxid\n  ?uniprot up:organism taxon:9606 . \n  ?uniprot up:proteome ?proteomeData .\n  BIND( strbefore( str(?proteomeData), \"#\" ) as ?proteome )\n  BIND( strafter( str(?proteomeData), \"#\" ) as ?replicon )\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "proteome"
+    ]
+  },
+  {
+    "id": "104_uniprot_recomended_protein_full_name",
+    "query": "The recommended protein full names for UniProtKB entries",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\n  ?fullName\nWHERE {\n  ?protein a up:Protein ;\n           up:recommendedName ?recommendedName .\n  ?recommendedName up:fullName ?fullName .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "protein name"
+    ]
+  },
+  {
+    "id": "105_uniprot_recomended_protein_short_name",
+    "query": "The recommended protein short names for UniProtKB entries",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein \n  ?fullName\nWHERE {\n  ?protein a up:Protein ;\n           up:recommendedName ?recommendedName .\n  ?recommendedName up:shortName ?fullName .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "protein name"
+    ]
+  },
+  {
+    "id": "106_uniprot_reviewed_or_not",
+    "query": "List all UniProtKB proteins and if they are reviewed (Swiss-Prot) or unreviewed (TrEMBL)",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?reviewed\nWHERE {\n  ?protein a up:Protein . \n  ?protein up:reviewed ?reviewed . \n}",
+    "complexity": "simple",
+    "keywords": [
+      "entry status",
+      "list"
+    ]
+  },
+  {
+    "id": "110_uniprot_unamed_plasmids",
+    "query": "Sometimes it is known that a gene encoding a protein UniProtKB is located on a plasmid or an organelle, but the name of the plasmid is unknown.",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?protein \n    ?plasmidOrOrganelle\n    ?label\nWHERE {\n    ?protein a up:Protein ;\n      up:encodedIn ?plasmidOrOrganelle .\n    OPTIONAL {\n        ?plasmidOrOrganelle rdfs:label ?label .\n    }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "gene location"
+    ]
+  },
+  {
+    "id": "119_uniref_distinct_ec_in_seed",
+    "query": "Distinct Enzymes in UniRef50 seed entries",
+    "expected_sparql": "PREFIX up:<http://purl.uniprot.org/core/>\nSELECT \n  (COUNT(DISTINCT ?enzyme) AS ?distinctEnzymesInUniRef50Seed)\nWHERE {\n  GRAPH <http://sparql.uniprot.org/uniprot>{\n  \t?protein ( up:enzyme | up:domain/up:enzyme | up:component/up:enzyme ) ?enzyme .\n  }\n  GRAPH <http://sparql.uniprot.org/uniref>{\n    ?protein up:seedFor ?cluster .\n    ?cluster up:identity 0.5 .\n  }\n}",
+    "complexity": "moderate",
+    "keywords": []
+  },
+  {
+    "id": "11_entries_with_transmem_on_cannonical_sequence",
+    "query": "Select all UniProtKB entries with annotated transmembrane regions and the regions' begin and end coordinates on the canonical sequence",
+    "expected_sparql": "PREFIX faldo: <http://biohackathon.org/resource/faldo#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?begin ?end\nWHERE \n{\n\t?protein a up:Protein .\n\t?protein up:annotation ?annotation .\n\t?annotation a up:Transmembrane_Annotation .\n\t?annotation up:range ?range .\n\t?range faldo:begin/faldo:position ?begin .\n\t?range faldo:end/faldo:position ?end\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "transmembrane annotation",
+      "search within sequence"
+    ]
+  },
+  {
+    "id": "120_for_taxon_find_reference_proteomes",
+    "query": "For a ncbi taxon identifier as a digit find it's reference proteome(s) if they exist",
+    "expected_sparql": "PREFIX up:<http://purl.uniprot.org/core/>\nPREFIX taxon:<http://purl.uniprot.org/taxonomy/>\n\nSELECT ?taxon ?reference_proteome\nWHERE\n{\n  VALUES (?taxid) {\n    (623) # Shigella flexneri\n    (633) # Yersinia pseudotuberculosis\n  } \n  # Convert the digit to a correct IRI\n  BIND(IRI(CONCAT(STR(taxon:), ?taxid)) AS ?taxon)\n  ?taxon up:scientificName ?taxonName .\n  OPTIONAL {\n    ?reference_proteome a up:Reference_Proteome .\n    ?reference_proteome up:organism ?taxon .\n  }\n}",
+    "complexity": "moderate",
+    "keywords": []
+  },
+  {
+    "id": "121_proteins_and_diseases_linked",
+    "query": "List all UniProtKB proteins and the diseases are annotated to be related.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n\t?protein\n\t?disease\nWHERE {\n\t?protein a up:Protein ;\n    \tup:annotation ?annotation .\n\t?annotation a up:Disease_Annotation ;\n    \tup:disease ?disease .\n\t?disease a up:Disease .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "list",
+      "disease"
+    ]
+  },
+  {
+    "id": "12_entries_integrated_on_date",
+    "query": "Select all UniProtKB entries that were integrated on the 30th of November 2010",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?protein\nWHERE\n{\n\t?protein a up:Protein . \n\t?protein up:created '2010-11-30'^^xsd:date\n}",
+    "complexity": "simple",
+    "keywords": [
+      "entry history",
+      "date"
+    ]
+  },
+  {
+    "id": "1_select_all_taxa_used_in_uniprot",
+    "query": "Select all taxa from the <a href=\\",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nFROM <http://sparql.uniprot.org/taxonomy>\nWHERE\n{\n    ?taxon a up:Taxon .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "taxonomy"
+    ]
+  },
+  {
+    "id": "21_where_are_genetic_disease_related_proteins_in_a_cell",
+    "query": "Find where disease related proteins are known to be located in the cell",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\n\nSELECT \n    ?protein \n    ?disease \n    ?location_inside_cell \n    ?cellcmpt\nWHERE\n{\n    ?protein up:annotation ?diseaseAnnotation , ?subcellAnnotation .\n    ?diseaseAnnotation up:disease/skos:prefLabel ?disease .\n    ?subcellAnnotation up:locatedIn/up:cellularComponent ?cellcmpt .\n    ?cellcmpt skos:prefLabel ?location_inside_cell .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "disease",
+      "subcellular location"
+    ]
+  },
+  {
+    "id": "23_human_proteins_related_to_kinase_activity",
+    "query": "Number of reviewed entries (UniProtKB/Swiss-Prot) that are related to <a href=\\",
+    "expected_sparql": "PREFIX GO: <http://purl.obolibrary.org/obo/GO_>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n    (COUNT(DISTINCT(?protein)) AS ?pc)\nWHERE\n{   \n    ?protein rdf:type up:Protein ;\n        up:reviewed true  ;\n        up:organism taxon:9606 ;\n        up:classifiedWith|(up:classifiedWith/rdfs:subClassOf) GO:0016301 .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "entry status",
+      "gene ontology",
+      "count"
+    ]
+  },
+  {
+    "id": "24_uniprot_release_in_endpoint",
+    "query": "Find the release number of the UniProt data that is currently being queried",
+    "expected_sparql": "SELECT ?version\nFROM <https://sparql.uniprot.org/.well-known/void>\nWHERE\n{\n    [] <http://purl.org/pav/version> ?version\n}",
+    "complexity": "simple",
+    "keywords": [
+      "release number"
+    ]
+  },
+  {
+    "id": "25_protein_name_of_any_kind_with_value",
+    "query": "Find UniProtKB entry which has a protein name 'HLA class I histocompatibility antigen, B-73 alpha chain'",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?anyKindOfName\nWHERE\n{\n\t\t?protein a up:Protein .\n\t\t?protein (up:recommendedName|up:alternativeName) ?structuredName .\n\t\t?structuredName ?anyKindOfName  \"HLA class I histocompatibility antigen, B alpha chain\" .\n\t\t?anyKindOfName rdfs:subPropertyOf up:structuredNameType .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "protein name"
+    ]
+  },
+  {
+    "id": "26_component_HLA_class_I_histocompatibility_domain",
+    "query": "Find UniProtKB entry, or an UniProtKB entries domain or component which has a name 'HLA class I histocompatibility antigen, B-73 alpha chain'",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?anyKindOfName\nWHERE\n{\n\t\t?protein a up:Protein .\n\t\t?protein (up:recommendedName|up:alternativeName)|((up:domain|up:component)/(up:recommendedName|up:alternativeName)) ?structuredName .\n\t\t?structuredName ?anyKindOfName  \"HLA class I histocompatibility antigen, B-73 alpha chain\" .\n\t\t?anyKindOfName rdfs:subPropertyOf up:structuredNameType .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "protein name",
+      "peptide name"
+    ]
+  },
+  {
+    "id": "2_bacteria_taxa_and_their_scientific_name",
+    "query": "Select all bacterial taxa and their scientific name from the <a href=\\",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon ?name\nWHERE\n{\n    ?taxon a up:Taxon .\n    ?taxon up:scientificName ?name .\n    # Taxon subclasses are materialized, do not use rdfs:subClassOf+\n    ?taxon rdfs:subClassOf taxon:2 .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "taxonomy"
+    ]
+  },
+  {
+    "id": "30_merged_loci",
+    "query": "Find UniProtKB entries with merged loci in <a href=\\",
+    "expected_sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein \n  (GROUP_CONCAT(?locusName; separator=',') AS ?locusNames)\nWHERE \n{ \n  ?protein a up:Protein ;\n    up:organism taxon:360910 ;\n    up:encodedBy ?gene .\n  ?gene up:locusName ?locusName .\n} \nGROUP BY ?protein \nHAVING (COUNT(?locusName) > 1)",
+    "complexity": "moderate",
+    "keywords": []
+  },
+  {
+    "id": "32_uniprot_with_more_than_x_topodom",
+    "query": "Find UniProtKB entries with more than 1 <a href=\\",
+    "expected_sparql": "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?protein \n    (GROUP_CONCAT(?comment; separator=\", \") AS ?comments)\nWHERE\n{\n    ?protein a up:Protein ;\n            up:annotation ?annotation . \n    ?annotation rdf:type up:Topological_Domain_Annotation ;\n            rdfs:comment ?comment .\n} \nGROUP BY ?protein \nHAVING (COUNT(?annotation) > 1)",
+    "complexity": "moderate",
+    "keywords": [
+      "transmembrane",
+      "topology",
+      "count"
+    ]
+  },
+  {
+    "id": "33_longest_variant_comment",
+    "query": "Find longest comment text associated with a UniProtKB natural variant annotation",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?annotation ?comment\nWHERE {\n    ?annotation a up:Natural_Variant_Annotation ;\n        rdfs:comment ?comment . \n} \nORDER BY DESC(STRLEN(?comment))",
+    "complexity": "moderate",
+    "keywords": [
+      "variant annotation",
+      "count"
+    ]
+  },
+  {
+    "id": "35_similar_proteins_via_uniref_clusters",
+    "query": "Find the similar proteins for UniProtKB entry P05067 sorted by UniRef cluster identity",
+    "expected_sparql": "PREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?similar ?identity\nFROM <http://sparql.uniprot.org/uniref>\nFROM <http://sparql.uniprot.org/uniprot>\nWHERE\n{\n    BIND (uniprotkb:P05607 AS ?protein)\n    ?cluster up:member ?member ;\n             up:member/up:sequenceFor ?protein;\n             up:identity ?identity .\n    ?member up:sequenceFor ?similar .\n    FILTER(!sameTerm(?similar, ?protein))\n} \nORDER BY DESC(?identity)",
+    "complexity": "moderate",
+    "keywords": [
+      "similarity",
+      "UniRef"
+    ]
+  },
+  {
+    "id": "41_fragmented_sequences",
+    "query": "Retrieve UniProtKB entries with sequences that are composed of fragments",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\n\nSELECT DISTINCT \n  ?protein\nWHERE {\n  ?protein a up:Protein ;\n    up:sequence ?sequence .\n  MINUS { ?sequence up:fragment [] }\n}",
+    "complexity": "simple",
+    "keywords": [
+      "protein fragment",
+      "sequence"
+    ]
+  },
+  {
+    "id": "42_connect_patents_to_epo",
+    "query": "Connect patents cited in UniProtKB with those in the patent database at EPO via publication number.",
+    "expected_sparql": "PREFIX patent: <http://data.epo.org/linked-data/def/patent/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?citation ?patent ?application ?applicationNo\nWHERE\n{\n  ?citation a up:Patent_Citation ;\n    skos:exactMatch ?patent .\n  FILTER(CONTAINS(STR(?patent), 'EP'))\n  BIND(SUBSTR(STR(?patent), 35) AS ?applicationNo)\n  SERVICE <https://data.epo.org/linked-data/query>{\n    ?application patent:publicationNumber ?applicationNo\n  }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "EPO",
+      "cross-reference",
+      "entry history",
+      "patent",
+      "federated query"
+    ]
+  },
+  {
+    "id": "44_rhea_interpro_union_in_uniprot",
+    "query": "Find the Rhea and InterPro combinations in UniProtKB entries.",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?interpro\n\t?rhea\nFROM <http://sparql.uniprot.org/uniprot>\nWHERE \n{\n  ?protein up:reviewed true .\n  ?protein up:annotation ?annotation .\n  ?annotation up:catalyticActivity ?rhea .\n  ?protein rdfs:seeAlso ?interpro .\n  ?interpro up:database <http://purl.uniprot.org/database/InterPro> .\n} ORDER BY ?rhea",
+    "complexity": "moderate",
+    "keywords": [
+      "enzyme",
+      "domain",
+      "InterPro",
+      "Rhea"
+    ]
+  },
+  {
+    "id": "4_uniprot_mnemonic_id",
+    "query": "Select the UniProtKB entry with the <a href=\\",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein up:mnemonic 'A4_HUMAN'\n}",
+    "complexity": "simple",
+    "keywords": [
+      "identifier"
+    ]
+  },
+  {
+    "id": "56_enzymes_that_have_a_known_allosteric_effect",
+    "query": "Select enzymes that have ligands known to have an allosteric effect",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?ligandName \n  ?ligandNote\n  ?chebi\nWHERE {\n   ?protein up:annotation ?annotation .\n   ?annotation a up:Binding_Site_Annotation . \n   ?annotation up:ligand ?ligand .\n   ?ligand rdfs:comment ?ligandNote ;\n     rdfs:subClassOf ?chebi ;\n     rdfs:label ?ligandName .\n   FILTER(REGEX(?ligandNote, \"allosteric\", \"i\"))\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "enzyme",
+      "binding site"
+    ]
+  },
+  {
+    "id": "58_uniprot_to_HGNC_and_symbols",
+    "query": "Map a selection of UniProtKB accession numbers (ACs) to HGNC identifiers and symbols",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?uniprot\n  ?hgnc\n  ?hgncSymbol\nWHERE\n{\n  # A space separated list of UniProt primary accessions.\n  VALUES (?acc) {('P05067') ('P00750')}\n  BIND(iri(concat(str(uniprotkb:), ?acc)) AS ?uniprot)\n  ?uniprot rdfs:seeAlso ?hgnc .\n  ?hgnc up:database <http://purl.uniprot.org/database/HGNC> ;\n       rdfs:comment ?hgncSymbol .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "mapping",
+      "HGNC"
+    ]
+  },
+  {
+    "id": "59_all_isoforms_for_a_given_proteome",
+    "query": "Count all isoforms for a given proteome",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nPREFIX proteome:<http://purl.uniprot.org/proteomes/>\nSELECT\n  (COUNT(DISTINCT ?sequence) AS ?allIsoforms)\nWHERE\n{\n  ?protein up:reviewed true .\n  ?protein up:organism taxon:9606 .\n  ?protein up:sequence ?sequence .\n  ?protein up:proteome/^skos:narrower proteome:UP000005640 .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "proteome",
+      "isoform",
+      "count"
+    ]
+  },
+  {
+    "id": "5_mapping_to_PDB",
+    "query": "Select a mapping of UniProtKB to PDB entries using the UniProtKB cross-references to the <a href=\\",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?db\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein rdfs:seeAlso ?db .\n    ?db up:database <http://purl.uniprot.org/database/PDB>\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "mapping",
+      "PDB",
+      "cross-reference"
+    ]
+  },
+  {
+    "id": "62_diseases_involving_enzymes",
+    "query": "Find diseases that are thought to be related to enzymes",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n?disease ?diseaseLabel\nWHERE {\n ?protein up:enzyme|up:annotation/up:catalyticActivity/up:enzymeClass ?enzyme ;\n                   up:annotation ?diseaseAnnotation .\n ?diseaseAnnotation a up:Disease_Annotation ;\n                    up:disease ?disease .\n ?disease skos:prefLabel ?diseaseLabel .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "enzyme",
+      "disease",
+      "list"
+    ]
+  },
+  {
+    "id": "65_distinct_extinct_organisms_in_uniprotkb",
+    "query": "How many distinct extinct organisms are represented in UniProtKB",
+    "expected_sparql": "PREFIX keywords: <http://purl.uniprot.org/keywords/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?taxon\n  (SAMPLE(?name) AS ?anName)\n  (COUNT(DISTINCT ?protein) AS ?entriesPerExtinctTaxon)\nWHERE\n{\n  GRAPH<http://sparql.uniprot.org/taxonomy>{\n    ?taxon a up:Taxon ;\n           up:scientificName ?name .\n  }\n  ?protein up:organism ?taxon ;\n           up:classifiedWith keywords:952 .\n} GROUP BY ?taxon ORDER BY ?taxon",
+    "complexity": "moderate",
+    "keywords": [
+      "taxonomy",
+      "keyword",
+      "count"
+    ]
+  },
+  {
+    "id": "66_distinct_rhea_transport_in_reviewed_uniprot",
+    "query": "Count number of unique Rhea transport reactions annotated in reviewed UniProtKB entries.",
+    "expected_sparql": "PREFIX rh: <http://rdf.rhea-db.org/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n(COUNT(DISTINCT ?rhea) AS ?distinctRheaTransportInUniProt)\nWHERE\n{\n  GRAPH <https://sparql.rhea-db.org/rhea> {\n    ?rhea rh:isTransport true .\n  }\n  ?protein up:annotation ?ann .\n  ?ann up:catalyticActivity ?ca .\n  ?ca up:catalyzedReaction ?rhea .\n}",
+    "complexity": "moderate",
+    "keywords": []
+  },
+  {
+    "id": "68_drosophila_enzymes_derived_from_at_least_two_mRNAs",
+    "query": "Find Drosophila enzymes, that depend on more than one transcript (requires cross-references to Ensembl family of resources).",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\nWHERE {\n  ?protein up:organism taxon:7227 ;\n    a up:Protein ;\n    up:reviewed true ;\n    rdfs:seeAlso ?transcript .\n  {\n    ?protein up:annotation/a up:Catalytic_Activity_Annotation ;\n  } UNION {\n    ?protein up:enzyme ?enzyme .\n  }\n  ?transcript  a up:Transcript_Resource .\n} GROUP BY ?protein HAVING(COUNT(?transcript) >= 2)",
+    "complexity": "moderate",
+    "keywords": [
+      "enzyme",
+      "mRNA",
+      "transcript"
+    ]
+  },
+  {
+    "id": "69_drosophila_proteins_derived_from_at_least_two_mRNAs",
+    "query": "Find Drosophila proteins, that depend on more than one transcript (requires cross-references to Ensembl family of resources).",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\nWHERE {\n  ?protein up:organism taxon:7227 ;\n    a up:Protein ;\n    up:reviewed true ;\n    rdfs:seeAlso ?transcript .\n  ?transcript  a up:Transcript_Resource .\n} GROUP BY ?protein HAVING(COUNT(?transcript) >= 2)",
+    "complexity": "moderate",
+    "keywords": [
+      "transcript",
+      "cross-reference",
+      "count",
+      "Ensembl"
+    ]
+  },
+  {
+    "id": "6_cross_ref_in_category_3D",
+    "query": "Select all cross-references to external databases of the category <a href=\\",
+    "expected_sparql": "PREFIX keywords: <http://purl.uniprot.org/keywords/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?link\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein up:classifiedWith keywords:5 .\n    ?protein rdfs:seeAlso ?link .\n    ?link up:database ?db .\n    ?db up:category '3D structure databases'\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "cross-reference",
+      "3D structure",
+      "keyword"
+    ]
+  },
+  {
+    "id": "74_enzymes_with_at_least_two_transmembrane_domains",
+    "query": "Find Hydrolases (enzymes that catalyse the hydrolysis of various bonds) that have at least two transmembrane domains",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\nWHERE {\n ?protein up:enzyme|up:annotation/up:catalyticActivity/up:enzymeClass ?enzymeClass ;\n                   up:annotation ?transMembraneAnnotation .\n ?enzymeClass rdfs:subClassOf <http://purl.uniprot.org/enzyme/3.-.-.-> .\n ?transMembraneAnnotation a up:Transmembrane_Annotation .\n} GROUP BY ?protein HAVING (COUNT(DISTINCT ?transMembraneAnnotation) >= 2)",
+    "complexity": "moderate",
+    "keywords": [
+      "enzyme",
+      "transmembrane",
+      "count",
+      "enzyme classification"
+    ]
+  },
+  {
+    "id": "79_mnemonic_also_known_as_id",
+    "query": "List all UniProtKB protein ID (mnemonic) for current UniProtKB entries.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?uniprot ?mnemonic \nWHERE\n{\n  GRAPH <http://sparql.uniprot.org/uniprot> {\n        ?uniprot a up:Protein ;\n            up:mnemonic ?mnemonic .\n    }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "identifier",
+      "list"
+    ]
+  },
+  {
+    "id": "7_swissprot_with_rec_protein_name_if_pref_gene_name_contains_word_DNA",
+    "query": "Select reviewed UniProtKB entries (Swiss-Prot), and their recommended protein name, that have a preferred gene name that contains the text 'DNA'",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?name\nWHERE\n{\n        ?protein a up:Protein .\n        ?protein up:reviewed true .\n        ?protein up:recommendedName ?recommended .\n        ?recommended up:fullName ?name .\n        ?protein up:encodedBy ?gene .\n        ?gene skos:prefLabel ?text .\n        FILTER CONTAINS(?text, 'DNA')\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "protein name",
+      "gene name",
+      "entry status"
+    ]
+  },
+  {
+    "id": "80_obsolete_mnemonic_also_known_as_id",
+    "query": "List all UniProtKB protein ID (mnemonic) that where used in the past for current UniProtKB entries.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?uniprot ?obsoleteMnemonic \nWHERE\n{\n  GRAPH <http://sparql.uniprot.org/uniprot> {\n        ?uniprot a up:Protein ;\n            up:oldMnemonic ?obsoleteMnemonic .\n    }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "identifier",
+      "list",
+      "entry history"
+    ]
+  },
+  {
+    "id": "82_rhea_reactions_associated_with_ec_in_uniprotkb",
+    "query": "List <a href=\\",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?rhea \n  ?EC \nWHERE {\n  ?CatalyticActivity  up:catalyzedReaction   ?rhea ;\n    up:enzymeClass         ?EC .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "enzyme",
+      "enzyme classification",
+      "Rhea",
+      "list"
+    ]
+  },
+  {
+    "id": "83_rhea_reactions_not_associated_with_ec_in_uniprotkb",
+    "query": "List <a href=\\",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?rhea \n  ?EC \nWHERE {\n  ?CatalyticActivity up:catalyzedReaction ?rhea .\n  MINUS {\n    ?CatalyticActivity up:enzymeClass ?EC .\n  }\n}",
+    "complexity": "simple",
+    "keywords": [
+      "Rhea",
+      "enzyme classification",
+      "list",
+      "enzyme"
+    ]
+  },
+  {
+    "id": "84_taxonomy_hierarchy",
+    "query": "Find all taxonomic records that describe species of the genus <a href=\\",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?species \n  ?genus \nWHERE {\n  BIND(taxon:9605 AS ?genus)\n  ?species a up:Taxon ;\n           up:rank up:Species ;\n           rdfs:subClassOf ?genus .\n  ?genus a up:Taxon ;\n         up:rank up:Genus .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "taxonomy"
+    ]
+  },
+  {
+    "id": "85_taxonomy_host",
+    "query": "Find taxon records that are known to have part of their life cycle in other organisms (e.g. parasite, symbiont, infection)",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?virus \n  ?host \nWHERE {\n    ?virus up:host ?host .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "taxonomy",
+      "host"
+    ]
+  },
+  {
+    "id": "86_taxonomy_rank_and_scientific_name",
+    "query": "Retrieve the rank and the scientific name of an taxonomic record. Not all taxonomic records have a <a href=\\",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?taxon \n  ?scientificName\n  ?rank\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName .\n  OPTIONAL {\n    ?taxon up:rank ?rank\n  }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "taxonomy"
+    ]
+  },
+  {
+    "id": "88_uniparc_linked_to_active_uniprot",
+    "query": "Show for a given UniParc accessions which active UniProtKB entries have the same amino acid sequence",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?uniparc\n  ?uniprot\nWHERE {\n  GRAPH <http://sparql.uniprot.org/uniparc>{\n    BIND(<http://purl.uniprot.org/uniparc/UPI000002DB1C> AS ?uniparc) \n    ?uniparc up:sequenceFor ?uniprot .\n  }\n  GRAPH <http://sparql.uniprot.org/uniprot> {\n    ?uniprot a up:Protein .\n  }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "UniParc"
+    ]
+  },
+  {
+    "id": "89_uniparc_triples_directly_associated",
+    "query": "Predicates and objects, for a given UniParc accession as a subject",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?predicate \n  ?object \nWHERE { \n  <http://purl.uniprot.org/uniparc/UPI000012A0AD> ?predicate ?object\n}",
+    "complexity": "simple",
+    "keywords": [
+      "UniParc",
+      "triples"
+    ]
+  },
+  {
+    "id": "91_uniprot_alternative_protein_full_name",
+    "query": "Alternative protein full names for UniProtKB entries",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein \n  ?fullName\nWHERE {\n  ?protein a up:Protein ;\n           up:alternativeName ?recommendedName .\n  ?recommendedName up:fullName ?fullName .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "protein name"
+    ]
+  },
+  {
+    "id": "92_uniprot_bioregistry_iri_translation",
+    "query": "Translate the global unique identifier for a UniProtKB record into other options using the bioregistry translating endpoint.",
+    "expected_sparql": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?protein \n    ?otherIdentifier\nWHERE {\n    BIND(uniprotkb:P00750 AS ?protein)\n    ?protein a up:Protein .\n    SERVICE <https://bioregistry.io/sparql> {\n        ?protein owl:sameAs ?otherIdentifier .\n    }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "mapping",
+      "identifier"
+    ]
+  },
+  {
+    "id": "93_uniprot_created_modified_updated",
+    "query": "List the created, last modified, and last sequence update dates for UniProtKB proteins.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein \n  ?created\n  ?modified\n  ?version\nWHERE {\n  ?protein a up:Protein ;\n           up:created ?created ;\n           up:modified ?modified ;\n           up:version ?version .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "entry history",
+      "list"
+    ]
+  },
+  {
+    "id": "94_uniprot_encoding_gene",
+    "query": "List UniProtKB proteins with their associated named gene",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\n  ?gene \nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "list",
+      "gene name"
+    ]
+  },
+  {
+    "id": "95_uniprot_encoding_gene_alternative_names",
+    "query": "List UniProtKB proteins with their associated gene and the gene's names that are used in the field, but not recommended for use by UniProtKB",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\n  ?gene ?altGeneName\nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n  ?gene skos:altLabel ?altGeneName .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "list",
+      "gene name"
+    ]
+  },
+  {
+    "id": "96_uniprot_encoding_gene_name",
+    "query": "List UniProtKB proteins with their associated gene and the gene's preffered name",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\n  ?gene \nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n  ?gene skos:prefLabel ?recommendedGeneName .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "gene name"
+    ]
+  },
+  {
+    "id": "97_uniprot_encoding_gene_org_name",
+    "query": "List UniProtKB proteins with their associated gene and the gene's ORF label",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?gene \n  ?orfName\nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n  ?gene up:orfName ?orfName .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "gene name",
+      "list"
+    ]
+  },
+  {
+    "id": "98_uniprot_entries_with_more_than_two_geneid_crossrefences",
+    "query": "Find GeneID's crosslinked to more than one human or mouse UniProtKB entry",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon:<http://purl.uniprot.org/taxon/>\nSELECT \n  ?geneid \n  ?organism \n  (GROUP_CONCAT(?protein; separator=', ') AS ?entries)\nWHERE\n{\n  VALUES ?organism {taxon:9606 taxon:10090}\n  ?geneid up:database <http://purl.uniprot.org/database/GeneID> .\n  ?protein rdfs:seeAlso ?geneid ; \n           up:organism ?organism\n} GROUP BY ?geneid ?organism HAVING (COUNT(?protein) > 1) ORDER BY ?organism ?geneid",
+    "complexity": "moderate",
+    "keywords": [
+      "cross-reference",
+      "mapping",
+      "count"
+    ]
+  },
+  {
+    "id": "99_uniprot_identifiers_org_translation",
+    "query": "Translate a selection of UniProtKB accession numbers into other options using the identifiers.org translating endpoint.",
+    "expected_sparql": "PREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX uniprotkb: <http://purl.uniprot.org/uniprot/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?protein \n    ?otherIdentifier\nWHERE {\n    VALUES (?protein) {(uniprotkb:P00750) (uniprotkb:P05067)}\n    ?protein a up:Protein .\n    SERVICE <https://sparql.api.identifiers.org/sparql> {\n        ?protein owl:sameAs ?otherIdentifier .\n    }\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "identifier",
+      "mapping"
+    ]
+  }
+]
