@@ -8,6 +8,7 @@ Tracks whether context leaks into iterative history by measuring:
 """
 
 from dataclasses import dataclass, field
+from functools import wraps
 from typing import Callable
 
 @dataclass
@@ -30,6 +31,7 @@ class Instrumented:
         wrapped = {}
         for name, fn in self.tools.items():
             def make_wrapper(tool_name, f):
+                @wraps(f)  # Preserve original function signature for DSPy
                 def wrapper(*args, **kwargs):
                     # Log tool call if callback provided
                     if self.log_callback:
@@ -57,7 +59,6 @@ class Instrumented:
                         })
 
                     return res
-                wrapper.__name__ = f.__name__
                 return wrapper
             wrapped[name] = make_wrapper(name, fn)
         return wrapped
