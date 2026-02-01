@@ -328,13 +328,19 @@ class SPARQLTools:
     def as_dspy_tools(self) -> dict:
         """Return tool dict with DSPy RLM signatures.
 
-        CRITICAL: DSPy RLM calls tools as `tool(args, kwargs)` with TWO positional
-        parameters, not `*args, **kwargs`. All wrappers use `lambda args, kwargs:`.
+        Tools can be called in two ways:
+        1. DSPy RLM style: tool(args, kwargs) with two positional parameters
+        2. Direct Python: tool() or tool(arg1, arg2) in REPL code
 
+        All lambdas use default args=None, kwargs=None to support both patterns.
         All tools include source attribution in their returns.
         """
         def _get_arg(args, kwargs, idx=0, key=None, default=None):
-            """Extract argument from DSPy's (args, kwargs) calling convention."""
+            """Extract argument from various calling conventions."""
+            if args is None:
+                args = []
+            if kwargs is None:
+                kwargs = {}
             if isinstance(args, (list, tuple)) and len(args) > idx:
                 return args[idx]
             if isinstance(args, str) and idx == 0:
@@ -347,34 +353,34 @@ class SPARQLTools:
 
         return {
             # Core query tools - LLM constructs SPARQL using ontology context
-            'sparql_query': lambda args, kwargs: self.sparql_query(
+            'sparql_query': lambda args=None, kwargs=None: self.sparql_query(
                 _get_arg(args, kwargs, 0, 'query', ''),
                 _get_arg(args, kwargs, 1, 'limit', self.default_limit)
             ),
-            'sparql_peek': lambda args, kwargs: self.sparql_peek(
+            'sparql_peek': lambda args=None, kwargs=None: self.sparql_peek(
                 _get_arg(args, kwargs, 0, 'ref_key', ''),
                 _get_arg(args, kwargs, 1, 'n', 5)
             ),
-            'sparql_slice': lambda args, kwargs: self.sparql_slice(
+            'sparql_slice': lambda args=None, kwargs=None: self.sparql_slice(
                 _get_arg(args, kwargs, 0, 'ref_key', ''),
                 _get_arg(args, kwargs, 1, 'start', 0),
                 _get_arg(args, kwargs, 2, 'end', 10)
             ),
-            'sparql_stats': lambda args, kwargs: self.sparql_stats(
+            'sparql_stats': lambda args=None, kwargs=None: self.sparql_stats(
                 _get_arg(args, kwargs, 0, 'ref_key', '')
             ),
-            'sparql_count': lambda args, kwargs: self.sparql_count(
+            'sparql_count': lambda args=None, kwargs=None: self.sparql_count(
                 _get_arg(args, kwargs, 0, 'query', '')
             ),
 
             # URI inspection - user provides URI, we get properties
-            'sparql_describe': lambda args, kwargs: self.sparql_describe(
+            'sparql_describe': lambda args=None, kwargs=None: self.sparql_describe(
                 _get_arg(args, kwargs, 0, 'uri', ''),
                 _get_arg(args, kwargs, 1, 'limit', 20)
             ),
 
             # Metadata
-            'endpoint_info': lambda args, kwargs: self.endpoint_info(),
+            'endpoint_info': lambda args=None, kwargs=None: self.endpoint_info(),
         }
 
 
