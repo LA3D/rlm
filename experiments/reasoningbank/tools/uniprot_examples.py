@@ -74,15 +74,25 @@ def parse_example(file_path: str | Path) -> Optional[SPARQLExample]:
 
     # Extract rdfs:comment (competency question)
     # Pattern: rdfs:comment "text"@en or rdfs:comment "text"^^rdf:HTML
+    # Handle escaped quotes in HTML content
     comment_match = re.search(
-        r'rdfs:comment\s+"([^"]+)"(?:@\w+|\^\^[\w:]+)?',
+        r'rdfs:comment\s+"((?:[^"\\]|\\.)*)"(?:@\w+|\^\^[\w:]+)?',
         content,
         re.DOTALL
     )
     comment = comment_match.group(1) if comment_match else ""
 
-    # Clean HTML tags from comment if present
+    # Unescape quotes
+    comment = comment.replace('\\"', '"')
+
+    # Extract text from anchor tags: <a href="...">text</a> -> text
+    comment = re.sub(r'<a\s+href=[^>]+>([^<]+)</a>', r'\1', comment)
+
+    # Clean any remaining HTML tags
     comment = re.sub(r'<[^>]+>', '', comment)
+
+    # Clean up whitespace
+    comment = ' '.join(comment.split())
 
     # Extract sh:select (SPARQL query)
     # Pattern: sh:select """...""" (triple quotes with content across lines)

@@ -104,7 +104,7 @@
   },
   {
     "id": "1_select_all_taxa_used_in_uniprot",
-    "query": "Select all taxa from the <a href=\\",
+    "query": "Select all taxa from the UniProt taxonomy",
     "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nFROM <http://sparql.uniprot.org/taxonomy>\nWHERE\n{\n    ?taxon a up:Taxon .\n}",
     "complexity": "simple",
     "keywords": [
@@ -123,7 +123,7 @@
   },
   {
     "id": "23_human_proteins_related_to_kinase_activity",
-    "query": "Number of reviewed entries (UniProtKB/Swiss-Prot) that are related to <a href=\\",
+    "query": "Number of reviewed entries (UniProtKB/Swiss-Prot) that are related to kinase activity",
     "expected_sparql": "PREFIX GO: <http://purl.obolibrary.org/obo/GO_>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n    (COUNT(DISTINCT(?protein)) AS ?pc)\nWHERE\n{   \n    ?protein rdf:type up:Protein ;\n        up:reviewed true  ;\n        up:organism taxon:9606 ;\n        up:classifiedWith|(up:classifiedWith/rdfs:subClassOf) GO:0016301 .\n}",
     "complexity": "moderate",
     "keywords": [
@@ -152,7 +152,7 @@
   },
   {
     "id": "2_bacteria_taxa_and_their_scientific_name",
-    "query": "Select all bacterial taxa and their scientific name from the <a href=\\",
+    "query": "Select all bacterial taxa and their scientific name from the UniProt taxonomy",
     "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon ?name\nWHERE\n{\n    ?taxon a up:Taxon .\n    ?taxon up:scientificName ?name .\n    # Taxon subclasses are materialized, do not use rdfs:subClassOf+\n    ?taxon rdfs:subClassOf taxon:2 .\n}",
     "complexity": "moderate",
     "keywords": [
@@ -161,7 +161,7 @@
   },
   {
     "id": "30_merged_loci",
-    "query": "Find UniProtKB entries with merged loci in <a href=\\",
+    "query": "Find UniProtKB entries with merged loci in Bordetella avium",
     "expected_sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein \n  (GROUP_CONCAT(?locusName; separator=',') AS ?locusNames)\nWHERE \n{ \n  ?protein a up:Protein ;\n    up:organism taxon:360910 ;\n    up:encodedBy ?gene .\n  ?gene up:locusName ?locusName .\n} \nGROUP BY ?protein \nHAVING (COUNT(?locusName) > 1)",
     "complexity": "moderate",
     "keywords": []
@@ -198,7 +198,7 @@
   },
   {
     "id": "4_uniprot_mnemonic_id",
-    "query": "Select the UniProtKB entry with the <a href=\\",
+    "query": "Select the UniProtKB entry with the mnemonic 'A4_HUMAN'",
     "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein up:mnemonic 'A4_HUMAN'\n}",
     "complexity": "simple",
     "keywords": [
@@ -238,7 +238,7 @@
   },
   {
     "id": "5_mapping_to_PDB",
-    "query": "Select a mapping of UniProtKB to PDB entries using the UniProtKB cross-references to the <a href=\\",
+    "query": "Select a mapping of UniProtKB to PDB entries using the UniProtKB cross-references to the PDB database",
     "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?db\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein rdfs:seeAlso ?db .\n    ?db up:database <http://purl.uniprot.org/database/PDB>\n}",
     "complexity": "moderate",
     "keywords": [
@@ -294,7 +294,7 @@
   },
   {
     "id": "6_cross_ref_in_category_3D",
-    "query": "Select all cross-references to external databases of the category <a href=\\",
+    "query": "Select all cross-references to external databases of the category '3D structure databases' of UniProtKB entries that are classified with the keyword 'Acetoin biosynthesis (KW-0005)'",
     "expected_sparql": "PREFIX keywords: <http://purl.uniprot.org/keywords/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?link\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein up:classifiedWith keywords:5 .\n    ?protein rdfs:seeAlso ?link .\n    ?link up:database ?db .\n    ?db up:category '3D structure databases'\n}",
     "complexity": "moderate",
     "keywords": [
@@ -337,7 +337,7 @@
   },
   {
     "id": "84_taxonomy_hierarchy",
-    "query": "Find all taxonomic records that describe species of the genus <a href=\\",
+    "query": "Find all taxonomic records that describe species of the genus Homo.",
     "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?species \n  ?genus \nWHERE {\n  BIND(taxon:9605 AS ?genus)\n  ?species a up:Taxon ;\n           up:rank up:Species ;\n           rdfs:subClassOf ?genus .\n  ?genus a up:Taxon ;\n         up:rank up:Genus .\n}",
     "complexity": "moderate",
     "keywords": [
@@ -356,7 +356,7 @@
   },
   {
     "id": "86_taxonomy_rank_and_scientific_name",
-    "query": "Retrieve the rank and the scientific name of an taxonomic record. Not all taxonomic records have a <a href=\\",
+    "query": "Retrieve the rank and the scientific name of an taxonomic record. Not all taxonomic records have a rank associated with them.",
     "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?taxon \n  ?scientificName\n  ?rank\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName .\n  OPTIONAL {\n    ?taxon up:rank ?rank\n  }\n}",
     "complexity": "moderate",
     "keywords": [
