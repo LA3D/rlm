@@ -19,8 +19,10 @@ from experiments.reasoningbank.ctx.builder import Cfg, Layer
 
 # Trajectory formatting helper
 
-def format_trajectory(trajectory: list[dict], max_chars: int = 2000) -> str:
+def format_trajectory(trajectory: list[dict], max_chars: int = 4000) -> str:
     """Format execution trajectory for prompt injection.
+
+    Prioritizes LAST steps (solution) over early exploration steps.
 
     Args:
         trajectory: List of {code, output} dicts from RLM execution
@@ -31,12 +33,29 @@ def format_trajectory(trajectory: list[dict], max_chars: int = 2000) -> str:
     """
     if not trajectory:
         return "(no trajectory captured)"
+
+    # Format all steps
     parts = []
     for i, step in enumerate(trajectory, 1):
         code = step.get('code', '')
         output = str(step.get('output', ''))[:300]
         parts.append(f"Step {i}:\n```python\n{code}\n```\n→ {output}")
-    return "\n".join(parts)[:max_chars]
+
+    full_text = "\n".join(parts)
+
+    # If under budget, return all
+    if len(full_text) <= max_chars:
+        return full_text
+
+    # Otherwise prioritize: first step + last 3 steps (contains solution)
+    first = parts[0] if parts else ""
+    last_n = parts[-3:] if len(parts) > 3 else parts[1:]
+
+    prioritized = [first, "...(earlier steps omitted)..."] + last_n
+    result = "\n".join(prioritized)
+
+    # Final truncation if still over
+    return result[:max_chars]
 
 
 # DSPy Signatures for Judge/Extract
@@ -52,14 +71,18 @@ class TrajectoryJudge(dspy.Signature):
 
 
 class SuccessExtractor(dspy.Signature):
-    """Extract transferable strategies from a successful trajectory."""
+    """Extract transferable strategies from a successful trajectory.
+
+    IMPORTANT: Base your procedure on the ACTUAL SPARQL query provided, not general knowledge.
+    The procedure must reflect the specific patterns used in the sparql field.
+    """
     task: str = dspy.InputField(desc="The original question/task")
     trajectory: str = dspy.InputField(desc="Full execution trajectory showing reasoning steps")
     answer: str = dspy.InputField(desc="The successful answer")
-    sparql: str = dspy.InputField(desc="The SPARQL query that worked")
+    sparql: str = dspy.InputField(desc="The ACTUAL SPARQL query that worked - base your procedure on THIS")
 
     title: str = dspy.OutputField(desc="Short title for this strategy (≤10 words)")
-    procedure: str = dspy.OutputField(desc="Reusable procedure explaining why this succeeded")
+    procedure: str = dspy.OutputField(desc="Reusable procedure based on the SPARQL pattern that actually worked")
 
 
 class FailureExtractor(dspy.Signature):
@@ -127,7 +150,7 @@ def judge(res: Result, task: str, verbose: bool = False) -> dict:
 
 
 def extract(res: Result, task: str, judgment: dict, verbose: bool = False,
-             temperature: float = 1.0) -> list[Item]:
+             temperature: float = 0.3) -> list[Item]:
     """Extract procedures from trajectory using polarity-aware extractors.
 
     Uses SuccessExtractor for successful trajectories, FailureExtractor for
@@ -138,7 +161,7 @@ def extract(res: Result, task: str, judgment: dict, verbose: bool = False,
         task: The original question/task
         judgment: dict with 'success' and 'reason' from judge()
         verbose: If True, print LLM inputs/outputs
-        temperature: LLM temperature for extraction (paper uses 1.0 for diversity)
+        temperature: LLM temperature for extraction (0.3 for grounded output)
 
     Returns:
         List of 1-3 Item objects with appropriate 'src' polarity
@@ -157,8 +180,10 @@ def extract(res: Result, task: str, judgment: dict, verbose: bool = False,
             print(f"    sparql: {(res.sparql or '')[:100]}")
 
         ext = dspy.Predict(SuccessExtractor, temperature=temperature)
+        # Prepend SPARQL to trajectory so it's prominent
+        enhanced_traj = f"SUCCESSFUL SPARQL (this is what worked):\n```sparql\n{res.sparql or 'N/A'}\n```\n\nEXECUTION STEPS:\n{traj_text}"
         try:
-            e = ext(task=task, trajectory=traj_text, answer=res.answer, sparql=res.sparql or "")
+            e = ext(task=task, trajectory=enhanced_traj, answer=res.answer, sparql=res.sparql or "")
             item = Item(
                 id=Item.make_id(e.title, e.procedure),
                 title=e.title[:100],
