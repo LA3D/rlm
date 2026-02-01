@@ -276,87 +276,10 @@ class SPARQLTools:
         preview = f"Description of {uri.split('/')[-1]} from {self.name}"
         return self.store.put(content, 'describe', preview).to_handle()
 
-    def sparql_classes(self, limit: int = 50) -> dict:
-        """List available classes as handle dict. Use sparql_peek(result['key']) to inspect.
-
-        Returns handle to classes defined in {name} database.
-        """.format(name=self.name)
-        query = f"""
-        {self._prefixes}
-        SELECT DISTINCT ?class WHERE {{
-            ?class a owl:Class .
-        }}
-        LIMIT {min(limit, 100)}
-        """
-        rows = self._execute(query, limit=limit)
-        classes = [r.get('class', '') for r in rows if 'error' not in r]
-        content = '\n'.join(classes)
-        preview = f"{len(classes)} classes from {self.name}"
-        return self.store.put(content, 'classes', preview).to_handle()
-
-    def sparql_properties(self, limit: int = 50) -> dict:
-        """List available properties as handle dict. Use sparql_peek(result['key']) to inspect.
-
-        Returns handle to properties defined in {name} database.
-        """.format(name=self.name)
-        query = f"""
-        {self._prefixes}
-        SELECT DISTINCT ?prop WHERE {{
-            {{ ?prop a owl:ObjectProperty }}
-            UNION
-            {{ ?prop a owl:DatatypeProperty }}
-            UNION
-            {{ ?prop a rdf:Property }}
-        }}
-        LIMIT {min(limit, 100)}
-        """
-        rows = self._execute(query, limit=limit)
-        props = [r.get('prop', '') for r in rows if 'error' not in r]
-        content = '\n'.join(props)
-        preview = f"{len(props)} properties from {self.name}"
-        return self.store.put(content, 'properties', preview).to_handle()
-
-    def sparql_find(self, pattern: str, limit: int = 20) -> dict:
-        """Find URIs matching pattern as handle dict. Use sparql_peek(result['key']) to inspect.
-
-        Searches {name} for entities with labels containing the pattern.
-        """.format(name=self.name)
-        # Escape pattern for SPARQL
-        pattern_escaped = pattern.replace('"', '\\"')
-        query = f"""
-        {self._prefixes}
-        SELECT DISTINCT ?uri ?label WHERE {{
-            ?uri rdfs:label|skos:prefLabel ?label .
-            FILTER(CONTAINS(LCASE(STR(?label)), LCASE("{pattern_escaped}")))
-        }}
-        LIMIT {min(limit, 50)}
-        """
-        rows = self._execute(query, limit=limit)
-        results = [f"{r.get('uri', '')}\t{r.get('label', '')[:80]}"
-                   for r in rows if 'error' not in r]
-        content = '\n'.join(results)
-        preview = f"{len(results)} matches for '{pattern}' in {self.name}"
-        return self.store.put(content, 'find', preview).to_handle()
-
-    def sparql_sample(self, class_uri: str, n: int = 5) -> dict:
-        """Get sample instances as handle dict. Use sparql_peek(result['key']) to inspect.
-
-        Retrieves sample instances from {name} database.
-        """.format(name=self.name)
-        query = f"""
-        {self._prefixes}
-        SELECT ?instance ?label WHERE {{
-            ?instance a <{class_uri}> .
-            OPTIONAL {{ ?instance rdfs:label|skos:prefLabel ?label }}
-        }}
-        LIMIT {min(n, 20)}
-        """
-        rows = self._execute(query, limit=n)
-        instances = [f"{r.get('instance', '')}\t{r.get('label', '')[:80]}"
-                     for r in rows if 'error' not in r]
-        content = '\n'.join(instances)
-        preview = f"{len(instances)} instances of {class_uri.split('/')[-1]} from {self.name}"
-        return self.store.put(content, 'sample', preview).to_handle()
+    # REMOVED: sparql_classes, sparql_properties, sparql_find, sparql_sample
+    # These used hardcoded schema patterns that ignore the actual ontology.
+    # The LLM should construct proper SPARQL using ontology context (L0/L1)
+    # and execute via sparql_query.
 
     def sparql_count(self, query: str) -> dict:
         """Execute COUNT query, return single count value with attribution."""
@@ -423,7 +346,7 @@ class SPARQLTools:
             return default
 
         return {
-            # Core query tools
+            # Core query tools - LLM constructs SPARQL using ontology context
             'sparql_query': lambda args, kwargs: self.sparql_query(
                 _get_arg(args, kwargs, 0, 'query', ''),
                 _get_arg(args, kwargs, 1, 'limit', self.default_limit)
@@ -440,28 +363,14 @@ class SPARQLTools:
             'sparql_stats': lambda args, kwargs: self.sparql_stats(
                 _get_arg(args, kwargs, 0, 'ref_key', '')
             ),
+            'sparql_count': lambda args, kwargs: self.sparql_count(
+                _get_arg(args, kwargs, 0, 'query', '')
+            ),
 
-            # Discovery tools
+            # URI inspection - user provides URI, we get properties
             'sparql_describe': lambda args, kwargs: self.sparql_describe(
                 _get_arg(args, kwargs, 0, 'uri', ''),
                 _get_arg(args, kwargs, 1, 'limit', 20)
-            ),
-            'sparql_classes': lambda args, kwargs: self.sparql_classes(
-                _get_arg(args, kwargs, 0, 'limit', 50)
-            ),
-            'sparql_properties': lambda args, kwargs: self.sparql_properties(
-                _get_arg(args, kwargs, 0, 'limit', 50)
-            ),
-            'sparql_find': lambda args, kwargs: self.sparql_find(
-                _get_arg(args, kwargs, 0, 'pattern', ''),
-                _get_arg(args, kwargs, 1, 'limit', 20)
-            ),
-            'sparql_sample': lambda args, kwargs: self.sparql_sample(
-                _get_arg(args, kwargs, 0, 'class_uri', ''),
-                _get_arg(args, kwargs, 1, 'n', 5)
-            ),
-            'sparql_count': lambda args, kwargs: self.sparql_count(
-                _get_arg(args, kwargs, 0, 'query', '')
             ),
 
             # Metadata
