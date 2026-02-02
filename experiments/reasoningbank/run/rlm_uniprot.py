@@ -211,22 +211,81 @@ def run_uniprot(
             if verbose:
                 print(f"  History entries: {len(history)}")
 
-            # Log iteration details from history
+            # Log iteration details from history with reasoning/code extraction
+            import re
             for i, hist_entry in enumerate(history, 1):
-                # Try to extract reasoning and code from history entry
                 try:
-                    # DSPy RLM history entries are complex - try to extract useful parts
-                    hist_str = str(hist_entry)
+                    # Extract response text from history entry
+                    response_text = None
+                    if 'outputs' in hist_entry and isinstance(hist_entry.get('outputs'), list):
+                        outputs_list = hist_entry['outputs']
+                        if outputs_list and len(outputs_list) > 0:
+                            response_text = str(outputs_list[0])
+                    elif 'response' in hist_entry and hist_entry.get('response'):
+                        response = hist_entry['response']
+                        if hasattr(response, 'choices') and response.choices:
+                            if len(response.choices) > 0:
+                                choice = response.choices[0]
+                                if hasattr(choice, 'message') and choice.message:
+                                    response_text = str(choice.message.content)
 
-                    # Log iteration event
+                    # Extract reasoning and code sections
+                    reasoning = None
+                    code = None
+                    if response_text:
+                        # Extract reasoning section
+                        reasoning_match = re.search(
+                            r'\[\[\s*##\s*reasoning\s*##\s*\]\]\s*(.*?)(?:\[\[\s*##|$)',
+                            response_text, re.DOTALL | re.IGNORECASE
+                        )
+                        if reasoning_match:
+                            reasoning = reasoning_match.group(1).strip()[:500]  # Limit to 500 chars
+
+                        # Extract code section
+                        code_match = re.search(
+                            r'\[\[\s*##\s*code\s*##\s*\]\]\s*```python\s*(.*?)\s*```',
+                            response_text, re.DOTALL | re.IGNORECASE
+                        )
+                        if not code_match:
+                            code_match = re.search(
+                                r'\[\[\s*##\s*code\s*##\s*\]\]\s*\n(.*?)(?:\[\[\s*##|$)',
+                                response_text, re.DOTALL
+                            )
+                        if code_match:
+                            code = code_match.group(1).strip()[:1000]  # Limit to 1000 chars
+                            if code.endswith('```'):
+                                code = code[:-3].strip()
+
+                    # Try to get output from next iteration's REPL history
+                    output = None
+                    if i < len(history) and 'messages' in history[i]:
+                        next_messages = history[i].get('messages', [])
+                        if next_messages and len(next_messages) >= 2:
+                            user_content = next_messages[1].get('content', '') if next_messages[1].get('role') == 'user' else ''
+                            output_match = re.search(
+                                r'Output[^:]*:\s*(.*?)(?=\n===\s*Step|\[\[\s*##|$)',
+                                user_content, re.DOTALL
+                            )
+                            if output_match:
+                                output = output_match.group(1).strip()[:500]  # Limit to 500 chars
+
+                    # Log iteration event with full content
                     log_event('iteration', {
                         'iteration': i,
                         'total': len(history),
-                        'entry_size': len(hist_str)
+                        'reasoning': reasoning,
+                        'code': code,
+                        'output': output,
                     })
                 except Exception as e:
                     if verbose:
                         print(f"    Warning: Could not parse history entry {i}: {e}")
+                    # Still log basic info on error
+                    log_event('iteration', {
+                        'iteration': i,
+                        'total': len(history),
+                        'parse_error': str(e)
+                    })
 
         # Get token usage from DSPy LM history (only calls from this run)
         lm_usage = {

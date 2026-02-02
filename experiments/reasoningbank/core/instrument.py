@@ -41,22 +41,30 @@ class Instrumented:
                             'kwargs_keys': list(kwargs.keys()) if isinstance(kwargs, dict) else []
                         })
 
-                    # Execute tool
-                    res = f(*args, **kwargs)
+                    # Execute tool with exception handling
+                    try:
+                        res = f(*args, **kwargs)
+                        error = None
+                    except Exception as e:
+                        res = {'error': str(e), 'exception_type': type(e).__name__}
+                        error = str(e)
 
                     # Track large returns
                     res_len = len(str(res))
                     if res_len > 1000:
                         self.metrics.large_returns += 1
 
-                    # Log tool result if callback provided
+                    # Log tool result if callback provided (always, even on error)
                     if self.log_callback:
-                        self.log_callback('tool_result', {
+                        result_data = {
                             'tool': tool_name,
                             'result_type': type(res).__name__,
                             'result_size': res_len,
                             'result_preview': str(res)[:200]
-                        })
+                        }
+                        if error:
+                            result_data['error'] = error
+                        self.log_callback('tool_result', result_data)
 
                     return res
                 return wrapper

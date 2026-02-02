@@ -172,9 +172,78 @@ def run(
         inst.metrics.subcalls = lm_usage.get('total_calls', 0)
         inst.metrics.vars_n = len(getattr(store, '_blobs', {}))
 
-        # Save full history to log file
+        # Log iteration details with reasoning/code extraction
         if log_path and history:
-            log_event('history', {'entries': [str(h)[:500] for h in history]})
+            import re
+            for i, hist_entry in enumerate(history, 1):
+                try:
+                    # Extract response text from history entry
+                    response_text = None
+                    if 'outputs' in hist_entry and isinstance(hist_entry.get('outputs'), list):
+                        outputs_list = hist_entry['outputs']
+                        if outputs_list and len(outputs_list) > 0:
+                            response_text = str(outputs_list[0])
+                    elif 'response' in hist_entry and hist_entry.get('response'):
+                        response = hist_entry['response']
+                        if hasattr(response, 'choices') and response.choices:
+                            if len(response.choices) > 0:
+                                choice = response.choices[0]
+                                if hasattr(choice, 'message') and choice.message:
+                                    response_text = str(choice.message.content)
+
+                    # Extract reasoning and code sections
+                    reasoning = None
+                    code = None
+                    if response_text:
+                        # Extract reasoning section
+                        reasoning_match = re.search(
+                            r'\[\[\s*##\s*reasoning\s*##\s*\]\]\s*(.*?)(?:\[\[\s*##|$)',
+                            response_text, re.DOTALL | re.IGNORECASE
+                        )
+                        if reasoning_match:
+                            reasoning = reasoning_match.group(1).strip()[:500]
+
+                        # Extract code section
+                        code_match = re.search(
+                            r'\[\[\s*##\s*code\s*##\s*\]\]\s*```python\s*(.*?)\s*```',
+                            response_text, re.DOTALL | re.IGNORECASE
+                        )
+                        if not code_match:
+                            code_match = re.search(
+                                r'\[\[\s*##\s*code\s*##\s*\]\]\s*\n(.*?)(?:\[\[\s*##|$)',
+                                response_text, re.DOTALL
+                            )
+                        if code_match:
+                            code = code_match.group(1).strip()[:1000]
+                            if code.endswith('```'):
+                                code = code[:-3].strip()
+
+                    # Try to get output from next iteration's REPL history
+                    output = None
+                    if i < len(history) and 'messages' in history[i]:
+                        next_messages = history[i].get('messages', [])
+                        if next_messages and len(next_messages) >= 2:
+                            user_content = next_messages[1].get('content', '') if next_messages[1].get('role') == 'user' else ''
+                            output_match = re.search(
+                                r'Output[^:]*:\s*(.*?)(?=\n===\s*Step|\[\[\s*##|$)',
+                                user_content, re.DOTALL
+                            )
+                            if output_match:
+                                output = output_match.group(1).strip()[:500]
+
+                    log_event('iteration', {
+                        'iteration': i,
+                        'total': len(history),
+                        'reasoning': reasoning,
+                        'code': code,
+                        'output': output,
+                    })
+                except Exception as e:
+                    log_event('iteration', {
+                        'iteration': i,
+                        'total': len(history),
+                        'parse_error': str(e)
+                    })
 
         # Extract execution trajectory from RLM history
         exec_trajectory = []
