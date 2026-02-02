@@ -41,7 +41,8 @@ EXPS = {
 #   E8b: Tool-mediated (agent calls mem_search/mem_get explicitly)
 # Use identical budgets; measure convergence and answer quality
 
-def run_phase0(exps:list[str], tasks:list[dict], ont:str, out:str, verbose:bool=True):
+def run_phase0(exps:list[str], tasks:list[dict], ont:str, out:str, verbose:bool=True,
+               use_local_interpreter:bool=False):
     "Run layer ablation experiments."
     from pathlib import Path
     from experiments.reasoningbank.core.mem import MemStore
@@ -73,7 +74,8 @@ def run_phase0(exps:list[str], tasks:list[dict], ont:str, out:str, verbose:bool=
 
             # Pass memory for E5 and E6 (experiments with L2 enabled)
             exp_mem = mem if cfg.l2.on else None
-            res = run(t['query'], ont, cfg, mem=exp_mem, verbose=verbose, log_path=log_path)
+            res = run(t['query'], ont, cfg, mem=exp_mem, verbose=verbose, log_path=log_path,
+                      use_local_interpreter=use_local_interpreter)
             print(f"  ✓ Completed: {res.iters} iters, converged={res.converged}")
             results.append({
                 'exp': exp, 'task': t['id'],
@@ -103,6 +105,8 @@ if __name__ == '__main__':
     parser.add_argument('--exp', default='E1,E2,E3,E4,E5,E6', help='Experiments to run (comma-separated)')
     parser.add_argument('--ont', default='ontology/prov.ttl', help='Ontology path')
     parser.add_argument('--out', default='experiments/reasoningbank/results', help='Output directory')
+    parser.add_argument('--local', action='store_true',
+                        help='Use LocalPythonInterpreter instead of Deno sandbox')
     args = parser.parse_args()
 
     # Test tasks
@@ -113,4 +117,6 @@ if __name__ == '__main__':
     ]
 
     exps = args.exp.split(',')
-    run_phase0(exps, tasks, args.ont, args.out)
+    if args.local:
+        print("Interpreter: LocalPythonInterpreter (no Deno sandbox)")
+    run_phase0(exps, tasks, args.ont, args.out, use_local_interpreter=args.local)

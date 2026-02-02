@@ -33,7 +33,8 @@ EXPS = {
               l2=Layer(True,2000), l3=Layer(True,1000)),  # Full layer cake
 }
 
-def run_phase0_uniprot(exps:list[str], tasks:list[dict], ont_path:str, out:str, verbose:bool=True):
+def run_phase0_uniprot(exps:list[str], tasks:list[dict], ont_path:str, out:str, verbose:bool=True,
+                       use_local_interpreter:bool=False):
     """Run layer ablation experiments with UniProt remote endpoint.
 
     Args:
@@ -42,6 +43,7 @@ def run_phase0_uniprot(exps:list[str], tasks:list[dict], ont_path:str, out:str, 
         ont_path: Path to UniProt ontology directory (for L0/L1 metadata)
         out: Output directory for results
         verbose: Print progress messages
+        use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox
     """
     from pathlib import Path
     from experiments.reasoningbank.core.mem import MemStore
@@ -73,7 +75,8 @@ def run_phase0_uniprot(exps:list[str], tasks:list[dict], ont_path:str, out:str, 
 
             # Pass memory for E5 and E6 (experiments with L2 enabled)
             exp_mem = mem if cfg.l2.on else None
-            res = run_uniprot(t['query'], ont_path, cfg, mem=exp_mem, verbose=verbose, log_path=log_path)
+            res = run_uniprot(t['query'], ont_path, cfg, mem=exp_mem, verbose=verbose, log_path=log_path,
+                              use_local_interpreter=use_local_interpreter)
             print(f"  ✓ Completed: {res.iters} iters, converged={res.converged}")
             results.append({
                 'exp': exp, 'task': t['id'],
@@ -107,6 +110,8 @@ if __name__ == '__main__':
     parser.add_argument('--out', default='experiments/reasoningbank/results_uniprot', help='Output directory')
     parser.add_argument('--tasks-file', default='experiments/reasoningbank/uniprot_test_tasks.json',
                         help='JSON file with test tasks')
+    parser.add_argument('--local', action='store_true',
+                        help='Use LocalPythonInterpreter instead of Deno sandbox')
     args = parser.parse_args()
 
     # Load test tasks (custom questions analogous to PROV experiments)
@@ -124,4 +129,6 @@ if __name__ == '__main__':
         print(f"    ({t['description']})")
 
     exps = args.exp.split(',')
-    run_phase0_uniprot(exps, tasks, args.ont, args.out)
+    if args.local:
+        print("Interpreter: LocalPythonInterpreter (no Deno sandbox)")
+    run_phase0_uniprot(exps, tasks, args.ont, args.out, use_local_interpreter=args.local)

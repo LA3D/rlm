@@ -18,6 +18,7 @@ from experiments.reasoningbank.ctx.builder import Cfg
 from experiments.reasoningbank.tools.sparql import SPARQLTools, create_tools
 from experiments.reasoningbank.packers import l0_sense, l1_schema, l2_mem, l3_guide
 from experiments.reasoningbank.ctx.cache import build_with_cache
+from experiments.reasoningbank.tools.local_interpreter import LocalPythonInterpreter
 
 # Configure DSPy with Anthropic model if not already configured
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
@@ -117,6 +118,7 @@ def run_uniprot(
     max_calls: int = 25,
     verbose: bool = True,
     log_path: str|None = None,
+    use_local_interpreter: bool = False,
 ) -> Result:
     """Run task using DSPy RLM with remote UniProt SPARQL endpoint.
 
@@ -130,6 +132,8 @@ def run_uniprot(
         max_calls: Maximum LLM calls
         verbose: Print progress
         log_path: Path to trajectory log file
+        use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox.
+                               Avoids sandbox corruption issues but has no security isolation.
 
     Returns:
         Result with answer, SPARQL, convergence status, and metrics
@@ -184,6 +188,16 @@ def run_uniprot(
     # Configure sub-LLM (cheaper model for llm_query)
     sub_lm = dspy.LM('anthropic/claude-haiku-4-5-20251001', api_key=os.environ['ANTHROPIC_API_KEY'])
 
+    # Create interpreter (local or Deno sandbox)
+    interpreter = None
+    if use_local_interpreter:
+        if verbose:
+            print("  Using LocalPythonInterpreter (no Deno sandbox)")
+        interpreter = LocalPythonInterpreter(
+            tools=inst.wrap(),
+            output_fields=[{'name': 'sparql'}, {'name': 'answer'}]
+        )
+
     # Run RLM with remote endpoint tools
     rlm = dspy.RLM(
         "context, question -> sparql, answer",
@@ -191,6 +205,7 @@ def run_uniprot(
         max_llm_calls=max_calls,
         tools=inst.wrap(),
         sub_lm=sub_lm,  # Enables llm_query and llm_query_batched
+        interpreter=interpreter,  # Use local interpreter if specified
     )
 
     try:

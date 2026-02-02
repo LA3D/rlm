@@ -29,6 +29,7 @@ def run_closed_loop_uniprot(
     verbose: bool = False,
     dedup: bool = True,
     log_dir: str = None,
+    use_local_interpreter: bool = False,
 ) -> list[dict]:
     """Run E9-E12 closed-loop learning with UniProt endpoint.
 
@@ -44,6 +45,7 @@ def run_closed_loop_uniprot(
         verbose: If True, print detailed LLM inputs/outputs
         dedup: If True, deduplicate during consolidation (default: True)
         log_dir: Directory for trajectory logs (creates {task_id}.jsonl files)
+        use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox
 
     Returns:
         List of result dicts for each task with keys:
@@ -58,7 +60,8 @@ def run_closed_loop_uniprot(
     for t in tasks:
         print(f"\nTask: {t['id']}")
         log_path = f"{log_dir}/{t['id']}.jsonl" if log_dir else None
-        res = run_uniprot(t['query'], ont_path, cfg, mem, endpoint=endpoint, verbose=False, log_path=log_path)
+        res = run_uniprot(t['query'], ont_path, cfg, mem, endpoint=endpoint, verbose=False,
+                         log_path=log_path, use_local_interpreter=use_local_interpreter)
 
         # Step 1: Judge with task context
         j = judge(res, t['query'], verbose=verbose)
@@ -124,6 +127,10 @@ if __name__ == '__main__':
     # Logging
     parser.add_argument('--log-dir', metavar='DIR', help='Directory for trajectory logs (creates {task_id}.jsonl files)')
 
+    # Interpreter
+    parser.add_argument('--local', action='store_true',
+                        help='Use LocalPythonInterpreter instead of Deno sandbox (avoids sandbox corruption)')
+
     args = parser.parse_args()
 
     if args.test:
@@ -154,6 +161,8 @@ if __name__ == '__main__':
         if cfg.l3.on: active.append('L3:guide')
         print(f"Active layers: {', '.join(active) if active else 'L2:memory (default)'}")
         print(f"Endpoint: {args.endpoint}")
+        if args.local:
+            print("Interpreter: LocalPythonInterpreter (no Deno sandbox)")
 
         # Dedup flag
         dedup = not args.no_dedup
@@ -208,7 +217,8 @@ if __name__ == '__main__':
                 do_extract=args.extract,
                 verbose=args.verbose,
                 dedup=dedup,
-                log_dir=log_dir
+                log_dir=log_dir,
+                use_local_interpreter=args.local
             )
 
         # Save memory if specified

@@ -61,6 +61,7 @@ class Ref:
             'rows': self.rows,
             'preview': self.prev,
             'source': self.source,
+            'usage': 'Call sparql_slice(this) to get data rows',
         }
 
 

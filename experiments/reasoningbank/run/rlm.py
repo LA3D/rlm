@@ -15,6 +15,7 @@ from experiments.reasoningbank.core.blob import Store
 from experiments.reasoningbank.core.mem import MemStore
 from experiments.reasoningbank.core.instrument import Metrics, Instrumented
 from experiments.reasoningbank.ctx.builder import Builder, Cfg
+from experiments.reasoningbank.tools.local_interpreter import LocalPythonInterpreter
 
 # Configure DSPy with Anthropic model if not already configured
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
@@ -48,8 +49,22 @@ def run(
     max_calls: int = 25,
     verbose: bool = True,
     log_path: str|None = None,
+    use_local_interpreter: bool = False,
 ) -> Result:
-    "Run `task` using dspy.RLM with configured context."
+    """Run `task` using dspy.RLM with configured context.
+
+    Args:
+        task: Natural language query
+        graph_path: Path to ontology file
+        cfg: Context configuration (layer toggles)
+        mem: Memory store (for L2)
+        max_iters: Maximum RLM iterations
+        max_calls: Maximum LLM calls
+        verbose: Print progress
+        log_path: Path to trajectory log file
+        use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox.
+                               Avoids sandbox corruption issues but has no security isolation.
+    """
     import json
     from datetime import datetime
 
@@ -97,6 +112,16 @@ def run(
     # Configure sub-LLM (cheaper model for llm_query)
     sub_lm = dspy.LM('anthropic/claude-haiku-4-5-20251001', api_key=os.environ['ANTHROPIC_API_KEY'])
 
+    # Create interpreter (local or Deno sandbox)
+    interpreter = None
+    if use_local_interpreter:
+        if verbose:
+            print("  Using LocalPythonInterpreter (no Deno sandbox)")
+        interpreter = LocalPythonInterpreter(
+            tools=inst.wrap(),
+            output_fields=[{'name': 'sparql'}, {'name': 'answer'}]
+        )
+
     # Run RLM
     rlm = dspy.RLM(
         "context, question -> sparql, answer",
@@ -104,6 +129,7 @@ def run(
         max_llm_calls=max_calls,
         tools=inst.wrap(),
         sub_lm=sub_lm,  # Enables llm_query and llm_query_batched
+        interpreter=interpreter,  # Use local interpreter if specified
     )
 
     try:
