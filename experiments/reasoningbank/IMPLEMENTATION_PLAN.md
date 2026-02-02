@@ -88,8 +88,16 @@ experiments/reasoningbank/
 ├── run/                         # Experiment execution
 │   ├── __init__.py
 │   ├── rlm.py                   # Direct dspy.RLM wrapper (~120 LOC)
+│   ├── rlm_uniprot.py           # UniProt remote endpoint runner (~400 LOC)
 │   ├── phase0.py                # E1-E8 layer experiments (~150 LOC)
-│   └── phase1.py                # E9-E12 closed-loop (~120 LOC)
+│   ├── phase1.py                # E9-E12 closed-loop (~120 LOC)
+│   └── phase1_uniprot.py        # Phase 1 for UniProt endpoint
+│
+├── tools/                       # SPARQL and memory tools
+│   ├── sparql.py                # Remote SPARQL tools with handles
+│   ├── endpoint.py              # Endpoint configuration registry
+│   ├── memory_reflect.py        # Human-guided memory augmentation (~300 LOC)
+│   └── memory_augment.py        # Automated memory analysis (experimental)
 │
 ├── seed/                        # Bootstrap data
 │   ├── strategies.json          # Curated success/failure strategies
@@ -752,14 +760,23 @@ def run_closed_loop(tasks:list[dict], ont:str, mem:MemStore,
 - ✅ **L0+L1 validation**: Context generation works (1418 chars, 88% of budget)
 - ✅ **E2 validation**: All 3 test tasks converged with proper tool usage (5-7 tool calls per task)
 
-**Total**: ~1130 LOC implemented
+**Total**: ~1300 LOC implemented
+
+**Recent Additions (2026-02):**
+- ✅ **L1 schema v2**: Property type separation, SPARQL hints, NamedIndividuals (~250 LOC)
+- ✅ **SPARQL tools fixes**: Prefix handling, API defaults (sparql_peek/slice)
+- ✅ **UniProt remote runner**: `run/rlm_uniprot.py` with endpoint tools (~400 LOC)
+- ✅ **Phase 1 UniProt**: `run/phase1_uniprot.py` closed-loop for remote endpoints
+- ✅ **Memory reflection tool**: `tools/memory_reflect.py` for human-guided augmentation (~300 LOC)
+- ✅ **Trajectory logging**: JSONL event streams for all runs
 
 **Pending (⏳):**
 - ⏳ Test full layer cake (E6: L0+L1+L2+L3 together)
 - ⏳ Full E1-E6 ablation suite execution and analysis
 - ⏳ E7 prompt leakage ablation (naive vs handle-based)
 - ⏳ E8 retrieval policy ablation (auto-inject vs tool-mediated)
-- ⏳ Phase 1 closed-loop learning (E9-E12)
+- ⏳ E10 consolidation (merge/supersede similar memories)
+- ⏳ E11 forgetting (bounded memory bank)
 
 ### L2 Enhancement (Completed ✅)
 
@@ -1192,3 +1209,112 @@ def run_closed_loop_sparql(
   - Successful trajectories teach strategies like "frame results as database records"
 
 The strategies extracted from successful trajectories implicitly encode how to frame queries to minimize refusals, without explicit "role framing" text.
+
+---
+
+## Human-in-the-Loop Procedural Memory Augmentation
+
+Beyond automatic extraction, procedural memory can be augmented through human-guided analysis of agent trajectories.
+
+### Workflow
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. Review trajectory together                          │
+│     (Claude Code explains agent behavior step by step)  │
+│                        ↓                                │
+│  2. Identify issue                                      │
+│     ("Agent wasted iterations because X")               │
+│                        ↓                                │
+│  3. Craft procedural memory                             │
+│     (Human dictates domain knowledge, tool records)     │
+│                        ↓                                │
+│  4. Re-run with memory                                  │
+│     (See if behavior changes)                           │
+│                        ↓                                │
+│  5. Evaluate & iterate                                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Rationale
+
+- **LLM extraction has gaps**: Automatic extraction may miss domain-specific patterns that a human expert recognizes
+- **Technical nuances**: SPARQL/RDF patterns, ontology conventions, and API behaviors may not be in training data
+- **Iterative refinement**: Testing memory impact on agent behavior validates the memory's usefulness
+- **Scale concerns**: We don't yet know how the system behaves with large memory stores, so careful human curation helps
+
+### Tool: `memory_reflect.py`
+
+A minimal tool supporting the human-in-the-loop workflow:
+
+```bash
+# View trajectory for analysis
+python tools/memory_reflect.py -t results/task.jsonl -m memories.json \
+    --hint "describe" --verbose
+
+# Add memory based on human insight
+python tools/memory_reflect.py -t results/task.jsonl -m memories.json \
+    --hint "The agent should retrieve all results before formatting answer" \
+    --save memories.json --interactive
+
+# Compare before/after trajectories
+python tools/memory_reflect.py -t results/after.jsonl --compare results/before.jsonl \
+    -m memories.json --hint "What made the second run faster?"
+```
+
+### Integration with Phase 1
+
+Human-in-the-loop augmentation complements automatic extraction (E9):
+- **E9 (automatic)**: Judge → extract → persist (append-only)
+- **Human-guided**: Review → identify → craft → test → refine
+
+Both feed into E10 (consolidation) and E11 (pruning) for memory management at scale.
+
+---
+
+## Recent Implementation Updates (2026-02)
+
+### L1 Schema Enhancements ✅
+
+**File**: `packers/l1_schema.py`
+
+Enhanced to support:
+1. **Property type separation**: ObjectProperty, DatatypeProperty, AnnotationProperty categorized separately
+2. **SPARQL hints**: Generated tips like "Use `rdfs:subClassOf+` for transitive closure"
+3. **NamedIndividuals extraction**: Enum-like values grouped by class type (e.g., UniProt Rank, Organelle)
+4. **Schema.org pattern support**: Handles `domainIncludes`/`rangeIncludes` in addition to `rdfs:domain`/`rdfs:range`
+
+**Tested on**: SIO (1140 props), DOLCE/DUL (178 props), GeoSPARQL (55 props), UniProt (138 props), SKOS (27 props), Schema.org (1507 props)
+
+### SPARQL Tools Fixes ✅
+
+**File**: `tools/sparql.py`
+
+1. **Prefix handling fix**: Always prepend default prefixes (rdfs, owl, rdf, etc.) regardless of user-defined prefixes. Previously, property paths like `rdfs:subClassOf+` would fail if the query included ANY prefix declaration.
+
+2. **API defaults fix**: Increased default limits to reduce wasted iterations:
+   - `sparql_peek`: default 5 → 20 rows, hard cap 20 → 50
+   - `sparql_slice`: default end 10 → `default_limit` (100)
+   - `ResultStore.slice`: hard cap 50 → 100
+
+**Impact**: protein_properties task improved from 10 → 5 iterations (50% reduction)
+
+### UniProt Procedural Memory Baseline ✅
+
+**File**: `results/phase1_uniprot_memory.json`
+
+5 extracted memories from initial UniProt runs:
+1. "Query Class Definition Using rdfs:comment Property"
+2. "Finding Class Properties via rdfs:domain Pattern"
+3. "Query Class Hierarchy with Transitive Subclass Pattern"
+4. (2 near-duplicates to be consolidated)
+
+### Iteration Comparison Results
+
+| Task | No Memory | With Memory | With API Fix |
+|------|-----------|-------------|--------------|
+| protein_lookup | 6 | 4 | 4 |
+| protein_properties | 9 | 10 | **5** |
+| annotation_types | 12 | 12 | **8** |
+
+The API fix had more impact than procedural memory for these tasks, indicating tool design is as important as memory content.
