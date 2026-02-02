@@ -39,9 +39,12 @@ class Store:
         return self._blobs[k][:n]
 
     def slice(self, k: str, start: int, end: int) -> str | dict:
-        "Get slice of content. Returns error dict if not found."
+        "Get slice of content. end=-1 means 'to end'. Returns error dict if not found."
         if k not in self._blobs:
             return {'error': f'key not found: {k}', 'available_keys': list(self._blobs.keys())[:5]}
+        # Special case: end=-1 means "to end of content" (not Python's "drop last char")
+        if end == -1:
+            return self._blobs[k][start:]
         return self._blobs[k][start:end]
 
     def stats(self, k: str) -> dict:

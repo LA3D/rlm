@@ -303,14 +303,15 @@ def make_tools(store: Store, graph_ref: Ref, mem: MemStore = None) -> dict:
         Args:
             key: The result key (string) OR the full handle dict from g_query
             start: Start character index (default 0)
-            end: End character index (default 100)
+            end: End character index (default 100), use -1 for "to end"
 
         Returns: String slice of the content
 
         Example:
             result = g_query('SELECT...')
-            print(ctx_slice(result, 0, 500))  # Pass handle directly
-            print(ctx_slice(result['key'], 0, 500))  # Or extract key
+            print(ctx_slice(result, 0, 500))   # First 500 chars
+            print(ctx_slice(result, 0, -1))    # ALL content (end=-1 means "to end")
+            print(ctx_slice(result, 100, 200)) # Chars 100-200
         """
         # Accept full handle dict - extract 'key' field
         if isinstance(key, dict) and 'key' in key:
