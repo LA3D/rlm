@@ -59,10 +59,15 @@ def run(
     # Build context (with caching for L0/L1)
     builder = Builder(cfg)
     ctx = builder.build(g, task, mem, g_path=graph_path)
+    exec_note = (
+        "EXECUTION NOTE: In [[ ## code ## ]] output raw Python only. "
+        "Do NOT include markdown fences (```), language tags, or prose."
+    )
+    ctx = f"{exec_note}\n\n{ctx}" if ctx else exec_note
 
     # Build tools
     store = Store()
-    tools = builder.tools(store, graph_path)
+    tools = builder.tools(store, graph_path, mem=mem)
     inst = Instrumented(tools)
 
     # Prepare trajectory logging
@@ -78,7 +83,9 @@ def run(
         }
         trajectory.append(event)
         if verbose:
-            print(f"  [{event_type}] {str(data)[:100]}")
+            msg = f"  [{event_type}] {str(data)[:100]}"
+            print(msg)
+            inst.metrics.stdout_chars += len(msg) + 1
         if log_path:
             with open(log_path, 'a') as f:
                 f.write(json.dumps(event) + '\n')
@@ -155,6 +162,9 @@ def run(
             'iterations': len(history),
             'lm_usage': lm_usage,
         })
+        # Update leakage metrics from run
+        inst.metrics.subcalls = lm_usage.get('total_calls', 0)
+        inst.metrics.vars_n = len(getattr(store, '_blobs', {}))
 
         # Save full history to log file
         if log_path and history:
@@ -185,11 +195,20 @@ def run(
 
                         if response_text:
                             # Extract code block from this iteration
+                            # Try with backticks first (preferred format)
                             code_pattern = r'\[\[\s*##\s*code\s*##\s*\]\]\s*```python\s+(.*?)\s*```'
                             code_match = re.search(code_pattern, str(response_text), re.DOTALL | re.IGNORECASE)
 
+                            # Fallback: code directly after marker (no backticks)
+                            if not code_match:
+                                code_pattern_alt = r'\[\[\s*##\s*code\s*##\s*\]\]\s*\n(.*?)(?:\[\[\s*##|\Z)'
+                                code_match = re.search(code_pattern_alt, str(response_text), re.DOTALL)
+
                             if code_match:
                                 code = code_match.group(1).strip()
+                                # Remove trailing ``` if present from alt pattern
+                                if code.endswith('```'):
+                                    code = code[:-3].strip()
 
                                 # Try to get output from next iteration's user message (REPL history)
                                 output = "(output not captured)"

@@ -139,6 +139,11 @@ def run_uniprot(
 
     # Build context from local ontology metadata
     ctx = build_context_uniprot(cfg, ont_path, task, mem)
+    exec_note = (
+        "EXECUTION NOTE: In [[ ## code ## ]] output raw Python only. "
+        "Do NOT include markdown fences (```), language tags, or prose."
+    )
+    ctx = f"{exec_note}\n\n{ctx}" if ctx else exec_note
 
     # Prepare trajectory logging
     trajectory = []
@@ -153,7 +158,9 @@ def run_uniprot(
         }
         trajectory.append(event)
         if verbose:
-            print(f"  [{event_type}] {str(data)[:100]}")
+            msg = f"  [{event_type}] {str(data)[:100]}"
+            print(msg)
+            inst.metrics.stdout_chars += len(msg) + 1
         if log_path:
             with open(log_path, 'a') as f:
                 f.write(json.dumps(event) + '\n')
@@ -259,6 +266,9 @@ def run_uniprot(
             'iterations': len(history),
             'lm_usage': lm_usage,
         })
+        # Update leakage metrics from run
+        inst.metrics.subcalls = lm_usage.get('total_calls', 0)
+        inst.metrics.vars_n = len(getattr(sparql_tools.store, '_results', {}))
 
         # Extract execution trajectory from RLM history
         exec_trajectory = []
@@ -285,11 +295,20 @@ def run_uniprot(
 
                         if response_text:
                             # Extract code block from this iteration
+                            # Try with backticks first (preferred format)
                             code_pattern = r'\[\[\s*##\s*code\s*##\s*\]\]\s*```python\s+(.*?)\s*```'
                             code_match = re.search(code_pattern, str(response_text), re.DOTALL | re.IGNORECASE)
 
+                            # Fallback: code directly after marker (no backticks)
+                            if not code_match:
+                                code_pattern_alt = r'\[\[\s*##\s*code\s*##\s*\]\]\s*\n(.*?)(?:\[\[\s*##|\Z)'
+                                code_match = re.search(code_pattern_alt, str(response_text), re.DOTALL)
+
                             if code_match:
                                 code = code_match.group(1).strip()
+                                # Remove trailing ``` if present from alt pattern
+                                if code.endswith('```'):
+                                    code = code[:-3].strip()
 
                                 # Try to get output from next iteration's user message (REPL history)
                                 output = "(output not captured)"

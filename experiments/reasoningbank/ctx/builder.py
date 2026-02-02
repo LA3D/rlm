@@ -89,39 +89,94 @@ class Builder:
         #   args = actual arguments (value, list, etc)
         #   kwargs = keyword arguments dict
 
+        def _norm(args, kwargs):
+            if args is None:
+                args_list = []
+            elif isinstance(args, (list, tuple)):
+                args_list = list(args)
+            else:
+                args_list = [args]
+            if kwargs is None or not isinstance(kwargs, dict):
+                kwargs = {}
+            return args_list, kwargs
+
+        def _arg(args_list, idx, default=None):
+            return args_list[idx] if len(args_list) > idx else default
+
         # Graph tools (bounded ontology access)
         tools = {
-            'g_stats': lambda args, kwargs: G.g_stats(ref),
-            'g_query': lambda args, kwargs: G.g_query(ref, args if isinstance(args, str) else (args[0] if args else kwargs.get('q', '')), kwargs.get('limit', 100)),
-            'g_sample': lambda args, kwargs: G.g_sample(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('n', 10))),
-            'g_classes': lambda args, kwargs: G.g_classes(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('limit', 50))),
-            'g_props': lambda args, kwargs: G.g_props(ref, args if isinstance(args, int) else (args[0] if args else kwargs.get('limit', 50))),
-            'g_describe': lambda args, kwargs: G.g_describe(ref, args if isinstance(args, str) else (args[0] if args else kwargs.get('uri', '')), kwargs.get('limit', 20)),
+            'g_stats': lambda args=None, kwargs=None: G.g_stats(ref),
+            'g_query': lambda args=None, kwargs=None: (
+                lambda a, k: G.g_query(
+                    ref,
+                    _arg(a, 0, k.get('q', '')),
+                    _arg(a, 1, k.get('limit', 100))
+                )
+            )(*_norm(args, kwargs)),
+            'g_sample': lambda args=None, kwargs=None: (
+                lambda a, k: G.g_sample(ref, _arg(a, 0, k.get('n', 10)))
+            )(*_norm(args, kwargs)),
+            'g_classes': lambda args=None, kwargs=None: (
+                lambda a, k: G.g_classes(ref, _arg(a, 0, k.get('limit', 50)))
+            )(*_norm(args, kwargs)),
+            'g_props': lambda args=None, kwargs=None: (
+                lambda a, k: G.g_props(ref, _arg(a, 0, k.get('limit', 50)))
+            )(*_norm(args, kwargs)),
+            'g_describe': lambda args=None, kwargs=None: (
+                lambda a, k: G.g_describe(ref, _arg(a, 0, k.get('uri', '')), k.get('limit', 20))
+            )(*_norm(args, kwargs)),
             # Context tools (bounded blob access)
-            'ctx_peek': lambda args, kwargs: store.peek(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', '')), args[1] if isinstance(args, list) and len(args) > 1 else kwargs.get('n', 200)),
-            'ctx_slice': lambda args, kwargs: store.slice(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', '')), args[1] if isinstance(args, list) and len(args) > 1 else kwargs.get('start', 0), args[2] if isinstance(args, list) and len(args) > 2 else kwargs.get('end', 100)),
-            'ctx_stats': lambda args, kwargs: store.stats(args if isinstance(args, str) else (args[0] if args else kwargs.get('k', ''))),
+            'ctx_peek': lambda args=None, kwargs=None: (
+                lambda a, k: {'error': 'missing key'} if not _arg(a, 0, k.get('k', '')) else
+                store.peek(_arg(a, 0, k.get('k', '')), _arg(a, 1, k.get('n', 200)))
+            )(*_norm(args, kwargs)),
+            'ctx_slice': lambda args=None, kwargs=None: (
+                lambda a, k: {'error': 'missing key'} if not _arg(a, 0, k.get('k', '')) else
+                store.slice(_arg(a, 0, k.get('k', '')),
+                            _arg(a, 1, k.get('start', 0)),
+                            _arg(a, 2, k.get('end', 100)))
+            )(*_norm(args, kwargs)),
+            'ctx_stats': lambda args=None, kwargs=None: (
+                lambda a, k: {'error': 'missing key'} if not _arg(a, 0, k.get('k', '')) else
+                store.stats(_arg(a, 0, k.get('k', '')))
+            )(*_norm(args, kwargs)),
         }
 
         # Memory tools (Mode 2: tool-mediated retrieval)
         if mem:
             tools.update({
-                'mem_search': lambda args, kwargs: mem.search(
-                    args if isinstance(args, str) else (args[0] if args else kwargs.get('q', '')),
-                    kwargs.get('k', 6),
-                    kwargs.get('polarity', None)
-                ),
-                'mem_get': lambda args, kwargs: [
-                    {'id': o.id, 'title': o.title, 'desc': o.desc, 'content': o.content, 'src': o.src}
-                    for o in mem.get(
-                        args if isinstance(args, list) else ([args] if args else kwargs.get('ids', [])),
-                        kwargs.get('max_n', 3)
+                'mem_search': lambda args=None, kwargs=None: (
+                    lambda a, k: mem.search(
+                        _arg(a, 0, k.get('q', '')),
+                        k.get('k', 6),
+                        k.get('polarity', None)
                     )
-                ],
-                'mem_quote': lambda args, kwargs: mem.quote(
-                    args if isinstance(args, str) else (args[0] if args else kwargs.get('id', '')),
-                    kwargs.get('max_chars', 500)
-                ),
+                )(*_norm(args, kwargs)),
+                'mem_get': lambda args=None, kwargs=None: (
+                    lambda a, k: [
+                        {
+                            'id': o.id,
+                            'title': o.title,
+                            'desc': o.desc,
+                            'content': (
+                                o.content[:(k.get('max_chars', 1000))] +
+                                ("..." if len(o.content) > (k.get('max_chars', 1000)) else "")
+                            ),
+                            'src': o.src
+                        }
+                        for o in mem.get(
+                            _arg(a, 0, k.get('ids', [])) if isinstance(_arg(a, 0, None), list)
+                            else ([ _arg(a, 0, None) ] if _arg(a, 0, None) else k.get('ids', [])),
+                            k.get('max_n', 3)
+                        )
+                    ]
+                )(*_norm(args, kwargs)),
+                'mem_quote': lambda args=None, kwargs=None: (
+                    lambda a, k: mem.quote(
+                        _arg(a, 0, k.get('id', '')),
+                        k.get('max_chars', 500)
+                    )
+                )(*_norm(args, kwargs)),
             })
 
         return tools

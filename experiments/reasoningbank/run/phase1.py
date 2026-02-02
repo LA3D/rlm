@@ -344,20 +344,14 @@ def run_matts_parallel(
     Returns:
         Tuple of (best Result, list of extracted Items)
     """
-    from concurrent.futures import ThreadPoolExecutor
-
     if cfg is None:
         cfg = Cfg()
 
     if verbose:
         print(f"  [matts] Running {k} parallel rollouts...")
 
-    # 1. Run k rollouts in parallel
-    def run_one(_):
-        return run(task, ont, cfg, mem)
-
-    with ThreadPoolExecutor(max_workers=k) as ex:
-        results = list(ex.map(run_one, range(k)))
+    # 1. Run k rollouts sequentially to avoid shared LM state issues
+    results = [run(task, ont, cfg, mem) for _ in range(k)]
 
     if verbose:
         print(f"  [matts] Completed {len(results)} rollouts")
