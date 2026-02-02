@@ -20,7 +20,7 @@ from experiments.reasoningbank.ctx.builder import Builder, Cfg
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
     if not os.environ.get('ANTHROPIC_API_KEY'):
         raise ValueError("Set ANTHROPIC_API_KEY environment variable")
-    lm = dspy.LM('anthropic/claude-sonnet-4-20250514', api_key=os.environ['ANTHROPIC_API_KEY'])
+    lm = dspy.LM('anthropic/claude-sonnet-4-5-20250929', api_key=os.environ['ANTHROPIC_API_KEY'])
     dspy.configure(lm=lm)
 
 @dataclass
@@ -95,7 +95,7 @@ def run(
     log_event('run_start', {'task': task, 'context_size': len(ctx), 'max_iters': max_iters})
 
     # Configure sub-LLM (cheaper model for llm_query)
-    sub_lm = dspy.LM('anthropic/claude-3-5-haiku-20241022', api_key=os.environ['ANTHROPIC_API_KEY'])
+    sub_lm = dspy.LM('anthropic/claude-haiku-4-5-20251001', api_key=os.environ['ANTHROPIC_API_KEY'])
 
     # Run RLM
     rlm = dspy.RLM(

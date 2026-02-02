@@ -17,7 +17,7 @@ from experiments.reasoningbank.core import graph as G
 if not os.environ.get('ANTHROPIC_API_KEY'):
     raise ValueError("Set ANTHROPIC_API_KEY environment variable")
 
-lm = dspy.LM('anthropic/claude-sonnet-4-20250514', api_key=os.environ['ANTHROPIC_API_KEY'])
+lm = dspy.LM('anthropic/claude-sonnet-4-5-20250929', api_key=os.environ['ANTHROPIC_API_KEY'])
 dspy.configure(lm=lm)
 
 # Graph path
