@@ -103,11 +103,11 @@ class ResultStore:
         return [data] if data else []
 
     def slice(self, k: str, start: int, end: int) -> list:
-        """Get rows [start:end] (capped at 50)."""
+        """Get rows [start:end] (capped at 100)."""
         data = self._results.get(k)
         if not isinstance(data, list):
             return [data] if data else []
-        end = min(end, start + 50)  # Hard cap
+        end = min(end, start + 100)  # Hard cap matches default_limit
         return data[start:end]
 
     def stats(self, k: str) -> dict:
@@ -233,12 +233,12 @@ class SPARQLTools:
 
         return self.store.put(rows, 'results', preview).to_handle()
 
-    def sparql_peek(self, ref_key: str | dict, n: int = 5) -> list[dict]:
-        """Peek at first n rows of result (bounded to 20 max).
+    def sparql_peek(self, ref_key: str | dict, n: int = 20) -> list[dict]:
+        """Peek at first n rows of result (bounded to 50 max).
 
         Args:
             ref_key: Result key (string) OR full handle dict from sparql_query
-            n: Number of rows to return (default 5, max 20)
+            n: Number of rows to return (default 20, max 50)
 
         Example:
             result = sparql_query('SELECT ...')
@@ -248,20 +248,21 @@ class SPARQLTools:
         # Accept full handle dict - extract 'key' field
         if isinstance(ref_key, dict) and 'key' in ref_key:
             ref_key = ref_key['key']
-        n = min(n, 20)  # Hard cap
+        n = min(n, 50)  # Hard cap
         return self.store.peek(ref_key, n)
 
     def sparql_slice(self, ref_key: str | dict, start: int, end: int) -> list[dict]:
-        """Get rows [start:end] from result (capped at 50).
+        """Get rows [start:end] from result (capped at 100).
 
         Args:
             ref_key: Result key (string) OR full handle dict from sparql_query
-            start: Start row index
-            end: End row index (capped at start + 50)
+            start: Start row index (default 0)
+            end: End row index (default: endpoint default_limit, typically 100)
 
         Example:
             result = sparql_query('SELECT ...')
-            rows = sparql_slice(result, 0, 10)  # Pass handle directly
+            rows = sparql_slice(result)          # Get all rows (up to 100)
+            rows = sparql_slice(result, 10, 20)  # Get rows 10-20
         """
         # Accept full handle dict - extract 'key' field
         if isinstance(ref_key, dict) and 'key' in ref_key:
@@ -397,12 +398,12 @@ class SPARQLTools:
             ),
             'sparql_peek': lambda args=None, kwargs=None: self.sparql_peek(
                 _get_arg(args, kwargs, 0, 'ref_key', ''),
-                _get_arg(args, kwargs, 1, 'n', 5)
+                _get_arg(args, kwargs, 1, 'n', 20)  # Increased from 5 to show more results by default
             ),
             'sparql_slice': lambda args=None, kwargs=None: self.sparql_slice(
                 _get_arg(args, kwargs, 0, 'ref_key', ''),
                 _get_arg(args, kwargs, 1, 'start', 0),
-                _get_arg(args, kwargs, 2, 'end', 10)
+                _get_arg(args, kwargs, 2, 'end', self.default_limit)  # Use endpoint default (100) not hardcoded 10
             ),
             'sparql_stats': lambda args=None, kwargs=None: self.sparql_stats(
                 _get_arg(args, kwargs, 0, 'ref_key', '')
