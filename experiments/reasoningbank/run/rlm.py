@@ -61,7 +61,9 @@ def run(
     ctx = builder.build(g, task, mem, g_path=graph_path)
     exec_note = (
         "EXECUTION NOTE: In [[ ## code ## ]] output raw Python only. "
-        "Do NOT include markdown fences (```), language tags, or prose."
+        "Do NOT include markdown fences (```), language tags, or prose.\n\n"
+        "SUBMIT SYNTAX: Use keyword arguments: SUBMIT(sparql='...', answer='...') "
+        "NOT positional: SUBMIT(sparql_var, answer_var)"
     )
     ctx = f"{exec_note}\n\n{ctx}" if ctx else exec_note
 
@@ -92,12 +94,16 @@ def run(
 
     log_event('run_start', {'task': task, 'context_size': len(ctx), 'max_iters': max_iters})
 
+    # Configure sub-LLM (cheaper model for llm_query)
+    sub_lm = dspy.LM('anthropic/claude-3-5-haiku-20241022', api_key=os.environ['ANTHROPIC_API_KEY'])
+
     # Run RLM
     rlm = dspy.RLM(
         "context, question -> sparql, answer",
         max_iterations=max_iters,
         max_llm_calls=max_calls,
         tools=inst.wrap(),
+        sub_lm=sub_lm,  # Enables llm_query and llm_query_batched
     )
 
     try:

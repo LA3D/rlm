@@ -201,11 +201,21 @@ def make_tools(store: Store, graph_ref: Ref, mem: MemStore = None) -> dict:
             q: SPARQL query string
             limit: Maximum results (default 100)
 
-        Returns: Handle dict with 'key' for ctx_peek/ctx_slice access
+        Returns:
+            Handle dict: {'key': 'results_N', 'dtype': 'results', 'sz': int, 'prev': str}
 
-        Example:
+        Usage:
             result = g_query('SELECT ?s WHERE { ?s a owl:Class } LIMIT 10')
-            print(ctx_peek(result['key']))
+
+            # Option 1: Pass handle directly to ctx_peek (preferred)
+            print(ctx_peek(result))
+
+            # Option 2: Extract key explicitly
+            print(ctx_peek(result['key'], 500))
+
+            # Check result size before reading
+            stats = ctx_stats(result)
+            print(f"Result has {stats['lines']} lines")
         """
         # Handle DSPy convention: g_query(['SELECT...'], {'limit': 50})
         if isinstance(q, list):
@@ -259,17 +269,25 @@ def make_tools(store: Store, graph_ref: Ref, mem: MemStore = None) -> dict:
         """Peek at first n characters of a stored result.
 
         Args:
-            key: The result key (from g_query, etc.)
+            key: The result key (string) OR the full handle dict from g_query
             n: Number of characters to show (default 200)
 
         Returns: String preview of the content
 
-        Example: print(ctx_peek('results_0', 500))
+        Example:
+            result = g_query('SELECT...')
+            print(ctx_peek(result))       # Pass handle directly
+            print(ctx_peek(result['key'], 500))  # Or extract key
         """
+        # Accept full handle dict - extract 'key' field
+        if isinstance(key, dict) and 'key' in key:
+            key = key['key']
         # Handle DSPy convention: ctx_peek(['key'], {'n': 500})
         if isinstance(key, list):
             if len(key) >= 1 and isinstance(key[0], str):
                 key = key[0]
+            elif len(key) >= 1 and isinstance(key[0], dict) and 'key' in key[0]:
+                key = key[0]['key']  # Handle [{'key': '...', ...}]
             else:
                 key = ''
         if isinstance(n, dict):
@@ -283,18 +301,26 @@ def make_tools(store: Store, graph_ref: Ref, mem: MemStore = None) -> dict:
         """Get a slice of stored content by character position.
 
         Args:
-            key: The result key
+            key: The result key (string) OR the full handle dict from g_query
             start: Start character index (default 0)
             end: End character index (default 100)
 
         Returns: String slice of the content
 
-        Example: print(ctx_slice('results_0', 0, 500))
+        Example:
+            result = g_query('SELECT...')
+            print(ctx_slice(result, 0, 500))  # Pass handle directly
+            print(ctx_slice(result['key'], 0, 500))  # Or extract key
         """
+        # Accept full handle dict - extract 'key' field
+        if isinstance(key, dict) and 'key' in key:
+            key = key['key']
         # Handle DSPy convention: ctx_slice(['key'], {'start': 0, 'end': 500})
         if isinstance(key, list):
             if len(key) >= 1 and isinstance(key[0], str):
                 key = key[0]
+            elif len(key) >= 1 and isinstance(key[0], dict) and 'key' in key[0]:
+                key = key[0]['key']  # Handle [{'key': '...', ...}]
             else:
                 key = ''
         if isinstance(start, dict):
@@ -310,16 +336,24 @@ def make_tools(store: Store, graph_ref: Ref, mem: MemStore = None) -> dict:
         """Get statistics about stored content.
 
         Args:
-            key: The result key
+            key: The result key (string) OR the full handle dict from g_query
 
         Returns: Dict with 'sz' (size) and 'lines' (line count)
 
-        Example: stats = ctx_stats('results_0')
+        Example:
+            result = g_query('SELECT...')
+            stats = ctx_stats(result)       # Pass handle directly
+            stats = ctx_stats(result['key'])  # Or extract key
         """
+        # Accept full handle dict - extract 'key' field
+        if isinstance(key, dict) and 'key' in key:
+            key = key['key']
         # Handle DSPy convention: ctx_stats(['key'], {})
         if isinstance(key, list):
             if len(key) >= 1 and isinstance(key[0], str):
                 key = key[0]
+            elif len(key) >= 1 and isinstance(key[0], dict) and 'key' in key[0]:
+                key = key[0]['key']  # Handle [{'key': '...', ...}]
             else:
                 key = ''
         k = _unwrap_key(key)

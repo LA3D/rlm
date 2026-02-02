@@ -26,9 +26,27 @@ class Store:
         self._blobs[k] = content
         return Ref(k, dtype, len(content), content[:80])
 
-    def get(self, k:str) -> str: return self._blobs[k]
-    def peek(self, k:str, n:int=200) -> str: return self._blobs[k][:n]
-    def slice(self, k:str, start:int, end:int) -> str: return self._blobs[k][start:end]
-    def stats(self, k:str) -> dict:
+    def get(self, k: str) -> str | dict:
+        "Get full content by key. Returns error dict if not found."
+        if k not in self._blobs:
+            return {'error': f'key not found: {k}', 'available_keys': list(self._blobs.keys())[:5]}
+        return self._blobs[k]
+
+    def peek(self, k: str, n: int = 200) -> str | dict:
+        "Peek at first n chars. Returns error dict if not found."
+        if k not in self._blobs:
+            return {'error': f'key not found: {k}', 'available_keys': list(self._blobs.keys())[:5]}
+        return self._blobs[k][:n]
+
+    def slice(self, k: str, start: int, end: int) -> str | dict:
+        "Get slice of content. Returns error dict if not found."
+        if k not in self._blobs:
+            return {'error': f'key not found: {k}', 'available_keys': list(self._blobs.keys())[:5]}
+        return self._blobs[k][start:end]
+
+    def stats(self, k: str) -> dict:
+        "Get size and line count. Returns error dict if not found."
+        if k not in self._blobs:
+            return {'error': f'key not found: {k}', 'available_keys': list(self._blobs.keys())[:5]}
         c = self._blobs[k]
         return {'sz': len(c), 'lines': c.count('\n')+1}
