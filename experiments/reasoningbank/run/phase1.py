@@ -415,6 +415,7 @@ def run_closed_loop(
     do_extract: bool = True,
     verbose: bool = False,
     dedup: bool = True,
+    log_dir: str = None,
 ) -> list[dict]:
     """Run E9-E12 closed-loop learning.
 
@@ -428,6 +429,7 @@ def run_closed_loop(
         do_extract: If True, extract procedures from trajectories
         verbose: If True, print detailed LLM inputs/outputs
         dedup: If True, deduplicate during consolidation (default: True)
+        log_dir: Directory for trajectory logs (creates {task_id}.jsonl files)
 
     Returns:
         List of result dicts for each task with keys:
@@ -441,7 +443,8 @@ def run_closed_loop(
 
     for t in tasks:
         print(f"\nTask: {t['id']}")
-        res = run(t['query'], ont, cfg, mem)
+        log_path = f"{log_dir}/{t['id']}.jsonl" if log_dir else None
+        res = run(t['query'], ont, cfg, mem, log_path=log_path)
 
         # Step 1: Judge with task context
         j = judge(res, t['query'], verbose=verbose)
@@ -574,6 +577,9 @@ if __name__ == '__main__':
     # Deduplication control
     parser.add_argument('--no-dedup', action='store_true', help='Disable deduplication during consolidation')
 
+    # Logging
+    parser.add_argument('--log-dir', metavar='DIR', help='Directory for trajectory logs (creates {task_id}.jsonl files)')
+
     args = parser.parse_args()
 
     if args.test:
@@ -609,6 +615,13 @@ if __name__ == '__main__':
         if not dedup:
             print("Deduplication: DISABLED")
 
+        # Create log directory if specified
+        log_dir = args.log_dir
+        if log_dir:
+            import os
+            os.makedirs(log_dir, exist_ok=True)
+            print(f"Logging trajectories to: {log_dir}/")
+
         # Full closed-loop run
         tasks = [
             {'id': 'entity_lookup', 'query': 'What is Activity?'},
@@ -641,7 +654,7 @@ if __name__ == '__main__':
         else:
             # Standard closed-loop mode
             results = run_closed_loop(tasks, args.ont, mem, cfg, args.extract,
-                                      verbose=args.verbose, dedup=dedup)
+                                      verbose=args.verbose, dedup=dedup, log_dir=log_dir)
 
         # Save memory if specified
         save_path = args.save_mem or ('experiments/reasoningbank/results/phase1_memory.json' if args.extract or args.matts else None)

@@ -28,6 +28,7 @@ def run_closed_loop_uniprot(
     do_extract: bool = True,
     verbose: bool = False,
     dedup: bool = True,
+    log_dir: str = None,
 ) -> list[dict]:
     """Run E9-E12 closed-loop learning with UniProt endpoint.
 
@@ -42,6 +43,7 @@ def run_closed_loop_uniprot(
         do_extract: If True, extract procedures from trajectories
         verbose: If True, print detailed LLM inputs/outputs
         dedup: If True, deduplicate during consolidation (default: True)
+        log_dir: Directory for trajectory logs (creates {task_id}.jsonl files)
 
     Returns:
         List of result dicts for each task with keys:
@@ -55,7 +57,8 @@ def run_closed_loop_uniprot(
 
     for t in tasks:
         print(f"\nTask: {t['id']}")
-        res = run_uniprot(t['query'], ont_path, cfg, mem, endpoint=endpoint, verbose=False)
+        log_path = f"{log_dir}/{t['id']}.jsonl" if log_dir else None
+        res = run_uniprot(t['query'], ont_path, cfg, mem, endpoint=endpoint, verbose=False, log_path=log_path)
 
         # Step 1: Judge with task context
         j = judge(res, t['query'], verbose=verbose)
@@ -118,6 +121,9 @@ if __name__ == '__main__':
     # Deduplication control
     parser.add_argument('--no-dedup', action='store_true', help='Disable deduplication during consolidation')
 
+    # Logging
+    parser.add_argument('--log-dir', metavar='DIR', help='Directory for trajectory logs (creates {task_id}.jsonl files)')
+
     args = parser.parse_args()
 
     if args.test:
@@ -153,6 +159,13 @@ if __name__ == '__main__':
         dedup = not args.no_dedup
         if not dedup:
             print("Deduplication: DISABLED")
+
+        # Create log directory if specified
+        log_dir = args.log_dir
+        if log_dir:
+            import os
+            os.makedirs(log_dir, exist_ok=True)
+            print(f"Logging trajectories to: {log_dir}/")
 
         # Load tasks
         with open(args.tasks) as f:
@@ -194,7 +207,8 @@ if __name__ == '__main__':
                 endpoint=args.endpoint,
                 do_extract=args.extract,
                 verbose=args.verbose,
-                dedup=dedup
+                dedup=dedup,
+                log_dir=log_dir
             )
 
         # Save memory if specified

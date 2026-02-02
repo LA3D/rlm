@@ -141,7 +141,9 @@ def run_uniprot(
     ctx = build_context_uniprot(cfg, ont_path, task, mem)
     exec_note = (
         "EXECUTION NOTE: In [[ ## code ## ]] output raw Python only. "
-        "Do NOT include markdown fences (```), language tags, or prose."
+        "Do NOT include markdown fences (```), language tags, or prose.\n\n"
+        "SUBMIT SYNTAX: Use keyword arguments: SUBMIT(sparql='...', answer='...') "
+        "NOT positional: SUBMIT(sparql_var, answer_var)"
     )
     ctx = f"{exec_note}\n\n{ctx}" if ctx else exec_note
 
@@ -179,12 +181,16 @@ def run_uniprot(
         'max_iters': max_iters
     })
 
+    # Configure sub-LLM (cheaper model for llm_query)
+    sub_lm = dspy.LM('anthropic/claude-haiku-4-5-20251001', api_key=os.environ['ANTHROPIC_API_KEY'])
+
     # Run RLM with remote endpoint tools
     rlm = dspy.RLM(
         "context, question -> sparql, answer",
         max_iterations=max_iters,
         max_llm_calls=max_calls,
         tools=inst.wrap(),
+        sub_lm=sub_lm,  # Enables llm_query and llm_query_batched
     )
 
     try:

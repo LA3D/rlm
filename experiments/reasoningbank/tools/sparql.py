@@ -233,17 +233,54 @@ class SPARQLTools:
 
         return self.store.put(rows, 'results', preview).to_handle()
 
-    def sparql_peek(self, ref_key: str, n: int = 5) -> list[dict]:
-        """Peek at first n rows of result (bounded to 20 max)."""
+    def sparql_peek(self, ref_key: str | dict, n: int = 5) -> list[dict]:
+        """Peek at first n rows of result (bounded to 20 max).
+
+        Args:
+            ref_key: Result key (string) OR full handle dict from sparql_query
+            n: Number of rows to return (default 5, max 20)
+
+        Example:
+            result = sparql_query('SELECT ...')
+            rows = sparql_peek(result)        # Pass handle directly
+            rows = sparql_peek(result['key']) # Or extract key
+        """
+        # Accept full handle dict - extract 'key' field
+        if isinstance(ref_key, dict) and 'key' in ref_key:
+            ref_key = ref_key['key']
         n = min(n, 20)  # Hard cap
         return self.store.peek(ref_key, n)
 
-    def sparql_slice(self, ref_key: str, start: int, end: int) -> list[dict]:
-        """Get rows [start:end] from result (capped at 50)."""
+    def sparql_slice(self, ref_key: str | dict, start: int, end: int) -> list[dict]:
+        """Get rows [start:end] from result (capped at 50).
+
+        Args:
+            ref_key: Result key (string) OR full handle dict from sparql_query
+            start: Start row index
+            end: End row index (capped at start + 50)
+
+        Example:
+            result = sparql_query('SELECT ...')
+            rows = sparql_slice(result, 0, 10)  # Pass handle directly
+        """
+        # Accept full handle dict - extract 'key' field
+        if isinstance(ref_key, dict) and 'key' in ref_key:
+            ref_key = ref_key['key']
         return self.store.slice(ref_key, start, end)
 
-    def sparql_stats(self, ref_key: str) -> dict:
-        """Get metadata about stored result including source attribution."""
+    def sparql_stats(self, ref_key: str | dict) -> dict:
+        """Get metadata about stored result including source attribution.
+
+        Args:
+            ref_key: Result key (string) OR full handle dict from sparql_query
+
+        Example:
+            result = sparql_query('SELECT ...')
+            stats = sparql_stats(result)  # Pass handle directly
+        """
+        # Accept full handle dict - extract 'key' field
+        if isinstance(ref_key, dict) and 'key' in ref_key:
+            ref_key = ref_key['key']
         return self.store.stats(ref_key)
 
     def sparql_describe(self, uri: str, limit: int = 20) -> dict:
@@ -347,6 +384,8 @@ class SPARQLTools:
                 return args  # Single string argument
             if isinstance(args, int) and idx == 0:
                 return args  # Single int argument
+            if isinstance(args, dict) and idx == 0:
+                return args  # Handle dict passed directly (e.g., sparql_peek(result))
             if key and isinstance(kwargs, dict):
                 return kwargs.get(key, default)
             return default
