@@ -55,6 +55,11 @@ def g_classes(ref:Ref, limit:int=50) -> dict:
     content = '\n'.join(classes)
     return _ref_to_handle(_store.put(content, 'classes'))
 
+def g_classes_list(ref:Ref, limit:int=50) -> list[str]:
+    "Return class URIs as a list (can be sliced, iterated directly)."
+    g = _graphs[ref.key]
+    return [str(c) for c in list(g.subjects(RDF.type, OWL.Class))[:limit]]
+
 def g_props(ref:Ref, limit:int=50) -> dict:
     "Return property URIs as handle dict. Use ctx_peek(result['key']) to inspect."
     g = _graphs[ref.key]
@@ -62,6 +67,13 @@ def g_props(ref:Ref, limit:int=50) -> dict:
     props += list(g.subjects(RDF.type, OWL.DatatypeProperty))
     content = '\n'.join([str(p) for p in props[:limit]])
     return _ref_to_handle(_store.put(content, 'properties'))
+
+def g_props_list(ref:Ref, limit:int=50) -> list[str]:
+    "Return property URIs as a list (can be sliced, iterated directly)."
+    g = _graphs[ref.key]
+    props = list(g.subjects(RDF.type, OWL.ObjectProperty))
+    props += list(g.subjects(RDF.type, OWL.DatatypeProperty))
+    return [str(p) for p in props[:limit]]
 
 def g_describe(ref:Ref, uri:str, limit:int=20) -> dict:
     "Return triples about `uri` as handle dict. Use ctx_peek(result['key']) to inspect."

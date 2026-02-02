@@ -75,7 +75,7 @@ class Builder:
             parts.append(l3_guide.pack(self.cfg.guide_text, self.cfg.l3.budget))
         return '\n\n'.join(parts)
 
-    def tools(self, store:Store, g_path:str, mem:MemStore=None) -> dict:
+    def tools(self, store: Store, g_path: str, mem: MemStore = None) -> dict:
         "Build tool dict for dspy.RLM. Includes graph, context, and memory tools."
         # Set module globals
         G._store = store
@@ -85,98 +85,355 @@ class Builder:
         ref = store.put(g_path, 'graph')
         G._graphs[ref.key] = g
 
-        # DSPy RLM calls tools as: tool(args, kwargs) where:
-        #   args = actual arguments (value, list, etc)
-        #   kwargs = keyword arguments dict
+        return make_tools(store, ref, mem)
 
-        def _norm(args, kwargs):
-            if args is None:
-                args_list = []
-            elif isinstance(args, (list, tuple)):
-                args_list = list(args)
+
+def _unwrap_key(val):
+    """Unwrap list-wrapped keys like ['results_7'] -> 'results_7'."""
+    if isinstance(val, list) and len(val) == 1:
+        return val[0]
+    return val
+
+
+def _handle_dspy_convention(first_param, second_param, defaults: dict) -> dict:
+    """Handle DSPy tool calling convention where needed.
+
+    DSPy may call tools as: tool(['value'], {'param': value})
+    This function detects and unwraps that pattern.
+
+    Args:
+        first_param: First parameter value (might be list-wrapped)
+        second_param: Second parameter value (might be kwargs dict)
+        defaults: Dict of {param_name: default_value}
+
+    Returns:
+        Dict of resolved parameter values
+    """
+    result = dict(defaults)
+    param_names = list(defaults.keys())
+
+    # Check if this looks like DSPy convention: (list, dict)
+    if isinstance(first_param, list) and isinstance(second_param, dict):
+        # DSPy convention: first_param is list of values, second_param is kwargs dict
+        values = first_param
+        kwargs = second_param
+
+        # Map list values to parameter names
+        for i, val in enumerate(values):
+            if i < len(param_names):
+                key_name = param_names[i]
+                result[key_name] = _unwrap_key(val) if key_name in ('key', 'id') else val
+
+        # Override with kwargs dict
+        for k, v in kwargs.items():
+            if k in result:
+                result[k] = _unwrap_key(v) if k in ('key', 'id') else v
+    else:
+        # Normal calling: use first_param as first value, second_param as second value
+        if first_param is not None and len(param_names) > 0:
+            key_name = param_names[0]
+            result[key_name] = _unwrap_key(first_param) if key_name in ('key', 'id') else first_param
+
+        if second_param is not None and len(param_names) > 1:
+            key_name = param_names[1]
+            result[key_name] = _unwrap_key(second_param) if key_name in ('key', 'id') else second_param
+
+    return result
+
+
+def make_tools(store: Store, graph_ref: Ref, mem: MemStore = None) -> dict:
+    """Create tool functions with explicit parameter signatures.
+
+    Tools use explicit named parameters (not *args/**kw) because DSPy sandbox
+    strips the * and ** from variadic parameters, breaking function calls.
+    """
+
+    # --- Graph Tools ---
+
+    def g_stats():
+        """Get graph statistics: triple count, class count, property count, namespaces.
+
+        Returns: dict with keys 'triples', 'classes', 'props', 'ns'
+
+        Example: stats = g_stats()
+        """
+        return G.g_stats(graph_ref)
+
+    def g_classes(limit=50):
+        """Get list of OWL class URIs in the graph.
+
+        Args:
+            limit: Maximum number of classes to return (default 50)
+
+        Returns: List of class URI strings (can be sliced, iterated)
+
+        Example:
+            classes = g_classes()
+            print(classes[:10])  # First 10 classes
+            classes = g_classes(20)  # Get 20 classes
+        """
+        # Handle DSPy convention: g_classes([50], {}) or g_classes([50])
+        if isinstance(limit, list) and len(limit) >= 1:
+            limit = limit[0] if not isinstance(limit[0], dict) else 50
+        return G.g_classes_list(graph_ref, limit)
+
+    def g_props(limit=50):
+        """Get list of OWL property URIs in the graph.
+
+        Args:
+            limit: Maximum number of properties to return (default 50)
+
+        Returns: List of property URI strings (can be sliced, iterated)
+
+        Example:
+            props = g_props()
+            print(props[:10])  # First 10 properties
+        """
+        # Handle DSPy convention
+        if isinstance(limit, list) and len(limit) >= 1:
+            limit = limit[0] if not isinstance(limit[0], dict) else 50
+        return G.g_props_list(graph_ref, limit)
+
+    def g_query(q='', limit=100):
+        """Execute SPARQL query and return results as handle.
+
+        Args:
+            q: SPARQL query string
+            limit: Maximum results (default 100)
+
+        Returns: Handle dict with 'key' for ctx_peek/ctx_slice access
+
+        Example:
+            result = g_query('SELECT ?s WHERE { ?s a owl:Class } LIMIT 10')
+            print(ctx_peek(result['key']))
+        """
+        # Handle DSPy convention: g_query(['SELECT...'], {'limit': 50})
+        if isinstance(q, list):
+            if len(q) >= 1 and isinstance(q[0], str):
+                q = q[0]
             else:
-                args_list = [args]
-            if kwargs is None or not isinstance(kwargs, dict):
-                kwargs = {}
-            return args_list, kwargs
+                q = ''
+        if isinstance(limit, dict):
+            limit = limit.get('limit', 100)
+        return G.g_query(graph_ref, q, limit)
 
-        def _arg(args_list, idx, default=None):
-            return args_list[idx] if len(args_list) > idx else default
+    def g_sample(n=10):
+        """Get sample triples from the graph as text.
 
-        # Graph tools (bounded ontology access)
-        tools = {
-            'g_stats': lambda args=None, kwargs=None: G.g_stats(ref),
-            'g_query': lambda args=None, kwargs=None: (
-                lambda a, k: G.g_query(
-                    ref,
-                    _arg(a, 0, k.get('q', '')),
-                    _arg(a, 1, k.get('limit', 100))
-                )
-            )(*_norm(args, kwargs)),
-            'g_sample': lambda args=None, kwargs=None: (
-                lambda a, k: G.g_sample(ref, _arg(a, 0, k.get('n', 10)))
-            )(*_norm(args, kwargs)),
-            'g_classes': lambda args=None, kwargs=None: (
-                lambda a, k: G.g_classes(ref, _arg(a, 0, k.get('limit', 50)))
-            )(*_norm(args, kwargs)),
-            'g_props': lambda args=None, kwargs=None: (
-                lambda a, k: G.g_props(ref, _arg(a, 0, k.get('limit', 50)))
-            )(*_norm(args, kwargs)),
-            'g_describe': lambda args=None, kwargs=None: (
-                lambda a, k: G.g_describe(ref, _arg(a, 0, k.get('uri', '')), k.get('limit', 20))
-            )(*_norm(args, kwargs)),
-            # Context tools (bounded blob access)
-            'ctx_peek': lambda args=None, kwargs=None: (
-                lambda a, k: {'error': 'missing key'} if not _arg(a, 0, k.get('k', '')) else
-                store.peek(_arg(a, 0, k.get('k', '')), _arg(a, 1, k.get('n', 200)))
-            )(*_norm(args, kwargs)),
-            'ctx_slice': lambda args=None, kwargs=None: (
-                lambda a, k: {'error': 'missing key'} if not _arg(a, 0, k.get('k', '')) else
-                store.slice(_arg(a, 0, k.get('k', '')),
-                            _arg(a, 1, k.get('start', 0)),
-                            _arg(a, 2, k.get('end', 100)))
-            )(*_norm(args, kwargs)),
-            'ctx_stats': lambda args=None, kwargs=None: (
-                lambda a, k: {'error': 'missing key'} if not _arg(a, 0, k.get('k', '')) else
-                store.stats(_arg(a, 0, k.get('k', '')))
-            )(*_norm(args, kwargs)),
-        }
+        Args:
+            n: Number of triples to sample (default 10)
 
-        # Memory tools (Mode 2: tool-mediated retrieval)
-        if mem:
-            tools.update({
-                'mem_search': lambda args=None, kwargs=None: (
-                    lambda a, k: mem.search(
-                        _arg(a, 0, k.get('q', '')),
-                        k.get('k', 6),
-                        k.get('polarity', None)
-                    )
-                )(*_norm(args, kwargs)),
-                'mem_get': lambda args=None, kwargs=None: (
-                    lambda a, k: [
-                        {
-                            'id': o.id,
-                            'title': o.title,
-                            'desc': o.desc,
-                            'content': (
-                                o.content[:(k.get('max_chars', 1000))] +
-                                ("..." if len(o.content) > (k.get('max_chars', 1000)) else "")
-                            ),
-                            'src': o.src
-                        }
-                        for o in mem.get(
-                            _arg(a, 0, k.get('ids', [])) if isinstance(_arg(a, 0, None), list)
-                            else ([ _arg(a, 0, None) ] if _arg(a, 0, None) else k.get('ids', [])),
-                            k.get('max_n', 3)
-                        )
-                    ]
-                )(*_norm(args, kwargs)),
-                'mem_quote': lambda args=None, kwargs=None: (
-                    lambda a, k: mem.quote(
-                        _arg(a, 0, k.get('id', '')),
-                        k.get('max_chars', 500)
-                    )
-                )(*_norm(args, kwargs)),
-            })
+        Returns: String with sample triples, one per line
 
-        return tools
+        Example: print(g_sample(5))
+        """
+        # Handle DSPy convention
+        if isinstance(n, list) and len(n) >= 1:
+            n = n[0] if not isinstance(n[0], dict) else 10
+        return G.g_sample(graph_ref, n)
+
+    def g_describe(uri='', limit=20):
+        """Describe a specific URI - get all triples where URI is subject.
+
+        Args:
+            uri: The URI to describe
+            limit: Maximum triples to return (default 20)
+
+        Returns: String with property-value pairs
+
+        Example: print(g_describe('http://www.w3.org/ns/prov#Activity'))
+        """
+        # Handle DSPy convention: g_describe(['uri'], {'limit': 10})
+        if isinstance(uri, list):
+            if len(uri) >= 1 and isinstance(uri[0], str):
+                uri = uri[0]
+            else:
+                uri = ''
+        if isinstance(limit, dict):
+            limit = limit.get('limit', 20)
+        return G.g_describe(graph_ref, uri, limit)
+
+    # --- Context Tools (for inspecting handles) ---
+
+    def ctx_peek(key='', n=200):
+        """Peek at first n characters of a stored result.
+
+        Args:
+            key: The result key (from g_query, etc.)
+            n: Number of characters to show (default 200)
+
+        Returns: String preview of the content
+
+        Example: print(ctx_peek('results_0', 500))
+        """
+        # Handle DSPy convention: ctx_peek(['key'], {'n': 500})
+        if isinstance(key, list):
+            if len(key) >= 1 and isinstance(key[0], str):
+                key = key[0]
+            else:
+                key = ''
+        if isinstance(n, dict):
+            n = n.get('n', 200)
+        k = _unwrap_key(key)
+        if not k:
+            return {'error': 'missing key - pass the key from a query result'}
+        return store.peek(k, n)
+
+    def ctx_slice(key='', start=0, end=100):
+        """Get a slice of stored content by character position.
+
+        Args:
+            key: The result key
+            start: Start character index (default 0)
+            end: End character index (default 100)
+
+        Returns: String slice of the content
+
+        Example: print(ctx_slice('results_0', 0, 500))
+        """
+        # Handle DSPy convention: ctx_slice(['key'], {'start': 0, 'end': 500})
+        if isinstance(key, list):
+            if len(key) >= 1 and isinstance(key[0], str):
+                key = key[0]
+            else:
+                key = ''
+        if isinstance(start, dict):
+            kwargs = start
+            start = kwargs.get('start', 0)
+            end = kwargs.get('end', 100)
+        k = _unwrap_key(key)
+        if not k:
+            return {'error': 'missing key - pass the key from a query result'}
+        return store.slice(k, start, end)
+
+    def ctx_stats(key=''):
+        """Get statistics about stored content.
+
+        Args:
+            key: The result key
+
+        Returns: Dict with 'sz' (size) and 'lines' (line count)
+
+        Example: stats = ctx_stats('results_0')
+        """
+        # Handle DSPy convention: ctx_stats(['key'], {})
+        if isinstance(key, list):
+            if len(key) >= 1 and isinstance(key[0], str):
+                key = key[0]
+            else:
+                key = ''
+        k = _unwrap_key(key)
+        if not k:
+            return {'error': 'missing key - pass the key from a query result'}
+        return store.stats(k)
+
+    tools = {
+        'g_stats': g_stats,
+        'g_classes': g_classes,
+        'g_props': g_props,
+        'g_query': g_query,
+        'g_sample': g_sample,
+        'g_describe': g_describe,
+        'ctx_peek': ctx_peek,
+        'ctx_slice': ctx_slice,
+        'ctx_stats': ctx_stats,
+    }
+
+    # --- Memory Tools (if memory store provided) ---
+
+    if mem:
+        def mem_search(q='', k=6, polarity=None):
+            """Search procedural memory for relevant strategies.
+
+            Args:
+                q: Search query string
+                k: Number of results (default 6)
+                polarity: Filter by 'success', 'failure', or None for all
+
+            Returns: List of {id, title, desc, src} dicts (not full content)
+
+            Example:
+                hits = mem_search('SPARQL query patterns')
+                for h in hits: print(h['title'])
+            """
+            # Handle DSPy convention: mem_search(['query'], {'k': 3})
+            if isinstance(q, list):
+                if len(q) >= 1 and isinstance(q[0], str):
+                    q = q[0]
+                else:
+                    q = ''
+            if isinstance(k, dict):
+                kwargs = k
+                k = kwargs.get('k', 6)
+                polarity = kwargs.get('polarity', polarity)
+            return mem.search(q, k, polarity)
+
+        def mem_get(ids=None, max_n=3, max_chars=1000):
+            """Get full content of memory items by ID.
+
+            Args:
+                ids: List of item IDs to retrieve
+                max_n: Maximum items to return (default 3, hard cap)
+                max_chars: Truncate content to this length (default 1000)
+
+            Returns: List of full item dicts with content
+
+            Example:
+                hits = mem_search('query patterns')
+                items = mem_get([h['id'] for h in hits[:2]])
+            """
+            # Handle DSPy convention: mem_get([['id1', 'id2']], {'max_n': 2})
+            if ids is None:
+                ids = []
+            if isinstance(ids, list) and len(ids) == 1 and isinstance(ids[0], list):
+                ids = ids[0]  # Unwrap nested list from DSPy
+            if isinstance(max_n, dict):
+                kwargs = max_n
+                max_n = kwargs.get('max_n', 3)
+                max_chars = kwargs.get('max_chars', 1000)
+
+            id_list = ids
+            if not isinstance(id_list, list):
+                id_list = [id_list] if id_list else []
+
+            items = mem.get(id_list, max_n)
+            mc = max_chars
+            return [
+                {
+                    'id': o.id,
+                    'title': o.title,
+                    'desc': o.desc,
+                    'content': o.content[:mc] + ('...' if len(o.content) > mc else ''),
+                    'src': o.src
+                }
+                for o in items
+            ]
+
+        def mem_quote(id='', max_chars=500):
+            """Get a bounded excerpt from a specific memory item.
+
+            Args:
+                id: Item ID
+                max_chars: Maximum characters (default 500)
+
+            Returns: String excerpt of the item content
+
+            Example: print(mem_quote('abc123', 200))
+            """
+            # Handle DSPy convention: mem_quote(['id'], {'max_chars': 200})
+            if isinstance(id, list):
+                if len(id) >= 1 and isinstance(id[0], str):
+                    id = id[0]
+                else:
+                    id = ''
+            if isinstance(max_chars, dict):
+                max_chars = max_chars.get('max_chars', 500)
+            return mem.quote(id, max_chars)
+
+        tools.update({
+            'mem_search': mem_search,
+            'mem_get': mem_get,
+            'mem_quote': mem_quote,
+        })
+
+    return tools
