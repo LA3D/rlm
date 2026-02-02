@@ -219,9 +219,9 @@ class SPARQLTools:
         """.format(name=self.name, authority=self.authority)
         limit = limit or self.default_limit
 
-        # Ensure prefixes are included
-        if 'PREFIX' not in query.upper():
-            query = self._prefixes + '\n' + query
+        # Always prepend default prefixes (they're harmless if already defined)
+        # This ensures rdfs:, owl:, rdf: etc. are always available
+        query = self._prefixes + '\n' + query
 
         rows = self._execute(query, limit=limit)
 
@@ -335,9 +335,8 @@ class SPARQLTools:
                         flags=re.IGNORECASE | re.DOTALL
                     )
 
-        # Ensure prefixes
-        if 'PREFIX' not in query.upper():
-            query = self._prefixes + '\n' + query
+        # Always prepend default prefixes
+        query = self._prefixes + '\n' + query
 
         rows = self._execute(query, limit=1)
         if rows and 'count' in rows[0]:
