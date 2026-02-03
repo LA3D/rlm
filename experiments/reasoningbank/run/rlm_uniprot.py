@@ -116,6 +116,7 @@ def run_uniprot(
     endpoint: str = 'uniprot',
     max_iters: int = 12,
     max_calls: int = 25,
+    temperature: float = 0.0,
     verbose: bool = True,
     log_path: str|None = None,
     use_local_interpreter: bool = False,
@@ -130,6 +131,7 @@ def run_uniprot(
         endpoint: Endpoint name ('uniprot', 'wikidata', etc.)
         max_iters: Maximum RLM iterations
         max_calls: Maximum LLM calls
+        temperature: LLM temperature (0.0=deterministic, 0.7=stochastic)
         verbose: Print progress
         log_path: Path to trajectory log file
         use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox.
@@ -182,8 +184,18 @@ def run_uniprot(
         'task': task,
         'endpoint': sparql_tools.endpoint,
         'context_size': len(ctx),
-        'max_iters': max_iters
+        'max_iters': max_iters,
+        'temperature': temperature
     })
+
+    # Configure main LLM with temperature (for stochastic evaluation)
+    if temperature > 0.0:
+        lm = dspy.LM(
+            'anthropic/claude-sonnet-4-5-20250929',
+            api_key=os.environ['ANTHROPIC_API_KEY'],
+            temperature=temperature
+        )
+        dspy.configure(lm=lm)
 
     # Configure sub-LLM (cheaper model for llm_query)
     sub_lm = dspy.LM('anthropic/claude-haiku-4-5-20251001', api_key=os.environ['ANTHROPIC_API_KEY'])

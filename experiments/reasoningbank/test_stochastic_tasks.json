@@ -1,0 +1,21 @@
+[
+  {
+    "id": "4_uniprot_mnemonic_id",
+    "query": "Select the UniProtKB entry with the mnemonic 'A4_HUMAN'",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein up:mnemonic 'A4_HUMAN'\n}",
+    "complexity": "simple",
+    "keywords": [
+      "identifier"
+    ]
+  },
+  {
+    "id": "106_uniprot_reviewed_or_not",
+    "query": "List all UniProtKB proteins and if they are reviewed (Swiss-Prot) or unreviewed (TrEMBL)",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?reviewed\nWHERE {\n  ?protein a up:Protein . \n  ?protein up:reviewed ?reviewed . \n}",
+    "complexity": "simple",
+    "keywords": [
+      "entry status",
+      "list"
+    ]
+  }
+]
