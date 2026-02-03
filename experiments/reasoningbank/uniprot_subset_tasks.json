@@ -1,0 +1,95 @@
+[
+  {
+    "id": "1_select_all_taxa_used_in_uniprot",
+    "query": "Select all taxa from the UniProt taxonomy",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nFROM <http://sparql.uniprot.org/taxonomy>\nWHERE\n{\n    ?taxon a up:Taxon .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "taxonomy"
+    ]
+  },
+  {
+    "id": "4_uniprot_mnemonic_id",
+    "query": "Select the UniProtKB entry with the mnemonic 'A4_HUMAN'",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein up:mnemonic 'A4_HUMAN'\n}",
+    "complexity": "simple",
+    "keywords": [
+      "identifier"
+    ]
+  },
+  {
+    "id": "106_uniprot_reviewed_or_not",
+    "query": "List all UniProtKB proteins and if they are reviewed (Swiss-Prot) or unreviewed (TrEMBL)",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?reviewed\nWHERE {\n  ?protein a up:Protein . \n  ?protein up:reviewed ?reviewed . \n}",
+    "complexity": "simple",
+    "keywords": [
+      "entry status",
+      "list"
+    ]
+  },
+  {
+    "id": "85_taxonomy_host",
+    "query": "Find taxon records that are known to have part of their life cycle in other organisms (e.g. parasite, symbiont, infection)",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?virus \n  ?host \nWHERE {\n    ?virus up:host ?host .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "taxonomy",
+      "host"
+    ]
+  },
+  {
+    "id": "104_uniprot_recomended_protein_full_name",
+    "query": "The recommended protein full names for UniProtKB entries",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\n  ?fullName\nWHERE {\n  ?protein a up:Protein ;\n           up:recommendedName ?recommendedName .\n  ?recommendedName up:fullName ?fullName .\n}",
+    "complexity": "simple",
+    "keywords": [
+      "protein name"
+    ]
+  },
+  {
+    "id": "12_entries_integrated_on_date",
+    "query": "Select all UniProtKB entries that were integrated on the 30th of November 2010",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?protein\nWHERE\n{\n\t?protein a up:Protein . \n\t?protein up:created '2010-11-30'^^xsd:date\n}",
+    "complexity": "simple",
+    "keywords": [
+      "entry history",
+      "date"
+    ]
+  },
+  {
+    "id": "2_bacteria_taxa_and_their_scientific_name",
+    "query": "Select all bacterial taxa and their scientific name from the UniProt taxonomy",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon ?name\nWHERE\n{\n    ?taxon a up:Taxon .\n    ?taxon up:scientificName ?name .\n    # Taxon subclasses are materialized, do not use rdfs:subClassOf+\n    ?taxon rdfs:subClassOf taxon:2 .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "taxonomy"
+    ]
+  },
+  {
+    "id": "121_proteins_and_diseases_linked",
+    "query": "List all UniProtKB proteins and the diseases are annotated to be related.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n\t?protein\n\t?disease\nWHERE {\n\t?protein a up:Protein ;\n    \tup:annotation ?annotation .\n\t?annotation a up:Disease_Annotation ;\n    \tup:disease ?disease .\n\t?disease a up:Disease .\n}",
+    "complexity": "moderate",
+    "keywords": [
+      "list",
+      "disease"
+    ]
+  },
+  {
+    "id": "30_merged_loci",
+    "query": "Find UniProtKB entries with merged loci in Bordetella avium",
+    "expected_sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein \n  (GROUP_CONCAT(?locusName; separator=',') AS ?locusNames)\nWHERE \n{ \n  ?protein a up:Protein ;\n    up:organism taxon:360910 ;\n    up:encodedBy ?gene .\n  ?gene up:locusName ?locusName .\n} \nGROUP BY ?protein \nHAVING (COUNT(?locusName) > 1)",
+    "complexity": "moderate",
+    "keywords": []
+  },
+  {
+    "id": "33_longest_variant_comment",
+    "query": "Find longest comment text associated with a UniProtKB natural variant annotation",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?annotation ?comment\nWHERE {\n    ?annotation a up:Natural_Variant_Annotation ;\n        rdfs:comment ?comment . \n} \nORDER BY DESC(STRLEN(?comment))",
+    "complexity": "moderate",
+    "keywords": [
+      "variant annotation",
+      "count"
+    ]
+  }
+]

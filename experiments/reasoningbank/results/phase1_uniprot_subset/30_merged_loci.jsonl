@@ -1,0 +1,2 @@
+{"timestamp": "2026-02-02T15:06:26.742877", "event_type": "run_start", "data": {"task": "Find UniProtKB entries with merged loci in Bordetella avium", "endpoint": "https://sparql.uniprot.org/sparql", "context_size": 2665, "max_iters": 12}}
+{"timestamp": "2026-02-02T15:06:29.015694", "event_type": "run_error", "data": {"error": "'NoneType' object has no attribute 'strip'", "type": "AttributeError"}}
