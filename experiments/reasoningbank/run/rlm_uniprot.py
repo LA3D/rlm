@@ -43,7 +43,7 @@ class Result:
         if self.trajectory is None:
             self.trajectory = []
 
-def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None = None) -> str:
+def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None = None, rollout_id: int|None = None) -> str:
     """Build context from layers using local ontology metadata.
 
     L0 and L1 are built from local ontology file (core.owl or core.ttl).
@@ -55,11 +55,18 @@ def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None
         ont_path: Path to UniProt ontology directory (contains core.owl/core.ttl)
         task: Query string (for L2 retrieval)
         mem: Memory store (for L2)
+        rollout_id: Optional rollout identifier (prevents caching by making prompts unique)
 
     Returns:
         Assembled context string
     """
     parts = []
+
+    # Add unique rollout marker to prevent prompt caching
+    # This is invisible to the agent (HTML comment) but makes each prompt unique
+    if rollout_id is not None:
+        parts.append(f"<!-- Rollout ID: {rollout_id} -->")
+        parts.append("")  # Blank line for readability
 
     # Find ontology file
     ont_dir = Path(ont_path)
@@ -117,9 +124,11 @@ def run_uniprot(
     max_iters: int = 12,
     max_calls: int = 25,
     temperature: float = 0.0,
+    seed: int|None = None,
     verbose: bool = True,
     log_path: str|None = None,
     use_local_interpreter: bool = False,
+    rollout_id: int|None = None,
 ) -> Result:
     """Run task using DSPy RLM with remote UniProt SPARQL endpoint.
 
@@ -132,10 +141,12 @@ def run_uniprot(
         max_iters: Maximum RLM iterations
         max_calls: Maximum LLM calls
         temperature: LLM temperature (0.0=deterministic, 0.7=stochastic)
+        seed: Explicit seed for reproducibility/diversity (Anthropic doesn't support this)
         verbose: Print progress
         log_path: Path to trajectory log file
         use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox.
                                Avoids sandbox corruption issues but has no security isolation.
+        rollout_id: Unique identifier for this rollout (prevents prompt caching)
 
     Returns:
         Result with answer, SPARQL, convergence status, and metrics
@@ -144,7 +155,7 @@ def run_uniprot(
     from datetime import datetime
 
     # Build context from local ontology metadata
-    ctx = build_context_uniprot(cfg, ont_path, task, mem)
+    ctx = build_context_uniprot(cfg, ont_path, task, mem, rollout_id=rollout_id)
     exec_note = (
         "EXECUTION NOTE: In [[ ## code ## ]] output raw Python only. "
         "Do NOT include markdown fences (```), language tags, or prose.\n\n"
@@ -185,15 +196,21 @@ def run_uniprot(
         'endpoint': sparql_tools.endpoint,
         'context_size': len(ctx),
         'max_iters': max_iters,
-        'temperature': temperature
+        'temperature': temperature,
+        'seed': seed
     })
 
-    # Configure main LLM with temperature (for stochastic evaluation)
-    if temperature > 0.0:
+    # Configure main LLM with temperature and optional seed (for stochastic evaluation)
+    if temperature > 0.0 or seed is not None:
+        lm_kwargs = {
+            'api_key': os.environ['ANTHROPIC_API_KEY'],
+            'temperature': temperature,
+        }
+        if seed is not None:
+            lm_kwargs['seed'] = seed  # Anthropic beta support, "best effort" only
         lm = dspy.LM(
             'anthropic/claude-sonnet-4-5-20250929',
-            api_key=os.environ['ANTHROPIC_API_KEY'],
-            temperature=temperature
+            **lm_kwargs
         )
         dspy.configure(lm=lm)
 

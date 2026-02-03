@@ -2,12 +2,18 @@
 
 Applies the same judge → extract → consolidate pipeline as phase1.py,
 but uses remote UniProt endpoint instead of local PROV ontology.
+
+Includes stochastic evaluation infrastructure with:
+- Pass@1, Best-of-N, Pass@k metrics
+- Trajectory diversity metrics (Vendi Score, Jaccard, edit distance)
+- Prompt perturbation strategies for trajectory diversity
 """
 
 import sys
 # sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')  # Not needed when running as module
 
 import dspy
+import random
 from experiments.reasoningbank.core.mem import MemStore
 from experiments.reasoningbank.run.rlm_uniprot import run_uniprot, Result
 from experiments.reasoningbank.ctx.builder import Cfg, Layer
@@ -17,6 +23,58 @@ from experiments.reasoningbank.run.phase1 import (
     TrajectoryJudge, SuccessExtractor, FailureExtractor,
     judge, extract, test_judge_extract
 )
+
+
+# =============================================================================
+# Prompt Perturbation Strategies
+# =============================================================================
+
+THINKING_PROMPTS = [
+    "Think step by step.",
+    "Consider multiple approaches before deciding.",
+    "Be thorough in your exploration.",
+    "Try a different strategy than usual.",
+    "Focus on the key constraints first.",
+]
+
+
+def perturb_query(query: str, rollout_id: int, strategy: str = 'none') -> str:
+    """Apply perturbation strategy to query for trajectory diversity.
+
+    Changing the INPUT rather than just the sampling creates different
+    initial conditions, analogous to perturbing starting positions in MD.
+
+    Args:
+        query: Original query string
+        rollout_id: Rollout number (0-indexed)
+        strategy: Perturbation strategy:
+            - 'none': Return original query unchanged
+            - 'prefix': Add rollout attempt marker
+            - 'thinking': Add different thinking prompt per rollout
+            - 'shuffle': Randomly shuffle query words (not recommended for natural language)
+
+    Returns:
+        Perturbed query string
+    """
+    if strategy == 'none':
+        return query
+    elif strategy == 'prefix':
+        return f"[Attempt {rollout_id + 1}] {query}"
+    elif strategy == 'thinking':
+        prompt = THINKING_PROMPTS[rollout_id % len(THINKING_PROMPTS)]
+        return f"{prompt} {query}"
+    elif strategy == 'rephrase':
+        # Could use LLM to rephrase, but for now just add variety via prefix
+        rephrases = [
+            query,
+            f"I need to find out: {query}",
+            f"Help me answer: {query}",
+            f"Query: {query}",
+            f"Please determine: {query}",
+        ]
+        return rephrases[rollout_id % len(rephrases)]
+    else:
+        return query
 
 
 def run_closed_loop_uniprot(
@@ -127,6 +185,9 @@ def run_stochastic_uniprot(
     verbose: bool = False,
     log_dir: str = None,
     use_local_interpreter: bool = False,
+    perturb: str = 'none',
+    use_seed: bool = False,
+    compute_diversity: bool = False,
 ) -> dict:
     """Run k stochastic rollouts for a single task.
 
@@ -141,14 +202,23 @@ def run_stochastic_uniprot(
         verbose: Print detailed output
         log_dir: Directory for trajectory logs
         use_local_interpreter: Use LocalPythonInterpreter instead of Deno
+        perturb: Perturbation strategy ('none', 'prefix', 'thinking', 'rephrase')
+        use_seed: Use explicit different seeds per rollout
+        compute_diversity: Compute trajectory diversity metrics
 
     Returns:
         dict with keys:
         - task_id, query
-        - rollouts: list of {converged, answer, sparql, judgment, iters}
+        - rollouts: list of {converged, answer, sparql, judgment, iters, log_path}
         - metrics: {pass_1, best_of_n, pass_k, n_success, n_total}
+        - diversity: {sparql_vendi, trajectory_vendi, ...} (if compute_diversity=True)
     """
     print(f"\nTask: {task['id']} ({k} rollouts)")
+    if perturb != 'none':
+        print(f"  Perturbation: {perturb}")
+    if use_seed:
+        print(f"  Using explicit seeds per rollout")
+
     rollouts = []
 
     for i in range(k):
@@ -157,18 +227,27 @@ def run_stochastic_uniprot(
         # Create log path for this rollout
         log_path = f"{log_dir}/{task['id']}_rollout{i+1}.jsonl" if log_dir else None
 
-        # Run with temperature
+        # Apply perturbation to query
+        perturbed_query = perturb_query(task['query'], i, strategy=perturb)
+
+        # Determine seed for this rollout
+        seed = (i + 1) * 42 if use_seed else None  # Use deterministic seed based on rollout id
+
+        # Run with temperature and optional seed
+        # Pass rollout_id to prevent prompt caching (makes each prompt unique)
         res = run_uniprot(
-            task['query'], ont_path, cfg, mem,
+            perturbed_query, ont_path, cfg, mem,
             endpoint=endpoint,
             temperature=temperature,
+            seed=seed,
             verbose=False,
             log_path=log_path,
-            use_local_interpreter=use_local_interpreter
+            use_local_interpreter=use_local_interpreter,
+            rollout_id=i  # Unique ID prevents caching
         )
 
         # Judge with deterministic temperature (temperature=0.0 is default for judge)
-        j = judge(res, task['query'], verbose=False)
+        j = judge(res, task['query'], verbose=False)  # Use original query for judging
 
         status = '✓' if j['success'] else '✗'
         print(f" {status}")
@@ -181,20 +260,63 @@ def run_stochastic_uniprot(
             'sparql': res.sparql,
             'judgment': j,
             'iters': res.iters,
+            'log_path': log_path,
+            'perturbed_query': perturbed_query if perturb != 'none' else None,
+            'seed': seed,
         })
 
-    # Compute metrics
+    # Compute stochastic metrics
     metrics = compute_stochastic_metrics(rollouts)
 
     # Print summary
     print(f"  Metrics: Pass@1={metrics['pass_1']}, Best-of-N={metrics['best_of_n']}, Pass@k={metrics['pass_k']:.2f} ({metrics['n_success']}/{metrics['n_total']})")
 
-    return {
+    result = {
         'task_id': task['id'],
         'query': task['query'],
         'rollouts': rollouts,
         'metrics': metrics,
     }
+
+    # Compute diversity metrics if requested
+    if compute_diversity and log_dir:
+        try:
+            from experiments.reasoningbank.metrics.diversity import (
+                compute_diversity_report,
+                load_trajectory,
+            )
+
+            # Load trajectories from log files
+            trajectories = []
+            queries = []
+            for rollout in rollouts:
+                if rollout.get('log_path'):
+                    try:
+                        traj = load_trajectory(rollout['log_path'])
+                        trajectories.append(traj)
+                    except Exception as e:
+                        if verbose:
+                            print(f"    Warning: Could not load trajectory: {e}")
+                        trajectories.append([])
+                if rollout.get('sparql'):
+                    queries.append(rollout['sparql'])
+
+            # Compute diversity report
+            if len(trajectories) >= 2:
+                report = compute_diversity_report(trajectories, queries=queries)
+                result['diversity'] = report.to_dict()
+                print(f"  Diversity: Vendi={report.trajectory_vendi_score:.2f}, "
+                      f"Jaccard={report.mean_pairwise_jaccard:.2f}, "
+                      f"Efficiency={report.sampling_efficiency:.1%}")
+
+        except ImportError as e:
+            if verbose:
+                print(f"  Warning: Could not compute diversity metrics: {e}")
+        except Exception as e:
+            if verbose:
+                print(f"  Warning: Diversity computation failed: {e}")
+
+    return result
 
 
 if __name__ == '__main__':
@@ -228,6 +350,14 @@ if __name__ == '__main__':
     parser.add_argument('--stochastic', action='store_true', help='Run stochastic evaluation (k rollouts per task)')
     parser.add_argument('--stochastic-k', type=int, default=5, help='Number of rollouts per task (default: 5)')
     parser.add_argument('--temperature', type=float, default=0.7, help='Temperature for stochastic rollouts (default: 0.7)')
+
+    # Trajectory diversity options
+    parser.add_argument('--perturb', choices=['none', 'prefix', 'thinking', 'rephrase'],
+                        default='none', help='Prompt perturbation strategy for trajectory diversity')
+    parser.add_argument('--use-seed', action='store_true',
+                        help='Use explicit different seeds per rollout (Anthropic beta support)')
+    parser.add_argument('--compute-diversity', action='store_true',
+                        help='Compute trajectory diversity metrics (requires sentence-transformers, vendi-score)')
 
     # Deduplication control
     parser.add_argument('--no-dedup', action='store_true', help='Disable deduplication during consolidation')
@@ -292,6 +422,12 @@ if __name__ == '__main__':
         if args.stochastic:
             # Stochastic evaluation mode
             print(f"Stochastic mode: {args.stochastic_k} rollouts per task, temperature={args.temperature}")
+            if args.perturb != 'none':
+                print(f"Perturbation strategy: {args.perturb}")
+            if args.use_seed:
+                print("Using explicit seeds per rollout")
+            if args.compute_diversity:
+                print("Trajectory diversity metrics: ENABLED")
 
             results = []
             for task in tasks:
@@ -302,7 +438,10 @@ if __name__ == '__main__':
                     endpoint=args.endpoint,
                     verbose=args.verbose,
                     log_dir=log_dir,
-                    use_local_interpreter=args.local
+                    use_local_interpreter=args.local,
+                    perturb=args.perturb,
+                    use_seed=args.use_seed,
+                    compute_diversity=args.compute_diversity,
                 )
                 results.append(result)
 
@@ -316,6 +455,17 @@ if __name__ == '__main__':
                 'total_tasks': len(tasks),
             }
 
+            # Compute aggregate diversity metrics if available
+            diversity_results = [r.get('diversity') for r in results if r.get('diversity')]
+            if diversity_results:
+                aggregate['diversity'] = {
+                    'mean_sparql_vendi': sum(d['sparql_vendi_score'] for d in diversity_results) / len(diversity_results),
+                    'mean_trajectory_vendi': sum(d['trajectory_vendi_score'] for d in diversity_results) / len(diversity_results),
+                    'mean_sampling_efficiency': sum(d['sampling_efficiency'] for d in diversity_results) / len(diversity_results),
+                    'mean_pairwise_jaccard': sum(d['mean_pairwise_jaccard'] for d in diversity_results) / len(diversity_results),
+                    'tasks_with_diversity_data': len(diversity_results),
+                }
+
             # Save results
             import os
             from datetime import datetime
@@ -324,6 +474,9 @@ if __name__ == '__main__':
                     'type': 'stochastic',
                     'k': args.stochastic_k,
                     'temperature': args.temperature,
+                    'perturb': args.perturb,
+                    'use_seed': args.use_seed,
+                    'compute_diversity': args.compute_diversity,
                     'timestamp': datetime.now().isoformat(),
                     'config': {
                         'endpoint': args.endpoint,
@@ -352,6 +505,14 @@ if __name__ == '__main__':
             print(f"Mean Best-of-N: {aggregate['mean_best_of_n']:.3f}")
             print(f"Mean Pass@k: {aggregate['mean_pass_k']:.3f}")
             print(f"Tasks with any success: {aggregate['tasks_with_any_success']}/{aggregate['total_tasks']}")
+
+            if 'diversity' in aggregate:
+                print(f"\n=== Aggregate Diversity ===")
+                print(f"Mean SPARQL Vendi Score: {aggregate['diversity']['mean_sparql_vendi']:.2f}")
+                print(f"Mean Trajectory Vendi Score: {aggregate['diversity']['mean_trajectory_vendi']:.2f}")
+                print(f"Mean Sampling Efficiency: {aggregate['diversity']['mean_sampling_efficiency']:.1%}")
+                print(f"Tasks with diversity data: {aggregate['diversity']['tasks_with_diversity_data']}")
+
             print(f"\nResults saved to: {output_path}")
 
         elif args.matts:
