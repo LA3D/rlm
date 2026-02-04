@@ -1,0 +1,97 @@
+{
+  "experiment": {
+    "type": "stochastic",
+    "k": 2,
+    "temperature": 0.7,
+    "timestamp": "2026-02-03T10:27:52.159696",
+    "config": {
+      "endpoint": "uniprot",
+      "ontology": "ontology/uniprot",
+      "layers": {
+        "l0": true,
+        "l1": false,
+        "l2": true,
+        "l3": false
+      }
+    }
+  },
+  "tasks": [
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "query": "Select the UniProtKB entry with the mnemonic 'A4_HUMAN'",
+      "rollouts": [
+        {
+          "rollout_id": 1,
+          "converged": true,
+          "answer": "http://purl.uniprot.org/uniprot/P05067",
+          "sparql": "SELECT ?entry\nWHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+          "judgment": {
+            "success": true,
+            "reason": "The task was to select the UniProtKB entry with mnemonic 'A4_HUMAN'. The agent produced a correct SPARQL query that searches for entries with this mnemonic, and returned the URI http://purl.uniprot.org/uniprot/P05067, which is the correct UniProtKB entry for A4_HUMAN (Amyloid-beta precursor protein). The query structure is appropriate and the answer directly fulfills the task requirement."
+          },
+          "iters": 4
+        },
+        {
+          "rollout_id": 2,
+          "converged": true,
+          "answer": "http://purl.uniprot.org/uniprot/P05067",
+          "sparql": "SELECT ?entry\nWHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+          "judgment": {
+            "success": true,
+            "reason": "The task was to select the UniProtKB entry with mnemonic 'A4_HUMAN'. The agent produced a correct SPARQL query that searches for entries with this mnemonic, and returned the URI http://purl.uniprot.org/uniprot/P05067, which is the correct UniProtKB entry for A4_HUMAN (Amyloid-beta precursor protein). The query structure is appropriate and the answer directly fulfills the task requirement."
+          },
+          "iters": 4
+        }
+      ],
+      "metrics": {
+        "pass_1": true,
+        "best_of_n": true,
+        "pass_k": 1.0,
+        "n_success": 2,
+        "n_total": 2
+      }
+    },
+    {
+      "task_id": "106_uniprot_reviewed_or_not",
+      "query": "List all UniProtKB proteins and if they are reviewed (Swiss-Prot) or unreviewed (TrEMBL)",
+      "rollouts": [
+        {
+          "rollout_id": 1,
+          "converged": true,
+          "answer": "The SPARQL query retrieves all UniProtKB proteins and indicates whether each protein is reviewed (Swiss-Prot) or unreviewed (TrEMBL). The query returns two columns: the protein URI and its review status. Reviewed proteins are labeled as 'Swiss-Prot (reviewed)' and unreviewed proteins are labeled as 'TrEMBL (unreviewed)'.",
+          "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?reviewStatus\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:reviewed ?reviewed .\n  BIND(IF(?reviewed = true, \"Swiss-Prot (reviewed)\", \"TrEMBL (unreviewed)\") AS ?reviewStatus)\n}\n",
+          "judgment": {
+            "success": true,
+            "reason": "The task requested listing all UniProtKB proteins with their review status (Swiss-Prot or TrEMBL). The SPARQL query correctly identifies proteins using `?protein a up:Protein`, retrieves the review status using the `up:reviewed` property, and uses a BIND statement with IF logic to convert the boolean reviewed value into human-readable labels ('Swiss-Prot (reviewed)' for true, 'TrEMBL (unreviewed)' for false). The query structure is appropriate for UniProt's RDF data model and will successfully return all proteins with their review status as requested."
+          },
+          "iters": 12
+        },
+        {
+          "rollout_id": 2,
+          "converged": true,
+          "answer": "All UniProtKB proteins are listed with their review status:\n- Proteins with up:reviewed = true are labeled as \"Swiss-Prot (reviewed)\"\n- Proteins with up:reviewed = false are labeled as \"TrEMBL (unreviewed)\"\n\nThe SPARQL query retrieves all protein entries from the UniProt knowledge base and indicates whether each is a reviewed entry (Swiss-Prot) or an unreviewed entry (TrEMBL) based on the up:reviewed predicate.",
+          "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein (IF(?reviewed, \"Swiss-Prot (reviewed)\", \"TrEMBL (unreviewed)\") AS ?status)\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:reviewed ?reviewed .\n}\nORDER BY ?protein\n",
+          "judgment": {
+            "success": true,
+            "reason": "The task requested listing all UniProtKB proteins with their review status (Swiss-Prot vs TrEMBL). The SPARQL query correctly retrieves all proteins using `?protein a up:Protein`, checks their review status with `up:reviewed ?reviewed`, and uses an IF statement to label them appropriately as \"Swiss-Prot (reviewed)\" or \"TrEMBL (unreviewed)\". The query structure is valid and directly addresses the task requirements."
+          },
+          "iters": 12
+        }
+      ],
+      "metrics": {
+        "pass_1": true,
+        "best_of_n": true,
+        "pass_k": 1.0,
+        "n_success": 2,
+        "n_total": 2
+      }
+    }
+  ],
+  "aggregate_metrics": {
+    "mean_pass_1": 1.0,
+    "mean_best_of_n": 1.0,
+    "mean_pass_k": 1.0,
+    "tasks_with_any_success": 2,
+    "total_tasks": 2
+  }
+}
