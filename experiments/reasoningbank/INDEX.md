@@ -43,6 +43,7 @@ Testing whether **memory layers** (ontology sense cards, schema constraints, pro
 05_ARCHIVE/          - Historical artifacts (bug reports, old docs)
 tests/               - Organized test suite (smoke, integration, unit, debug)
 analysis/            - Analysis scripts
+tasks/               - Task definition files (evaluation queries)
 seed/                - Bootstrap data (strategies, constraints)
 results/             - Raw outputs (gitignored)
 ```
