@@ -1,0 +1,1439 @@
+{
+  "experiment": "s3_prompt_perturbation",
+  "timestamp": "2026-02-03T15:56:27.615446",
+  "config": {
+    "k": 5,
+    "temperature": 0.7,
+    "use_seed": false,
+    "tasks": [
+      "1_select_all_taxa_used_in_uniprot",
+      "4_uniprot_mnemonic_id",
+      "2_bacteria_taxa_and_their_scientific_name",
+      "121_proteins_and_diseases_linked",
+      "30_merged_loci"
+    ],
+    "strategies": [
+      "none",
+      "prefix",
+      "thinking",
+      "rephrase"
+    ]
+  },
+  "task_results": [
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "task_query": "Select all taxa from the UniProt taxonomy",
+      "complexity": "simple",
+      "strategy_results": {
+        "none": {
+          "strategy": "none",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.6210225820541382,
+            "sparql_vendi": 1.3410403728485107,
+            "mean_jaccard": 0.5373755656108596,
+            "mean_edit_distance": 5.8,
+            "sampling_efficiency": 0.3242045044898987,
+            "effective_count": 1.6210225820541382
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "This query selects all taxa from the UniProt taxonomy. Taxa are represented as instances of the up:Taxon class in the UniProt RDF schema. The query returns all distinct taxon URIs from the taxonomy namespace (http://purl.uniprot.org/taxonomy/). There are 3,116,860 taxa in total in the UniProt taxonomy database.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT DISTINCT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/none/1_select_all_taxa_used_in_uniprot_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "There are 3,116,860 taxa in the UniProt taxonomy. Each taxon is represented as an RDF resource with a URI in the http://purl.uniprot.org/taxonomy/ namespace.",
+              "sparql": "SELECT ?taxon WHERE {\n  ?taxon a <http://purl.uniprot.org/core/Taxon>\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/none/1_select_all_taxa_used_in_uniprot_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all taxa from the UniProt taxonomy by querying for all resources that are instances of the up:Taxon class. The query returns 3,116,860 taxa URIs from the UniProt taxonomy namespace (http://purl.uniprot.org/taxonomy/).",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/none/1_select_all_taxa_used_in_uniprot_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all taxa from the UniProt taxonomy by querying for all entities of type up:Taxon. The query returns 3,116,860 taxa, each identified by a URI in the format http://purl.uniprot.org/taxonomy/{id}.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon WHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/none/1_select_all_taxa_used_in_uniprot_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query selects all taxa from the UniProt taxonomy. There are 3116860 taxa in total.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/none/1_select_all_taxa_used_in_uniprot_rollout5.jsonl"
+            }
+          ]
+        },
+        "prefix": {
+          "strategy": "prefix",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.9205424785614014,
+            "sparql_vendi": 1.4309254884719849,
+            "mean_jaccard": 0.56192184363624,
+            "mean_edit_distance": 5.4,
+            "sampling_efficiency": 0.3841084837913513,
+            "effective_count": 1.9205424785614014
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "The query selects all taxa from the UniProt taxonomy. There are 3,116,860 taxa in total, each identified by their taxonomy URI (e.g., http://purl.uniprot.org/taxonomy/10).",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?taxon WHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/prefix/1_select_all_taxa_used_in_uniprot_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The SPARQL query selects all taxa from the UniProt taxonomy by querying for all instances of the up:Taxon class. This returns 3,116,860 taxa, each identified by a URI in the format http://purl.uniprot.org/taxonomy/{id}.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon WHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/prefix/1_select_all_taxa_used_in_uniprot_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query selects all taxa from the UniProt taxonomy. There are 3116860 taxa total in the database. The query retrieves taxa as URIs in the format http://purl.uniprot.org/taxonomy/[ID]. Due to endpoint limitations, results are returned in batches (default 100 per page), but the query pattern correctly identifies all taxonomic entries classified as up:Taxon in the UniProt RDF dataset.",
+              "sparql": "SELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/prefix/1_select_all_taxa_used_in_uniprot_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query returns all taxa from the UniProt taxonomy. There are 3,116,860 taxa in total, each identified by a URI in the format http://purl.uniprot.org/taxonomy/{id}.",
+              "sparql": "SELECT ?taxon WHERE { ?taxon a <http://purl.uniprot.org/core/Taxon> }",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/prefix/1_select_all_taxa_used_in_uniprot_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query selects all taxa from the UniProt taxonomy by finding all resources that are instances of the up:Taxon class. The query returns the URIs of all taxonomic entities in the UniProt RDF database, which includes approximately 3.1 million taxa.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?taxon WHERE {\n  ?taxon a up:Taxon\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/prefix/1_select_all_taxa_used_in_uniprot_rollout5.jsonl"
+            }
+          ]
+        },
+        "thinking": {
+          "strategy": "thinking",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.6111773252487183,
+            "sparql_vendi": 1.5530794858932495,
+            "mean_jaccard": 0.5946160130718954,
+            "mean_edit_distance": 4.6,
+            "sampling_efficiency": 0.32223546504974365,
+            "effective_count": 1.6111773252487183
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "The SPARQL query selects all taxa from the UniProt taxonomy by querying for all instances of the up:Taxon class. This returns all 3,116,860 taxon URIs from the UniProt taxonomy database.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon WHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/thinking/1_select_all_taxa_used_in_uniprot_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all taxa from the UniProt taxonomy by finding all instances of the up:Taxon class. The UniProt taxonomy contains 3,116,860 taxa, each identified by a URI in the http://purl.uniprot.org/taxonomy/ namespace followed by a taxonomic identifier number.",
+              "sparql": "SELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/thinking/1_select_all_taxa_used_in_uniprot_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query selects all taxa from the UniProt taxonomy. There are {'key': 'results_2', 'dtype': 'results', 'size': 20, 'rows': 1, 'preview': 'count=3116860', 'source': 'UniProt', 'usage': 'Call sparql_slice(this) to get data rows'} total taxa in the database. Each taxon is represented as an instance of the up:Taxon class with URIs in the format http://purl.uniprot.org/taxonomy/{id}.",
+              "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nSELECT DISTINCT ?taxon WHERE {\n  ?taxon a up:Taxon .\n}\n",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/thinking/1_select_all_taxa_used_in_uniprot_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query selects all taxa from the UniProt taxonomy by directly querying entities of type up:Taxon. Unlike the typical approach of finding taxa through protein organisms, this strategy queries the taxonomy graph directly, retrieving all 3,116,860 taxonomic entries in the database.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/thinking/1_select_all_taxa_used_in_uniprot_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query selects all taxa from the UniProt taxonomy. It returns all instances of the up:Taxon class, which represents taxonomic entities in UniProt. The result set contains 3,116,860 taxa.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon WHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/thinking/1_select_all_taxa_used_in_uniprot_rollout5.jsonl"
+            }
+          ]
+        },
+        "rephrase": {
+          "strategy": "rephrase",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.7421586513519287,
+            "sparql_vendi": 1.6373236179351807,
+            "mean_jaccard": 0.6365254435107376,
+            "mean_edit_distance": 5.1,
+            "sampling_efficiency": 0.3484317362308502,
+            "effective_count": 1.7421586513519287
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "This query selects all taxa from the UniProt taxonomy. Taxa are represented as instances of the up:Taxon class in the UniProt RDF schema. The query returns all distinct taxon URIs from the taxonomy namespace (http://purl.uniprot.org/taxonomy/). There are 3,116,860 taxa in total in the UniProt taxonomy database.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT DISTINCT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/rephrase/1_select_all_taxa_used_in_uniprot_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "There are 3116860 taxa in the UniProt taxonomy.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/rephrase/1_select_all_taxa_used_in_uniprot_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all taxa from the UniProt taxonomy by finding all instances of the up:Taxon class. The query returns 3116860 taxa, which are identified by their taxonomy URIs (e.g., http://purl.uniprot.org/taxonomy/10, http://purl.uniprot.org/taxonomy/100, etc.).",
+              "sparql": "SELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/rephrase/1_select_all_taxa_used_in_uniprot_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query selects all taxa from the UniProt taxonomy. There are 3,116,860 taxa in total, each represented as a URI in the format http://purl.uniprot.org/taxonomy/<id>.",
+              "sparql": "SELECT ?taxon WHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/rephrase/1_select_all_taxa_used_in_uniprot_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all taxa from the UniProt taxonomy by retrieving all instances of the up:Taxon class. The UniProt taxonomy contains 3,116,860 taxonomic entries, each identified by a URI in the format http://purl.uniprot.org/taxonomy/{id}.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/1_select_all_taxa_used_in_uniprot/rephrase/1_select_all_taxa_used_in_uniprot_rollout5.jsonl"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "task_query": "Select the UniProtKB entry with the mnemonic 'A4_HUMAN'",
+      "complexity": "simple",
+      "strategy_results": {
+        "none": {
+          "strategy": "none",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.8832921981811523,
+            "sparql_vendi": 1.1117042303085327,
+            "mean_jaccard": 0.5456759906759905,
+            "mean_edit_distance": 6.3,
+            "sampling_efficiency": 0.37665843963623047,
+            "effective_count": 1.8832921981811523
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/none/4_uniprot_mnemonic_id_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n    ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/none/4_uniprot_mnemonic_id_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The UniProtKB entry with mnemonic 'A4_HUMAN' is: http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry\nWHERE {\n  ?entry up:mnemonic \"A4_HUMAN\" .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/none/4_uniprot_mnemonic_id_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n  ?entry up:mnemonic \"A4_HUMAN\" .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/none/4_uniprot_mnemonic_id_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?entry\nWHERE {\n  ?entry a up:Protein ;\n         up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/none/4_uniprot_mnemonic_id_rollout5.jsonl"
+            }
+          ]
+        },
+        "prefix": {
+          "strategy": "prefix",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.8894624710083008,
+            "sparql_vendi": 1.4344476461410522,
+            "mean_jaccard": 0.5714285714285714,
+            "mean_edit_distance": 3.1,
+            "sampling_efficiency": 0.37789249420166016,
+            "effective_count": 1.8894624710083008
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "SELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/prefix/4_uniprot_mnemonic_id_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry\nWHERE {\n  ?entry a up:Protein .\n  ?entry up:mnemonic \"A4_HUMAN\" .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/prefix/4_uniprot_mnemonic_id_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/prefix/4_uniprot_mnemonic_id_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry\nWHERE {\n  ?entry a up:Protein ;\n         up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/prefix/4_uniprot_mnemonic_id_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/prefix/4_uniprot_mnemonic_id_rollout5.jsonl"
+            }
+          ]
+        },
+        "thinking": {
+          "strategy": "thinking",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.8664699792861938,
+            "sparql_vendi": 1.3885548114776611,
+            "mean_jaccard": 0.48634319112260294,
+            "mean_edit_distance": 5.9,
+            "sampling_efficiency": 0.37329399585723877,
+            "effective_count": 1.8664699792861938
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "SELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/thinking/4_uniprot_mnemonic_id_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry\nWHERE {\n  ?entry a up:Protein .\n  ?entry up:mnemonic \"A4_HUMAN\" .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/thinking/4_uniprot_mnemonic_id_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/thinking/4_uniprot_mnemonic_id_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?entry WHERE {\n  ?entry up:mnemonic \"A4_HUMAN\" .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/thinking/4_uniprot_mnemonic_id_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?entry\nWHERE {\n  ?entry up:mnemonic \"A4_HUMAN\" .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 5,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/thinking/4_uniprot_mnemonic_id_rollout5.jsonl"
+            }
+          ]
+        },
+        "rephrase": {
+          "strategy": "rephrase",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.674384355545044,
+            "sparql_vendi": 1.0040662288665771,
+            "mean_jaccard": 0.6444227994227995,
+            "mean_edit_distance": 4.7,
+            "sampling_efficiency": 0.3348768651485443,
+            "effective_count": 1.674384355545044
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/rephrase/4_uniprot_mnemonic_id_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/rephrase/4_uniprot_mnemonic_id_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/rephrase/4_uniprot_mnemonic_id_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?entry\nWHERE {\n  ?entry up:mnemonic \"A4_HUMAN\" .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/rephrase/4_uniprot_mnemonic_id_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "http://purl.uniprot.org/uniprot/P05067",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?entry\nWHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 4,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/4_uniprot_mnemonic_id/rephrase/4_uniprot_mnemonic_id_rollout5.jsonl"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "task_query": "Select all bacterial taxa and their scientific name from the UniProt taxonomy",
+      "complexity": "moderate",
+      "strategy_results": {
+        "none": {
+          "strategy": "none",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.4887645244598389,
+            "sparql_vendi": 1.193448781967163,
+            "mean_jaccard": 0.47492327657087385,
+            "mean_edit_distance": 17.7,
+            "sampling_efficiency": 0.29775291681289673,
+            "effective_count": 1.4887645244598389
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all bacterial taxa and their scientific names from the UniProt taxonomy. It uses the transitive subClassOf relationship (rdfs:subClassOf+) to find all taxa that are descendants of taxon:2 (Bacteria), and retrieves their scientific names using the up:scientificName property. The query returns approximately 593,078 bacterial taxa.",
+              "sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon rdfs:subClassOf+ taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/none/2_bacteria_taxa_and_their_scientific_name_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all bacterial taxa and their scientific names from the UniProt taxonomy. It finds all taxa that are descendants (using the transitive subClassOf+ property path) of taxon:2 (Bacteria) and retrieves their scientific names using the up:scientificName predicate.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon rdfs:subClassOf+ taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/none/2_bacteria_taxa_and_their_scientific_name_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "{'key': 'results_9', 'dtype': 'results', 'size': 9984, 'rows': 100, 'preview': 'taxon=http://purl.uniprot.org/taxono, scientificName=Cellvibrio', 'source': 'UniProt', 'usage': 'Call sparql_slice(this) to get data rows'}",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon rdfs:subClassOf+ taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 13,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/none/2_bacteria_taxa_and_their_scientific_name_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query returns 593,079 bacterial taxa from the UniProt taxonomy. Each result includes the taxon URI and its scientific name. The query uses rdfs:subClassOf* to transitively find all taxa that are subclasses of the Bacteria superkingdom (taxon:2), which includes Bacteria itself and all descendant bacterial taxa at all taxonomic ranks.",
+              "sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?name\nWHERE {\n  ?taxon rdfs:subClassOf* taxon:2 .\n  ?taxon up:scientificName ?name .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/none/2_bacteria_taxa_and_their_scientific_name_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query selects all bacterial taxa from the UniProt taxonomy by finding taxa that are subclasses of taxon 2 (Bacteria domain). It returns the taxon URI and its scientific name. There are 593,078 bacterial taxa in the database.",
+              "sparql": "SELECT ?taxon ?name WHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?name .\n  ?taxon rdfs:subClassOf <http://purl.uniprot.org/taxonomy/2> .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 8,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/none/2_bacteria_taxa_and_their_scientific_name_rollout5.jsonl"
+            }
+          ]
+        },
+        "prefix": {
+          "strategy": "prefix",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 2.0500428676605225,
+            "sparql_vendi": 1.5529969930648804,
+            "mean_jaccard": 0.38190414713836435,
+            "mean_edit_distance": 16.0,
+            "sampling_efficiency": 0.41000857949256897,
+            "effective_count": 2.0500428676605225
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "This query selects all bacterial taxa and their scientific names from the UniProt taxonomy. It uses the skos:narrowerTransitive property to find all taxa that are descendants of Bacteria (taxonomy ID 2), which is the bacterial domain/superkingdom, and retrieves their scientific names.",
+              "sparql": "SELECT ?taxon ?scientificName\nWHERE {\n  <http://purl.uniprot.org/taxonomy/2> skos:narrowerTransitive ?taxon .\n  ?taxon up:scientificName ?scientificName\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/prefix/2_bacteria_taxa_and_their_scientific_name_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all bacterial taxa and their scientific names from the UniProt taxonomy. It uses the transitive closure of rdfs:subClassOf (rdfs:subClassOf+) to find all taxa that are descendants of taxon:2 (Bacteria superkingdom), and retrieves their scientific names using the up:scientificName predicate. The query returns 593,078 bacterial taxa.",
+              "sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName WHERE {\n  ?taxon rdfs:subClassOf+ taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/prefix/2_bacteria_taxa_and_their_scientific_name_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query returns all bacterial taxa and their scientific names from the UniProt taxonomy. It retrieves 593,079 bacterial taxa total, including all taxonomic ranks (domain, phylum, class, order, family, genus, species, etc.) that are descendants of Bacteria (taxon:2). Each result contains the taxon URI and its scientific name.",
+              "sparql": "\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon rdfs:subClassOf* taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}\n",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/prefix/2_bacteria_taxa_and_their_scientific_name_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query retrieves all bacterial taxa and their scientific names from the UniProt taxonomy by finding all descendants of taxon:2 (Bacteria domain) using the transitive narrower relationship. The query returns 593,079 bacterial taxa.",
+              "sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  taxon:2 skos:narrowerTransitive* ?taxon .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/prefix/2_bacteria_taxa_and_their_scientific_name_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "Retrieved 100 bacterial taxa from UniProt taxonomy. Each entry includes the taxon URI and its scientific name. Examples include: Cellvibrio, Ancylobacter aquaticus, Herbaspirillum sp. BA12, etc.",
+              "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?name\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?name .\n  ?taxon rdfs:subClassOf* taxon:2 .\n}\n",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/prefix/2_bacteria_taxa_and_their_scientific_name_rollout5.jsonl"
+            }
+          ]
+        },
+        "thinking": {
+          "strategy": "thinking",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.7383211851119995,
+            "sparql_vendi": 1.0767019987106323,
+            "mean_jaccard": 0.47761900532724333,
+            "mean_edit_distance": 17.1,
+            "sampling_efficiency": 0.3476642370223999,
+            "effective_count": 1.7383211851119995
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "The query returns all bacterial taxa (593,079 total) from the UniProt taxonomy. Each result includes the taxon URI and its scientific name. The query uses rdfs:subClassOf* to transitively find all taxa that are subclasses of taxon:2 (Bacteria superkingdom).",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT ?taxon ?scientificName WHERE {\n  ?taxon rdfs:subClassOf* taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 10,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/thinking/2_bacteria_taxa_and_their_scientific_name_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "[{'taxon': 'http://purl.uniprot.org/taxonomy/10', 'scientificName': 'Cellvibrio'}, {'taxon': 'http://purl.uniprot.org/taxonomy/100', 'scientificName': 'Ancylobacter aquaticus'}, {'taxon': 'http://purl.uniprot.org/taxonomy/100000', 'scientificName': 'Herbaspirillum sp. BA12'}, {'taxon': 'http://purl.uniprot.org/taxonomy/1000000', 'scientificName': 'Microbacterium sp. 6.11-VPa'}, {'taxon': 'http://purl.uniprot.org/taxonomy/1000001', 'scientificName': 'Mycobacterium sp. 1.1-VEs'}, {'taxon': 'http:/",
+              "sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName WHERE {\n  ?taxon rdfs:subClassOf* taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 12,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/thinking/2_bacteria_taxa_and_their_scientific_name_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query selects all bacterial taxa from the UniProt taxonomy database. It identifies bacteria by finding all taxa that are descendants of taxon 2 (Bacteria) in the taxonomic hierarchy using the transitive rdfs:subClassOf+ relationship. The query returns 593,078 bacterial taxa, each with their taxon URI and scientific name. The results include bacteria at all taxonomic ranks (species, genus, family, etc.) that fall under the Bacteria domain.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?name WHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?name .\n  ?taxon rdfs:subClassOf+ <http://purl.uniprot.org/taxonomy/2> .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 8,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/thinking/2_bacteria_taxa_and_their_scientific_name_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query retrieves all bacterial taxa (593,079 total) by finding all taxa that are descendants of taxon:2 (Bacteria domain) using the transitive subClassOf relationship, along with their scientific names. The different strategy used here was to leverage the taxonomic hierarchy through rdfs:subClassOf* transitive property paths rather than using text-based filtering or other approaches.",
+              "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon rdfs:subClassOf* taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}\n",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/thinking/2_bacteria_taxa_and_their_scientific_name_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all bacterial taxa and their scientific names from the UniProt taxonomy by finding all taxa that are subclasses of the Bacteria domain (taxon ID 2, http://purl.uniprot.org/taxonomy/2). The query returns the taxon URI and scientific name for each bacterial taxon.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon rdfs:subClassOf <http://purl.uniprot.org/taxonomy/2> .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/thinking/2_bacteria_taxa_and_their_scientific_name_rollout5.jsonl"
+            }
+          ]
+        },
+        "rephrase": {
+          "strategy": "rephrase",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.6571733951568604,
+            "sparql_vendi": 1.0472302436828613,
+            "mean_jaccard": 0.3772266880006818,
+            "mean_edit_distance": 12.6,
+            "sampling_efficiency": 0.3314346671104431,
+            "effective_count": 1.6571733951568604
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all bacterial taxa and their scientific names from the UniProt taxonomy. It uses the transitive subClassOf relationship (rdfs:subClassOf+) to find all taxa that are descendants of taxon:2 (Bacteria), and retrieves their scientific names using the up:scientificName property. The query returns approximately 593,078 bacterial taxa.",
+              "sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon rdfs:subClassOf+ taxon:2 .\n  ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/rephrase/2_bacteria_taxa_and_their_scientific_name_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all bacterial taxa and their scientific names from the UniProt taxonomy. It uses the transitive property rdfs:subClassOf+ to find all descendants of taxon:2 (Bacteria), which represents the bacterial domain in the taxonomy hierarchy. The query returns 593,078 bacterial taxa, each with their corresponding scientific name retrieved via the up:scientificName predicate.",
+              "sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName WHERE {\n    ?taxon rdfs:subClassOf+ taxon:2 .\n    ?taxon up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/rephrase/2_bacteria_taxa_and_their_scientific_name_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query retrieves all bacterial taxa from the UniProt taxonomy database. It selects all taxa that are subclasses (direct or transitive) of taxon:2 (Bacteria domain) along with their scientific names. The query uses the rdfs:subClassOf* property path to traverse the entire taxonomic hierarchy beneath Bacteria, returning 593,079 bacterial taxa including Bacteria itself.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon rdfs:subClassOf* taxon:2 ;\n         up:scientificName ?scientificName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/rephrase/2_bacteria_taxa_and_their_scientific_name_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query selects all bacterial taxa and their scientific names from the UniProt taxonomy. It works by finding all taxa that are descendants of taxon:2 (Bacteria) using the rdfs:subClassOf* property path, which traverses the taxonomic hierarchy. The query returns the taxon URI and the corresponding scientific name for each bacterial taxon.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName WHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?scientificName .\n  ?taxon rdfs:subClassOf* taxon:2 .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/rephrase/2_bacteria_taxa_and_their_scientific_name_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The SPARQL query selects all bacterial taxa from the UniProt taxonomy by finding all taxa that are subclasses (descendants) of taxon:2 (Bacteria domain). The query returns 593,078 bacterial taxa with their scientific names. Each result includes the taxon URI and its scientific name.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?scientificName .\n  ?taxon rdfs:subClassOf+ taxon:2 .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/2_bacteria_taxa_and_their_scientific_name/rephrase/2_bacteria_taxa_and_their_scientific_name_rollout5.jsonl"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "task_query": "List all UniProtKB proteins and the diseases are annotated to be related.",
+      "complexity": "moderate",
+      "strategy_results": {
+        "none": {
+          "strategy": "none",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.5668894052505493,
+            "sparql_vendi": 1.140517234802246,
+            "mean_jaccard": 0.3603689588443593,
+            "mean_edit_distance": 12.3,
+            "sampling_efficiency": 0.31337788701057434,
+            "effective_count": 1.5668894052505493
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "The SPARQL query retrieves all UniProtKB proteins that have disease annotations. It returns pairs of protein URIs and disease URIs, where each protein is linked to a disease through a Disease_Annotation. The query found 7,250 such protein-disease associations in the UniProt database.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?protein ?disease\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/none/121_proteins_and_diseases_linked_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "Found 10504 protein-disease associations in UniProtKB.\n\nSample associations (first 10):\n1. Protein: A0A1B0GTQ4 - Disease: 6467\n2. Protein: A0A1B0GTW7 - Disease: 6243\n3. Protein: A0A1W2PR82 - Disease: 5692\n4. Protein: A0AVF1 - Disease: 6257\n5. Protein: A0PJY2 - Disease: 4228\n6. Protein: A0PK11 - Disease: 6028\n7. Protein: A1A4Y4 - Disease: 3080\n8. Protein: A1L188 - Disease: 5760\n9. Protein: A1X283 - Disease: 2812\n10. Protein: A1XBS5 - Disease: 5433\n\n... and 10494 more associations (total: 10504).",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?protein ?disease\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/none/121_proteins_and_diseases_linked_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query retrieves all UniProtKB proteins that have disease annotations. It returns pairs of protein URIs and their associated disease URIs. The query works by: (1) finding all entities of type up:Protein, (2) following their up:annotation links to find annotations, (3) filtering for annotations of type up:Disease_Annotation, and (4) extracting the disease URIs via the up:disease property. Each row in the result represents one protein-disease relationship.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?protein ?disease\nWHERE {\n  ?protein a up:Protein ;\n           up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation ;\n              up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/none/121_proteins_and_diseases_linked_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query retrieves all UniProtKB proteins that have disease annotations and the diseases they are related to. The query:\n\n1. Finds all proteins (up:Protein)\n2. Identifies their disease annotations (up:Disease_Annotation)\n3. Extracts the disease URIs linked via up:disease property\n4. Optionally retrieves the disease names using skos:prefLabel\n\nThe results include the protein URI, disease URI, and disease name (when available). Each row represents a protein-disease relationship as annotat",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nSELECT ?protein ?disease ?diseaseName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?diseaseAnnotation .\n  ?diseaseAnnotation a up:Disease_Annotation .\n  ?diseaseAnnotation up:disease ?disease .\n  OPTIONAL { ?disease skos:prefLabel ?diseaseName }\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/none/121_proteins_and_diseases_linked_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query returns 1062 protein-disease relationships from UniProtKB. Each result contains a protein URI (from http://purl.uniprot.org/uniprot/) and its associated disease URI (from http://purl.uniprot.org/diseases/). The query finds proteins that have disease annotations by traversing through the annotation structure: proteins are linked to Disease_Annotation objects via the up:annotation predicate, and these annotations link to specific diseases via the up:disease predicate.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?disease\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/none/121_proteins_and_diseases_linked_rollout5.jsonl"
+            }
+          ]
+        },
+        "prefix": {
+          "strategy": "prefix",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.5187724828720093,
+            "sparql_vendi": 1.457169771194458,
+            "mean_jaccard": 0.4736056808688387,
+            "mean_edit_distance": 10.7,
+            "sampling_efficiency": 0.3037545084953308,
+            "effective_count": 1.5187724828720093
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "The query retrieves all UniProtKB proteins and their associated diseases. There are 7,250 protein-disease associations in the database. Each result includes the protein URI, protein name, disease URI, and disease name.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?proteinLabel ?disease ?diseaseName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  OPTIONAL { ?protein rdfs:label ?proteinLabel }\n  OPTIONAL { ?disease skos:prefLabel ?diseaseName }\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/prefix/121_proteins_and_diseases_linked_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query returns all UniProtKB proteins that have disease annotations, along with the diseases they are annotated to be related to. It finds proteins, their Disease_Annotation annotations, and the associated disease entities. The result contains 10,504 protein-disease associations.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?protein ?disease WHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/prefix/121_proteins_and_diseases_linked_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "Retrieved 100 protein-disease associations. The query returns all UniProtKB proteins that have disease annotations, paired with their associated disease names.",
+              "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?diseaseName WHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  ?disease skos:prefLabel ?diseaseName .\n}\n",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/prefix/121_proteins_and_diseases_linked_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "[{'protein': 'http://purl.uniprot.org/uniprot/Q99714', 'proteinLabel': 'HCD2_HUMAN', 'disease': 'http://purl.uniprot.org/diseases/1'}, {'protein': 'http://purl.uniprot.org/uniprot/P78330', 'proteinLabel': 'SERB_HUMAN', 'disease': 'http://purl.uniprot.org/diseases/10'}, {'protein': 'http://purl.uniprot.org/uniprot/P02766', 'proteinLabel': 'TTHY_HUMAN', 'disease': 'http://purl.uniprot.org/diseases/100'}, {'protein': 'http://purl.uniprot.org/uniprot/P02458', 'proteinLabel': 'CO2A1_HUMAN', 'disease'",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?protein ?proteinLabel ?disease ?diseaseLabel\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  OPTIONAL { ?protein up:mnemonic ?proteinLabel . }\n  OPTIONAL { ?disease rdfs:label ?diseaseLabel . }\n}\nLIMIT 100000",
+              "judgment": {
+                "success": true
+              },
+              "iters": 12,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/prefix/121_proteins_and_diseases_linked_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "There are 7,250 protein-disease associations in UniProtKB. Each association links a UniProt protein to a disease entity.\n\nSample results (first 5):\n1. Protein: A0A1B0GTQ4, Disease: 6467\n2. Protein: A0A1B0GTW7, Disease: 6243\n3. Protein: A0A1W2PR82, Disease: 5692\n4. Protein: A0AVF1, Disease: 6257\n5. Protein: A0PJY2, Disease: 4228\n\n(Showing 5 of 7,250 total associations)",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?protein ?disease\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 6,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/prefix/121_proteins_and_diseases_linked_rollout5.jsonl"
+            }
+          ]
+        },
+        "thinking": {
+          "strategy": "thinking",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 2.0189149379730225,
+            "sparql_vendi": 1.2294507026672363,
+            "mean_jaccard": 0.406431255243419,
+            "mean_edit_distance": 7.0,
+            "sampling_efficiency": 0.40378299355506897,
+            "effective_count": 2.0189149379730225
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "Found 16376 protein-disease associations in UniProtKB.\n\nSample of proteins and their associated diseases:\n1. Unknown protein (http://purl.uniprot.org/uniprot/Q99714) - HSD10 mitochondrial disease (http://purl.uniprot.org/diseases/1)\n2. Unknown protein (http://purl.uniprot.org/uniprot/P78330) - Phosphoserine phosphatase deficiency (http://purl.uniprot.org/diseases/10)\n3. Unknown protein (http://purl.uniprot.org/uniprot/P02766) - Amyloidosis, hereditary systemic 1 (http://purl.uniprot.org/diseases",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?proteinLabel ?disease ?diseaseLabel\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  OPTIONAL { ?protein skos:prefLabel ?proteinLabel }\n  OPTIONAL { ?disease skos:prefLabel ?diseaseLabel }\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/thinking/121_proteins_and_diseases_linked_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The SPARQL query retrieves all UniProtKB proteins and their annotated disease associations. The query returns 7250 protein-disease relationships, where each row contains a protein URI and the corresponding disease name.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?diseaseName\nWHERE {\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  ?disease skos:prefLabel ?diseaseName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 9,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/thinking/121_proteins_and_diseases_linked_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The SPARQL query retrieves all UniProtKB proteins and their associated diseases. The query found 7,250 protein-disease associations.\n\nThe query works by:\n1. Identifying all entities of type up:Protein (UniProtKB proteins)\n2. Finding their annotations (up:annotation predicate)\n3. Filtering for Disease_Annotation type annotations\n4. Extracting the disease resource linked to each annotation\n\nThe results include proteins (identified by their UniProt URIs such as http://purl.uniprot.org/uniprot/A0A1B",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?disease\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 12,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/thinking/121_proteins_and_diseases_linked_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query retrieves all UniProtKB proteins and their associated disease annotations from the UniProt RDF endpoint.\n\nThe query returns 100 associations (with default limit of 100 applied). The full dataset contains approximately 7,250 protein-disease associations.\n\nEach result includes:\n- Protein URI (e.g., http://purl.uniprot.org/uniprot/Q99714)\n- Protein name (e.g., \"3-hydroxyacyl-CoA dehydrogenase type-2\")\n- Disease URI (e.g., http://purl.uniprot.org/diseases/1)\n- Disease name (e.g., \"",
+              "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?proteinName ?disease ?diseaseName WHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  OPTIONAL { ?protein up:recommendedName ?recName . ?recName up:fullName ?proteinName . }\n  OPTIONAL { ?disease skos:prefLabel ?diseaseName . }\n}\n",
+              "judgment": {
+                "success": true
+              },
+              "iters": 8,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/thinking/121_proteins_and_diseases_linked_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The SPARQL query retrieves all UniProtKB proteins that are annotated to be related to diseases. The query returns 7,250 protein-disease relationships.\n\nThe query works by:\n1. Finding all proteins (up:Protein)\n2. Accessing their disease annotations (up:Disease_Annotation)\n3. Retrieving the associated disease objects and their names\n\nSample results include:\n- Protein A0A1B0GTQ4 is related to Carey-Fineman-Ziter syndrome 2\n- Protein A0A1B0GTW7 is related to Heterotaxy, visceral, 12, autosomal\n- Pro",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?disease ?diseaseName WHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  ?disease skos:prefLabel ?diseaseName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 10,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/thinking/121_proteins_and_diseases_linked_rollout5.jsonl"
+            }
+          ]
+        },
+        "rephrase": {
+          "strategy": "rephrase",
+          "pass_at_1": true,
+          "best_of_n": true,
+          "pass_at_k": 1.0,
+          "n_success": 5,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 2.128880262374878,
+            "sparql_vendi": 1.4076292514801025,
+            "mean_jaccard": 0.41711546499477536,
+            "mean_edit_distance": 15.0,
+            "sampling_efficiency": 0.42577606439590454,
+            "effective_count": 2.128880262374878
+          },
+          "rollouts": [
+            {
+              "converged": true,
+              "answer": "The SPARQL query retrieves all UniProtKB proteins that have disease annotations. It returns pairs of protein URIs and disease URIs, where each protein is linked to a disease through a Disease_Annotation. The query found 7,250 such protein-disease associations in the UniProt database.",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nSELECT ?protein ?disease\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/rephrase/121_proteins_and_diseases_linked_rollout1.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "The query retrieves all UniProtKB proteins that have disease annotations. \n\nResults summary:\n- Total distinct proteins with disease annotations: 4,903\n- Total protein-disease annotation pairs: 7,250\n\nThe query returns three columns:\n1. protein: The UniProt protein URI\n2. disease: The UniProt disease URI\n3. diseaseMnemonic: The disease mnemonic/code (e.g., CFZS2, HTX12, DIAR11)\n\nSample results include proteins like A0A1B0GTQ4 (associated with CFZS2), A0A1B0GTW7 (associated with HTX12), and A0A1W2",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core/>\n\nSELECT ?protein ?disease ?diseaseMnemonic\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation up:disease ?disease .\n  ?disease up:mnemonic ?diseaseMnemonic .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 10,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/rephrase/121_proteins_and_diseases_linked_rollout2.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This SPARQL query retrieves all UniProtKB proteins that have disease annotations and lists them with their associated diseases.\n\nThe query:\n- Finds all entities of type up:Protein (UniProtKB proteins)\n- Filters for proteins that have annotations of type up:Disease_Annotation\n- Retrieves the associated disease entity via the up:disease predicate\n- Includes optional protein labels (mnemonics like \"HCD2_HUMAN\") and disease names (preferred labels)\n\nResults include:\n- protein: The URI of the UniProt",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?proteinLabel ?disease ?diseaseLabel\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  OPTIONAL { ?protein up:mnemonic ?proteinLabel . }\n  OPTIONAL { ?disease skos:prefLabel ?diseaseLabel . }\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 11,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/rephrase/121_proteins_and_diseases_linked_rollout3.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "This query retrieves all UniProtKB proteins that have disease annotations along with their associated diseases. It returns 7,250 protein-disease associations covering 4,903 unique proteins. The results include:\n- protein: The URI of the UniProt protein entry\n- disease: The URI of the disease from UniProt's disease vocabulary\n- diseaseName: The human-readable name of the disease (from skos:prefLabel)\n\nThe query uses the up:Disease_Annotation class to identify disease-related annotations and links",
+              "sparql": "\nPREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?disease ?diseaseName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  OPTIONAL { ?disease skos:prefLabel ?diseaseName }\n}\n",
+              "judgment": {
+                "success": true
+              },
+              "iters": 7,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/rephrase/121_proteins_and_diseases_linked_rollout4.jsonl"
+            },
+            {
+              "converged": true,
+              "answer": "There are 7,250 protein-disease associations in UniProtKB. The SPARQL query retrieves all UniProtKB proteins that have disease annotations along with their associated diseases. Each protein is linked to diseases through Disease_Annotation objects in the UniProt RDF schema. The query pattern follows: protein -> up:annotation -> Disease_Annotation -> up:disease -> disease entity, where disease names are retrieved using skos:prefLabel. Examples include protein A0A1B0GTQ4 associated with 'Carey-Fine",
+              "sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?protein ?disease ?diseaseName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  ?disease skos:prefLabel ?diseaseName .\n}",
+              "judgment": {
+                "success": true
+              },
+              "iters": 12,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/121_proteins_and_diseases_linked/rephrase/121_proteins_and_diseases_linked_rollout5.jsonl"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "30_merged_loci",
+      "task_query": "Find UniProtKB entries with merged loci in Bordetella avium",
+      "complexity": "moderate",
+      "strategy_results": {
+        "none": {
+          "strategy": "none",
+          "pass_at_1": false,
+          "best_of_n": false,
+          "pass_at_k": 0.0,
+          "n_success": 0,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.0000005960464478,
+            "sparql_vendi": 0.0,
+            "mean_jaccard": 1.0,
+            "mean_edit_distance": 0.0,
+            "sampling_efficiency": 0.2000001221895218,
+            "effective_count": 1.0000005960464478
+          },
+          "rollouts": [
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/none/30_merged_loci_rollout1.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/none/30_merged_loci_rollout2.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/none/30_merged_loci_rollout3.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/none/30_merged_loci_rollout4.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/none/30_merged_loci_rollout5.jsonl"
+            }
+          ]
+        },
+        "prefix": {
+          "strategy": "prefix",
+          "pass_at_1": false,
+          "best_of_n": false,
+          "pass_at_k": 0.0,
+          "n_success": 0,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.0000005960464478,
+            "sparql_vendi": 0.0,
+            "mean_jaccard": 1.0,
+            "mean_edit_distance": 0.0,
+            "sampling_efficiency": 0.2000001221895218,
+            "effective_count": 1.0000005960464478
+          },
+          "rollouts": [
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/prefix/30_merged_loci_rollout1.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/prefix/30_merged_loci_rollout2.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/prefix/30_merged_loci_rollout3.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/prefix/30_merged_loci_rollout4.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/prefix/30_merged_loci_rollout5.jsonl"
+            }
+          ]
+        },
+        "thinking": {
+          "strategy": "thinking",
+          "pass_at_1": false,
+          "best_of_n": false,
+          "pass_at_k": 0.0,
+          "n_success": 0,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.0000005960464478,
+            "sparql_vendi": 0.0,
+            "mean_jaccard": 1.0,
+            "mean_edit_distance": 0.0,
+            "sampling_efficiency": 0.2000001221895218,
+            "effective_count": 1.0000005960464478
+          },
+          "rollouts": [
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/thinking/30_merged_loci_rollout1.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/thinking/30_merged_loci_rollout2.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/thinking/30_merged_loci_rollout3.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/thinking/30_merged_loci_rollout4.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/thinking/30_merged_loci_rollout5.jsonl"
+            }
+          ]
+        },
+        "rephrase": {
+          "strategy": "rephrase",
+          "pass_at_1": false,
+          "best_of_n": false,
+          "pass_at_k": 0.0,
+          "n_success": 0,
+          "n_total": 5,
+          "num_trajectories": 5,
+          "diversity": {
+            "trajectory_vendi": 1.0000005960464478,
+            "sparql_vendi": 0.0,
+            "mean_jaccard": 1.0,
+            "mean_edit_distance": 0.0,
+            "sampling_efficiency": 0.2000001221895218,
+            "effective_count": 1.0000005960464478
+          },
+          "rollouts": [
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/rephrase/30_merged_loci_rollout1.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/rephrase/30_merged_loci_rollout2.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/rephrase/30_merged_loci_rollout3.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/rephrase/30_merged_loci_rollout4.jsonl"
+            },
+            {
+              "converged": false,
+              "answer": null,
+              "sparql": null,
+              "judgment": {
+                "success": false
+              },
+              "iters": 0,
+              "log_path": "experiments/reasoningbank/results/s3_prompt_perturbation/logs/30_merged_loci/rephrase/30_merged_loci_rollout5.jsonl"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

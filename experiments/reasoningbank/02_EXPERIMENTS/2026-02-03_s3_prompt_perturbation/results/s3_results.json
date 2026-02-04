@@ -1,0 +1,119 @@
+{
+  "experiment": "s3_prompt_perturbation",
+  "timestamp": "2026-02-03T12:36:15.863298",
+  "config": {
+    "k": 5,
+    "temperature": 0.7,
+    "use_seed": false,
+    "tasks": [
+      "1_select_all_taxa_used_in_uniprot",
+      "4_uniprot_mnemonic_id",
+      "2_bacteria_taxa_and_their_scientific_name",
+      "121_proteins_and_diseases_linked",
+      "30_merged_loci"
+    ],
+    "strategies": [
+      "none",
+      "prefix",
+      "thinking",
+      "rephrase"
+    ]
+  },
+  "task_results": [
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "task_query": "Select all taxa from the UniProt taxonomy",
+      "complexity": "simple",
+      "strategy_results": {
+        "none": {
+          "error": "'pass_at_1'"
+        },
+        "prefix": {
+          "error": "'pass_at_1'"
+        },
+        "thinking": {
+          "error": "'pass_at_1'"
+        },
+        "rephrase": {
+          "error": "'pass_at_1'"
+        }
+      }
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "task_query": "Select the UniProtKB entry with the mnemonic 'A4_HUMAN'",
+      "complexity": "simple",
+      "strategy_results": {
+        "none": {
+          "error": "'pass_at_1'"
+        },
+        "prefix": {
+          "error": "'pass_at_1'"
+        },
+        "thinking": {
+          "error": "'pass_at_1'"
+        },
+        "rephrase": {
+          "error": "'pass_at_1'"
+        }
+      }
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "task_query": "Select all bacterial taxa and their scientific name from the UniProt taxonomy",
+      "complexity": "moderate",
+      "strategy_results": {
+        "none": {
+          "error": "'pass_at_1'"
+        },
+        "prefix": {
+          "error": "'pass_at_1'"
+        },
+        "thinking": {
+          "error": "'pass_at_1'"
+        },
+        "rephrase": {
+          "error": "'pass_at_1'"
+        }
+      }
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "task_query": "List all UniProtKB proteins and the diseases are annotated to be related.",
+      "complexity": "moderate",
+      "strategy_results": {
+        "none": {
+          "error": "'pass_at_1'"
+        },
+        "prefix": {
+          "error": "'pass_at_1'"
+        },
+        "thinking": {
+          "error": "'pass_at_1'"
+        },
+        "rephrase": {
+          "error": "'pass_at_1'"
+        }
+      }
+    },
+    {
+      "task_id": "30_merged_loci",
+      "task_query": "Find UniProtKB entries with merged loci in Bordetella avium",
+      "complexity": "moderate",
+      "strategy_results": {
+        "none": {
+          "error": "'pass_at_1'"
+        },
+        "prefix": {
+          "error": "'pass_at_1'"
+        },
+        "thinking": {
+          "error": "'pass_at_1'"
+        },
+        "rephrase": {
+          "error": "'pass_at_1'"
+        }
+      }
+    }
+  ]
+}

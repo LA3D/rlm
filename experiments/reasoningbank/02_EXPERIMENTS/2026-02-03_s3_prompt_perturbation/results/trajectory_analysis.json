@@ -1,0 +1,2539 @@
+{
+  "total_trajectories": 100,
+  "trajectories": [
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "prefix",
+      "rollout": 4,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "prefix",
+      "rollout": 2,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "prefix",
+      "rollout": 5,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "prefix",
+      "rollout": 3,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "prefix",
+      "rollout": 1,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "thinking",
+      "rollout": 4,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "thinking",
+      "rollout": 2,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "thinking",
+      "rollout": 5,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "thinking",
+      "rollout": 3,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "thinking",
+      "rollout": 1,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "rephrase",
+      "rollout": 4,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "rephrase",
+      "rollout": 2,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "rephrase",
+      "rollout": 5,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "rephrase",
+      "rollout": 3,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "rephrase",
+      "rollout": 1,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "none",
+      "rollout": 4,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "none",
+      "rollout": 2,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "none",
+      "rollout": 5,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "none",
+      "rollout": 3,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "30_merged_loci",
+      "strategy": "none",
+      "rollout": 1,
+      "converged": false,
+      "iterations": 0,
+      "total_calls": 0,
+      "total_cost": 0.0,
+      "tools_used": [],
+      "tool_counts": {},
+      "has_sparql": false
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "prefix",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.051042,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "prefix",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.061128,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "prefix",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.056597999999999996,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "prefix",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.042789,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "prefix",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.058526999999999996,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "thinking",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.08766600000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "thinking",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.045687000000000005,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 3,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "thinking",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.07796700000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 3,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "thinking",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.055349999999999996,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "thinking",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.05601300000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_describe": 1,
+        "sparql_slice": 3,
+        "sparql_query": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "rephrase",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.042939,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "rephrase",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.049413,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 3,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "rephrase",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.066447,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "rephrase",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.040572,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "rephrase",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.049160999999999996,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "none",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.061512,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "none",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.065442,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "none",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.068355,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "none",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.040572,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "4_uniprot_mnemonic_id",
+      "strategy": "none",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.065424,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "prefix",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.08586300000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 3,
+        "sparql_stats": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "prefix",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.137754,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 8,
+        "sparql_slice": 8
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "prefix",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.11523000000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 9,
+        "sparql_peek": 1,
+        "sparql_slice": 6
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "prefix",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 12,
+      "total_calls": 12,
+      "total_cost": 0.244509,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_count",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_peek",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 5,
+        "sparql_peek": 3,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "prefix",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.08854500000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_stats",
+        "sparql_query"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 2,
+        "sparql_stats": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "thinking",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 10,
+      "total_calls": 10,
+      "total_cost": 0.190476,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_describe",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 8,
+        "sparql_slice": 7,
+        "sparql_describe": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "thinking",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.159939,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 8,
+        "sparql_slice": 6,
+        "sparql_stats": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "thinking",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 12,
+      "total_calls": 12,
+      "total_cost": 0.26722500000000005,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_count",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 8,
+        "sparql_slice": 7,
+        "sparql_stats": 1,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "thinking",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 8,
+      "total_calls": 8,
+      "total_cost": 0.15898800000000002,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 9,
+        "sparql_slice": 6
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "thinking",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.17418899999999998,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 8,
+        "sparql_slice": 8
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "rephrase",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 12,
+      "total_calls": 12,
+      "total_cost": 0.29431199999999996,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_describe",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_stats"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 9,
+        "sparql_describe": 1,
+        "sparql_slice": 6,
+        "sparql_stats": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "rephrase",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.098385,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_describe",
+        "sparql_peek",
+        "sparql_describe",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 2,
+        "sparql_describe": 3,
+        "sparql_stats": 1,
+        "sparql_query": 4,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "rephrase",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 11,
+      "total_calls": 11,
+      "total_cost": 0.19206299999999998,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_count",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 4,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "rephrase",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.110568,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 3,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "rephrase",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 10,
+      "total_calls": 10,
+      "total_cost": 0.185085,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_describe": 1,
+        "sparql_slice": 6,
+        "sparql_query": 8
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "none",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.076458,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 2,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "none",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.098385,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_describe",
+        "sparql_peek",
+        "sparql_describe",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 2,
+        "sparql_describe": 3,
+        "sparql_stats": 1,
+        "sparql_query": 4,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "none",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.112197,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 6,
+        "sparql_slice": 4
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "none",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.14275800000000002,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 9,
+        "sparql_slice": 6
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "121_proteins_and_diseases_linked",
+      "strategy": "none",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.13828800000000002,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 2,
+        "sparql_query": 3,
+        "sparql_slice": 4
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "prefix",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.065604,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_describe",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_describe": 1,
+        "sparql_query": 4,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "prefix",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.058992,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "prefix",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.066624,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 4
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "prefix",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.065916,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "prefix",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.048789,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_count",
+        "sparql_stats"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 1,
+        "sparql_count": 1,
+        "sparql_stats": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "thinking",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.080076,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 3,
+        "sparql_peek": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "thinking",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.06403800000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "thinking",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.067083,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_count"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_slice": 2,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "thinking",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.070662,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_stats",
+        "sparql_slice",
+        "sparql_query"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 2,
+        "sparql_stats": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "thinking",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.08719199999999999,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 7,
+        "sparql_slice": 4
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "rephrase",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.064575,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_slice": 3,
+        "sparql_stats": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "rephrase",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.06973800000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_describe",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_describe": 1,
+        "sparql_query": 4,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "rephrase",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.06657300000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "rephrase",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.10527900000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "rephrase",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.06774000000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 3,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "none",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 4,
+      "total_calls": 4,
+      "total_cost": 0.04815,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_count",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_count": 1,
+        "sparql_slice": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "none",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.06973800000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_describe",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_describe": 1,
+        "sparql_query": 4,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "none",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.054705,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 2,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "none",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.064275,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 4,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "1_select_all_taxa_used_in_uniprot",
+      "strategy": "none",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 5,
+      "total_calls": 5,
+      "total_cost": 0.069096,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 5,
+        "sparql_peek": 1,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "prefix",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.077394,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_stats": 1,
+        "sparql_query": 2,
+        "sparql_slice": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "prefix",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.17697000000000002,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 6,
+        "sparql_slice": 5
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "prefix",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.11284500000000001,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_count",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_count",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 8,
+        "sparql_slice": 8,
+        "sparql_count": 2
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "prefix",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.10566,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_describe",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_describe": 2,
+        "sparql_slice": 5,
+        "sparql_query": 4
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "prefix",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.154266,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_stats",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 7,
+        "sparql_describe": 1,
+        "sparql_slice": 4,
+        "sparql_peek": 1,
+        "sparql_stats": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "thinking",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.18652200000000002,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_count",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 9,
+        "sparql_slice": 8,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "thinking",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 8,
+      "total_calls": 8,
+      "total_cost": 0.157341,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 13,
+        "sparql_peek": 1,
+        "sparql_slice": 10
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "thinking",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 10,
+      "total_calls": 10,
+      "total_cost": 0.211599,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_count",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 12,
+        "sparql_peek": 1,
+        "sparql_describe": 1,
+        "sparql_slice": 7,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "thinking",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.097851,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 7,
+        "sparql_slice": 5
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "thinking",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 12,
+      "total_calls": 12,
+      "total_cost": 0.349419,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 13,
+        "sparql_peek": 1,
+        "sparql_slice": 13
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "rephrase",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.163605,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_describe",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 8,
+        "sparql_peek": 1,
+        "sparql_describe": 1,
+        "sparql_slice": 6
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "rephrase",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.202434,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_count",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 8,
+        "sparql_slice": 9,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "rephrase",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.100611,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 6,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "rephrase",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.094452,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_describe",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_describe": 1,
+        "sparql_query": 4,
+        "sparql_slice": 4
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "rephrase",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.187059,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_describe",
+        "sparql_query",
+        "sparql_peek",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 7,
+        "sparql_describe": 1,
+        "sparql_peek": 1,
+        "sparql_slice": 8
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "none",
+      "rollout": 5,
+      "converged": true,
+      "iterations": 8,
+      "total_calls": 8,
+      "total_cost": 0.13873800000000003,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 11,
+        "sparql_slice": 11
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "none",
+      "rollout": 3,
+      "converged": true,
+      "iterations": 13,
+      "total_calls": 13,
+      "total_cost": 0.322881,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_stats",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_stats": 1,
+        "sparql_query": 13,
+        "sparql_slice": 6
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "none",
+      "rollout": 1,
+      "converged": true,
+      "iterations": 6,
+      "total_calls": 6,
+      "total_cost": 0.100611,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 6,
+        "sparql_slice": 3
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "none",
+      "rollout": 4,
+      "converged": true,
+      "iterations": 9,
+      "total_calls": 9,
+      "total_cost": 0.185244,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_query",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_query": 15,
+        "sparql_slice": 5
+      },
+      "has_sparql": true
+    },
+    {
+      "task_id": "2_bacteria_taxa_and_their_scientific_name",
+      "strategy": "none",
+      "rollout": 2,
+      "converged": true,
+      "iterations": 7,
+      "total_calls": 7,
+      "total_cost": 0.117726,
+      "tools_used": [
+        "endpoint_info",
+        "sparql_peek",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_slice",
+        "sparql_query",
+        "sparql_count",
+        "sparql_slice"
+      ],
+      "tool_counts": {
+        "endpoint_info": 1,
+        "sparql_peek": 1,
+        "sparql_query": 8,
+        "sparql_slice": 8,
+        "sparql_count": 1
+      },
+      "has_sparql": true
+    }
+  ]
+}
