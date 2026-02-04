@@ -422,6 +422,8 @@ class SPARQLTools:
             # Metadata
             'endpoint_info': lambda args=None, kwargs=None: self.endpoint_info(),
         }
+        # Note: llm_query is NOT added here - it's a DSPy RLM built-in
+        # For LocalPythonInterpreter, it's injected via sub_lm parameter
 
 
 # Convenience functions

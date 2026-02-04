@@ -20,6 +20,9 @@ from experiments.reasoningbank.packers import l0_sense, l1_schema, l2_mem, l3_gu
 from experiments.reasoningbank.ctx.cache import build_with_cache
 from experiments.reasoningbank.tools.local_interpreter import LocalPythonInterpreter
 
+# Apply DSPy bug patches
+from experiments.reasoningbank.tools import dspy_patches
+
 # Configure DSPy with Anthropic model if not already configured
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
     if not os.environ.get('ANTHROPIC_API_KEY'):
@@ -224,7 +227,8 @@ def run_uniprot(
             print("  Using LocalPythonInterpreter (no Deno sandbox)")
         interpreter = LocalPythonInterpreter(
             tools=inst.wrap(),
-            output_fields=[{'name': 'sparql'}, {'name': 'answer'}]
+            output_fields=[{'name': 'sparql'}, {'name': 'answer'}],
+            sub_lm=sub_lm  # Enable llm_query in LocalPythonInterpreter
         )
 
     # Run RLM with remote endpoint tools
@@ -366,8 +370,30 @@ def run_uniprot(
         answer = getattr(res, 'answer', str(res))
         sparql = getattr(res, 'sparql', None)
 
+        # Detect LLM refusal: check if all LM calls were refused
+        refusal_detected = False
+        try:
+            from dspy.clients.base_lm import GLOBAL_HISTORY
+            if GLOBAL_HISTORY:
+                relevant_calls = list(GLOBAL_HISTORY)[history_before:history_after]
+                refusals = sum(
+                    1 for entry in relevant_calls
+                    if "finish_reason='refusal'" in str(entry.get('response', ''))
+                )
+                if refusals > 0 and refusals == len(relevant_calls):
+                    refusal_detected = True
+                    answer = f"LLM refused ({refusals}/{len(relevant_calls)} calls refused by safety filter)"
+                    sparql = None
+                    if verbose:
+                        print(f"  WARNING: LLM refused all {refusals} calls (safety filter false positive)")
+        except Exception:
+            pass
+
+        converged = not refusal_detected
+
         log_event('run_complete', {
-            'converged': True,
+            'converged': converged,
+            'refusal_detected': refusal_detected,
             'answer_length': len(str(answer)),
             'answer_preview': str(answer)[:500],
             'has_sparql': sparql is not None,
@@ -459,20 +485,74 @@ def run_uniprot(
                 # Continue with empty trajectory
 
         return Result(
-            answer=getattr(res, 'answer', str(res)),
-            sparql=getattr(res, 'sparql', None),
-            converged=True,
+            answer=answer,
+            sparql=sparql,
+            converged=converged,
             iters=len(history),
             leakage=inst.metrics,
             trace=trajectory,
             trajectory=exec_trajectory,
         )
     except Exception as e:
-        log_event('run_error', {'error': str(e), 'type': type(e).__name__})
+        import traceback
+        import sys
+
+        # Capture full traceback
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        full_traceback = ''.join(tb_lines)
+
+        # Find the specific line with .strip() if it exists
+        strip_location = None
+        for frame_summary in traceback.extract_tb(exc_traceback):
+            if '.strip()' in frame_summary.line:
+                strip_location = {
+                    'filename': frame_summary.filename,
+                    'line': frame_summary.lineno,
+                    'code': frame_summary.line,
+                    'function': frame_summary.name,
+                }
+                break
+
+        # Check for LLM refusal in GLOBAL_HISTORY
+        refusal_detected = False
+        try:
+            from dspy.clients.base_lm import GLOBAL_HISTORY
+            if GLOBAL_HISTORY:
+                last_entry = GLOBAL_HISTORY[-1]
+                response_str = str(last_entry.get('response', ''))
+                if "finish_reason='refusal'" in response_str:
+                    refusal_detected = True
+        except Exception:
+            pass
+
+        # Log detailed error information
+        error_data = {
+            'error': str(e),
+            'type': type(e).__name__,
+            'traceback': full_traceback,
+            'task_length': len(task),
+            'task_preview': task[:200] if task else None,
+            'context_length': len(ctx),
+            'context_preview': ctx[:200] if ctx else None,
+            'refusal_detected': refusal_detected,
+        }
+
+        if strip_location:
+            error_data['strip_location'] = strip_location
+
+        log_event('run_error', error_data)
+
         if verbose:
-            import traceback
             print(f"  Error: {e}")
-            print(traceback.format_exc())
+            print(f"  Type: {type(e).__name__}")
+            print(f"\n  Full traceback:")
+            print(full_traceback)
+            if strip_location:
+                print(f"\n  .strip() called at:")
+                print(f"    {strip_location['filename']}:{strip_location['line']}")
+                print(f"    {strip_location['code']}")
+
         return Result(
             answer=f"Error: {e}",
             sparql=None,
