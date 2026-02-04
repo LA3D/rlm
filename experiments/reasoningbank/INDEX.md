@@ -23,24 +23,24 @@ Testing whether **memory layers** (ontology sense cards, schema constraints, pro
 
 | I want to... | Go to... |
 |--------------|----------|
-| **Understand the architecture** | [00_FOUNDATIONS/IMPLEMENTATION_PLAN.md](00_FOUNDATIONS/IMPLEMENTATION_PLAN.md) |
-| **Understand RLM v2 principles** | [00_FOUNDATIONS/rlm_notes.md](00_FOUNDATIONS/rlm_notes.md) |
-| **See what worked** | [03_FINDINGS/validated_patterns/](03_FINDINGS/validated_patterns/) |
-| **See what failed** | [03_FINDINGS/failed_approaches/](03_FINDINGS/failed_approaches/) |
-| **Review experiment results** | [02_EXPERIMENTS/](02_EXPERIMENTS/) (timestamped directories) |
-| **Extract to production** | [04_EXTRACTION_GUIDE/](04_EXTRACTION_GUIDE/) |
+| **Understand the architecture** | [foundations/IMPLEMENTATION_PLAN.md](foundations/IMPLEMENTATION_PLAN.md) |
+| **Understand RLM v2 principles** | [foundations/rlm_notes.md](foundations/rlm_notes.md) |
+| **See what worked** | [findings/validated_patterns/](findings/validated_patterns/) |
+| **See what failed** | [findings/failed_approaches/](findings/failed_approaches/) |
+| **Review experiment results** | [experiments_archive/](experiments_archive/) (timestamped directories) |
+| **Extract to production** | [extraction_guide/](extraction_guide/) |
 | **Check current status** | [STATUS.md](STATUS.md) |
-| **Examine prototype code** | [01_PROTOTYPE/](01_PROTOTYPE/) (~1300 LOC) |
+| **Examine prototype code** | [prototype/](prototype/) (~1300 LOC) |
 
 ## Directory Structure
 
 ```
-00_FOUNDATIONS/      - Core design principles (stable, foundational)
-01_PROTOTYPE/        - Exploratory code (reference only, not production)
-02_EXPERIMENTS/      - Timestamped experimental runs with results
-03_FINDINGS/         - Extraction-ready validated/failed patterns
-04_EXTRACTION_GUIDE/ - How to reimplement for production
-05_ARCHIVE/          - Historical artifacts (bug reports, old docs)
+foundations/         - Core design principles (stable, foundational)
+prototype/           - Exploratory code (reference only, not production)
+experiments_archive/ - Timestamped experimental runs with results
+findings/            - Extraction-ready validated/failed patterns
+extraction_guide/    - How to reimplement for production
+archive/             - Historical artifacts (bug reports, old docs)
 tests/               - Organized test suite (smoke, integration, unit, debug)
 analysis/            - Analysis scripts
 tasks/               - Task definition files (evaluation queries)
