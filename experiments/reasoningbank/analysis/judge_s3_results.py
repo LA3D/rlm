@@ -15,8 +15,8 @@ from collections import defaultdict
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 import dspy
-from experiments.reasoningbank.run.phase1 import judge
-from experiments.reasoningbank.run.rlm_uniprot import Result, Metrics
+from experiments.reasoningbank.prototype.run.phase1 import judge
+from experiments.reasoningbank.prototype.run.rlm_uniprot import Result, Metrics
 
 
 def load_trajectory_events(log_path: str) -> list[dict]:

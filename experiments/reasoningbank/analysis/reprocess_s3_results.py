@@ -15,7 +15,7 @@ from datetime import datetime
 
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.metrics.diversity import (
+from experiments.reasoningbank.prototype.metrics.diversity import (
     compute_diversity_report,
     load_trajectory,
 )
@@ -259,7 +259,7 @@ def reprocess_s3_experiment(
     print(f"\n✓ Results saved to: {results_file}")
 
     # Generate summary report
-    from experiments.reasoningbank.run_experiment_s3 import generate_summary_report
+    from experiments.reasoningbank.prototype.run_experiment_s3 import generate_summary_report
     generate_summary_report(results, results_dir)
 
     return results
