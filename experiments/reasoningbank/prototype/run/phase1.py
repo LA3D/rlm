@@ -12,9 +12,9 @@ import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 import dspy
-from experiments.reasoningbank.core.mem import MemStore, Item
-from experiments.reasoningbank.run.rlm import run, Result
-from experiments.reasoningbank.ctx.builder import Cfg, Layer
+from experiments.reasoningbank.prototype.core.mem import MemStore, Item
+from experiments.reasoningbank.prototype.run.rlm import run, Result
+from experiments.reasoningbank.prototype.ctx.builder import Cfg, Layer
 
 
 # Trajectory formatting helper
@@ -486,7 +486,7 @@ def test_judge_extract(verbose: bool = True):
     Uses synthetic Result objects to test the closed-loop logic
     without expensive LLM calls from run().
     """
-    from experiments.reasoningbank.core.instrument import Metrics
+    from experiments.reasoningbank.prototype.core.instrument import Metrics
 
     print("=== Testing judge/extract with mock Results ===\n")
     mem = MemStore()

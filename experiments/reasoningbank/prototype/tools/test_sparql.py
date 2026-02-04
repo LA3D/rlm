@@ -15,8 +15,8 @@ Usage:
 import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.tools.endpoint import EndpointConfig
-from experiments.reasoningbank.tools.sparql import SPARQLTools
+from experiments.reasoningbank.prototype.tools.endpoint import EndpointConfig
+from experiments.reasoningbank.prototype.tools.sparql import SPARQLTools
 
 
 # Test endpoint configurations

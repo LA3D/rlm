@@ -5,11 +5,11 @@ discovered dynamically from examples rather than hardcoded.
 """
 
 try:
-    from experiments.reasoningbank.tools.discovery import EndpointRegistry
+    from experiments.reasoningbank.prototype.tools.discovery import EndpointRegistry
 except ModuleNotFoundError:
     import sys
     sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
-    from experiments.reasoningbank.tools.discovery import EndpointRegistry
+    from experiments.reasoningbank.prototype.tools.discovery import EndpointRegistry
 
 
 def build_sense_card(registry: EndpointRegistry, budget: int = 800) -> str:
@@ -108,7 +108,7 @@ def test_sense_card():
     import sys
     sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-    from experiments.reasoningbank.tools.discovery import discover_endpoints
+    from experiments.reasoningbank.prototype.tools.discovery import discover_endpoints
 
     print("Discovering endpoints...")
     registry = discover_endpoints("ontology/uniprot")

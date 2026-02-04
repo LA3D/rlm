@@ -6,7 +6,7 @@ Separates success strategies from failure guardrails for clarity.
 import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.core.mem import Item
+from experiments.reasoningbank.prototype.core.mem import Item
 
 def pack(items:list[Item], budget:int=2000) -> str:
     "Format memories with success/failure separation."

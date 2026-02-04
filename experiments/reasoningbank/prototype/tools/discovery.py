@@ -9,7 +9,7 @@ This aligns with RLM's progressive disclosure philosophy - learn about the
 endpoints from how they're actually used, not from hardcoded metadata.
 
 Usage:
-    from experiments.reasoningbank.tools.discovery import discover_endpoints
+    from experiments.reasoningbank.prototype.tools.discovery import discover_endpoints
 
     registry = discover_endpoints("ontology/uniprot")
     primary = registry.primary_endpoint
@@ -23,12 +23,12 @@ import re
 from typing import Optional
 
 try:
-    from experiments.reasoningbank.tools.uniprot_examples import load_examples, SPARQLExample
+    from experiments.reasoningbank.prototype.tools.uniprot_examples import load_examples, SPARQLExample
 except ModuleNotFoundError:
     # Standalone execution
     import sys
     sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
-    from experiments.reasoningbank.tools.uniprot_examples import load_examples, SPARQLExample
+    from experiments.reasoningbank.prototype.tools.uniprot_examples import load_examples, SPARQLExample
 
 
 @dataclass
@@ -242,7 +242,7 @@ def discover_endpoints(
 
 def registry_to_endpoint_config(metadata: EndpointMetadata):
     """Convert discovered EndpointMetadata to EndpointConfig for SPARQLTools."""
-    from experiments.reasoningbank.tools.endpoint import EndpointConfig
+    from experiments.reasoningbank.prototype.tools.endpoint import EndpointConfig
 
     # Infer domain description from name
     domain_descriptions = {

@@ -22,7 +22,7 @@ WHERE { ... }''' ;
 ```
 
 Usage:
-    from experiments.reasoningbank.tools.uniprot_examples import (
+    from experiments.reasoningbank.prototype.tools.uniprot_examples import (
         parse_example, load_examples
     )
 

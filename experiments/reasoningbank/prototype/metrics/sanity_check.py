@@ -8,7 +8,7 @@ intuitive results.
 import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.metrics.diversity import (
+from experiments.reasoningbank.prototype.metrics.diversity import (
     compute_diversity_report,
     trajectory_jaccard,
     trajectory_edit_distance,

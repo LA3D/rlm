@@ -8,7 +8,7 @@ Analyzes completed trajectories to augment procedural memories:
 - Deprecate superseded memories
 
 Usage:
-    from experiments.reasoningbank.tools.memory_augment import MemoryAugmenter
+    from experiments.reasoningbank.prototype.tools.memory_augment import MemoryAugmenter
 
     augmenter = MemoryAugmenter(mem_store)
 
@@ -30,7 +30,7 @@ import dspy
 from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from experiments.reasoningbank.core.mem import MemStore, Item, title_similarity, content_jaccard
+from experiments.reasoningbank.prototype.core.mem import MemStore, Item, title_similarity, content_jaccard
 
 
 # === Data Structures ===

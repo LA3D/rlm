@@ -20,7 +20,7 @@ from typing import Optional
 
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.tools.endpoint_tools import EndpointTools
+from experiments.reasoningbank.prototype.tools.endpoint_tools import EndpointTools
 
 # Namespaces
 VOID = Namespace('http://rdfs.org/ns/void#')

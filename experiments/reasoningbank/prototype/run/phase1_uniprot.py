@@ -14,12 +14,12 @@ import sys
 
 import dspy
 import random
-from experiments.reasoningbank.core.mem import MemStore
-from experiments.reasoningbank.run.rlm_uniprot import run_uniprot, Result
-from experiments.reasoningbank.ctx.builder import Cfg, Layer
+from experiments.reasoningbank.prototype.core.mem import MemStore
+from experiments.reasoningbank.prototype.run.rlm_uniprot import run_uniprot, Result
+from experiments.reasoningbank.prototype.ctx.builder import Cfg, Layer
 
 # Import judge/extract from phase1.py (ontology-agnostic)
-from experiments.reasoningbank.run.phase1 import (
+from experiments.reasoningbank.prototype.run.phase1 import (
     TrajectoryJudge, SuccessExtractor, FailureExtractor,
     judge, extract, test_judge_extract
 )
@@ -281,7 +281,7 @@ def run_stochastic_uniprot(
     # Compute diversity metrics if requested
     if compute_diversity and log_dir:
         try:
-            from experiments.reasoningbank.metrics.diversity import (
+            from experiments.reasoningbank.prototype.metrics.diversity import (
                 compute_diversity_report,
                 load_trajectory,
             )
@@ -517,8 +517,8 @@ if __name__ == '__main__':
 
         elif args.matts:
             # MaTTS mode: import and use from phase1
-            from experiments.reasoningbank.run.phase1 import run_matts_parallel
-            from experiments.reasoningbank.run.rlm_uniprot import run_uniprot
+            from experiments.reasoningbank.prototype.run.phase1 import run_matts_parallel
+            from experiments.reasoningbank.prototype.run.rlm_uniprot import run_uniprot
 
             print(f"MaTTS mode: {args.matts_k} rollouts per task")
             print("Note: MaTTS for UniProt uses local ontology runner")

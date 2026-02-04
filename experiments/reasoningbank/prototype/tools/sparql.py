@@ -11,8 +11,8 @@ Handle dict format: {'key': str, 'dtype': str, 'size': int, 'rows': int, 'previe
 Use sparql_peek(result['key']) to inspect handle contents.
 
 Usage:
-    from experiments.reasoningbank.tools.sparql import SPARQLTools
-    from experiments.reasoningbank.tools.endpoint import EndpointConfig
+    from experiments.reasoningbank.prototype.tools.sparql import SPARQLTools
+    from experiments.reasoningbank.prototype.tools.endpoint import EndpointConfig
 
     # Create endpoint config (or use discovery.registry_to_endpoint_config)
     config = EndpointConfig(url='https://sparql.uniprot.org/sparql/', name='UniProt')
@@ -33,7 +33,7 @@ import json
 
 # Import endpoint config (with fallback for standalone use)
 try:
-    from experiments.reasoningbank.tools.endpoint import EndpointConfig
+    from experiments.reasoningbank.prototype.tools.endpoint import EndpointConfig
 except ImportError:
     EndpointConfig = None
 
@@ -436,7 +436,7 @@ def create_tools(endpoint_name: str) -> SPARQLTools:
     Returns:
         Configured SPARQLTools instance
     """
-    from experiments.reasoningbank.tools.endpoint import get_endpoint
+    from experiments.reasoningbank.prototype.tools.endpoint import get_endpoint
     config = get_endpoint(endpoint_name)
     return SPARQLTools(config)
 

@@ -16,8 +16,8 @@ sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 from pathlib import Path
 import json
-from experiments.reasoningbank.ctx.builder import Cfg, Layer
-from experiments.reasoningbank.run.rlm import run, Result
+from experiments.reasoningbank.prototype.ctx.builder import Cfg, Layer
+from experiments.reasoningbank.prototype.run.rlm import run, Result
 
 # Experiment configurations
 EXPS = {
@@ -45,7 +45,7 @@ def run_phase0(exps:list[str], tasks:list[dict], ont:str, out:str, verbose:bool=
                use_local_interpreter:bool=False):
     "Run layer ablation experiments."
     from pathlib import Path
-    from experiments.reasoningbank.core.mem import MemStore
+    from experiments.reasoningbank.prototype.core.mem import MemStore
     Path(out).mkdir(parents=True, exist_ok=True)
 
     # Load seed memory for E5 and E6

@@ -19,7 +19,7 @@ NOT what goes into L2:
 - Task-specific query templates
 
 Usage:
-    from experiments.reasoningbank.tools.shacl_tasks import load_shacl_tasks
+    from experiments.reasoningbank.prototype.tools.shacl_tasks import load_shacl_tasks
 
     tasks = load_shacl_tasks('ontology/uniprot')
     for task in tasks[:5]:
@@ -32,13 +32,13 @@ from pathlib import Path
 from typing import Optional
 
 try:
-    from experiments.reasoningbank.tools.uniprot_examples import (
+    from experiments.reasoningbank.prototype.tools.uniprot_examples import (
         load_examples, SPARQLExample, categorize_by_complexity
     )
 except ModuleNotFoundError:
     import sys
     sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
-    from experiments.reasoningbank.tools.uniprot_examples import (
+    from experiments.reasoningbank.prototype.tools.uniprot_examples import (
         load_examples, SPARQLExample, categorize_by_complexity
     )
 

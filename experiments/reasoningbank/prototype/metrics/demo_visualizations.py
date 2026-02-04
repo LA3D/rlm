@@ -4,7 +4,7 @@
 import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.metrics.visualize import visualize_scenario
+from experiments.reasoningbank.prototype.metrics.visualize import visualize_scenario
 
 
 def main():

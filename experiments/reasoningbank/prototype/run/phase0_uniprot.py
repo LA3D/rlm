@@ -19,8 +19,8 @@ sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 from pathlib import Path
 import json
-from experiments.reasoningbank.ctx.builder import Cfg, Layer
-from experiments.reasoningbank.run.rlm_uniprot import run_uniprot, Result
+from experiments.reasoningbank.prototype.ctx.builder import Cfg, Layer
+from experiments.reasoningbank.prototype.run.rlm_uniprot import run_uniprot, Result
 
 # Same experiment configurations as phase0.py
 EXPS = {
@@ -46,7 +46,7 @@ def run_phase0_uniprot(exps:list[str], tasks:list[dict], ont_path:str, out:str, 
         use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox
     """
     from pathlib import Path
-    from experiments.reasoningbank.core.mem import MemStore
+    from experiments.reasoningbank.prototype.core.mem import MemStore
     Path(out).mkdir(parents=True, exist_ok=True)
 
     # Load seed memory for E5 and E6

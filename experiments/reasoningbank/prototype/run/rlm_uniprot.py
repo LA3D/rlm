@@ -12,16 +12,16 @@ import dspy
 from dataclasses import dataclass
 from rdflib import Graph
 from pathlib import Path
-from experiments.reasoningbank.core.mem import MemStore
-from experiments.reasoningbank.core.instrument import Metrics, Instrumented
-from experiments.reasoningbank.ctx.builder import Cfg
-from experiments.reasoningbank.tools.sparql import SPARQLTools, create_tools
-from experiments.reasoningbank.packers import l0_sense, l1_schema, l2_mem, l3_guide
-from experiments.reasoningbank.ctx.cache import build_with_cache
-from experiments.reasoningbank.tools.local_interpreter import LocalPythonInterpreter
+from experiments.reasoningbank.prototype.core.mem import MemStore
+from experiments.reasoningbank.prototype.core.instrument import Metrics, Instrumented
+from experiments.reasoningbank.prototype.ctx.builder import Cfg
+from experiments.reasoningbank.prototype.tools.sparql import SPARQLTools, create_tools
+from experiments.reasoningbank.prototype.packers import l0_sense, l1_schema, l2_mem, l3_guide
+from experiments.reasoningbank.prototype.ctx.cache import build_with_cache
+from experiments.reasoningbank.prototype.tools.local_interpreter import LocalPythonInterpreter
 
 # Apply DSPy bug patches
-from experiments.reasoningbank.tools import dspy_patches
+from experiments.reasoningbank.prototype.tools import dspy_patches
 
 # Configure DSPy with Anthropic model if not already configured
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:

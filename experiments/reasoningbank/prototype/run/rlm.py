@@ -11,11 +11,11 @@ import os
 import dspy
 from dataclasses import dataclass
 from rdflib import Graph
-from experiments.reasoningbank.core.blob import Store
-from experiments.reasoningbank.core.mem import MemStore
-from experiments.reasoningbank.core.instrument import Metrics, Instrumented
-from experiments.reasoningbank.ctx.builder import Builder, Cfg
-from experiments.reasoningbank.tools.local_interpreter import LocalPythonInterpreter
+from experiments.reasoningbank.prototype.core.blob import Store
+from experiments.reasoningbank.prototype.core.mem import MemStore
+from experiments.reasoningbank.prototype.core.instrument import Metrics, Instrumented
+from experiments.reasoningbank.prototype.ctx.builder import Builder, Cfg
+from experiments.reasoningbank.prototype.tools.local_interpreter import LocalPythonInterpreter
 
 # Configure DSPy with Anthropic model if not already configured
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:

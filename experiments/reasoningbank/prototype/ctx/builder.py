@@ -9,11 +9,11 @@ sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 from dataclasses import dataclass, field
 from rdflib import Graph
-from experiments.reasoningbank.core.blob import Store, Ref
-from experiments.reasoningbank.core.mem import MemStore
-from experiments.reasoningbank.core import graph as G
-from experiments.reasoningbank.packers import l0_sense, l1_schema, l2_mem, l3_guide
-from experiments.reasoningbank.ctx.cache import build_with_cache
+from experiments.reasoningbank.prototype.core.blob import Store, Ref
+from experiments.reasoningbank.prototype.core.mem import MemStore
+from experiments.reasoningbank.prototype.core import graph as G
+from experiments.reasoningbank.prototype.packers import l0_sense, l1_schema, l2_mem, l3_guide
+from experiments.reasoningbank.prototype.ctx.cache import build_with_cache
 
 @dataclass
 class Layer:

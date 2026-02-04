@@ -11,7 +11,7 @@ All tools follow RLM constraints:
 - DSPy RLM signatures: lambda args, kwargs:
 
 Usage:
-    from experiments.reasoningbank.tools.endpoint_tools import EndpointTools
+    from experiments.reasoningbank.prototype.tools.endpoint_tools import EndpointTools
 
     tools = EndpointTools()
 
@@ -31,13 +31,13 @@ import requests
 from rdflib import Graph, Namespace
 
 try:
-    from experiments.reasoningbank.tools.discovery import (
+    from experiments.reasoningbank.prototype.tools.discovery import (
         discover_endpoints, EndpointRegistry, EndpointMetadata
     )
 except ModuleNotFoundError:
     import sys
     sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
-    from experiments.reasoningbank.tools.discovery import (
+    from experiments.reasoningbank.prototype.tools.discovery import (
         discover_endpoints, EndpointRegistry, EndpointMetadata
     )
 

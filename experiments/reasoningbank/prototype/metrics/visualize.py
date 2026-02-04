@@ -13,7 +13,7 @@ import seaborn as sns
 from matplotlib.patches import Rectangle
 from typing import Optional
 
-from experiments.reasoningbank.metrics.diversity import (
+from experiments.reasoningbank.prototype.metrics.diversity import (
     compute_diversity_report,
     _extract_operations,
     trajectory_jaccard,

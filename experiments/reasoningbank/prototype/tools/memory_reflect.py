@@ -32,7 +32,7 @@ import json
 import dspy
 from pathlib import Path
 from dataclasses import dataclass
-from experiments.reasoningbank.core.mem import MemStore, Item
+from experiments.reasoningbank.prototype.core.mem import MemStore, Item
 
 # Configure DSPy if not already configured
 if not os.environ.get('ANTHROPIC_API_KEY'):
