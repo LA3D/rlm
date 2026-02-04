@@ -4,8 +4,8 @@ import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 from rdflib import Graph
-from experiments.reasoningbank.ctx.builder import Builder, Cfg, Layer
-from experiments.reasoningbank.core.mem import MemStore, Item
+from experiments.reasoningbank.prototype.ctx.builder import Builder, Cfg, Layer
+from experiments.reasoningbank.prototype.core.mem import MemStore, Item
 
 print("=" * 70)
 print("FULL LAYER CAKE TEST (L0+L1+L2+L3)")

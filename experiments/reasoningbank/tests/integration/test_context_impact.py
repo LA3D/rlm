@@ -9,9 +9,9 @@ sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 import os
 import dspy
 from rdflib import Graph
-from experiments.reasoningbank.ctx.builder import Builder, Cfg, Layer
-from experiments.reasoningbank.core.blob import Store
-from experiments.reasoningbank.core import graph as G
+from experiments.reasoningbank.prototype.ctx.builder import Builder, Cfg, Layer
+from experiments.reasoningbank.prototype.core.blob import Store
+from experiments.reasoningbank.prototype.core import graph as G
 
 # Configure DSPy
 if not os.environ.get('ANTHROPIC_API_KEY'):

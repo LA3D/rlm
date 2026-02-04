@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 from rdflib import Graph
-from experiments.reasoningbank.packers import l0_sense
+from experiments.reasoningbank.prototype.packers import l0_sense
 
 print("=" * 70)
 print("VERIFYING ENHANCED L0_SENSE.PY")

@@ -3,7 +3,7 @@
 import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.packers import l3_guide
+from experiments.reasoningbank.prototype.packers import l3_guide
 
 print("=" * 70)
 print("L3 GUIDE COMPRESSION TEST")

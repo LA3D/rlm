@@ -6,8 +6,8 @@ import os
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 import dspy
-from experiments.reasoningbank.tools.local_interpreter import LocalPythonInterpreter
-from experiments.reasoningbank.tools.sparql import create_tools
+from experiments.reasoningbank.prototype.tools.local_interpreter import LocalPythonInterpreter
+from experiments.reasoningbank.prototype.tools.sparql import create_tools
 
 # Configure DSPy
 if not os.environ.get('ANTHROPIC_API_KEY'):

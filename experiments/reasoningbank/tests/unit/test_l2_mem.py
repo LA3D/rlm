@@ -3,8 +3,8 @@
 import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.core.mem import MemStore, Item
-from experiments.reasoningbank.packers import l2_mem
+from experiments.reasoningbank.prototype.core.mem import MemStore, Item
+from experiments.reasoningbank.prototype.packers import l2_mem
 
 print("=" * 70)
 print("L2 PROCEDURAL MEMORY TEST")

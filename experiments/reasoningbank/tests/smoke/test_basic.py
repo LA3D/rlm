@@ -8,7 +8,7 @@ sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 def test_blob():
     "Test BlobRef handle pattern."
-    from experiments.reasoningbank.core.blob import Store, Ref
+    from experiments.reasoningbank.prototype.core.blob import Store, Ref
     store = Store()
     ref = store.put("Hello world " * 100, "text")
     assert isinstance(ref, Ref)
@@ -20,7 +20,7 @@ def test_blob():
 
 def test_mem():
     "Test memory store."
-    from experiments.reasoningbank.core.mem import MemStore, Item
+    from experiments.reasoningbank.prototype.core.mem import MemStore, Item
     store = MemStore()
     item = Item(
         id=Item.make_id("Test", "Content"),
@@ -42,7 +42,7 @@ def test_mem():
 def test_packers():
     "Test layer packers."
     from rdflib import Graph
-    from experiments.reasoningbank.packers import l0_sense, l1_schema
+    from experiments.reasoningbank.prototype.packers import l0_sense, l1_schema
 
     g = Graph().parse('ontology/prov.ttl')
 
@@ -61,8 +61,8 @@ def test_packers():
 def test_context_builder():
     "Test context builder."
     from rdflib import Graph
-    from experiments.reasoningbank.ctx.builder import Cfg, Layer, Builder
-    from experiments.reasoningbank.core.mem import MemStore
+    from experiments.reasoningbank.prototype.ctx.builder import Cfg, Layer, Builder
+    from experiments.reasoningbank.prototype.core.mem import MemStore
 
     cfg = Cfg(l0=Layer(True, 600))
     builder = Builder(cfg)

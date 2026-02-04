@@ -14,9 +14,9 @@ import sys
 import json
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
-from experiments.reasoningbank.run.phase1_uniprot import run_stochastic_uniprot
-from experiments.reasoningbank.core.mem import MemStore
-from experiments.reasoningbank.ctx.builder import Cfg, Layer
+from experiments.reasoningbank.prototype.run.phase1_uniprot import run_stochastic_uniprot
+from experiments.reasoningbank.prototype.core.mem import MemStore
+from experiments.reasoningbank.prototype.ctx.builder import Cfg, Layer
 
 def main():
     print("=" * 80)

@@ -4,8 +4,8 @@ import sys
 sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 print("Imports...")
-from experiments.reasoningbank.run.rlm import run
-from experiments.reasoningbank.ctx.builder import Cfg
+from experiments.reasoningbank.prototype.run.rlm import run
+from experiments.reasoningbank.prototype.ctx.builder import Cfg
 
 print("Running task...")
 result = run(
