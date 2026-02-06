@@ -16,6 +16,7 @@ from experiments.reasoningbank.prototype.core.mem import MemStore
 from experiments.reasoningbank.prototype.core.instrument import Metrics, Instrumented
 from experiments.reasoningbank.prototype.ctx.builder import Cfg
 from experiments.reasoningbank.prototype.tools.sparql import SPARQLTools, create_tools
+from experiments.reasoningbank.prototype.tools.sparql_v2 import SPARQLToolsV2, create_tools as create_tools_v2
 from experiments.reasoningbank.prototype.packers import l0_sense, l1_schema, l2_mem, l3_guide
 from experiments.reasoningbank.prototype.ctx.cache import build_with_cache
 from experiments.reasoningbank.prototype.tools.local_interpreter import LocalPythonInterpreter
@@ -132,6 +133,7 @@ def run_uniprot(
     log_path: str|None = None,
     use_local_interpreter: bool = False,
     rollout_id: int|None = None,
+    use_v2_tools: bool = False,
 ) -> Result:
     """Run task using DSPy RLM with remote UniProt SPARQL endpoint.
 
@@ -150,6 +152,8 @@ def run_uniprot(
         use_local_interpreter: If True, use LocalPythonInterpreter instead of Deno sandbox.
                                Avoids sandbox corruption issues but has no security isolation.
         rollout_id: Unique identifier for this rollout (prevents prompt caching)
+        use_v2_tools: If True, use SPARQLToolsV2 with improved parameter handling
+                      (consistent limit parameter, pagination metadata, output modes)
 
     Returns:
         Result with answer, SPARQL, convergence status, and metrics
@@ -188,7 +192,12 @@ def run_uniprot(
                 f.write(json.dumps(event) + '\n')
 
     # Create SPARQL tools for remote endpoint
-    sparql_tools = create_tools(endpoint)
+    if use_v2_tools:
+        if verbose:
+            print("  Using SPARQLToolsV2 (improved parameter handling)")
+        sparql_tools = create_tools_v2(endpoint)
+    else:
+        sparql_tools = create_tools(endpoint)
     tools = sparql_tools.as_dspy_tools()
 
     # Instrument tools for leakage tracking AND tool call logging
@@ -200,7 +209,8 @@ def run_uniprot(
         'context_size': len(ctx),
         'max_iters': max_iters,
         'temperature': temperature,
-        'seed': seed
+        'seed': seed,
+        'use_v2_tools': use_v2_tools,
     })
 
     # Configure main LLM with temperature and optional seed (for stochastic evaluation)

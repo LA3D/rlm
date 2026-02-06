@@ -2,11 +2,13 @@
 
 **Quick orientation** for LLMs and humans working with this codebase.
 
+👉 **First time here?** Read [GETTING_STARTED.md](GETTING_STARTED.md) for practical quick-start guide.
+
 ## What is this?
 
 Testing whether **memory layers** (ontology sense cards, schema constraints, procedural strategies) improve LLM query construction over RDF ontologies using the RLM (Recursive Language Model) pattern.
 
-**Core principle** (see [00_FOUNDATIONS/rlm_notes.md](00_FOUNDATIONS/rlm_notes.md)): Use **handles not payloads**. Keep large context in REPL state, not in chat history.
+**Core principle** (see [foundations/rlm_notes.md](foundations/rlm_notes.md)): Use **handles not payloads**. Keep large context in REPL state, not in chat history.
 
 **Current phase**: Research/exploration → will later be extracted into production Python package.
 
@@ -17,7 +19,8 @@ Testing whether **memory layers** (ontology sense cards, schema constraints, pro
 - **Next**: Full S3 run (5 tasks × 5 rollouts × 4 strategies)
 
 👉 See [STATUS.md](STATUS.md) for complete current status
-👉 See [05_ARCHIVE/status_snapshots/](05_ARCHIVE/status_snapshots/) for historical status
+👉 See [WORK_LOG.md](WORK_LOG.md) for session-by-session history
+👉 See [archive/status_snapshots/](archive/status_snapshots/) for historical status
 
 ## Quick Navigation
 
@@ -50,7 +53,7 @@ results/             - Raw outputs (gitignored)
 
 ## RLM v2 Design Principles
 
-From [00_FOUNDATIONS/rlm_notes.md](00_FOUNDATIONS/rlm_notes.md):
+From [foundations/rlm_notes.md](foundations/rlm_notes.md):
 
 1. **Handles not payloads** - Wrap large data in `BlobRef` with metadata-only `repr()`
 2. **REPL state not history** - Memory lives in variables, not chat context
@@ -68,16 +71,16 @@ This directory is organized for **extraction**, not direct productionization:
 
 ### Current Phase: Research & Validation
 
-- **01_PROTOTYPE/**: Exploratory code (~1300 LOC) - tests hypotheses, validates patterns
-- **02_EXPERIMENTS/**: Timestamped runs with design + results + findings
-- **03_FINDINGS/**: Extraction-ready documentation of what worked/failed
+- **prototype/**: Exploratory code (~1300 LOC) - tests hypotheses, validates patterns
+- **experiments_archive/**: Timestamped runs with design + results + findings
+- **findings/**: Extraction-ready documentation of what worked/failed
 
 ### Future Phase: Engineering & Production
 
 Future Claude will:
-1. Read `03_FINDINGS/validated_patterns/` → know what to build
-2. Read `03_FINDINGS/failed_approaches/` → avoid repeat mistakes
-3. Follow `04_EXTRACTION_GUIDE/README.md` → systematic extraction protocol
+1. Read `findings/validated_patterns/` → know what to build
+2. Read `findings/failed_approaches/` → avoid repeat mistakes
+3. Follow `extraction_guide/README.md` → systematic extraction protocol
 4. **Reimplement cleanly** (not refactor prototype code)
 
 ## Recent Work (Last 3 Commits)
@@ -90,17 +93,19 @@ Future Claude will:
 
 ### For Newcomers
 1. **THIS FILE** - Entry point
-2. **[00_FOUNDATIONS/IMPLEMENTATION_PLAN.md](00_FOUNDATIONS/IMPLEMENTATION_PLAN.md)** - Architecture (~1320 lines)
-3. **[00_FOUNDATIONS/rlm_notes.md](00_FOUNDATIONS/rlm_notes.md)** - RLM v2 principles (~137 lines)
-4. **[STATUS.md](STATUS.md)** - Current state
+2. **[GETTING_STARTED.md](GETTING_STARTED.md)** - Practical quick-start guide
+3. **[foundations/IMPLEMENTATION_PLAN.md](foundations/IMPLEMENTATION_PLAN.md)** - Architecture (~1320 lines)
+4. **[foundations/rlm_notes.md](foundations/rlm_notes.md)** - RLM v2 principles (~137 lines)
+5. **[STATUS.md](STATUS.md)** - Current state
 
 ### For Current Research
-5. **[02_EXPERIMENTS/README.md](02_EXPERIMENTS/README.md)** - Experiment index
-6. **[03_FINDINGS/README.md](03_FINDINGS/README.md)** - What we've learned
+6. **[RESEARCH_TRAJECTORY.md](RESEARCH_TRAJECTORY.md)** - Research journey from git history
+7. **[experiments_archive/README.md](experiments_archive/README.md)** - Experiment index
+8. **[findings/README.md](findings/README.md)** - What we've learned
 
 ### For Future Engineering
-7. **[04_EXTRACTION_GUIDE/README.md](04_EXTRACTION_GUIDE/README.md)** - How to extract
-8. **[03_FINDINGS/validated_patterns/](03_FINDINGS/validated_patterns/)** - Proven approaches
+8. **[extraction_guide/README.md](extraction_guide/README.md)** - How to extract
+9. **[findings/validated_patterns/](findings/validated_patterns/)** - Proven approaches
 
 ## Validation Status
 
@@ -117,19 +122,23 @@ Future Claude will:
 
 When working on this codebase:
 
-1. **Progressive disclosure**: Start here → foundations → specific area
-2. **Timestamped experiments**: Each in `02_EXPERIMENTS/YYYY-MM-DD_name/` with single `EXPERIMENT.md`
-3. **Findings as you go**: Update `03_FINDINGS/` as experiments complete
-4. **Prototype is throwaway**: Code in `01_PROTOTYPE/` is for reference, not refactoring
+1. **Progressive disclosure**: Start here → [GETTING_STARTED.md](GETTING_STARTED.md) → foundations → specific area
+2. **Timestamped experiments**: Each in `experiments_archive/YYYY-MM-DD_name/` with single `EXPERIMENT.md`
+3. **Findings as you go**: Update `findings/` as experiments complete
+4. **Prototype is throwaway**: Code in `prototype/` is for reference, not refactoring
 5. **Git history preserved**: All moves used `git mv`, can trace origins
+6. **Session handoff**: Update [WORK_LOG.md](WORK_LOG.md) and [STATUS.md](STATUS.md) at end of each session
 
 ## Questions?
 
+- **"How do I get started?"** → [GETTING_STARTED.md](GETTING_STARTED.md)
 - **"What's the current status?"** → [STATUS.md](STATUS.md)
-- **"What's the architecture?"** → [00_FOUNDATIONS/IMPLEMENTATION_PLAN.md](00_FOUNDATIONS/IMPLEMENTATION_PLAN.md)
-- **"Why these design choices?"** → [00_FOUNDATIONS/rlm_notes.md](00_FOUNDATIONS/rlm_notes.md)
-- **"What worked?"** → [03_FINDINGS/validated_patterns/](03_FINDINGS/validated_patterns/)
-- **"How do I extract this?"** → [04_EXTRACTION_GUIDE/README.md](04_EXTRACTION_GUIDE/README.md)
+- **"What's the research journey?"** → [RESEARCH_TRAJECTORY.md](RESEARCH_TRAJECTORY.md)
+- **"What happened in recent sessions?"** → [WORK_LOG.md](WORK_LOG.md)
+- **"What's the architecture?"** → [foundations/IMPLEMENTATION_PLAN.md](foundations/IMPLEMENTATION_PLAN.md)
+- **"Why these design choices?"** → [foundations/rlm_notes.md](foundations/rlm_notes.md)
+- **"What worked?"** → [findings/validated_patterns/](findings/validated_patterns/)
+- **"How do I extract this?"** → [extraction_guide/README.md](extraction_guide/README.md)
 
 ---
 
