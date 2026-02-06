@@ -20,9 +20,32 @@ from experiments.reasoningbank.prototype.tools.sparql_v2 import SPARQLToolsV2, c
 from experiments.reasoningbank.prototype.packers import l0_sense, l1_schema, l2_mem, l3_guide
 from experiments.reasoningbank.prototype.ctx.cache import build_with_cache
 from experiments.reasoningbank.prototype.tools.local_interpreter import LocalPythonInterpreter
+from experiments.reasoningbank.prototype.tools.query_guard import EndpointProfile, validate as guard_validate
 
 # Apply DSPy bug patches
 from experiments.reasoningbank.prototype.tools import dspy_patches
+
+# Endpoint profiles for query guard
+ENDPOINT_PROFILES = {
+    'uniprot': EndpointProfile.uniprot(),
+    'wikidata': EndpointProfile.wikidata(),
+}
+
+# Endpoint metadata for context injection (L0/L1)
+ENDPOINT_META = {
+    'uniprot': {
+        'name': 'UniProt',
+        'triple_count': 232_000_000_000,
+        'has_text_index': False,
+        'has_spo_index': False,
+    },
+    'wikidata': {
+        'name': 'Wikidata',
+        'triple_count': 17_000_000_000,
+        'has_text_index': True,
+        'has_spo_index': True,
+    },
+}
 
 # Configure DSPy with Anthropic model if not already configured
 if not hasattr(dspy.settings, 'lm') or dspy.settings.lm is None:
@@ -47,7 +70,8 @@ class Result:
         if self.trajectory is None:
             self.trajectory = []
 
-def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None = None, rollout_id: int|None = None) -> str:
+def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None = None,
+                          rollout_id: int|None = None, endpoint: str = 'uniprot') -> str:
     """Build context from layers using local ontology metadata.
 
     L0 and L1 are built from local ontology file (core.owl or core.ttl).
@@ -60,11 +84,13 @@ def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None
         task: Query string (for L2 retrieval)
         mem: Memory store (for L2)
         rollout_id: Optional rollout identifier (prevents caching by making prompts unique)
+        endpoint: Endpoint name for scale-aware context ('uniprot', 'wikidata')
 
     Returns:
         Assembled context string
     """
     parts = []
+    ep_meta = ENDPOINT_META.get(endpoint)
 
     # Add unique rollout marker to prevent prompt caching
     # This is invisible to the agent (HTML comment) but makes each prompt unique
@@ -85,15 +111,19 @@ def build_context_uniprot(cfg: Cfg, ont_path: str, task: str, mem: MemStore|None
         print(f"Warning: No core ontology found in {ont_path}")
         return ""
 
-    # L0: Sense card (cached)
+    # L0: Sense card (with endpoint scale awareness)
     if cfg.l0.on:
-        sense_card = build_with_cache(str(ont_file), 'l0', cfg.l0.budget, l0_sense.pack)
+        sense_card = build_with_cache(
+            str(ont_file), 'l0', cfg.l0.budget, l0_sense.pack,
+            **(dict(endpoint_meta=ep_meta) if ep_meta else {}))
         if sense_card:
             parts.append(sense_card)
 
-    # L1: Schema constraints (cached)
+    # L1: Schema constraints (with endpoint-aware anti-patterns)
     if cfg.l1.on:
-        constraints = build_with_cache(str(ont_file), 'l1', cfg.l1.budget, l1_schema.pack)
+        constraints = build_with_cache(
+            str(ont_file), 'l1', cfg.l1.budget, l1_schema.pack,
+            **(dict(endpoint_meta=ep_meta) if ep_meta else {}))
         if constraints:
             parts.append(constraints)
 

@@ -38,5 +38,45 @@
     "content": "1. Add LIMIT clause to every SELECT query\n2. Start with LIMIT 10 for exploration\n3. Increase limit only if needed and results are small\n4. Use FILTER to narrow results instead of fetching everything",
     "src": "seed",
     "tags": ["sparql", "anti-pattern", "limit"]
+  },
+  {
+    "id": "remote_ontology_first_discovery",
+    "title": "Remote Endpoints: Query Ontology Schema, Not Data",
+    "desc": "On large remote endpoints, discover predicates via ontology-level queries, not data scans",
+    "content": "Large endpoints (billions of triples) cannot scan all data to answer discovery questions.\n1. Find classes: SELECT ?type WHERE { ?type rdfs:subClassOf <ParentClass> } (fast: queries schema)\n2. Find properties: SELECT ?prop WHERE { ?prop a owl:ObjectProperty } (fast: queries schema)\n3. Find properties of a class: SELECT ?prop WHERE { ?prop rdfs:domain <Class> } (fast: queries schema)\n4. Describe a sample instance: SELECT ?p ?o WHERE { <specific_URI> ?p ?o } LIMIT 30 (fast: subject bound)\nNEVER: SELECT ?p WHERE { ?s ?p ?o } GROUP BY ?p (scans entire dataset — will timeout)",
+    "src": "seed",
+    "tags": ["remote", "sparql", "discovery", "timeout", "ontology"]
+  },
+  {
+    "id": "remote_no_filter_contains_data",
+    "title": "Remote Endpoints: FILTER CONTAINS on Data Causes Timeouts",
+    "desc": "String filtering on data triples causes timeouts on large remote endpoints",
+    "content": "FILTER(CONTAINS(STR(?x), 'keyword')) on data variables (not ontology variables) forces a full scan of all matching triples. On large endpoints this will always timeout.\nInstead, search the ontology schema:\n  SELECT ?prop WHERE { ?prop a owl:ObjectProperty . FILTER(CONTAINS(LCASE(STR(?prop)), 'keyword')) }\nThis searches a small set (property declarations) instead of billions of data triples.\nAlternatively, use known predicates from the ontology context provided.",
+    "src": "failure",
+    "tags": ["remote", "sparql", "timeout", "filter", "anti-pattern"]
+  },
+  {
+    "id": "remote_describe_sample_instance",
+    "title": "Remote Endpoints: Describe a Sample Instance to Learn Properties",
+    "desc": "To discover what predicates a class has, describe one instance instead of scanning all",
+    "content": "To learn what predicates are used for a class (e.g., Protein, Taxon):\n1. Find one instance: SELECT ?inst WHERE { ?inst a <Class> } LIMIT 1\n2. Describe it: SELECT DISTINCT ?p WHERE { <that_instance> ?p ?o } LIMIT 30\nThis runs in <1s because the subject is fully bound.\nDO NOT: SELECT DISTINCT ?p WHERE { ?s a <Class> . ?s ?p ?o } GROUP BY ?p\nThis scans ALL instances of the class and will timeout for any class with >100K instances.",
+    "src": "seed",
+    "tags": ["remote", "sparql", "discovery", "instance", "properties"]
+  },
+  {
+    "id": "uniprot_bound_predicates",
+    "title": "UniProt: Always Use Bound Predicates in Queries",
+    "desc": "UniProt QLever has PSO/POS index only — predicates must be bound for fast queries",
+    "content": "UniProt uses QLever with only PSO and POS index permutations. This means:\n- Queries with BOUND predicates (up:organism, up:annotation, rdfs:subClassOf) are fast\n- Queries with UNBOUND predicates (?s ?p ?o where ?p is variable) require full scans\n\nFast patterns (bound predicates):\n  ?protein up:organism taxon:9606 (PSO index: predicate→subject→object)\n  ?taxon rdfs:subClassOf taxon:2 (PSO index)\n  ?annotation a up:Disease_Annotation (POS index: rdf:type→object→subject)\n\nTimeout patterns (unbound predicates):\n  ?s ?p ?o GROUP BY ?p (no index covers this)\n  ?s a up:Protein . ?s ?p ?o DISTINCT ?p (billions of triples to scan)",
+    "src": "seed",
+    "tags": ["uniprot", "sparql", "qlever", "index", "predicates"]
+  },
+  {
+    "id": "uniprot_annotation_pattern",
+    "title": "UniProt: Use Annotation Pattern for Disease/Function/Location Queries",
+    "desc": "UniProt models diseases, functions, and locations as typed annotations",
+    "content": "UniProt uses an annotation pattern for disease, function, subcellular location, etc.:\n  ?protein up:annotation ?annot .\n  ?annot a up:Disease_Annotation .  (or up:Function_Annotation, up:Subcellular_Location_Annotation)\n  ?annot rdfs:comment ?text .\n\nTo find annotation types: SELECT ?type WHERE { ?type rdfs:subClassOf up:Annotation }\nTo find disease predicates: up:annotation → up:disease → skos:prefLabel\nTo find location: up:annotation → up:locatedIn → up:cellularComponent → skos:prefLabel\n\nDo NOT search for disease by FILTER(CONTAINS(STR(?predicate), 'disease')) — use the annotation type hierarchy.",
+    "src": "seed",
+    "tags": ["uniprot", "sparql", "annotation", "disease", "pattern"]
   }
 ]

@@ -29,6 +29,7 @@ class Cfg:
     l2: Layer = field(default_factory=lambda: Layer(False, 2000))
     l3: Layer = field(default_factory=lambda: Layer(False, 1000))
     guide_text: str = ""  # Full guide for L3
+    endpoint_meta: dict = field(default_factory=dict)  # Endpoint metadata for scale-aware context
 
 class Builder:
     "Assembles layer cake context for injection."
@@ -47,19 +48,24 @@ class Builder:
             Assembled context string
         """
         parts = []
+        ep = self.cfg.endpoint_meta or None
 
         # L0/L1 with optional caching
         if self.cfg.l0.on:
             if g_path:
-                parts.append(build_with_cache(g_path, 'l0', self.cfg.l0.budget, l0_sense.pack))
+                parts.append(build_with_cache(
+                    g_path, 'l0', self.cfg.l0.budget, l0_sense.pack,
+                    **(dict(endpoint_meta=ep) if ep else {})))
             else:
-                parts.append(l0_sense.pack(g, self.cfg.l0.budget))
+                parts.append(l0_sense.pack(g, self.cfg.l0.budget, endpoint_meta=ep))
 
         if self.cfg.l1.on:
             if g_path:
-                parts.append(build_with_cache(g_path, 'l1', self.cfg.l1.budget, l1_schema.pack))
+                parts.append(build_with_cache(
+                    g_path, 'l1', self.cfg.l1.budget, l1_schema.pack,
+                    **(dict(endpoint_meta=ep) if ep else {})))
             else:
-                parts.append(l1_schema.pack(g, self.cfg.l1.budget))
+                parts.append(l1_schema.pack(g, self.cfg.l1.budget, endpoint_meta=ep))
 
         if self.cfg.l2.on and mem:
             # Top-K success + top-K failure retrieval

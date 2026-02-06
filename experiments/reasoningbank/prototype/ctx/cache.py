@@ -76,29 +76,35 @@ def save_cached(ont_path: str, layer: str, budget: int, content: str):
     cache_file.write_text(content)
 
 
-def build_with_cache(ont_path: str, layer: str, budget: int, builder_fn) -> str:
+def build_with_cache(ont_path: str, layer: str, budget: int, builder_fn,
+                     **extra_kwargs) -> str:
     """Build layer content with caching.
 
     Args:
         ont_path: Path to ontology file
         layer: Layer name ('l0' or 'l1')
         budget: Character budget
-        builder_fn: Function that builds the layer (takes graph, budget)
+        builder_fn: Function that builds the layer (takes graph, budget, **extra_kwargs)
+        **extra_kwargs: Additional keyword args passed to builder_fn
+            (e.g., endpoint_meta). When present, caching is skipped since
+            the cache key doesn't account for these parameters.
 
     Returns:
         Layer content (from cache or freshly built)
     """
-    # Try cache first
-    cached = load_cached(ont_path, layer, budget)
-    if cached is not None:
-        return cached
+    # Skip cache when extra kwargs are provided (cache key doesn't cover them)
+    if not extra_kwargs:
+        cached = load_cached(ont_path, layer, budget)
+        if cached is not None:
+            return cached
 
-    # Cache miss - build from scratch
+    # Cache miss or cache bypass - build from scratch
     g = Graph().parse(ont_path)
-    content = builder_fn(g, budget)
+    content = builder_fn(g, budget, **extra_kwargs)
 
-    # Save to cache
-    save_cached(ont_path, layer, budget, content)
+    # Only cache when no extra kwargs (stable result)
+    if not extra_kwargs:
+        save_cached(ont_path, layer, budget, content)
 
     return content
 

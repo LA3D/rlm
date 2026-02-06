@@ -31,6 +31,15 @@ except ImportError:
     EndpointConfig = None
     get_endpoint = None
 
+# Import query guard
+try:
+    from experiments.reasoningbank.prototype.tools.query_guard import (
+        EndpointProfile, validate as guard_validate
+    )
+except ImportError:
+    EndpointProfile = None
+    guard_validate = None
+
 
 # === Handle Types ===
 
@@ -172,7 +181,8 @@ class SPARQLToolsV2:
         self,
         config: Union['EndpointConfig', str],
         timeout: int = None,
-        default_limit: int = None
+        default_limit: int = None,
+        guard_profile: 'EndpointProfile' = None,
     ):
         if isinstance(config, str):
             self.endpoint = config.rstrip('/')
@@ -192,6 +202,7 @@ class SPARQLToolsV2:
             self.default_limit = default_limit or config.default_limit
 
         self.store = ResultStore(source=self.name)
+        self._guard_profile = guard_profile
 
     def _extract_key(self, ref_key: Union[str, dict]) -> str:
         """Extract key from string or handle dict."""
@@ -288,7 +299,17 @@ class SPARQLToolsV2:
         """
         limit = limit or self.default_limit
 
-        # Validate
+        # Query guard: reject known-bad patterns before execution
+        if self._guard_profile and guard_validate:
+            guard_result = guard_validate(query, self._guard_profile)
+            if not guard_result.ok:
+                return {
+                    'error': f"Query rejected: {guard_result.reason}",
+                    'suggestion': guard_result.suggestion,
+                    'pattern': guard_result.pattern,
+                }
+
+        # Validate (soft warnings)
         warnings = self._validate_query(query) if validate else []
 
         # Prepend prefixes
@@ -383,24 +404,46 @@ class SPARQLToolsV2:
             }
 
         elif output_mode == 'schema':
-            # Get distinct properties used by this class
-            query = f"""
+            # Discover properties by describing a SINGLE instance (safe on all endpoints).
+            # Previous version scanned ALL instances (?s a Resource . ?s ?p ?o GROUP BY ?p)
+            # which times out on large classes like up:Protein (~250B triples).
+            instance_query = f"""
             {self._prefixes}
-            SELECT DISTINCT ?p (COUNT(?o) AS ?usage) WHERE {{
-                ?s a {resource} .
-                ?s ?p ?o .
-            }}
-            GROUP BY ?p
-            ORDER BY DESC(?usage)
-            LIMIT {limit}
+            SELECT ?inst WHERE {{ ?inst a {resource} }} LIMIT 1
             """
-            rows, _ = self._execute(query, limit=limit)
-            properties = [
-                {'name': row.get('p', '').split('/')[-1].split('#')[-1],
-                 'uri': row.get('p', ''),
-                 'usage': int(row.get('usage', 0))}
-                for row in rows if 'error' not in row
-            ]
+            inst_rows, _ = self._execute(instance_query, limit=1)
+
+            if inst_rows and 'inst' in inst_rows[0] and 'error' not in inst_rows[0]:
+                instance_uri = inst_rows[0]['inst']
+                prop_query = f"""
+                {self._prefixes}
+                SELECT DISTINCT ?p WHERE {{
+                    <{instance_uri}> ?p ?o .
+                }}
+                LIMIT {limit}
+                """
+                rows, _ = self._execute(prop_query, limit=limit)
+                properties = [
+                    {'name': row.get('p', '').split('/')[-1].split('#')[-1],
+                     'uri': row.get('p', ''),
+                     'sample_instance': instance_uri}
+                    for row in rows if 'error' not in row
+                ]
+            else:
+                # Fall back to ontology-declared properties via rdfs:domain
+                fallback_query = f"""
+                {self._prefixes}
+                SELECT ?p WHERE {{ ?p rdfs:domain {resource} }}
+                LIMIT {limit}
+                """
+                rows, _ = self._execute(fallback_query, limit=limit)
+                properties = [
+                    {'name': row.get('p', '').split('/')[-1].split('#')[-1],
+                     'uri': row.get('p', ''),
+                     'source': 'ontology_domain'}
+                    for row in rows if 'error' not in row
+                ]
+
             return {
                 'resource': resource,
                 'type': 'class',
@@ -598,13 +641,17 @@ class SPARQLToolsV2:
             }
 
         elif output_mode == 'properties':
+            # Query ontology-declared properties (safe on all endpoints).
+            # Previous version used ?s ?p ?o GROUP BY ?p which scans entire dataset
+            # and guaranteed timeout on large endpoints like UniProt (232B triples).
             query = f"""
             {self._prefixes}
-            SELECT ?p (COUNT(*) AS ?usage) WHERE {{
-                ?s ?p ?o .
+            SELECT DISTINCT ?p ?type ?domain ?range WHERE {{
+                VALUES ?type {{ owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty rdf:Property }}
+                ?p a ?type .
+                OPTIONAL {{ ?p rdfs:domain ?domain }}
+                OPTIONAL {{ ?p rdfs:range ?range }}
             }}
-            GROUP BY ?p
-            ORDER BY DESC(?usage)
             LIMIT {limit}
             """
             rows, _ = self._execute(query, limit=limit)
@@ -619,7 +666,9 @@ class SPARQLToolsV2:
                 properties.append({
                     'uri': prop,
                     'label': prop.split('/')[-1].split('#')[-1],
-                    'usage': int(row.get('usage', 0)),
+                    'type': row.get('type', '').split('/')[-1].split('#')[-1],
+                    'domain': row.get('domain', '').split('/')[-1].split('#')[-1] if row.get('domain') else '',
+                    'range': row.get('range', '').split('/')[-1].split('#')[-1] if row.get('range') else '',
                 })
 
             return {
@@ -627,17 +676,23 @@ class SPARQLToolsV2:
                 'returned': len(properties),
                 'filter': filter_prefix,
                 'source': self.name,
+                'note': 'Ontology-declared properties (not data-scanned usage counts)',
             }
 
         else:  # overview
-            # Get class count
+            # Get class count (safe: QLever optimizes ?s a ?class)
             class_count = self.sparql_count(
                 "SELECT DISTINCT ?class WHERE { ?s a ?class }"
             ).get('count', 0)
 
-            # Get property count
+            # Get property count from ontology declarations (safe: schema-level)
+            # Previous version used "SELECT DISTINCT ?p WHERE { ?s ?p ?o }"
+            # which scans entire dataset and times out on large endpoints.
             prop_count = self.sparql_count(
-                "SELECT DISTINCT ?p WHERE { ?s ?p ?o }"
+                "SELECT DISTINCT ?p WHERE { ?p a owl:ObjectProperty }"
+            ).get('count', 0)
+            prop_count += self.sparql_count(
+                "SELECT DISTINCT ?p WHERE { ?p a owl:DatatypeProperty }"
             ).get('count', 0)
 
             return {
@@ -646,6 +701,7 @@ class SPARQLToolsV2:
                 'authority': self.authority,
                 'class_count': class_count,
                 'property_count': prop_count,
+                'property_count_note': 'Ontology-declared properties only',
                 'default_limit': self.default_limit,
                 'source': self.name,
             }
@@ -790,12 +846,29 @@ class SPARQLToolsV2:
 
 # === Convenience Functions ===
 
-def create_tools(endpoint_name: str) -> SPARQLToolsV2:
-    """Create SPARQLToolsV2 from pre-configured endpoint name."""
+def create_tools(endpoint_name: str, enable_guard: bool = True) -> SPARQLToolsV2:
+    """Create SPARQLToolsV2 from pre-configured endpoint name.
+
+    Args:
+        endpoint_name: One of 'uniprot', 'wikidata'
+        enable_guard: Enable query guard to reject known-bad patterns (default True)
+    """
     if get_endpoint is None:
         raise ImportError("endpoint module not available")
     config = get_endpoint(endpoint_name)
-    return SPARQLToolsV2(config)
+
+    # Get guard profile for endpoint
+    guard_profile = None
+    if enable_guard and EndpointProfile is not None:
+        _profiles = {
+            'uniprot': EndpointProfile.uniprot,
+            'wikidata': EndpointProfile.wikidata,
+        }
+        profile_fn = _profiles.get(endpoint_name)
+        if profile_fn:
+            guard_profile = profile_fn()
+
+    return SPARQLToolsV2(config, guard_profile=guard_profile)
 
 
 def test_tools():

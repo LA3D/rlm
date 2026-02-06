@@ -146,9 +146,33 @@ def extract(g: Graph) -> dict:
     }
 
 
-def generate_anti_patterns(constraints: dict) -> list[str]:
-    """Generate anti-pattern warnings from constraints."""
+def generate_anti_patterns(constraints: dict, endpoint_meta: dict = None) -> list[str]:
+    """Generate anti-pattern warnings from constraints.
+
+    Args:
+        constraints: Extracted schema constraints
+        endpoint_meta: Optional endpoint metadata dict with keys:
+            'name', 'triple_count', 'has_text_index', 'has_spo_index'
+    """
     anti_patterns = []
+
+    # Endpoint-scale warnings (highest priority — prevent timeouts)
+    if endpoint_meta and endpoint_meta.get('triple_count', 0) > 1_000_000:
+        tc = endpoint_meta['triple_count']
+        name = endpoint_meta.get('name', 'this endpoint')
+        tc_str = f"{tc/1e9:.0f}B" if tc >= 1e9 else f"{tc/1e6:.0f}M"
+
+        anti_patterns.append(
+            f"NEVER use ?s ?p ?o with unbound predicate on {name} ({tc_str} triples) — will timeout"
+        )
+        anti_patterns.append(
+            "NEVER use FILTER(CONTAINS(STR(...))) to discover predicates — query the ontology schema instead"
+        )
+
+        if not endpoint_meta.get('has_spo_index', True):
+            anti_patterns.append(
+                "Predicates MUST be bound (e.g., up:organism, rdfs:subClassOf) — no SPO index available"
+            )
 
     # From disjoint classes
     for a, b in constraints['disjoint'][:3]:  # Top 3 most important
@@ -165,14 +189,22 @@ def generate_anti_patterns(constraints: dict) -> list[str]:
     return anti_patterns
 
 
-def generate_sparql_hints(constraints: dict, include_defaults: bool = True) -> list[str]:
+def generate_sparql_hints(constraints: dict, include_defaults: bool = True,
+                          endpoint_meta: dict = None) -> list[str]:
     """Generate SPARQL pattern hints from constraints.
 
     Args:
         constraints: Extracted schema constraints
         include_defaults: Include common RDFS/OWL patterns (default True)
+        endpoint_meta: Optional endpoint metadata for scale-aware hints
     """
     hints = []
+
+    # Endpoint-scale discovery hints (highest priority)
+    if endpoint_meta and endpoint_meta.get('triple_count', 0) > 1_000_000:
+        hints.append("Discover predicates via ontology: `?prop a owl:ObjectProperty` (fast)")
+        hints.append("Discover class properties via domain: `?prop rdfs:domain <Class>` (fast)")
+        hints.append("Inspect instances individually: `<specific_URI> ?p ?o LIMIT 30` (fast)")
 
     # Default RDFS/OWL patterns (always useful for class/property hierarchies)
     if include_defaults:
@@ -200,8 +232,14 @@ def generate_sparql_hints(constraints: dict, include_defaults: bool = True) -> l
     return hints
 
 
-def pack(g: Graph, budget: int = 1000) -> str:
+def pack(g: Graph, budget: int = 1000, endpoint_meta: dict = None) -> str:
     """Pack schema constraints into bounded markdown.
+
+    Args:
+        g: RDF graph
+        budget: Character budget
+        endpoint_meta: Optional endpoint metadata dict with keys:
+            'name', 'triple_count', 'has_text_index', 'has_spo_index'
 
     Priority:
     1. Anti-patterns (most actionable)
@@ -216,17 +254,19 @@ def pack(g: Graph, budget: int = 1000) -> str:
     lines = ['**Schema Constraints**:']
 
     # 1. Anti-patterns (high value, concise)
-    anti_patterns = generate_anti_patterns(c)
+    anti_patterns = generate_anti_patterns(c, endpoint_meta)
     if anti_patterns:
         lines.append('\n**Anti-patterns**:')
-        for ap in anti_patterns[:3]:  # Top 3
+        max_anti = 6 if endpoint_meta else 3  # More slots when endpoint warnings present
+        for ap in anti_patterns[:max_anti]:
             lines.append(f'- {ap}')
 
     # 2. SPARQL hints (property paths, symmetry, etc.)
-    sparql_hints = generate_sparql_hints(c)
+    sparql_hints = generate_sparql_hints(c, endpoint_meta=endpoint_meta)
     if sparql_hints:
         lines.append('\n**SPARQL Patterns**:')
-        for hint in sparql_hints[:4]:  # Top 4 hints
+        max_hints = 7 if endpoint_meta else 4  # More slots when endpoint hints present
+        for hint in sparql_hints[:max_hints]:
             lines.append(f'- {hint}')
 
     # 3. Disjoint classes (critical for correctness)

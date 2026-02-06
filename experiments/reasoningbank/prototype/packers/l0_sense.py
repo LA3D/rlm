@@ -115,17 +115,24 @@ def extract_metadata(g: Graph) -> dict:
     return meta
 
 
-def pack(g: Graph, budget: int = 600) -> str:
+def pack(g: Graph, budget: int = 600, endpoint_meta: dict = None) -> str:
     """Pack metadata into compact sense card.
+
+    Args:
+        g: RDF graph
+        budget: Character budget
+        endpoint_meta: Optional endpoint metadata dict with keys:
+            'name', 'triple_count' — adds scale warning to card
 
     Priority order:
     1. Title (if available)
-    2. Description excerpt (if available)
-    3. Size stats (always)
-    4. Namespaces (key ones)
-    5. Imports/subsets (if present)
-    6. Label/description conventions (always)
-    7. Formalism (if space permits)
+    2. Endpoint scale warning (if remote endpoint)
+    3. Description excerpt (if available)
+    4. Size stats (always)
+    5. Namespaces (key ones)
+    6. Imports/subsets (if present)
+    7. Label/description conventions (always)
+    8. Formalism (if space permits)
     """
     meta = extract_metadata(g)
     lines = []
@@ -133,6 +140,13 @@ def pack(g: Graph, budget: int = 600) -> str:
     # Title (optional, if present)
     if meta['title']:
         lines.append(f"**{meta['title']}**")
+
+    # Endpoint scale warning (critical for remote endpoints)
+    if endpoint_meta and endpoint_meta.get('triple_count', 0) > 1_000_000:
+        tc = endpoint_meta['triple_count']
+        name = endpoint_meta.get('name', 'Remote endpoint')
+        tc_str = f"{tc/1e9:.0f}B" if tc >= 1e9 else f"{tc/1e6:.0f}M"
+        lines.append(f"**Endpoint**: {name} — {tc_str} triples — ontology-first discovery only")
 
     # Description excerpt (optional, first 150 chars)
     if meta['description']:

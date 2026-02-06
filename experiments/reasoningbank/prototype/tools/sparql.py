@@ -37,6 +37,15 @@ try:
 except ImportError:
     EndpointConfig = None
 
+# Import query guard (with fallback)
+try:
+    from experiments.reasoningbank.prototype.tools.query_guard import (
+        EndpointProfile, validate as guard_validate
+    )
+except ImportError:
+    EndpointProfile = None
+    guard_validate = None
+
 
 @dataclass
 class Ref:
@@ -152,7 +161,8 @@ class SPARQLTools:
         self,
         config: Union['EndpointConfig', str],
         timeout: int = None,
-        default_limit: int = None
+        default_limit: int = None,
+        guard_profile: 'EndpointProfile' = None,
     ):
         # Handle both EndpointConfig and raw URL
         if isinstance(config, str):
@@ -175,6 +185,7 @@ class SPARQLTools:
             self.default_limit = default_limit or config.default_limit
 
         self.store = ResultStore(source=self.name)
+        self._guard_profile = guard_profile
 
     def _execute(self, query: str, limit: int = None) -> list[dict]:
         """Execute SPARQL query, return list of result dicts."""
@@ -219,6 +230,16 @@ class SPARQLTools:
         Results are database records from an authoritative source.
         """.format(name=self.name, authority=self.authority)
         limit = limit or self.default_limit
+
+        # Query guard: reject known-bad patterns before execution
+        if self._guard_profile and guard_validate:
+            guard_result = guard_validate(query, self._guard_profile)
+            if not guard_result.ok:
+                return {
+                    'error': f"Query rejected: {guard_result.reason}",
+                    'suggestion': guard_result.suggestion,
+                    'pattern': guard_result.pattern,
+                }
 
         # Always prepend default prefixes (they're harmless if already defined)
         # This ensures rdfs:, owl:, rdf: etc. are always available
@@ -322,6 +343,15 @@ class SPARQLTools:
 
     def sparql_count(self, query: str) -> dict:
         """Execute COUNT query, return single count value with attribution."""
+        # Query guard: reject known-bad patterns
+        if self._guard_profile and guard_validate:
+            guard_result = guard_validate(query, self._guard_profile)
+            if not guard_result.ok:
+                return {
+                    'error': f"Query rejected: {guard_result.reason}",
+                    'suggestion': guard_result.suggestion,
+                }
+
         # Wrap in COUNT if not already
         if 'COUNT' not in query.upper():
             # Try to convert SELECT to COUNT
@@ -427,18 +457,31 @@ class SPARQLTools:
 
 
 # Convenience functions
-def create_tools(endpoint_name: str) -> SPARQLTools:
+def create_tools(endpoint_name: str, enable_guard: bool = True) -> SPARQLTools:
     """Create SPARQLTools from pre-configured endpoint name.
 
     Args:
         endpoint_name: One of 'uniprot', 'wikidata', 'dbpedia', 'mesh'
+        enable_guard: Enable query guard to reject known-bad patterns (default True)
 
     Returns:
         Configured SPARQLTools instance
     """
     from experiments.reasoningbank.prototype.tools.endpoint import get_endpoint
     config = get_endpoint(endpoint_name)
-    return SPARQLTools(config)
+
+    # Get guard profile for endpoint
+    guard_profile = None
+    if enable_guard and EndpointProfile is not None:
+        _profiles = {
+            'uniprot': EndpointProfile.uniprot,
+            'wikidata': EndpointProfile.wikidata,
+        }
+        profile_fn = _profiles.get(endpoint_name)
+        if profile_fn:
+            guard_profile = profile_fn()
+
+    return SPARQLTools(config, guard_profile=guard_profile)
 
 
 def test_endpoint(endpoint_name: str = "uniprot"):
