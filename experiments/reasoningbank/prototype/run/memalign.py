@@ -169,6 +169,10 @@ def judge_baseline(task: str, answer: str, sparql: str, verbose: bool = False) -
     """
     from experiments.reasoningbank.prototype.run.phase1 import TrajectoryJudge
 
+    # Handle empty/missing inputs
+    if not sparql or not answer:
+        return {'success': False, 'reason': 'No SPARQL query or answer produced'}
+
     if verbose:
         print(f"  [judge:baseline] task: {task[:80]}")
         print(f"  [judge:baseline] sparql: {sparql[:100]}")
@@ -176,9 +180,11 @@ def judge_baseline(task: str, answer: str, sparql: str, verbose: bool = False) -
     judge_fn = dspy.Predict(TrajectoryJudge, temperature=0.0)
     try:
         j = judge_fn(task=task, answer=answer, sparql=sparql or "")
-        result = {'success': j.success, 'reason': j.reason}
+        # Ensure success is a boolean
+        success = bool(j.success) if j.success is not None else False
+        result = {'success': success, 'reason': j.reason or ''}
         if verbose:
-            print(f"  [judge:baseline] -> success={j.success}, reason={j.reason[:80]}")
+            print(f"  [judge:baseline] -> success={success}, reason={(j.reason or '')[:80]}")
         return result
     except Exception as e:
         return {'success': False, 'reason': f'Judgment failed: {e}'}
@@ -206,6 +212,10 @@ def judge_aligned(
     Returns:
         dict with 'success' (bool) and 'reason' (str)
     """
+    # Handle empty/missing inputs
+    if not sparql or not answer:
+        return {'success': False, 'reason': 'No SPARQL query or answer produced'}
+
     # 1. Load ALL principles (semantic memory)
     all_principles = [item for item in judge_mem.all() if item.src == 'principle']
 
@@ -236,10 +246,12 @@ def judge_aligned(
             principles=principles_text,
             past_cases=episodes_text,
         )
-        result = {'success': j.success, 'reason': j.reason}
+        # Ensure success is a boolean
+        success = bool(j.success) if j.success is not None else False
+        result = {'success': success, 'reason': j.reason or ''}
         if verbose:
-            print(f"  [judge:aligned] -> success={j.success}")
-            print(f"  [judge:aligned] reason: {j.reason[:120]}")
+            print(f"  [judge:aligned] -> success={success}")
+            print(f"  [judge:aligned] reason: {(j.reason or '')[:120]}")
         return result
     except Exception as e:
         return {'success': False, 'reason': f'Aligned judgment failed: {e}'}
@@ -291,7 +303,7 @@ def evaluate_judge(
             'predicted': predicted,
             'expected': expected,
             'verdict': verdict,
-            'judge_reason': judge_result['reason'],
+            'judge_reason': judge_result.get('reason', '') or '',
             'expert_reason': t.get('expert_reason', ''),
         }
         details.append(detail)
@@ -300,7 +312,8 @@ def evaluate_judge(
             mark = 'OK' if predicted == expected else 'WRONG'
             print(f"  [{mark}] {task_id}: predicted={predicted}, expected={expected} ({verdict})")
             if predicted != expected:
-                print(f"    Judge: {judge_result['reason'][:100]}")
+                judge_reason = judge_result.get('reason', '') or ''
+                print(f"    Judge: {judge_reason[:100]}")
                 print(f"    Expert: {t.get('expert_reason', '')[:100]}")
 
     total = len(eval_tasks)
