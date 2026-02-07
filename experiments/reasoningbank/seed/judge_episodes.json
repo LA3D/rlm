@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ep_up_created_integration",
+    "title": "up:created IS integration date (not creation)",
+    "desc": "False negative on Task 12: judge rejected correct predicate",
+    "content": "Task: 'entries integrated on date'. Agent SPARQL: up:created '2010-11-30'^^xsd:date. CORRECT. In UniProt RDF, up:created = integration date. Judge wrongly said 'up:created refers to creation date, not integration date.' This is incorrect -- consult AGENT_GUIDE.md which confirms up:created means 'when entry was first integrated'.",
+    "src": "episode",
+    "tags": ["uniprot", "date", "false_negative", "task_12"]
+  },
+  {
+    "id": "ep_missing_from_taxonomy",
+    "title": "Missing FROM clause for taxonomy graph",
+    "desc": "False positive on Task 1: approved query missing named graph",
+    "content": "Task: 'Select all taxa from UniProt taxonomy'. Agent SPARQL: SELECT DISTINCT ?taxon WHERE { ?taxon a up:Taxon . } -- missing FROM <http://sparql.uniprot.org/taxonomy>. Judge approved but this is INCORRECT. Without FROM clause, query hits default graph instead of taxonomy-specific named graph. Expected: SELECT ?taxon FROM <http://sparql.uniprot.org/taxonomy> WHERE { ?taxon a up:Taxon . }",
+    "src": "episode",
+    "tags": ["uniprot", "named_graph", "false_positive", "task_1"]
+  },
+  {
+    "id": "ep_missing_type_mnemonic",
+    "title": "Missing type constraint for mnemonic lookup",
+    "desc": "False positive on Task 4: approved query without type filter",
+    "content": "Task: 'Select UniProtKB entry with mnemonic A4_HUMAN'. Agent SPARQL: SELECT ?entry WHERE { ?entry up:mnemonic 'A4_HUMAN' . } -- missing '?protein a up:Protein'. Judge approved but this is INCORRECT. Without type constraint, query could match non-Protein entities. Expected: SELECT ?protein WHERE { ?protein a up:Protein . ?protein up:mnemonic 'A4_HUMAN' }",
+    "src": "episode",
+    "tags": ["uniprot", "type_constraint", "false_positive", "task_4"]
+  },
+  {
+    "id": "ep_incomplete_projection_host",
+    "title": "Incomplete projection for host relationship query",
+    "desc": "False positive on Task 85: approved query returning only taxon, not host",
+    "content": "Task: 'Find taxon records with host relationships'. Agent SPARQL: SELECT DISTINCT ?taxon WHERE { ?taxon a up:Taxon . ?taxon up:host ?host . } -- returns only ?taxon but task asks for both organism AND host. Judge approved but this is INCORRECT. Expected: SELECT ?virus ?host WHERE { ?virus up:host ?host . } -- must project BOTH variables.",
+    "src": "episode",
+    "tags": ["uniprot", "projection", "false_positive", "task_85"]
+  },
+  {
+    "id": "ep_reviewed_property_vs_class",
+    "title": "Use up:reviewed property, not Reviewed_Protein class",
+    "desc": "False positive on Task 106: approved non-canonical pattern",
+    "content": "Task: 'reviewed or not'. Agent used UNION + FILTER NOT EXISTS on up:Reviewed_Protein class. INCORRECT -- canonical pattern is: ?protein up:reviewed ?reviewed. Official examples at ontology/uniprot/examples/UniProt/106_uniprot_reviewed_or_not.ttl use the property-based approach. Complex class-based workaround is non-canonical and returns different output format (string labels vs boolean).",
+    "src": "episode",
+    "tags": ["uniprot", "canonical", "false_positive", "task_106"]
+  },
+  {
+    "id": "ep_disease_uri_vs_name",
+    "title": "Return disease URIs not labels for disease query",
+    "desc": "False positive on Task 121: approved query returning names instead of URIs",
+    "content": "Task: 'List proteins and diseases annotated'. Agent SPARQL added skos:prefLabel to get disease names instead of returning disease URIs directly. Missing '?disease a up:Disease' type constraint. Judge approved but this is INCORRECT. Expected pattern returns ?disease (URI) not ?diseaseName (string). Ground truth: SELECT ?protein ?disease WHERE { ... ?disease a up:Disease . }",
+    "src": "episode",
+    "tags": ["uniprot", "format", "false_positive", "task_121"]
+  }
+]

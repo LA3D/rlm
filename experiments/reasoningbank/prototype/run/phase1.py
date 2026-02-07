@@ -325,6 +325,7 @@ def run_matts_parallel(
     k: int = 3,
     verbose: bool = False,
     dedup: bool = True,
+    judge_fn=None,
 ) -> tuple[Result, list[Item]]:
     """Run k parallel trajectories, select best, extract contrastively (MaTTS).
 
@@ -340,6 +341,8 @@ def run_matts_parallel(
         k: Number of parallel rollouts (default: 3)
         verbose: If True, print detailed output
         dedup: If True, deduplicate extracted items
+        judge_fn: Optional custom judge callable(res, task) -> dict.
+                  Defaults to built-in judge() if None.
 
     Returns:
         Tuple of (best Result, list of extracted Items)
@@ -357,7 +360,8 @@ def run_matts_parallel(
         print(f"  [matts] Completed {len(results)} rollouts")
 
     # 2. Judge all results
-    judgments = [judge(res, task, verbose=False) for res in results]
+    _judge = judge_fn if judge_fn else lambda res, t: judge(res, t, verbose=False)
+    judgments = [_judge(res, task) for res in results]
 
     if verbose:
         success_count = sum(1 for j in judgments if j['success'])

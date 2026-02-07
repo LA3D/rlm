@@ -1,0 +1,102 @@
+[
+  {
+    "id": "1_select_all_taxa",
+    "query": "Select all taxa from the UniProt taxonomy",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon\nFROM <http://sparql.uniprot.org/taxonomy>\nWHERE\n{\n    ?taxon a up:Taxon .\n}",
+    "agent_sparql": "SELECT DISTINCT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n}",
+    "agent_answer": "Found all taxa using basic class membership query on up:Taxon.",
+    "expert_verdict": false,
+    "expert_reason": "Missing FROM <http://sparql.uniprot.org/taxonomy> clause - queries default graph instead of taxonomy-specific named graph. Functional difference, not just stylistic.",
+    "error_type": "false_positive"
+  },
+  {
+    "id": "4_uniprot_mnemonic",
+    "query": "Select the UniProtKB entry with the mnemonic 'A4_HUMAN'",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\nWHERE\n{\n    ?protein a up:Protein .\n    ?protein up:mnemonic 'A4_HUMAN'\n}",
+    "agent_sparql": "SELECT ?entry WHERE {\n  ?entry up:mnemonic 'A4_HUMAN' .\n}",
+    "agent_answer": "Found UniProtKB entry with mnemonic A4_HUMAN using up:mnemonic predicate.",
+    "expert_verdict": false,
+    "expert_reason": "Missing type constraint '?protein a up:Protein'. Overly broad query could match non-Protein entities that happen to have mnemonics.",
+    "error_type": "false_positive"
+  },
+  {
+    "id": "12_entries_integrated",
+    "query": "Select all UniProtKB entries that were integrated on the 30th of November 2010",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?protein\nWHERE\n{\n\t?protein a up:Protein . \n\t?protein up:created '2010-11-30'^^xsd:date\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?entry\nWHERE {\n  ?entry a up:Protein .\n  ?entry up:created \"2010-11-30\"^^xsd:date .\n}",
+    "agent_answer": "Selected all UniProtKB entries integrated on November 30, 2010 using up:created predicate with typed date literal.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. In UniProt RDF, up:created IS the integration date. Variable name difference (?entry vs ?protein) is cosmetic. Query is structurally identical to ground truth.",
+    "error_type": "false_negative"
+  },
+  {
+    "id": "85_taxonomy_host",
+    "query": "Find taxon records that are known to have part of their life cycle in other organisms (e.g. parasite, symbiont, infection)",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n  ?virus \n  ?host \nWHERE {\n    ?virus up:host ?host .\n}",
+    "agent_sparql": "SELECT DISTINCT ?taxon\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:host ?host .\n}",
+    "agent_answer": "Found taxon records with host relationships using up:host property on up:Taxon class.",
+    "expert_verdict": false,
+    "expert_reason": "Incomplete projection: returns only ?taxon but task implicitly asks for both the organism and its host. Expected query projects both ?virus and ?host. Missing half the requested data.",
+    "error_type": "false_positive"
+  },
+  {
+    "id": "104_protein_full_name",
+    "query": "The recommended protein full names for UniProtKB entries",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\n  ?fullName\nWHERE {\n  ?protein a up:Protein ;\n           up:recommendedName ?recommendedName .\n  ?recommendedName up:fullName ?fullName .\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?fullName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:recommendedName ?recName .\n  ?recName up:fullName ?fullName .\n}",
+    "agent_answer": "Retrieved recommended protein full names using two-step property path through up:recommendedName to up:fullName.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Structurally identical to ground truth. Uses proper two-hop pattern through intermediate name object. Syntax differences are cosmetic.",
+    "error_type": "true_positive"
+  },
+  {
+    "id": "106_reviewed_or_not",
+    "query": "List all UniProtKB proteins and if they are reviewed (Swiss-Prot) or unreviewed (TrEMBL)",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein\n  ?reviewed\nWHERE {\n  ?protein a up:Protein . \n  ?protein up:reviewed ?reviewed . \n}",
+    "agent_sparql": "SELECT ?protein ?status WHERE {\n  {\n    ?protein a up:Reviewed_Protein .\n    BIND(\"reviewed (Swiss-Prot)\" AS ?status)\n  }\n  UNION\n  {\n    ?protein a up:Protein .\n    FILTER NOT EXISTS { ?protein a up:Reviewed_Protein }\n    BIND(\"unreviewed (TrEMBL)\" AS ?status)\n  }\n}",
+    "agent_answer": "Listed all proteins with their review status using UNION pattern to classify as reviewed or unreviewed.",
+    "expert_verdict": false,
+    "expert_reason": "Non-canonical pattern. Official UniProt examples use the simple 'up:reviewed' property (see ontology/uniprot/examples/UniProt/106_uniprot_reviewed_or_not.ttl). Agent used unnecessarily complex UNION + FILTER NOT EXISTS on subclass. Different output format (string labels vs boolean). Canonical property-based pattern is always preferred.",
+    "error_type": "false_positive"
+  },
+  {
+    "id": "121_proteins_diseases",
+    "query": "List all UniProtKB proteins and the diseases are annotated to be related.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n\t?protein\n\t?disease\nWHERE {\n\t?protein a up:Protein ;\n    \tup:annotation ?annotation .\n\t?annotation a up:Disease_Annotation ;\n    \tup:disease ?disease .\n\t?disease a up:Disease .\n}",
+    "agent_sparql": "SELECT ?protein ?diseaseName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Disease_Annotation .\n  ?annotation up:disease ?disease .\n  ?disease skos:prefLabel ?diseaseName .\n}",
+    "agent_answer": "Listed proteins and their disease associations through Disease_Annotation navigation, extracting disease names via skos:prefLabel.",
+    "expert_verdict": false,
+    "expert_reason": "Returns disease names (strings) instead of disease URIs. Missing type constraint '?disease a up:Disease'. Uses skos:prefLabel instead of returning disease entity directly as expected. Different output format from ground truth.",
+    "error_type": "false_positive"
+  },
+  {
+    "id": "2_bacteria_taxa",
+    "query": "Select all bacterial taxa and their scientific name from the UniProt taxonomy",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon ?name\nWHERE\n{\n    ?taxon a up:Taxon .\n    ?taxon up:scientificName ?name .\n    ?taxon rdfs:subClassOf taxon:2 .\n}",
+    "agent_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon ?scientificName\nWHERE {\n  ?taxon rdfs:subClassOf+ taxon:2 .\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?scientificName .\n}",
+    "agent_answer": "Selected all bacterial taxa using rdfs:subClassOf+ transitive property path from taxon:2 (Bacteria) and their scientific names.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Uses rdfs:subClassOf+ for hierarchy traversal (note: ground truth uses rdfs:subClassOf without +, but UniProt materializes subclasses so both work). Variable name difference is cosmetic.",
+    "error_type": "true_positive"
+  },
+  {
+    "id": "30_merged_loci",
+    "query": "Find UniProtKB entries with merged loci in Bordetella avium",
+    "expected_sparql": "PREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT\n  ?protein \n  (GROUP_CONCAT(?locusName; separator=',') AS ?locusNames)\nWHERE \n{ \n  ?protein a up:Protein ;\n    up:organism taxon:360910 ;\n    up:encodedBy ?gene .\n  ?gene up:locusName ?locusName .\n} \nGROUP BY ?protein \nHAVING (COUNT(?locusName) > 1)",
+    "agent_sparql": "",
+    "agent_answer": "Failed to converge within iteration limit.",
+    "expert_verdict": false,
+    "expert_reason": "Did not converge. No SPARQL produced. Complex aggregation query with GROUP_CONCAT, GROUP BY, HAVING exceeded agent capabilities.",
+    "error_type": "true_negative"
+  },
+  {
+    "id": "33_longest_variant",
+    "query": "Find longest comment text associated with a UniProtKB natural variant annotation",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT \n    ?annotation ?comment\nWHERE {\n    ?annotation a up:Natural_Variant_Annotation ;\n        rdfs:comment ?comment . \n} \nORDER BY DESC(STRLEN(?comment))",
+    "agent_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?annotation ?comment (STRLEN(?comment) AS ?length)\nWHERE {\n  ?annotation a up:Natural_Variant_Annotation .\n  ?annotation rdfs:comment ?comment .\n}\nORDER BY DESC(STRLEN(?comment))\nLIMIT 1",
+    "agent_answer": "Found the longest comment text using STRLEN and ORDER BY DESC with LIMIT 1.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Structurally matches ground truth. Extra STRLEN projection and LIMIT 1 are reasonable additions that don't change correctness. Core pattern is identical.",
+    "error_type": "true_positive"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "p_domain_terminology",
+    "title": "Check Domain Terminology Before Rejecting",
+    "desc": "Predicate names may differ from common English usage",
+    "content": "UniProt predicate names may not match common English usage. Example: up:created means 'integration date', not 'creation date'. Consult domain documentation (AGENT_GUIDE.md) before judging predicate correctness. Do NOT reject a query solely because a predicate name seems semantically wrong.",
+    "src": "principle",
+    "tags": ["terminology", "false_negative"]
+  },
+  {
+    "id": "p_from_clause",
+    "title": "Require FROM Clause for Named Graphs",
+    "desc": "Named graph endpoints need explicit FROM clause",
+    "content": "When the ontology uses named graphs (e.g., UniProt taxonomy at <http://sparql.uniprot.org/taxonomy>), queries MUST include a FROM clause. A query without FROM that gets correct-looking results may be querying the wrong graph. Mark as FAILURE if FROM clause is missing for named-graph queries.",
+    "src": "principle",
+    "tags": ["named_graph", "false_positive"]
+  },
+  {
+    "id": "p_canonical_patterns",
+    "title": "Prefer Canonical Over Equivalent Patterns",
+    "desc": "Use documented property-based patterns over complex alternatives",
+    "content": "If the ontology documents a direct property (e.g., up:reviewed), a query using that property is CORRECT. A query achieving the same result via a complex workaround (UNION + FILTER NOT EXISTS on subclasses) is NON-CANONICAL and should be marked FAILURE. Simpler documented patterns are always preferred.",
+    "src": "principle",
+    "tags": ["canonical", "false_positive"]
+  },
+  {
+    "id": "p_projection_completeness",
+    "title": "Check Projection Matches Task Requirements",
+    "desc": "SELECT variables must cover all requested data",
+    "content": "If the task asks for multiple pieces of information (e.g., 'find viruses AND their hosts'), the SELECT clause must project ALL requested variables. A query returning only ?virus but not ?host is INCOMPLETE. Mark as FAILURE if projection doesn't match the task request.",
+    "src": "principle",
+    "tags": ["projection", "false_positive"]
+  },
+  {
+    "id": "p_type_constraints",
+    "title": "Require Type Constraints for Entity Queries",
+    "desc": "Entity lookups should include rdf:type constraint",
+    "content": "When looking up specific entities (e.g., proteins by mnemonic), the query should include a type constraint (e.g., ?protein a up:Protein). A query without type constraints may match unexpected entity types. Mark as FAILURE if type constraint is missing for entity-specific queries.",
+    "src": "principle",
+    "tags": ["type_constraint", "false_positive"]
+  }
+]
