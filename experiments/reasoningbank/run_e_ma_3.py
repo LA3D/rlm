@@ -43,12 +43,16 @@ EXPERT_CORRECTIONS = {
     '2_bacteria_taxa': {
         'expert_verdict': True,
         'expert_reason': (
-            'The query is CORRECT. The FROM clause principle applies only to '
-            'specialized named graphs (e.g., taxonomy at '
-            '<http://sparql.uniprot.org/taxonomy>, UniRef clusters). '
-            'Core UniProt data like taxonomic subclass relationships accessed '
-            'via rdfs:subClassOf are in the default graph and do NOT require '
-            'a FROM clause. The judge is being overly strict.'
+            'The query is CORRECT. The key distinction for the FROM clause '
+            'principle is: core RDF predicates (rdfs:subClassOf, rdf:type '
+            'when used for hierarchy traversal) are replicated in the default '
+            'graph and do NOT require a FROM clause. However, queries that '
+            'directly enumerate taxonomy-specific resources (e.g., '
+            '"SELECT ?taxon WHERE { ?taxon a up:Taxon }") DO still require '
+            'FROM <http://sparql.uniprot.org/taxonomy> because up:Taxon '
+            'instances live in the taxonomy named graph. This query uses '
+            'rdfs:subClassOf+ to traverse the taxonomy hierarchy from a '
+            'known root URI, which works in the default graph.'
         ),
     },
     # Task 121: Sometimes still a false positive - disease URI vs name
