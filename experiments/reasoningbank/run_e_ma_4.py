@@ -1,26 +1,20 @@
 #!/usr/bin/env python
 """E-MA-4: Memory Scaling (Accumulation Test).
 
-Tests whether judge accuracy improves as feedback accumulates.
+Tests whether judge accuracy improves as feedback accumulates over batches.
 
 Protocol:
     1. Start with E-MA-2 judge memory (5 principles + 6 episodes)
-    2. Run judge on 20 NEW tasks from uniprot_pure_tasks.json
+    2. Run judge on 20 NEW annotated tasks (judge_scaling_tasks.json)
     3. Process in batches of 5:
        - Batch 1 (tasks 1-5): Judge -> expert corrects errors -> extract -> accumulate
        - Batch 2 (tasks 6-10): Judge with accumulated memory -> correct -> accumulate
        - Batch 3 (tasks 11-15): Judge -> correct -> accumulate
-       - Batch 4 (tasks 16-20): Judge -> measure (no correction, test set)
-    4. Plot accuracy curve across batches
+       - Batch 4 (tasks 16-20): Judge -> measure only (test set, no correction)
+    4. Report accuracy curve across batches
 
 Usage:
-    python experiments/reasoningbank/run_e_ma_4.py \
-        --principles experiments/reasoningbank/seed/judge_principles.json \
-        --episodes experiments/reasoningbank/seed/judge_episodes.json \
-        --held-out-tasks experiments/reasoningbank/tasks/uniprot_pure_tasks.json \
-        --batch-size 5 \
-        --n-batches 4 \
-        -v
+    python experiments/reasoningbank/run_e_ma_4.py -v
 """
 
 import sys
@@ -28,7 +22,6 @@ sys.path.insert(0, '/Users/cvardema/dev/git/LA3D/rlm')
 
 import json
 import os
-import argparse
 from datetime import datetime
 
 import dspy
@@ -52,13 +45,9 @@ def run_scaling_experiment(
     For batches 1 through n_batches-1: judge, collect errors, ingest feedback.
     For the final batch: judge only (test set, no correction).
 
-    Note: This requires expert verdicts in tasks (expected_sparql + expert_verdict).
-    For tasks without expert_verdict, it runs in "simulation" mode using
-    expected_sparql as ground truth.
-
     Args:
         judge_mem: Initial judge memory (principles + episodes)
-        tasks: List of tasks with expected_sparql
+        tasks: List of annotated tasks with expert_verdict
         batch_size: Tasks per batch
         n_batches: Number of batches
         verbose: Print details
@@ -69,7 +58,7 @@ def run_scaling_experiment(
     total_needed = batch_size * n_batches
     if len(tasks) < total_needed:
         print(f"Warning: only {len(tasks)} tasks available, need {total_needed}")
-        tasks = tasks[:total_needed]
+    tasks = tasks[:total_needed]
 
     batches = [tasks[i*batch_size:(i+1)*batch_size] for i in range(n_batches)]
     batch_results = []
@@ -79,9 +68,9 @@ def run_scaling_experiment(
         is_test_batch = (batch_idx == n_batches - 1)
         batch_label = f"Batch {batch_idx + 1}/{n_batches}" + (" (TEST)" if is_test_batch else "")
 
-        print(f"\n{'='*50}")
+        print(f"\n{'='*60}")
         print(f"{batch_label}: {len(batch_tasks)} tasks, memory={len(judge_mem.all())} items")
-        print(f"{'='*50}")
+        print(f"{'='*60}")
 
         # Judge all tasks in this batch
         judge_fn = lambda task, answer, sparql: judge_aligned(
@@ -99,10 +88,13 @@ def run_scaling_experiment(
         if not is_test_batch:
             for detail, task_data in zip(metrics['details'], batch_tasks):
                 if detail['predicted'] != detail['expected']:
-                    # Error found - simulate expert correction
+                    # Error found - ingest expert correction
                     expert_reason = task_data.get('expert_reason', '')
                     if not expert_reason:
-                        expert_reason = f"Judge said {detail['predicted']}, correct is {detail['expected']}"
+                        expert_reason = (
+                            f"Judge said {detail['predicted']}, "
+                            f"correct is {detail['expected']}"
+                        )
 
                     items = ingest_feedback(
                         task=task_data['query'],
@@ -115,8 +107,8 @@ def run_scaling_experiment(
                     )
                     n_ingested += len(items)
 
-            if verbose:
-                print(f"  Ingested {n_ingested} items from {metrics['total'] - metrics['correct']} errors")
+            print(f"  Ingested {n_ingested} items from "
+                  f"{metrics['total'] - metrics['correct']} errors")
 
         batch_results.append({
             'batch_idx': batch_idx,
@@ -134,9 +126,14 @@ def run_scaling_experiment(
     scaling_curve = {
         'batch_accuracies': accuracies,
         'memory_sizes': memory_sizes,
-        'monotonic': all(accuracies[i] <= accuracies[i+1] for i in range(len(accuracies)-1)),
+        'monotonic': all(
+            accuracies[i] <= accuracies[i+1]
+            for i in range(len(accuracies)-1)
+        ),
         'test_accuracy': accuracies[-1] if batch_results else 0.0,
-        'improvement': accuracies[-1] - accuracies[0] if len(accuracies) > 1 else 0.0,
+        'improvement': (
+            accuracies[-1] - accuracies[0] if len(accuracies) > 1 else 0.0
+        ),
     }
 
     return {
@@ -147,21 +144,21 @@ def run_scaling_experiment(
 
 
 def main():
-    parser = argparse.ArgumentParser(description='E-MA-4: Memory Scaling Experiment')
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description='E-MA-4: Memory Scaling Experiment')
     parser.add_argument('--principles',
-                        default='experiments/reasoningbank/seed/judge_principles.json',
-                        help='Path to judge principles JSON')
+                        default='experiments/reasoningbank/seed/judge_principles.json')
     parser.add_argument('--episodes',
-                        default='experiments/reasoningbank/seed/judge_episodes.json',
-                        help='Path to judge episodes JSON')
-    parser.add_argument('--held-out-tasks',
-                        default='experiments/reasoningbank/tasks/uniprot_pure_tasks.json',
-                        help='Path to held-out tasks JSON')
+                        default='experiments/reasoningbank/seed/judge_episodes.json')
+    parser.add_argument('--scaling-tasks',
+                        default='experiments/reasoningbank/tasks/judge_scaling_tasks.json',
+                        help='Path to annotated scaling tasks')
     parser.add_argument('--batch-size', type=int, default=5)
     parser.add_argument('--n-batches', type=int, default=4)
     parser.add_argument('--output-dir',
-                        default='experiments/reasoningbank/results/e_ma_4',
-                        help='Output directory')
+                        default='experiments/reasoningbank/results/e_ma_4')
     parser.add_argument('--verbose', '-v', action='store_true')
     parser.add_argument('--model', default='anthropic/claude-sonnet-4-5-20250929')
 
@@ -171,30 +168,30 @@ def main():
     lm = dspy.LM(args.model, temperature=0.0)
     dspy.configure(lm=lm)
 
-    # Load initial judge memory
+    # Load initial judge memory (E-MA-2 state)
     judge_mem = load_judge_mem(
         principles_path=args.principles,
         episodes_path=args.episodes,
     )
     print(f"Initial judge memory: {len(judge_mem.all())} items")
 
-    # Load held-out tasks
-    with open(args.held_out_tasks) as f:
-        all_tasks = json.load(f)
+    # Load annotated tasks
+    with open(args.scaling_tasks) as f:
+        tasks = json.load(f)
 
-    # Filter to tasks with expected_sparql (needed for evaluation)
-    eval_ready = [t for t in all_tasks if t.get('expected_sparql')]
-    total_needed = args.batch_size * args.n_batches
-    tasks = eval_ready[:total_needed]
-    print(f"Using {len(tasks)} tasks ({args.n_batches} batches of {args.batch_size})")
-
-    # Note: held-out tasks need expert_verdict for proper evaluation.
-    # If not present, we'll run in limited mode.
+    # Verify tasks have expert verdicts
     has_verdicts = all(t.get('expert_verdict') is not None for t in tasks)
+    total_needed = args.batch_size * args.n_batches
+    print(f"Loaded {len(tasks)} annotated tasks "
+          f"(need {total_needed} for {args.n_batches} batches of {args.batch_size})")
     if not has_verdicts:
-        print("WARNING: Tasks lack expert_verdict fields. "
-              "Scaling test requires manual expert annotation for full evaluation.")
-        print("Running in demo mode - will judge but cannot measure accuracy without expert verdicts.")
+        print("ERROR: Tasks missing expert_verdict. Use judge_scaling_tasks.json.")
+        return
+
+    n_correct = sum(1 for t in tasks if t['expert_verdict'])
+    n_incorrect = sum(1 for t in tasks if not t['expert_verdict'])
+    print(f"  Distribution: {n_correct} correct ({n_correct/len(tasks):.0%}), "
+          f"{n_incorrect} incorrect ({n_incorrect/len(tasks):.0%})")
 
     # Run experiment
     results = run_scaling_experiment(
@@ -206,22 +203,40 @@ def main():
     )
 
     # Print summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCALING CURVE SUMMARY")
-    print("="*60)
+    print("=" * 60)
     curve = results['scaling_curve']
-    for i, acc in enumerate(curve['batch_accuracies']):
-        label = "TEST" if i == args.n_batches - 1 else f"train"
-        print(f"  Batch {i+1} ({label}): {acc:.1%}")
-    print(f"  Monotonic improvement: {curve['monotonic']}")
+    print(f"{'Batch':<20} {'Accuracy':>8} {'Memory':>8} {'Ingested':>8}")
+    print("-" * 50)
+    for b in results['batch_results']:
+        label = "TEST" if b['is_test'] else "train"
+        print(f"  Batch {b['batch_idx']+1} ({label})"
+              f"     {b['metrics']['accuracy']:>7.1%}"
+              f"     {b['memory_size_after']:>5}"
+              f"     {b['n_ingested']:>5}")
+
+    print(f"\n  Monotonic improvement: {curve['monotonic']}")
     print(f"  Total improvement: {curve['improvement']:+.1%}")
     print(f"  Final memory size: {results['final_memory_size']} items")
+
+    # Success criteria
+    print("\n" + "=" * 60)
+    print("SUCCESS CRITERIA")
+    print("=" * 60)
+    criteria = {
+        'Test accuracy >= 75%': curve['test_accuracy'] >= 0.75,
+        'Accuracy improved over batches': curve['improvement'] > 0,
+        'Memory bounded (< 30 items)': results['final_memory_size'] < 30,
+    }
+    for name, passed in criteria.items():
+        mark = 'PASS' if passed else 'FAIL'
+        print(f"  [{mark}] {name}")
 
     # Save results
     os.makedirs(args.output_dir, exist_ok=True)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    # Scaling curve
     with open(os.path.join(args.output_dir, 'scaling_curve.json'), 'w') as f:
         json.dump({
             'experiment': 'E-MA-4',
@@ -235,17 +250,21 @@ def main():
             'batch_summaries': [
                 {
                     'batch': b['batch_idx'],
+                    'label': b['label'],
                     'accuracy': b['metrics']['accuracy'],
+                    'precision': b['metrics']['precision'],
+                    'recall': b['metrics']['recall'],
+                    'f1': b['metrics']['f1'],
                     'n_ingested': b['n_ingested'],
                     'memory_size': b['memory_size_after'],
+                    'is_test': b['is_test'],
                 }
                 for b in results['batch_results']
             ],
+            'criteria': {k: v for k, v in criteria.items()},
         }, f, indent=2)
 
-    # Save judge memory state
     judge_mem.save(os.path.join(args.output_dir, 'judge_memory_final.json'))
-
     print(f"\nResults saved to {args.output_dir}/")
 
 

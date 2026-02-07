@@ -1,0 +1,173 @@
+[
+  {
+    "id": "105_short_name",
+    "query": "The recommended protein short names for UniProtKB entries",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?fullName\nWHERE {\n  ?protein a up:Protein ;\n           up:recommendedName ?recommendedName .\n  ?recommendedName up:shortName ?fullName .\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?shortName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:recommendedName ?recName .\n  ?recName up:shortName ?shortName .\n}",
+    "agent_answer": "Retrieved recommended protein short names using two-hop property path through up:recommendedName to up:shortName.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Structurally identical to ground truth. Uses proper two-hop pattern."
+  },
+  {
+    "id": "94_encoding_gene",
+    "query": "List UniProtKB proteins with their associated named gene",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?gene\nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?gene\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:encodedBy ?gene .\n}",
+    "agent_answer": "Listed proteins with their associated genes using up:encodedBy property.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Structurally identical, uses proper type constraint and property."
+  },
+  {
+    "id": "97_gene_orf_name",
+    "query": "List UniProtKB proteins with their associated gene and the gene's ORF label",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?gene ?orfName\nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n  ?gene up:orfName ?orfName .\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?gene ?orfName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:encodedBy ?gene .\n  ?gene up:orfName ?orfName .\n}",
+    "agent_answer": "Listed proteins with gene ORF names using up:encodedBy and up:orfName.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Extra ?protein projection is fine. Core pattern matches ground truth."
+  },
+  {
+    "id": "86_taxonomy_rank",
+    "query": "Retrieve the rank and the scientific name of an taxonomic record. Not all taxonomic records have a rank associated with them.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon ?scientificName ?rank\nWHERE {\n  ?taxon a up:Taxon ;\n         up:scientificName ?scientificName .\n  OPTIONAL {\n    ?taxon up:rank ?rank\n  }\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?taxon ?scientificName ?rank\nWHERE {\n  ?taxon a up:Taxon .\n  ?taxon up:scientificName ?scientificName .\n  OPTIONAL { ?taxon up:rank ?rank . }\n}",
+    "agent_answer": "Retrieved taxonomic rank and scientific name with OPTIONAL for missing ranks.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Uses OPTIONAL for rank as required. Structurally matches ground truth."
+  },
+  {
+    "id": "91_alt_protein_name",
+    "query": "Alternative protein full names for UniProtKB entries",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?fullName\nWHERE {\n  ?protein a up:Protein ;\n           up:alternativeName ?recommendedName .\n  ?recommendedName up:fullName ?fullName .\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?fullName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:alternativeName ?altName .\n  ?altName up:fullName ?fullName .\n}",
+    "agent_answer": "Retrieved alternative protein full names via up:alternativeName -> up:fullName path.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Uses proper two-hop path through alternativeName."
+  },
+  {
+    "id": "93_dates",
+    "query": "List the created, last modified, and last sequence update dates for UniProtKB proteins.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?created ?modified ?version\nWHERE {\n  ?protein a up:Protein ;\n           up:created ?created ;\n           up:modified ?modified ;\n           up:version ?version .\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?created ?modified ?version\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:created ?created .\n  ?protein up:modified ?modified .\n  ?protein up:version ?version .\n}",
+    "agent_answer": "Listed protein date properties: up:created, up:modified, up:version.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. All three date properties present with type constraint."
+  },
+  {
+    "id": "89_uniparc_triples",
+    "query": "Predicates and objects, for a given UniParc accession as a subject",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?predicate ?object\nWHERE {\n  <http://purl.uniprot.org/uniparc/UPI000012A0AD> ?predicate ?object\n}",
+    "agent_sparql": "SELECT ?predicate ?object\nWHERE {\n  <http://purl.uniprot.org/uniparc/UPI000012A0AD> ?predicate ?object .\n}",
+    "agent_answer": "Retrieved all predicates and objects for the given UniParc accession.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Simple SPO pattern with bound subject. PREFIX not needed for full URI."
+  },
+  {
+    "id": "41_fragments",
+    "query": "Retrieve UniProtKB entries with sequences that are composed of fragments",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?protein\nWHERE {\n  ?protein a up:Protein ;\n    up:sequence ?sequence .\n  MINUS { ?sequence up:fragment [] }\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT DISTINCT ?protein\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:sequence ?sequence .\n  MINUS { ?sequence up:fragment [] }\n}",
+    "agent_answer": "Retrieved protein entries with fragment sequences using MINUS pattern.",
+    "expert_verdict": true,
+    "expert_reason": "Correct. Uses MINUS pattern matching ground truth. Type constraint present."
+  },
+  {
+    "id": "24_release_number",
+    "query": "Find the release number of the UniProt data that is currently being queried",
+    "expected_sparql": "SELECT ?version\nFROM <https://sparql.uniprot.org/.well-known/void>\nWHERE\n{\n    [] <http://purl.org/pav/version> ?version\n}",
+    "agent_sparql": "SELECT ?version\nWHERE {\n  [] <http://purl.org/pav/version> ?version .\n}",
+    "agent_answer": "Found the release version using pav:version predicate.",
+    "expert_verdict": false,
+    "expert_reason": "Missing FROM <https://sparql.uniprot.org/.well-known/void> clause. Queries default graph instead of void metadata graph. Named graph access required."
+  },
+  {
+    "id": "79_mnemonic_list",
+    "query": "List all UniProtKB protein ID (mnemonic) for current UniProtKB entries.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?uniprot ?mnemonic\nWHERE {\n  GRAPH <http://sparql.uniprot.org/uniprot> {\n    ?uniprot a up:Protein ;\n        up:mnemonic ?mnemonic .\n  }\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?mnemonic\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:mnemonic ?mnemonic .\n}",
+    "agent_answer": "Listed all protein mnemonics using up:mnemonic predicate.",
+    "expert_verdict": false,
+    "expert_reason": "Missing GRAPH <http://sparql.uniprot.org/uniprot> clause. Expected uses explicit named graph for current entries. Without it, may include obsolete entries."
+  },
+  {
+    "id": "80_obsolete_mnemonic",
+    "query": "List all UniProtKB protein ID (mnemonic) that where used in the past for current UniProtKB entries.",
+    "expected_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?uniprot ?obsoleteMnemonic\nWHERE {\n  GRAPH <http://sparql.uniprot.org/uniprot> {\n    ?uniprot a up:Protein ;\n        up:oldMnemonic ?obsoleteMnemonic .\n  }\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?oldMnemonic\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:oldMnemonic ?oldMnemonic .\n}",
+    "agent_answer": "Listed obsolete mnemonics using up:oldMnemonic.",
+    "expert_verdict": false,
+    "expert_reason": "Missing GRAPH <http://sparql.uniprot.org/uniprot> clause. Expected uses explicit named graph for current entries."
+  },
+  {
+    "id": "100_organelles",
+    "query": "List the proteins encoded by a gene that is located in an organelle other than the nucleus, or on a plasmid rather than a chromosome.",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?plasmidOrOrganelle ?label\nWHERE {\n    ?protein a up:Protein ;\n      up:encodedIn ?plasmidOrOrganelle .\n    OPTIONAL {\n        ?plasmidOrOrganelle rdfs:label ?label .\n    }\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?location\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:encodedIn ?location .\n}",
+    "agent_answer": "Listed proteins with their gene locations using up:encodedIn.",
+    "expert_verdict": false,
+    "expert_reason": "Incomplete projection: missing OPTIONAL rdfs:label for the location name. Expected returns protein, location, AND label. Also missing rdfs prefix."
+  },
+  {
+    "id": "110_unnamed_plasmids",
+    "query": "Sometimes it is known that a gene encoding a protein UniProtKB is located on a plasmid or an organelle, but the name of the plasmid is unknown.",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?plasmidOrOrganelle ?label\nWHERE {\n    ?protein a up:Protein ;\n      up:encodedIn ?plasmidOrOrganelle .\n    OPTIONAL {\n        ?plasmidOrOrganelle rdfs:label ?label .\n    }\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein\nWHERE {\n  ?protein up:encodedIn ?location .\n}",
+    "agent_answer": "Found proteins encoded on plasmids or organelles.",
+    "expert_verdict": false,
+    "expert_reason": "Missing type constraint '?protein a up:Protein'. Also incomplete projection - should return location and optional label, not just protein."
+  },
+  {
+    "id": "11_transmembrane",
+    "query": "Select all UniProtKB entries with annotated transmembrane regions and the regions' begin and end coordinates on the canonical sequence",
+    "expected_sparql": "PREFIX faldo: <http://biohackathon.org/resource/faldo#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?begin ?end\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Transmembrane_Annotation .\n  ?annotation up:range ?range .\n  ?range faldo:begin/faldo:position ?begin .\n  ?range faldo:end/faldo:position ?end\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?annotation\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:annotation ?annotation .\n  ?annotation a up:Transmembrane_Annotation .\n}",
+    "agent_answer": "Found proteins with transmembrane annotations.",
+    "expert_verdict": false,
+    "expert_reason": "Incomplete: missing begin/end coordinates from faldo vocabulary. Task asks for coordinates but query only returns annotation URIs. Missing faldo:begin/faldo:position and faldo:end/faldo:position."
+  },
+  {
+    "id": "5_mapping_pdb",
+    "query": "Select a mapping of UniProtKB to PDB entries using the UniProtKB cross-references to the PDB database",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?db\nWHERE {\n    ?protein a up:Protein .\n    ?protein rdfs:seeAlso ?db .\n    ?db up:database <http://purl.uniprot.org/database/PDB>\n}",
+    "agent_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?pdbRef\nWHERE {\n  ?protein rdfs:seeAlso ?pdbRef .\n  ?pdbRef up:database <http://purl.uniprot.org/database/PDB> .\n}",
+    "agent_answer": "Mapped UniProtKB entries to PDB using rdfs:seeAlso cross-references.",
+    "expert_verdict": false,
+    "expert_reason": "Missing type constraint '?protein a up:Protein'. Could match non-Protein entities with PDB cross-references."
+  },
+  {
+    "id": "95_gene_alt_names",
+    "query": "List UniProtKB proteins with their associated gene and the gene's names that are used in the field, but not recommended for use by UniProtKB",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?gene ?altGeneName\nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n  ?gene skos:altLabel ?altGeneName .\n}",
+    "agent_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?gene ?altName\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:encodedBy ?gene .\n  ?gene rdfs:label ?altName .\n}",
+    "agent_answer": "Listed proteins with gene alternative names using rdfs:label.",
+    "expert_verdict": false,
+    "expert_reason": "Non-canonical pattern: uses rdfs:label instead of skos:altLabel. Ground truth uses SKOS vocabulary for alternative gene names. rdfs:label may return preferred names, not alternatives."
+  },
+  {
+    "id": "96_gene_pref_name",
+    "query": "List UniProtKB proteins with their associated gene and the gene's preferred name",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?gene\nWHERE {\n  ?protein a up:Protein ;\n           up:encodedBy ?gene .\n  ?gene skos:prefLabel ?recommendedGeneName .\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?gene ?geneName\nWHERE {\n  ?protein up:encodedBy ?gene .\n  ?gene up:orfName ?geneName .\n}",
+    "agent_answer": "Listed proteins with gene names.",
+    "expert_verdict": false,
+    "expert_reason": "Wrong predicate: uses up:orfName instead of skos:prefLabel. ORF names are not preferred gene names. Also missing type constraint '?protein a up:Protein'."
+  },
+  {
+    "id": "7_swissprot_DNA",
+    "query": "Select reviewed UniProtKB entries (Swiss-Prot), and their recommended protein name, that have a preferred gene name that contains the text 'DNA'",
+    "expected_sparql": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?name\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:reviewed true .\n  ?protein up:recommendedName ?recommended .\n  ?recommended up:fullName ?name .\n  ?protein up:encodedBy ?gene .\n  ?gene skos:prefLabel ?text .\n  FILTER CONTAINS(?text, 'DNA')\n}",
+    "agent_sparql": "PREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?protein ?name\nWHERE {\n  ?protein a up:Protein .\n  ?protein up:recommendedName ?recName .\n  ?recName up:fullName ?name .\n  ?protein up:encodedBy ?gene .\n  FILTER(CONTAINS(STR(?gene), 'DNA'))\n}",
+    "agent_answer": "Found proteins with gene names containing 'DNA'.",
+    "expert_verdict": false,
+    "expert_reason": "Missing 'up:reviewed true' filter - should only return Swiss-Prot (reviewed) entries. Also filters on gene URI string instead of skos:prefLabel text."
+  },
+  {
+    "id": "84_homo_species",
+    "query": "Find all taxonomic records that describe species of the genus Homo.",
+    "expected_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?species ?genus\nWHERE {\n  BIND(taxon:9605 AS ?genus)\n  ?species a up:Taxon ;\n           up:rank up:Species ;\n           rdfs:subClassOf ?genus .\n  ?genus a up:Taxon ;\n         up:rank up:Genus .\n}",
+    "agent_sparql": "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX taxon: <http://purl.uniprot.org/taxonomy/>\nPREFIX up: <http://purl.uniprot.org/core/>\n\nSELECT ?species\nWHERE {\n  ?species rdfs:subClassOf taxon:9605 .\n  ?species a up:Taxon .\n}",
+    "agent_answer": "Found species under genus Homo using subClassOf.",
+    "expert_verdict": false,
+    "expert_reason": "Missing rank constraints: should filter ?species to up:rank up:Species and ?genus to up:rank up:Genus. Also missing ?genus in projection. Returns all subclasses, not just species."
+  }
+]
