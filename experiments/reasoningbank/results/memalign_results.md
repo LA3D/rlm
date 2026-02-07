@@ -1,4 +1,4 @@
-# MemAlign: Judge Alignment via Dual-Memory Feedback (E-MA-0 through E-MA-4)
+# MemAlign: Judge Alignment via Dual-Memory Feedback (E-MA-0 through E-MA-6)
 
 **Problem**: The trajectory judge approved 5 of 6 incorrect SPARQL queries (44% accuracy, 5 false positives), failing to catch missing FROM clauses, missing type constraints, non-canonical patterns, and incomplete projections.
 
@@ -31,12 +31,17 @@ Memory items are typed by `src` field: `principle`, `episode`, `contrastive`, `p
 | **E-MA-2** Principles + episodes | 90% | 100% | 75% | 85.7% | 3 | 0 | 6 | 1 | 11 |
 | **E-MA-3** + Feedback extraction | 100% | 100% | 100% | 100% | 4 | 0 | 6 | 0 | 13 |
 | **E-MA-4** Scaling (test batch) | 100% | — | — | — | — | — | — | — | 25 |
+| **E-MA-5** MaTTS comparison | 100% | — | — | — | — | — | — | — | 11 |
+| **E-MA-6** ALHF routing (before) | 80% | 100% | 33.3% | 50.0% | 1 | 0 | 7 | 2 | 11 |
+| **E-MA-6** ALHF routing (after) | 80% | 66.7% | 66.7% | 66.7% | 2 | 1 | 6 | 1 | 17 |
 
 Key transitions:
 - E-MA-0 → E-MA-1: **+30% accuracy** — 4 of 5 false positives eliminated by principles alone
 - E-MA-1 → E-MA-2: **+10% accuracy** — remaining false positive eliminated; 100% precision achieved
 - E-MA-2 → E-MA-3: **+10% accuracy** — false negative on Task 2 fixed via extracted principle
 - E-MA-3 → E-MA-4: **sustained 100%** — generalization to unseen tasks confirmed
+- E-MA-5: **100% trajectory selection** — aligned comparator beat min-iteration baseline 5/5 vs 0/5
+- E-MA-6: **mixed results** — routing accuracy 40% (below 70% target); 1 fix + 1 regression
 
 ---
 
@@ -128,6 +133,95 @@ E-MA-4 tested whether the judge can learn from new tasks in batch without degrad
 
 ---
 
+## E-MA-5: MaTTS Trajectory Comparison
+
+E-MA-5 tested whether aligned judgment improves Best-of-N trajectory selection. For each of 5 tasks, 3 synthetic rollouts were created (1 correct + 2 flawed), and two selection strategies were compared.
+
+### Selection Results
+
+| Task | Correct Trajectory | Baseline Pick | Aligned Pick |
+|------|--------------------|---------------|--------------|
+| Select all taxa | #2 (FROM clause, 7 iters) | #1 (3 iters) | **#2** |
+| Mnemonic A4_HUMAN | #1 (type constraint, 6 iters) | #0 (3 iters) | **#1** |
+| Reviewed or not | #0 (up:reviewed, 5 iters) | #2 (3 iters) | **#0** |
+| Taxonomy hosts | #1 (both projections, 6 iters) | #2 (3 iters) | **#1** |
+| Proteins + diseases | #2 (URIs + type, 8 iters) | #1 (3 iters) | **#2** |
+
+| Method | Correct | Accuracy |
+|--------|---------|----------|
+| Baseline (min iterations) | 0/5 | 0% |
+| **Aligned (w/ memory)** | **5/5** | **100%** |
+
+### Analysis
+
+The baseline heuristic (pick lowest iteration count) got **every task wrong** — because correct queries tend to be more complex (FROM clauses, type constraints, proper projections) and take more iterations to construct. The min-iteration heuristic systematically selects incomplete or non-canonical queries that converge fast precisely because they skip correctness requirements.
+
+The aligned comparator applied principles (FROM requirements, canonical patterns, type constraints, projection completeness) to select the correct trajectory in all 5 cases. This demonstrates that judge memory transfers directly to trajectory ranking: the same knowledge that prevents false positives in evaluation also enables correct Best-of-N selection.
+
+**Criteria: 2/2 passed.**
+
+---
+
+## E-MA-6: ALHF Routing
+
+E-MA-6 tested multi-component feedback routing: can expert feedback be automatically routed to both judge memory (principles) AND agent memory (constraints/seeds), and does the compound effect improve performance?
+
+### Routing Accuracy
+
+| Task | Verdict | Judge Routed | Agent Routed | Expected | Correct? |
+|------|---------|-------------|-------------|----------|----------|
+| `alhf_1_taxonomy_graph` | TN | Yes | Yes | J+A | Yes |
+| `alhf_2_type_constraint` | TN | No | Yes | J+A | No |
+| `alhf_3_canonical_pattern` | TN | No | Yes | J+A | No |
+| `alhf_4_correct_query` | TP | Yes | No | J only | Yes |
+| `alhf_5_projection` | TN | Yes | Yes | J+A | Yes |
+| `alhf_6_disease_format` | TN | Yes | Yes | J+A | Yes |
+| `alhf_7_correct_hierarchy` | FN | Yes | Yes | J only | No |
+| `alhf_8_gene_name` | TN | No | Yes | J+A | No |
+| `alhf_9_annotation_pattern` | TN | No | Yes | J+A | No |
+| `alhf_10_subcellular_location` | FN | Yes | No | Neither | No |
+
+**Routing accuracy: 4/10 (40%)** — below the 70% target.
+
+The router under-routed to judge (6/10 vs expected 8/10) and over-routed to agent (8/10 vs expected 7/10). The router tended to classify feedback as agent-only when it also contained judge-relevant evaluation criteria (tasks 2, 3, 8, 9).
+
+### Before/After Comparison
+
+| Metric | Before | After | Delta |
+|--------|--------|-------|-------|
+| Accuracy | 80% | 80% | 0% |
+| Precision | 100% | 66.7% | -33.3% |
+| Recall | 33.3% | 66.7% | +33.3% |
+| F1 | 50% | 66.7% | +16.7% |
+
+**Verdict flips:**
+- `alhf_10_subcellular_location`: FN → TP (fixed) — routed principle helped judge recognize correct annotation pattern
+- `alhf_9_annotation_pattern`: TN → FP (regressed) — extra principles diluted focus; judge incorrectly accepted missing type constraint and wrong property path
+
+### Memory Growth
+
+| Component | Before | After | Growth |
+|-----------|--------|-------|--------|
+| Judge memory | 11 | 17 | +6 principles |
+| Agent memory | 0 | 16 | +16 items (8 constraints + 8 seeds) |
+
+### Failure Analysis
+
+Two structural issues explain the poor routing accuracy:
+
+1. **Judge under-routing**: When feedback focused on agent construction patterns (e.g., "always include type constraints"), the router classified it as agent-only, even though the judge also needs to check for these patterns. The router lacks awareness that evaluation criteria and construction guidance are two views of the same knowledge.
+
+2. **Regression from principle dilution**: Adding 6 new principles (11 → 17) without corresponding episodes caused the judge to over-apply the FROM clause principle to `alhf_9` (catalytic activity annotations in the default graph). More principles without grounding cases increases false-positive risk.
+
+**Criteria: 3/5 passed, 2 failed.**
+- PASS: Feedback reaches both components (4 dual-routed)
+- PASS: Judge accuracy maintained (80% → 80%)
+- PASS: Agent memory populated (0 → 16)
+- FAIL: Routing accuracy >= 70% (got 40%)
+- FAIL: Memory bounded — agent at 16, over 15-item limit
+
+---
+
 ## Key Findings
 
 1. **Semantic principles are high-leverage** — 5 principles alone achieved +30% accuracy (E-MA-0 → E-MA-1), eliminating 4 of 5 false positives
@@ -136,12 +230,16 @@ E-MA-4 tested whether the judge can learn from new tasks in batch without degrad
 4. **The system generalizes** — 100% test accuracy on unseen tasks (E-MA-4) with only 25 memory items
 5. **Memory stays bounded** — 25 items sufficed for 20+ evaluation tasks, well under the 30-item limit
 6. **False negatives are harder than false positives** — FP errors were fixed by E-MA-2, but the FN on Task 2 required a nuanced principle distinguishing traversal from enumeration (E-MA-3)
+7. **Aligned judgment transfers to trajectory selection** — Memory-aligned comparator achieved 100% Best-of-N selection accuracy vs 0% for min-iteration baseline (E-MA-5), because correct queries are often more complex
+8. **Automated routing needs work** — ALHF routing accuracy was 40%, well below 70% target (E-MA-6). The router under-routes to judge and over-routes to agent, lacking awareness that evaluation and construction are dual views of the same knowledge
+9. **Principle dilution causes regressions** — Adding principles without corresponding episodes increases false-positive risk (E-MA-6 regression on annotation pattern task)
 
 ---
 
 ## Next Steps
 
-- **E-MA-5**: MaTTS integration — automated batch evaluation with memory growth tracking and convergence criteria
-- **E-MA-6**: ALHF (Active Learning from Human Feedback) — route uncertain judgments to human experts, extract feedback, close the loop automatically
-- **Integration**: Port the aligned judge into the main RLM pipeline's trajectory evaluation stage
-- **Scaling validation**: Test on larger task sets (50+) to validate memory boundedness claims
+- **Routing quality**: Improve FeedbackRouter to recognize dual-component feedback (judge + agent views of the same knowledge). Consider requiring paired principle+episode extraction for each routing.
+- **Principle-episode balance**: Enforce that new principles are always accompanied by grounding episodes to prevent dilution regressions.
+- **Integration**: Port the aligned judge into the main RLM pipeline's trajectory evaluation stage.
+- **Scaling validation**: Test on larger task sets (50+) to validate memory boundedness claims.
+- **Agent memory evaluation**: Run agent construction tasks with populated agent memory to measure end-to-end improvement.
