@@ -1,0 +1,101 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ns1: <https://w3id.org/fabric/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://la3d.local/agent/kg1> a ns1:KnowledgeGraph ;
+    ns1:hasCanonicalHash "z0000000000000000000000000000000000000000000000000000000000000000" ;
+    ns1:hasRole "primary" ;
+    ns1:hasStatus "active" .
+
+ns1: a owl:Ontology ;
+    dcterms:created "2025-09-15"^^xsd:date ;
+    dcterms:creator <https://w3id.org/fabric/org/Org1MSP> ;
+    dcterms:description "Core vocabulary for blockchain-backed knowledge fabric operations"@en ;
+    dcterms:modified "2025-09-15"^^xsd:date ;
+    dcterms:title "Knowledge Fabric Core Vocabulary"@en ;
+    owl:versionInfo "1.0.0" .
+
+ns1:attestsIntegrity a owl:ObjectProperty ;
+    rdfs:label "attests integrity"@en ;
+    rdfs:comment "Cryptographic attestation of content integrity"@en ;
+    rdfs:domain ns1:VerifiableCredential ;
+    rdfs:range ns1:VerifiableKnowledgeAsset ;
+    skos:definition "VC attests integrity of knowledge asset"@en .
+
+ns1:conformsToPolicy a owl:DatatypeProperty ;
+    rdfs:label "conforms to policy"@en ;
+    rdfs:comment "Reference to governance policy"@en ;
+    rdfs:range xsd:anyURI ;
+    skos:definition "Policy compliance indicator"@en .
+
+ns1:hasCanonicalHash a owl:DatatypeProperty ;
+    rdfs:label "has canonical hash"@en ;
+    rdfs:comment "Base58btc-encoded multihash with z-prefix"@en ;
+    rdfs:domain ns1:VerifiableKnowledgeAsset ;
+    rdfs:range xsd:string ;
+    skos:definition "Content-addressed hash computed via RDFC-1.0 canonicalization"@en .
+
+ns1:hasCapability a owl:DatatypeProperty ;
+    rdfs:label "has capability"@en ;
+    rdfs:comment "SPARQL operations: Query, Update, Construct, Describe"@en ;
+    rdfs:domain ns1:ServiceRegistration ;
+    rdfs:range xsd:string ;
+    skos:definition "Service capability identifier"@en .
+
+ns1:hasDatasetHash a owl:DatatypeProperty ;
+    rdfs:label "has dataset hash"@en ;
+    rdfs:comment "SHA-256 hash of RDFC-1.0 canonical representation"@en ;
+    rdfs:domain ns1:KnowledgeDataset ;
+    rdfs:range xsd:string ;
+    skos:definition "Deterministic hash of complete RDF dataset"@en .
+
+ns1:hasMember a owl:ObjectProperty ;
+    rdfs:label "has member"@en ;
+    rdfs:comment "Links dataset to constituent knowledge graphs"@en ;
+    rdfs:domain ns1:KnowledgeDataset ;
+    rdfs:range ns1:KnowledgeGraph ;
+    skos:definition "Dataset membership relation"@en .
+
+ns1:hasRole a owl:DatatypeProperty ;
+    rdfs:label "has role"@en ;
+    rdfs:comment "Functional role: main, metadata, provenance, secondary"@en ;
+    rdfs:domain ns1:KnowledgeGraph ;
+    rdfs:range xsd:string ;
+    skos:definition "Role of graph within dataset"@en .
+
+ns1:hasStatus a owl:DatatypeProperty ;
+    rdfs:label "has status"@en ;
+    rdfs:comment "Values: active, deprecated, revoked, suspended"@en ;
+    rdfs:range xsd:string ;
+    skos:definition "Lifecycle status indicator"@en .
+
+ns1:ServiceRegistration a owl:Class ;
+    rdfs:label "Service Registration"@en ;
+    rdfs:comment "Service discovery metadata with capability declarations"@en ;
+    skos:definition "Registration record for a knowledge fabric service"@en .
+
+ns1:VerifiableCredential a owl:Class ;
+    rdfs:label "Verifiable Credential"@en ;
+    rdfs:comment "Cryptographically verifiable claim about knowledge assets"@en ;
+    skos:definition "W3C Verifiable Credential for attestation"@en .
+
+ns1:KnowledgeDataset a owl:Class ;
+    rdfs:label "Knowledge Dataset"@en ;
+    rdfs:comment "RDF dataset comprising multiple named graphs with versioning support"@en ;
+    rdfs:subClassOf ns1:VerifiableKnowledgeAsset ;
+    skos:definition "A collection of related knowledge graphs"@en .
+
+ns1:KnowledgeGraph a owl:Class ;
+    rdfs:label "Knowledge Graph"@en ;
+    rdfs:comment "RDF graph with deterministic DID based on RDFC-1.0 canonicalization"@en ;
+    rdfs:subClassOf ns1:VerifiableKnowledgeAsset ;
+    skos:definition "A named graph with content-addressed identity"@en .
+
+ns1:VerifiableKnowledgeAsset a owl:Class ;
+    rdfs:label "Verifiable Knowledge Asset"@en ;
+    rdfs:comment "Base class for all verifiable knowledge components in the fabric"@en ;
+    skos:definition "A knowledge asset with cryptographic integrity guarantees"@en .
+

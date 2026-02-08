@@ -1,0 +1,145 @@
+{
+  "timestamp": "20260208T192935Z",
+  "model": "anthropic/claude-sonnet-4-5-20250929",
+  "sub_model": "anthropic/claude-haiku-4-5-20251001",
+  "ontology_path": "ontology/core-vocabulary.ttl",
+  "shapes_path": "ontology/core-shapes.ttl",
+  "cqs": [
+    "CQ1",
+    "CQ2",
+    "CQ3",
+    "CQ4",
+    "CQ5"
+  ],
+  "trajectory_log": "experiments/owl/results/agentic_sprint1/trajectory_20260208T192935Z.jsonl",
+  "graph_snapshot": {
+    "path": "experiments/owl/results/agentic_sprint1/working_graph_20260208T192935Z.ttl",
+    "triples": 175
+  },
+  "final_validation": {
+    "conforms": false,
+    "validation_results": 29
+  },
+  "memory_stats": {
+    "items_total": 0,
+    "principles": 0,
+    "episodes": 0
+  },
+  "runs": [
+    {
+      "cq_id": "CQ1",
+      "answer": "Applied minimal ontology deltas for CQ1:\n1. Asserted ex:kg1 as type fabric:KnowledgeGraph\n2. Added fabric:hasCanonicalHash with value 'z' + 64 hex zeros (matches required pattern)\n3. Added fabric:hasStatus with value 'active'\n4. Added fabric:hasRole with value 'primary'\n\nCQ1 now passes successfully. \n\nSHACL validation shows 44 violations, all related to prof:Profile and prof:ResourceDescriptor constraints (CQ5 scope), not fabric:KnowledgeGraph (CQ1 scope). These Profile constraints require extensive metadata (Fabric network IDs, MSP identifiers, canonicalization algorithms, governance models, resource descriptors, versioning, etc.) that are beyond the minimal deltas needed to satisfy CQ1.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 12,
+      "lm_usage": {
+        "total_calls": 12,
+        "prompt_tokens": 101978,
+        "completion_tokens": 7846,
+        "total_tokens": 109824,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.447459
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 7,
+        "subcalls": 12,
+        "vars_n": 18
+      }
+    },
+    {
+      "cq_id": "CQ2",
+      "answer": "Applied ontology deltas: Created KnowledgeDataset (kd1) and KnowledgeGraph (graph1) with required properties (hasCanonicalHash, hasStatus, hasDatasetHash, hasRole) and established hasKnowledgeGraph link between them.",
+      "cq_passed_reported": "False",
+      "cq_passed_actual": false,
+      "shacl_conforms": false,
+      "iterations": 13,
+      "lm_usage": {
+        "total_calls": 12,
+        "prompt_tokens": 110097,
+        "completion_tokens": 7168,
+        "total_tokens": 117265,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.437811
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 6,
+        "subcalls": 12,
+        "vars_n": 36
+      }
+    },
+    {
+      "cq_id": "CQ3",
+      "answer": "CQ3 passes. Ontology has been repaired with minimal deltas: added ServiceRegistration type and capability to ex:svc1, configured profile1 with required Fabric properties, created resource descriptors, and fixed KnowledgeGraph roles.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 12,
+      "lm_usage": {
+        "total_calls": 12,
+        "prompt_tokens": 82742,
+        "completion_tokens": 7512,
+        "total_tokens": 90254,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.360906
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 4,
+        "subcalls": 12,
+        "vars_n": 52
+      }
+    },
+    {
+      "cq_id": "CQ4",
+      "answer": "CQ4 satisfied via minimal ontology deltas: (1) asserted ex:vc1 as fabric:VerifiableCredential, (2) added fabric:attestsIntegrity link from ex:vc1 to ex:kg1, (3) asserted ex:kg1 as fabric:VerifiableKnowledgeAsset. These changes introduced zero SHACL violations. Additionally fixed 4 pre-existing hasRole violations. CQ4 now passes successfully.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 12,
+      "lm_usage": {
+        "total_calls": 12,
+        "prompt_tokens": 77199,
+        "completion_tokens": 6235,
+        "total_tokens": 83434,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.325122
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 6,
+        "subcalls": 12,
+        "vars_n": 72
+      }
+    },
+    {
+      "cq_id": "CQ5",
+      "answer": "False",
+      "cq_passed_reported": "False",
+      "cq_passed_actual": false,
+      "shacl_conforms": false,
+      "iterations": 12,
+      "lm_usage": {
+        "total_calls": 12,
+        "prompt_tokens": 86586,
+        "completion_tokens": 6820,
+        "total_tokens": 93406,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.362058
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 7,
+        "subcalls": 12,
+        "vars_n": 86
+      }
+    }
+  ]
+}

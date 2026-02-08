@@ -1,0 +1,49 @@
+{
+  "timestamp": "20260208T192633Z",
+  "model": "anthropic/claude-sonnet-4-5-20250929",
+  "sub_model": "anthropic/claude-haiku-4-5-20251001",
+  "ontology_path": "ontology/core-vocabulary.ttl",
+  "shapes_path": "ontology/core-shapes.ttl",
+  "cqs": [
+    "CQ1"
+  ],
+  "trajectory_log": "experiments/owl/results/agentic_sprint1/trajectory_20260208T192633Z.jsonl",
+  "graph_snapshot": {
+    "path": "experiments/owl/results/agentic_sprint1/working_graph_20260208T192633Z.ttl",
+    "triples": 79
+  },
+  "final_validation": {
+    "conforms": false,
+    "validation_results": 5
+  },
+  "memory_stats": {
+    "items_total": 0,
+    "principles": 0,
+    "episodes": 0
+  },
+  "runs": [
+    {
+      "cq_id": "CQ1",
+      "answer": "CQ1 now passes. Created ex:kg1 as fabric:KnowledgeGraph with required properties: hasCanonicalHash (z0000...0000), hasStatus (active), and hasRole (primary). No KnowledgeGraph-specific SHACL violations remain.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 7,
+      "lm_usage": {
+        "total_calls": 7,
+        "prompt_tokens": 38726,
+        "completion_tokens": 3492,
+        "total_tokens": 42218,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.16855800000000004
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 4,
+        "subcalls": 7,
+        "vars_n": 12
+      }
+    }
+  ]
+}
