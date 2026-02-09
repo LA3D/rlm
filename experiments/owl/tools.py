@@ -86,10 +86,30 @@ class OwlRLMToolset:
         """Return metadata for an arbitrary symbolic handle."""
         return self.store.stats(ref_or_key)
 
-    def handle_read_window(self, ref_or_key: BlobRef | str | dict, start: int = 0, size: int = 128) -> dict:
-        """Read a bounded window from any handle and return a nested handle."""
+    def handle_read_window(
+        self,
+        ref_or_key: BlobRef | str | dict,
+        start: int = 0,
+        size: int = 128,
+        include_text: bool = False,
+        nest: bool = False,
+    ) -> dict:
+        """Read a bounded window from any handle.
+
+        Default behavior is metadata-first and non-nesting to avoid handle chains.
+        """
         window = self.store.read_window(ref_or_key, start=start, size=size)
-        return self._window_to_handle(window, kind="handle_window")
+        if "error" in window:
+            return window
+        text = str(window.pop("text", ""))
+        if nest:
+            window_ref = self.store.put(text, kind="handle_window")
+            window["window_ref"] = window_ref.to_dict()
+            return window
+        window["text_preview"] = text[:80]
+        if include_text:
+            window["text"] = text
+        return window
 
     def as_tools(self) -> list:
         """DSPy 3.1+ expects a list of callables."""

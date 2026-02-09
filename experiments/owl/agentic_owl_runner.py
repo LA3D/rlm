@@ -218,12 +218,13 @@ def _build_context(prompt_ref: dict[str, Any], cq_details: dict[str, Any]) -> st
         "You are running in strict symbolic RLM mode.\n"
         "Rules:\n"
         "1) Prompt P is symbolic; inspect P only via bounded prompt_* tools.\n"
-        "2) Use recursive code execution and tool calls; avoid dumping payloads.\n"
+        "2) Use cq_query_symbols for required triples/filters; avoid reconstructing queries from text windows.\n"
         "3) Call cq_anchor_nodes first and only mutate allowed nodes.\n"
         "4) Prefer additive operators (op_add_*) for multi-valued properties.\n"
-        "5) Validate with ontology_validate and verify with cq_eval before SUBMIT.\n"
-        "6) Keep large artifacts behind handles. Do not print full report payloads.\n"
-        "7) End by calling SUBMIT(answer=..., cq_id=..., cq_passed=...).\n"
+        "5) Use ontology_signature_index and ontology_validate_focus for compact SHACL guidance.\n"
+        "6) Keep large artifacts behind handles. Avoid repeated handle_read_window loops.\n"
+        "7) Validate with ontology_validate and verify with cq_eval before SUBMIT.\n"
+        "8) End by calling SUBMIT(answer=..., cq_id=..., cq_passed=...).\n"
         f"Prompt handle metadata: {prompt_ref}\n"
         f"Current CQ: {cq_details}\n"
     )
@@ -325,7 +326,7 @@ def run_single_cq(
     context = _build_context(toolset.prompt_ref.to_dict(), cq_details)
     task = (
         f"Construct or repair ontology state so {cq_id} passes and SHACL conforms. "
-        "Use operator tools for deltas, then validate and submit."
+        "Start with cq_query_symbols, apply operator deltas, then validate and submit."
     )
 
     history_before = len(dspy.settings.lm.history) if hasattr(dspy.settings.lm, "history") else 0
@@ -353,7 +354,7 @@ def run_single_cq(
         )
 
     cq_eval = toolset.cq_eval(cq_id)
-    validation = toolset.ontology_validate(max_results=25)
+    validation = workspace.validate_graph(store=blob_store, max_results=25, include_rows=False)
     top_signatures = validation.get("top_signatures", [])
     top_signature = top_signatures[0]["signature"] if top_signatures else ""
     top_operator = ""

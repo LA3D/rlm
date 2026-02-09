@@ -54,3 +54,24 @@ def test_memory_window_read_is_bounded():
     assert out["returned_size"] == MAX_READ_CHARS
     assert "text" not in out
     assert out["window_ref"]["key"].startswith("memory_window_")
+
+
+def test_handle_read_window_is_non_nested_by_default():
+    ts = OwlRLMToolset(prompt_text="abcdefghijklmnopqrstuvwxyz")
+    out = ts.handle_read_window(ref_or_key=ts.prompt_ref.to_dict(), start=0, size=10)
+    assert out["returned_size"] == 10
+    assert "window_ref" not in out
+    assert "text" not in out
+    assert "text_preview" in out
+
+
+def test_handle_read_window_can_include_text_when_requested():
+    ts = OwlRLMToolset(prompt_text="abcdefghijklmnopqrstuvwxyz")
+    out = ts.handle_read_window(
+        ref_or_key=ts.prompt_ref.to_dict(),
+        start=0,
+        size=10,
+        include_text=True,
+    )
+    assert out["returned_size"] == 10
+    assert out["text"] == "abcdefghij"

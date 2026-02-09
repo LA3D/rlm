@@ -31,6 +31,14 @@ class AgenticOwlToolset:
         self.mem = self.base.mem
         self.prompt_ref = self.base.prompt_ref
         self.current_cq_id = current_cq_id.strip()
+        self._graph_revision = 0
+        self._last_validation_revision = -1
+        self._validations_without_delta = 0
+        self._handle_reads_total = 0
+        self._handle_reads_by_key: dict[str, int] = {}
+        self._max_handle_reads_per_run = 24
+        self._max_reads_per_handle = 3
+        self._max_validations_without_delta = 2
         self._cq_query_refs: dict[str, dict] = {}
         for row in self.workspace.list_cqs():
             cq_id = row["cq_id"]
@@ -71,8 +79,39 @@ class AgenticOwlToolset:
     def handle_stats(self, ref_or_key: dict | str) -> dict:
         return self.base.handle_stats(ref_or_key=ref_or_key)
 
-    def handle_read_window(self, ref_or_key: dict | str, start: int = 0, size: int = 128) -> dict:
-        return self.base.handle_read_window(ref_or_key=ref_or_key, start=start, size=size)
+    def handle_read_window(
+        self,
+        ref_or_key: dict | str,
+        start: int = 0,
+        size: int = 128,
+        include_text: bool = False,
+    ) -> dict:
+        key = self._extract_ref_key(ref_or_key)
+        self._handle_reads_total += 1
+        self._handle_reads_by_key[key] = self._handle_reads_by_key.get(key, 0) + 1
+        key_reads = self._handle_reads_by_key.get(key, 0)
+        if self._handle_reads_total > self._max_handle_reads_per_run:
+            return {
+                "error": "handle_read_budget_exceeded",
+                "reads_total": self._handle_reads_total,
+                "max_reads_total": self._max_handle_reads_per_run,
+                "suggestion": "Use cq_query_symbols and ontology_signature_index instead of repeated handle reads.",
+            }
+        if key_reads > self._max_reads_per_handle:
+            return {
+                "error": "repeated_handle_read_blocked",
+                "key": key,
+                "reads_for_key": key_reads,
+                "max_reads_for_key": self._max_reads_per_handle,
+                "suggestion": "Use cq_query_symbols or ontology_validate_focus to move forward.",
+            }
+        return self.base.handle_read_window(
+            ref_or_key=ref_or_key,
+            start=start,
+            size=size,
+            include_text=include_text,
+            nest=False,
+        )
 
     def ontology_stats(self) -> dict:
         return self.workspace.ontology_stats()
@@ -84,10 +123,37 @@ class AgenticOwlToolset:
         return self.workspace.node_incoming(node_iri=node_iri, limit=limit)
 
     def ontology_validate(self, max_results: int = 25) -> dict:
+        blocked = self._guard_validation_budget()
+        if blocked is not None:
+            return blocked
         return self.workspace.validate_graph(store=self.store, max_results=max_results, include_rows=False)
 
     def ontology_validate_preview(self, max_results: int = 10) -> dict:
+        blocked = self._guard_validation_budget()
+        if blocked is not None:
+            return blocked
         return self.workspace.validate_graph(store=self.store, max_results=max_results, include_rows=True)
+
+    def ontology_signature_index(self, max_signatures: int = 25) -> dict:
+        blocked = self._guard_validation_budget()
+        if blocked is not None:
+            return blocked
+        return self.workspace.validate_graph(
+            store=self.store,
+            max_results=max_signatures,
+            include_rows=False,
+        )
+
+    def ontology_validate_focus(self, cq_id: str, max_results: int = 25) -> dict:
+        blocked = self._guard_validation_budget()
+        if blocked is not None:
+            return blocked
+        return self.workspace.validate_focus_for_cq(
+            cq_id=cq_id,
+            store=self.store,
+            max_results=max_results,
+            include_rows=False,
+        )
 
     def cq_list(self) -> list[dict]:
         rows = []
@@ -103,8 +169,12 @@ class AgenticOwlToolset:
             return details
         details["query_ref"] = self._cq_query_refs.get(cq_id, {})
         details["anchors"] = self.workspace.cq_anchor_nodes(cq_id).get("anchors", [])
+        details["query_symbols"] = self.workspace.cq_query_symbols(cq_id)
         details.pop("ask_query", None)
         return details
+
+    def cq_query_symbols(self, cq_id: str) -> dict:
+        return self.workspace.cq_query_symbols(cq_id)
 
     def cq_anchor_nodes(self, cq_id: str) -> dict:
         return self.workspace.cq_anchor_nodes(cq_id)
@@ -134,43 +204,57 @@ class AgenticOwlToolset:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_assert_type(node_iri=node_iri, class_iri=class_iri)
+        out = self.workspace.op_assert_type(node_iri=node_iri, class_iri=class_iri)
+        self._record_mutation(out)
+        return out
 
     def op_set_single_literal(self, node_iri: str, prop_iri: str, value: str) -> dict:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_set_single_literal(node_iri=node_iri, prop_iri=prop_iri, value=value)
+        out = self.workspace.op_set_single_literal(node_iri=node_iri, prop_iri=prop_iri, value=value)
+        self._record_mutation(out)
+        return out
 
     def op_set_single_iri(self, node_iri: str, prop_iri: str, value_iri: str) -> dict:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_set_single_iri(node_iri=node_iri, prop_iri=prop_iri, value_iri=value_iri)
+        out = self.workspace.op_set_single_iri(node_iri=node_iri, prop_iri=prop_iri, value_iri=value_iri)
+        self._record_mutation(out)
+        return out
 
     def op_add_literal(self, node_iri: str, prop_iri: str, value: str) -> dict:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_add_literal(node_iri=node_iri, prop_iri=prop_iri, value=value)
+        out = self.workspace.op_add_literal(node_iri=node_iri, prop_iri=prop_iri, value=value)
+        self._record_mutation(out)
+        return out
 
     def op_add_iri_link(self, node_iri: str, prop_iri: str, value_iri: str) -> dict:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_add_iri_link(node_iri=node_iri, prop_iri=prop_iri, value_iri=value_iri)
+        out = self.workspace.op_add_iri_link(node_iri=node_iri, prop_iri=prop_iri, value_iri=value_iri)
+        self._record_mutation(out)
+        return out
 
     def op_remove_literal(self, node_iri: str, prop_iri: str, value: str) -> dict:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_remove_literal(node_iri=node_iri, prop_iri=prop_iri, value=value)
+        out = self.workspace.op_remove_literal(node_iri=node_iri, prop_iri=prop_iri, value=value)
+        self._record_mutation(out)
+        return out
 
     def op_remove_iri_link(self, node_iri: str, prop_iri: str, value_iri: str) -> dict:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_remove_iri_link(node_iri=node_iri, prop_iri=prop_iri, value_iri=value_iri)
+        out = self.workspace.op_remove_iri_link(node_iri=node_iri, prop_iri=prop_iri, value_iri=value_iri)
+        self._record_mutation(out)
+        return out
 
     def op_ensure_mincount_links(
         self,
@@ -183,23 +267,27 @@ class AgenticOwlToolset:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_ensure_mincount_links(
+        out = self.workspace.op_ensure_mincount_links(
             node_iri=node_iri,
             prop_iri=prop_iri,
             target_class_iri=target_class_iri,
             n=n,
             prefix=prefix,
         )
+        self._record_mutation(out)
+        return out
 
     def op_normalize_cardinality(self, node_iri: str, prop_iri: str, keep_value: str = "") -> dict:
         blocked = self._guard_mutation_node(node_iri=node_iri)
         if blocked is not None:
             return blocked
-        return self.workspace.op_normalize_cardinality(
+        out = self.workspace.op_normalize_cardinality(
             node_iri=node_iri,
             prop_iri=prop_iri,
             keep_value=keep_value,
         )
+        self._record_mutation(out)
+        return out
 
     def graph_snapshot(self, label: str = "working") -> dict:
         return self.workspace.snapshot(store=self.store, label=label)
@@ -221,8 +309,11 @@ class AgenticOwlToolset:
             self.ontology_node_incoming,
             self.ontology_validate,
             self.ontology_validate_preview,
+            self.ontology_signature_index,
+            self.ontology_validate_focus,
             self.cq_list,
             self.cq_details,
+            self.cq_query_symbols,
             self.cq_anchor_nodes,
             self.cq_node_allowed,
             self.cq_query_read_window,
@@ -254,4 +345,33 @@ class AgenticOwlToolset:
             "node": node_iri,
             "anchors": verdict.get("anchors", []),
             "allowed_node_prefixes": verdict.get("allowed_node_prefixes", []),
+            "suggestion": "Use cq_anchor_nodes and cq_query_symbols to select an allowed node.",
         }
+
+    def _record_mutation(self, result: dict) -> None:
+        if result.get("error"):
+            return
+        self._graph_revision += 1
+        self._validations_without_delta = 0
+
+    def _guard_validation_budget(self) -> Optional[dict]:
+        if self._last_validation_revision == self._graph_revision:
+            self._validations_without_delta += 1
+        else:
+            self._validations_without_delta = 0
+        self._last_validation_revision = self._graph_revision
+        if self._validations_without_delta <= self._max_validations_without_delta:
+            return None
+        return {
+            "error": "validation_without_graph_delta",
+            "graph_revision": self._graph_revision,
+            "validations_without_delta": self._validations_without_delta,
+            "max_validations_without_delta": self._max_validations_without_delta,
+            "suggestion": "Apply an operator delta before validating again.",
+        }
+
+    @staticmethod
+    def _extract_ref_key(ref_or_key: dict | str) -> str:
+        if isinstance(ref_or_key, dict):
+            return str(ref_or_key.get("key", ""))
+        return str(ref_or_key)

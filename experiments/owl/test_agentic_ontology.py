@@ -99,6 +99,18 @@ def test_cq2_anchor_nodes_include_ds1_and_kg1():
     assert str(EX.kg1) in anchors["anchors"]
 
 
+def test_cq4_query_symbols_exposes_attests_integrity_pattern():
+    ws = _workspace()
+    symbols = ws.cq_query_symbols("CQ4")
+    triples = symbols["triple_patterns"]
+    assert any(
+        row["s"] == "ex:vc1"
+        and row["p"] == "fabric:attestsIntegrity"
+        and row["o"] == "ex:kg1"
+        for row in triples
+    )
+
+
 def test_agentic_toolset_blocks_non_anchor_mutation_for_current_cq():
     ws = _workspace()
     ts = AgenticOwlToolset(
@@ -112,3 +124,33 @@ def test_agentic_toolset_blocks_non_anchor_mutation_for_current_cq():
         "active",
     )
     assert blocked["error"] == "node_not_allowed_for_current_cq"
+
+
+def test_agentic_toolset_blocks_repeated_handle_reads():
+    ws = _workspace()
+    ts = AgenticOwlToolset(
+        prompt_text="cq1 test",
+        workspace=ws,
+        current_cq_id="CQ1",
+    )
+    window = ts.cq_query_read_window("CQ1", start=0, size=32)
+    ref = window["window_ref"]
+    for _ in range(3):
+        out = ts.handle_read_window(ref, start=0, size=16)
+        assert "error" not in out
+    blocked = ts.handle_read_window(ref, start=0, size=16)
+    assert blocked["error"] == "repeated_handle_read_blocked"
+
+
+def test_agentic_toolset_blocks_repeated_validation_without_delta():
+    ws = _workspace()
+    ts = AgenticOwlToolset(
+        prompt_text="cq2 test",
+        workspace=ws,
+        current_cq_id="CQ2",
+    )
+    for _ in range(3):
+        out = ts.ontology_signature_index(max_signatures=5)
+        assert "error" not in out
+    blocked = ts.ontology_signature_index(max_signatures=5)
+    assert blocked["error"] == "validation_without_graph_delta"

@@ -6,7 +6,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 from pyshacl import validate
 from rdflib import Graph, Literal, Namespace, RDF, URIRef
@@ -22,6 +22,17 @@ OWL = Namespace("http://www.w3.org/2002/07/owl#")
 EX = Namespace("http://la3d.local/agent/")
 EX_PREFIX = str(EX)
 GENERATED_PREFIX = "http://la3d.local/agent/generated/"
+KNOWN_PREFIXES = {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "sh": "http://www.w3.org/ns/shacl#",
+    "fabric": str(FABRIC),
+    "prof": str(PROF),
+    "dct": str(DCT),
+    "ex": str(EX),
+}
 
 
 @dataclass(frozen=True)
@@ -265,6 +276,86 @@ class AgenticOntologyWorkspace:
             raise ValueError(f"unknown cq_id: {cq_id}")
         return cq.ask_query
 
+    def cq_query_symbols(self, cq_id: str) -> dict:
+        cq = self.questions.get(cq_id)
+        if cq is None:
+            return {"error": f"unknown cq_id: {cq_id}"}
+        triples = []
+        filters = []
+        variables = set()
+        current_subject = ""
+        in_ask = False
+        for raw_line in cq.ask_query.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            if line.startswith("PREFIX"):
+                continue
+            if line.startswith("ASK"):
+                in_ask = True
+                continue
+            if not in_ask:
+                continue
+            if line == "{":
+                continue
+            if line.startswith("}"):
+                break
+            if line.startswith("FILTER"):
+                filt = self._parse_filter(line)
+                filters.append(filt)
+                var_name = str(filt.get("variable", ""))
+                if var_name.startswith("?"):
+                    variables.add(var_name)
+                continue
+
+            core = line.rstrip(";.").strip()
+            if not core:
+                continue
+            parts = core.split(None, 2)
+            if len(parts) == 3:
+                subj, pred, obj_raw = parts
+                current_subject = subj
+            elif len(parts) == 2 and current_subject:
+                subj = current_subject
+                pred, obj_raw = parts
+            else:
+                continue
+
+            object_terms = [x.strip() for x in obj_raw.split(",") if x.strip()]
+            for obj in object_terms:
+                triples.append(
+                    {
+                        "s": subj,
+                        "p": pred,
+                        "o": obj,
+                        "s_expanded": self._expand_prefixed(subj),
+                        "p_expanded": self._expand_prefixed(pred),
+                        "o_expanded": self._expand_prefixed(obj),
+                    }
+                )
+                for token in (subj, pred, obj):
+                    if token.startswith("?"):
+                        variables.add(token)
+
+        required_assertions = []
+        for row in triples:
+            if row["s"].startswith("ex:") and not row["o"].startswith("?"):
+                required_assertions.append(
+                    {
+                        "s": row["s_expanded"],
+                        "p": row["p_expanded"],
+                        "o": row["o_expanded"],
+                    }
+                )
+        return {
+            "cq_id": cq_id,
+            "anchors": self._cq_anchor_iris.get(cq_id, []),
+            "variables": sorted(variables),
+            "triple_patterns": triples,
+            "filters": filters,
+            "required_assertions": required_assertions,
+        }
+
     def evaluate_cq(self, cq_id: str) -> dict:
         cq = self.questions.get(cq_id)
         if cq is None:
@@ -284,6 +375,8 @@ class AgenticOntologyWorkspace:
         store: SymbolicBlobStore | None = None,
         max_results: int = 25,
         include_rows: bool = False,
+        focus_nodes: Iterable[str] | None = None,
+        include_generated: bool = False,
     ) -> dict:
         conforms, report_graph, report_text = validate(
             self.working_graph,
@@ -311,40 +404,77 @@ class AgenticOntologyWorkspace:
                     "severity": self._term_to_str(report_graph.value(row, SH.resultSeverity)),
                 }
             )
-        sig_counts: dict[str, int] = {}
+        focus_set = {str(x) for x in (focus_nodes or []) if str(x)}
+        scoped_rows = []
         for row in all_rows:
-            signature = "|".join(
-                [
-                    row.get("source_shape", ""),
-                    row.get("path", ""),
-                    row.get("constraint_component", ""),
-                ]
-            )
-            sig_counts[signature] = sig_counts.get(signature, 0) + 1
-        signatures = [
-            {"signature": sig, "count": count}
-            for sig, count in sorted(sig_counts.items(), key=lambda x: x[1], reverse=True)
-        ]
+            if not focus_set and not include_generated:
+                scoped_rows.append(row)
+                continue
+            focus_node = str(row.get("focus_node", ""))
+            if focus_node in focus_set:
+                scoped_rows.append(row)
+                continue
+            if include_generated and focus_node.startswith(GENERATED_PREFIX):
+                scoped_rows.append(row)
+                continue
+
+        sig_index: dict[str, dict[str, Any]] = {}
+        for row in scoped_rows:
+            source_shape = row.get("source_shape", "")
+            path = row.get("path", "")
+            component = row.get("constraint_component", "")
+            signature = "|".join([source_shape, path, component])
+            entry = sig_index.get(signature)
+            if entry is None:
+                entry = {
+                    "signature": signature,
+                    "source_shape": source_shape,
+                    "path": path,
+                    "constraint_component": component,
+                    "count": 0,
+                    "focus_node_counts": {},
+                }
+                sig_index[signature] = entry
+            entry["count"] += 1
+            node_key = str(row.get("focus_node", ""))
+            if node_key:
+                node_counts = entry["focus_node_counts"]
+                node_counts[node_key] = node_counts.get(node_key, 0) + 1
+
+        signatures = []
+        for entry in sig_index.values():
+            node_counts = entry.pop("focus_node_counts")
+            top_focus_nodes = sorted(node_counts.items(), key=lambda x: x[1], reverse=True)[:3]
+            entry["top_focus_nodes"] = [
+                {"node": node, "count": count}
+                for node, count in top_focus_nodes
+            ]
+            signatures.append(entry)
+        signatures.sort(key=lambda x: x["count"], reverse=True)
 
         out = {
             "conforms": bool(conforms),
-            "validation_results": len(rows_all),
+            "validation_results_total": len(rows_all),
+            "validation_results": len(scoped_rows),
+            "focus_mode": bool(focus_set or include_generated),
+            "focus_nodes": sorted(focus_set),
+            "focus_include_generated": bool(include_generated),
             "signatures_total": len(signatures),
             "signatures_returned": min(len(signatures), safe_max),
             "signatures_clamped": len(signatures) > safe_max,
             "top_signatures": signatures[:safe_max],
         }
         if include_rows:
-            out["results_returned"] = min(len(all_rows), safe_max)
-            out["results_clamped"] = len(all_rows) > safe_max
-            out["violations"] = all_rows[:safe_max]
+            out["results_returned"] = min(len(scoped_rows), safe_max)
+            out["results_clamped"] = len(scoped_rows) > safe_max
+            out["violations"] = scoped_rows[:safe_max]
         if store is not None:
             report_text_ref = store.put(str(report_text), kind="shacl_report_text")
             report_turtle = report_graph.serialize(format="turtle")
             if isinstance(report_turtle, bytes):
                 report_turtle = report_turtle.decode("utf-8", errors="replace")
             report_ttl_ref = store.put(str(report_turtle), kind="shacl_report_ttl")
-            violations_json = json.dumps(all_rows, ensure_ascii=True)
+            violations_json = json.dumps(scoped_rows, ensure_ascii=True)
             violations_ref = store.put(violations_json, kind="shacl_violations_json")
             signatures_json = json.dumps(signatures, ensure_ascii=True)
             signatures_ref = store.put(signatures_json, kind="shacl_signatures_json")
@@ -353,6 +483,25 @@ class AgenticOntologyWorkspace:
             out["violations_ref"] = violations_ref.to_dict()
             out["signatures_ref"] = signatures_ref.to_dict()
         return out
+
+    def validate_focus_for_cq(
+        self,
+        cq_id: str,
+        store: SymbolicBlobStore | None = None,
+        max_results: int = 25,
+        include_rows: bool = False,
+    ) -> dict:
+        cq = self.questions.get(cq_id)
+        if cq is None:
+            return {"error": f"unknown cq_id: {cq_id}"}
+        anchors = self._cq_anchor_iris.get(cq_id, [])
+        return self.validate_graph(
+            store=store,
+            max_results=max_results,
+            include_rows=include_rows,
+            focus_nodes=anchors,
+            include_generated=True,
+        )
 
     def operator_catalog(self) -> list[dict]:
         return [
@@ -606,3 +755,54 @@ class AgenticOntologyWorkspace:
             seen.add(iri)
             anchors.append(iri)
         return anchors
+
+    @staticmethod
+    def _parse_filter(line: str) -> dict:
+        regex_match = re.search(
+            r"FILTER\s+regex\s*\(\s*str\((\?[A-Za-z_][A-Za-z0-9_]*)\)\s*,\s*\"([^\"]+)\"",
+            line,
+            re.IGNORECASE,
+        )
+        if regex_match:
+            return {
+                "kind": "regex",
+                "variable": regex_match.group(1),
+                "pattern": regex_match.group(2),
+            }
+        in_match = re.search(
+            r"FILTER\s*\(\s*(\?[A-Za-z_][A-Za-z0-9_]*)\s+IN\s*\(([^)]+)\)\s*\)",
+            line,
+            re.IGNORECASE,
+        )
+        if in_match:
+            values = re.findall(r'"([^"]+)"', in_match.group(2))
+            return {
+                "kind": "enum",
+                "variable": in_match.group(1),
+                "values": values,
+            }
+        strlen_match = re.search(
+            r"FILTER\s*\(\s*strlen\s*\(\s*str\((\?[A-Za-z_][A-Za-z0-9_]*)\)\s*\)\s*>=\s*([0-9]+)\s*\)",
+            line,
+            re.IGNORECASE,
+        )
+        if strlen_match:
+            return {
+                "kind": "strlen_min",
+                "variable": strlen_match.group(1),
+                "value": int(strlen_match.group(2)),
+            }
+        return {"kind": "raw", "text": line}
+
+    @staticmethod
+    def _expand_prefixed(token: str) -> str:
+        if token.startswith("?"):
+            return token
+        if token.startswith("<") and token.endswith(">"):
+            return token[1:-1]
+        if ":" in token:
+            prefix, local = token.split(":", 1)
+            base = KNOWN_PREFIXES.get(prefix)
+            if base is not None:
+                return base + local
+        return token
