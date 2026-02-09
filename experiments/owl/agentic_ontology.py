@@ -19,6 +19,7 @@ FABRIC = Namespace("https://w3id.org/fabric/core#")
 PROF = Namespace("http://www.w3.org/ns/dx/prof/")
 DCT = Namespace("http://purl.org/dc/terms/")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
+DCAT = Namespace("http://www.w3.org/ns/dcat#")
 EX = Namespace("http://la3d.local/agent/")
 EX_PREFIX = str(EX)
 GENERATED_PREFIX = "http://la3d.local/agent/generated/"
@@ -323,19 +324,21 @@ class AgenticOntologyWorkspace:
 
             object_terms = [x.strip() for x in obj_raw.split(",") if x.strip()]
             for obj in object_terms:
+                normalized_obj = self._clean_token(obj)
                 triples.append(
                     {
                         "s": subj,
                         "p": pred,
-                        "o": obj,
+                        "o": normalized_obj,
                         "s_expanded": self._expand_prefixed(subj),
                         "p_expanded": self._expand_prefixed(pred),
-                        "o_expanded": self._expand_prefixed(obj),
+                        "o_expanded": self._expand_prefixed(normalized_obj),
                     }
                 )
-                for token in (subj, pred, obj):
-                    if token.startswith("?"):
-                        variables.add(token)
+                for token in (subj, pred, normalized_obj):
+                    normalized_var = self._normalize_variable(token)
+                    if normalized_var:
+                        variables.add(normalized_var)
 
         required_assertions = []
         for row in triples:
@@ -550,6 +553,11 @@ class AgenticOntologyWorkspace:
                 "summary": "Reduce property values to exactly one value (deterministic keep).",
                 "args": ["node_iri", "prop_iri", "keep_value"],
             },
+            {
+                "operator_id": "op_profile_closure",
+                "summary": "Apply deterministic profile/resource closure defaults for recurring SHACL failures.",
+                "args": ["profile_iri", "resource_count", "resource_prefix"],
+            },
         ]
 
     def op_assert_type(self, node_iri: str, class_iri: str) -> dict:
@@ -722,6 +730,59 @@ class AgenticOntologyWorkspace:
             "kept": self._term_to_str(keep),
         }
 
+    def op_profile_closure(
+        self,
+        profile_iri: str,
+        resource_count: int = 2,
+        resource_prefix: str = "http://la3d.local/agent/generated/resource",
+    ) -> dict:
+        profile = URIRef(profile_iri)
+        safe_count = max(1, min(int(resource_count), 10))
+        self.working_graph.add((profile, RDF.type, PROF.Profile))
+        self._ensure_literal(profile, DCT.title, "Profile")
+        self._ensure_literal(
+            profile,
+            DCT.description,
+            "Profile used for deterministic SHACL closure in sprint experiments.",
+        )
+        self._ensure_literal(profile, PROF.hasToken, "profile/v1.0.0")
+        self._ensure_literal(profile, OWL.versionInfo, "1.0.0")
+        self._ensure_iri(profile, DCT.publisher, EX.org1)
+        self._ensure_iri(profile, DCT.license, EX.license1)
+
+        mincount_out = self.op_ensure_mincount_links(
+            node_iri=str(profile),
+            prop_iri=str(PROF.hasResource),
+            target_class_iri=str(PROF.ResourceDescriptor),
+            n=safe_count,
+            prefix=resource_prefix,
+        )
+        resources = [
+            obj
+            for obj in self.working_graph.objects(profile, PROF.hasResource)
+            if isinstance(obj, URIRef)
+        ]
+        resources = sorted(resources, key=str)
+
+        seeded = []
+        for idx, resource in enumerate(resources):
+            self.working_graph.add((resource, RDF.type, PROF.ResourceDescriptor))
+            self._ensure_literal(resource, DCT.title, f"Resource {idx}")
+            self._ensure_literal(resource, DCT.description, f"Descriptor for resource {idx}")
+            self._ensure_iri(resource, PROF.hasRole, PROF.role)
+            self._ensure_iri(resource, DCT["format"], EX.ttl)
+            self._ensure_iri(resource, PROF.hasArtifact, URIRef(f"{EX}artifact{idx}"))
+            self._ensure_literal(resource, DCAT.mediaType, "text/turtle")
+            seeded.append(str(resource))
+
+        return {
+            "operator": "op_profile_closure",
+            "profile": str(profile),
+            "resource_count": len(resources),
+            "resources_seeded": seeded,
+            "mincount_created": mincount_out.get("created", []),
+        }
+
     def snapshot(self, store: SymbolicBlobStore | None = None, label: str = "working") -> dict:
         ttl = self.working_graph.serialize(format="turtle")
         if isinstance(ttl, bytes):
@@ -743,6 +804,18 @@ class AgenticOntologyWorkspace:
         if term is None:
             return ""
         return str(term)
+
+    def _ensure_literal(self, node: URIRef, prop: URIRef, value: str) -> None:
+        for existing in self.working_graph.objects(node, prop):
+            if isinstance(existing, Literal) and str(existing) == str(value):
+                return
+        self.working_graph.add((node, prop, Literal(str(value))))
+
+    def _ensure_iri(self, node: URIRef, prop: URIRef, value: URIRef) -> None:
+        iri = URIRef(str(value))
+        if (node, prop, iri) in self.working_graph:
+            return
+        self.working_graph.add((node, prop, iri))
 
     @staticmethod
     def _extract_ex_anchor_iris(query: str) -> list[str]:
@@ -793,6 +866,17 @@ class AgenticOntologyWorkspace:
                 "value": int(strlen_match.group(2)),
             }
         return {"kind": "raw", "text": line}
+
+    @staticmethod
+    def _normalize_variable(token: str) -> str:
+        cleaned = AgenticOntologyWorkspace._clean_token(token)
+        if cleaned.startswith("?"):
+            return cleaned
+        return ""
+
+    @staticmethod
+    def _clean_token(token: str) -> str:
+        return token.strip().rstrip(",;")
 
     @staticmethod
     def _expand_prefixed(token: str) -> str:

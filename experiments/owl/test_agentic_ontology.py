@@ -73,7 +73,7 @@ def test_cq5_becomes_true_after_profile_fields_and_resources():
         ws.op_set_single_literal(res, str(DCT.title), f"Resource {idx}")
         ws.op_set_single_literal(res, str(DCT.description), f"Descriptor for resource {idx}")
         ws.op_set_single_iri(res, str(PROF.hasRole), str(PROF.role))
-        ws.op_set_single_iri(res, str(DCT.format), str(EX.ttl))
+        ws.op_set_single_iri(res, str(DCT["format"]), str(EX.ttl))
         ws.op_set_single_iri(res, str(PROF.hasArtifact), str(EX[f"artifact{idx}"]))
         ws.op_set_single_literal(res, "http://www.w3.org/ns/dcat#mediaType", "text/turtle")
 
@@ -111,6 +111,14 @@ def test_cq4_query_symbols_exposes_attests_integrity_pattern():
     )
 
 
+def test_cq5_query_symbols_variable_names_are_normalized():
+    ws = _workspace()
+    symbols = ws.cq_query_symbols("CQ5")
+    assert "?r1" in symbols["variables"]
+    assert "?r2" in symbols["variables"]
+    assert "?r1," not in symbols["variables"]
+
+
 def test_agentic_toolset_blocks_non_anchor_mutation_for_current_cq():
     ws = _workspace()
     ts = AgenticOwlToolset(
@@ -142,6 +150,17 @@ def test_agentic_toolset_blocks_repeated_handle_reads():
     assert blocked["error"] == "repeated_handle_read_blocked"
 
 
+def test_agentic_toolset_blocks_cross_cq_queries():
+    ws = _workspace()
+    ts = AgenticOwlToolset(
+        prompt_text="cq1 test",
+        workspace=ws,
+        current_cq_id="CQ1",
+    )
+    blocked = ts.cq_details("CQ5")
+    assert blocked["error"] == "cq_scope_violation"
+
+
 def test_agentic_toolset_blocks_repeated_validation_without_delta():
     ws = _workspace()
     ts = AgenticOwlToolset(
@@ -154,3 +173,39 @@ def test_agentic_toolset_blocks_repeated_validation_without_delta():
         assert "error" not in out
     blocked = ts.ontology_signature_index(max_signatures=5)
     assert blocked["error"] == "validation_without_graph_delta"
+
+
+def test_agentic_toolset_focus_validation_returns_global_hint_when_scoped_empty():
+    ws = _workspace()
+    ts = AgenticOwlToolset(
+        prompt_text="cq1 test",
+        workspace=ws,
+        current_cq_id="CQ1",
+    )
+    out = ts.ontology_validate_focus("CQ1", max_results=5)
+    assert out["validation_results"] == 0
+    assert "global_signature_hint" in out
+    assert out["global_signature_hint"]["signatures_total"] >= 1
+
+
+def test_profile_closure_operator_seeds_profile_and_resources():
+    ws = _workspace()
+    out = ws.op_profile_closure(str(EX.prof1), resource_count=2)
+    assert out["operator"] == "op_profile_closure"
+    cq = ws.evaluate_cq("CQ5")
+    assert cq["passed"] is True
+
+
+def test_agentic_toolset_throttles_report_text_reads():
+    ws = _workspace()
+    ts = AgenticOwlToolset(
+        prompt_text="cq1 test",
+        workspace=ws,
+        current_cq_id="CQ1",
+    )
+    report = ts.ontology_signature_index(max_signatures=5)
+    ref = report["report_text_ref"]
+    first = ts.handle_read_window(ref_or_key=ref, start=0, size=64, include_text=True)
+    assert "error" not in first
+    second = ts.handle_read_window(ref_or_key=ref, start=0, size=64, include_text=True)
+    assert second["error"] == "report_text_read_blocked"

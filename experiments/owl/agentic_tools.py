@@ -39,6 +39,9 @@ class AgenticOwlToolset:
         self._max_handle_reads_per_run = 24
         self._max_reads_per_handle = 3
         self._max_validations_without_delta = 2
+        self._report_text_reads = 0
+        self._max_report_text_reads = 1
+        self._last_signature_counts: dict[str, int] = {}
         self._cq_query_refs: dict[str, dict] = {}
         for row in self.workspace.list_cqs():
             cq_id = row["cq_id"]
@@ -87,9 +90,20 @@ class AgenticOwlToolset:
         include_text: bool = False,
     ) -> dict:
         key = self._extract_ref_key(ref_or_key)
+        kind = self._extract_ref_kind(ref_or_key)
         self._handle_reads_total += 1
         self._handle_reads_by_key[key] = self._handle_reads_by_key.get(key, 0) + 1
         key_reads = self._handle_reads_by_key.get(key, 0)
+        if kind == "shacl_report_text" and include_text:
+            self._report_text_reads += 1
+            if self._report_text_reads > self._max_report_text_reads:
+                return {
+                    "error": "report_text_read_blocked",
+                    "key": key,
+                    "report_text_reads": self._report_text_reads,
+                    "max_report_text_reads": self._max_report_text_reads,
+                    "suggestion": "Use signatures_ref or violations_ref with ontology_signature_index before reading report text.",
+                }
         if self._handle_reads_total > self._max_handle_reads_per_run:
             return {
                 "error": "handle_read_budget_exceeded",
@@ -126,36 +140,71 @@ class AgenticOwlToolset:
         blocked = self._guard_validation_budget()
         if blocked is not None:
             return blocked
-        return self.workspace.validate_graph(store=self.store, max_results=max_results, include_rows=False)
+        out = self.workspace.validate_graph(store=self.store, max_results=max_results, include_rows=False)
+        return self._annotate_validation_result(out)
 
     def ontology_validate_preview(self, max_results: int = 10) -> dict:
         blocked = self._guard_validation_budget()
         if blocked is not None:
             return blocked
-        return self.workspace.validate_graph(store=self.store, max_results=max_results, include_rows=True)
+        out = self.workspace.validate_graph(store=self.store, max_results=max_results, include_rows=True)
+        return self._annotate_validation_result(out)
 
     def ontology_signature_index(self, max_signatures: int = 25) -> dict:
         blocked = self._guard_validation_budget()
         if blocked is not None:
             return blocked
-        return self.workspace.validate_graph(
+        out = self.workspace.validate_graph(
             store=self.store,
             max_results=max_signatures,
             include_rows=False,
         )
+        return self._annotate_validation_result(out)
 
     def ontology_validate_focus(self, cq_id: str, max_results: int = 25) -> dict:
+        cq_mismatch = self._guard_cq_mismatch(cq_id)
+        if cq_mismatch is not None:
+            return cq_mismatch
         blocked = self._guard_validation_budget()
         if blocked is not None:
             return blocked
-        return self.workspace.validate_focus_for_cq(
+        out = self.workspace.validate_focus_for_cq(
             cq_id=cq_id,
             store=self.store,
             max_results=max_results,
             include_rows=False,
         )
+        out = self._annotate_validation_result(out)
+        if (
+            "error" not in out
+            and not out.get("conforms", True)
+            and int(out.get("validation_results", 0)) == 0
+        ):
+            global_out = self.workspace.validate_graph(
+                store=self.store,
+                max_results=min(max(int(max_results), 1), 10),
+                include_rows=False,
+            )
+            out["global_signature_hint"] = {
+                "validation_results": global_out.get("validation_results", 0),
+                "signatures_total": global_out.get("signatures_total", 0),
+                "top_signatures": global_out.get("top_signatures", [])[:5],
+                "signatures_ref": global_out.get("signatures_ref", {}),
+                "violations_ref": global_out.get("violations_ref", {}),
+            }
+        return out
 
     def cq_list(self) -> list[dict]:
+        if self.current_cq_id:
+            row = next(
+                (entry for entry in self.workspace.list_cqs() if entry["cq_id"] == self.current_cq_id),
+                None,
+            )
+            if row is None:
+                return []
+            out = dict(row)
+            out["query_ref"] = self._cq_query_refs.get(row["cq_id"], {})
+            return [out]
         rows = []
         for row in self.workspace.list_cqs():
             out = dict(row)
@@ -164,6 +213,9 @@ class AgenticOwlToolset:
         return rows
 
     def cq_details(self, cq_id: str) -> dict:
+        cq_mismatch = self._guard_cq_mismatch(cq_id)
+        if cq_mismatch is not None:
+            return cq_mismatch
         details = self.workspace.cq_details(cq_id)
         if "error" in details:
             return details
@@ -174,15 +226,27 @@ class AgenticOwlToolset:
         return details
 
     def cq_query_symbols(self, cq_id: str) -> dict:
+        cq_mismatch = self._guard_cq_mismatch(cq_id)
+        if cq_mismatch is not None:
+            return cq_mismatch
         return self.workspace.cq_query_symbols(cq_id)
 
     def cq_anchor_nodes(self, cq_id: str) -> dict:
+        cq_mismatch = self._guard_cq_mismatch(cq_id)
+        if cq_mismatch is not None:
+            return cq_mismatch
         return self.workspace.cq_anchor_nodes(cq_id)
 
     def cq_node_allowed(self, cq_id: str, node_iri: str) -> dict:
+        cq_mismatch = self._guard_cq_mismatch(cq_id)
+        if cq_mismatch is not None:
+            return cq_mismatch
         return self.workspace.node_allowed_for_cq(cq_id=cq_id, node_iri=node_iri)
 
     def cq_query_read_window(self, cq_id: str, start: int = 0, size: int = 128) -> dict:
+        cq_mismatch = self._guard_cq_mismatch(cq_id)
+        if cq_mismatch is not None:
+            return cq_mismatch
         query_ref = self._cq_query_refs.get(cq_id)
         if query_ref is None:
             return {"error": f"unknown cq_id: {cq_id}"}
@@ -195,6 +259,9 @@ class AgenticOwlToolset:
         return window
 
     def cq_eval(self, cq_id: str) -> dict:
+        cq_mismatch = self._guard_cq_mismatch(cq_id)
+        if cq_mismatch is not None:
+            return cq_mismatch
         return self.workspace.evaluate_cq(cq_id)
 
     def operator_catalog(self) -> list[dict]:
@@ -289,6 +356,23 @@ class AgenticOwlToolset:
         self._record_mutation(out)
         return out
 
+    def op_profile_closure(
+        self,
+        profile_iri: str,
+        resource_count: int = 2,
+        resource_prefix: str = "http://la3d.local/agent/generated/resource",
+    ) -> dict:
+        blocked = self._guard_mutation_node(node_iri=profile_iri)
+        if blocked is not None:
+            return blocked
+        out = self.workspace.op_profile_closure(
+            profile_iri=profile_iri,
+            resource_count=resource_count,
+            resource_prefix=resource_prefix,
+        )
+        self._record_mutation(out)
+        return out
+
     def graph_snapshot(self, label: str = "working") -> dict:
         return self.workspace.snapshot(store=self.store, label=label)
 
@@ -328,6 +412,7 @@ class AgenticOwlToolset:
             self.op_remove_iri_link,
             self.op_ensure_mincount_links,
             self.op_normalize_cardinality,
+            self.op_profile_closure,
             self.graph_snapshot,
         ]
 
@@ -375,3 +460,57 @@ class AgenticOwlToolset:
         if isinstance(ref_or_key, dict):
             return str(ref_or_key.get("key", ""))
         return str(ref_or_key)
+
+    @staticmethod
+    def _extract_ref_kind(ref_or_key: dict | str) -> str:
+        if isinstance(ref_or_key, dict):
+            return str(ref_or_key.get("kind", ""))
+        key = str(ref_or_key)
+        if "_" in key:
+            return "_".join(key.split("_")[:-1])
+        return ""
+
+    def _guard_cq_mismatch(self, cq_id: str) -> Optional[dict]:
+        if not self.current_cq_id:
+            return None
+        if cq_id == self.current_cq_id:
+            return None
+        return {
+            "error": "cq_scope_violation",
+            "current_cq_id": self.current_cq_id,
+            "requested_cq_id": cq_id,
+            "suggestion": "Use the current CQ only in this run context.",
+        }
+
+    def _annotate_validation_result(self, result: dict) -> dict:
+        if result.get("error"):
+            return result
+        current: dict[str, int] = {}
+        for entry in result.get("top_signatures", []):
+            signature = str(entry.get("signature", ""))
+            if not signature:
+                continue
+            current[signature] = int(entry.get("count", 0))
+        deltas = []
+        for signature in sorted(set(self._last_signature_counts) | set(current)):
+            before = self._last_signature_counts.get(signature, 0)
+            after = current.get(signature, 0)
+            if before == after:
+                continue
+            deltas.append(
+                {
+                    "signature": signature,
+                    "before": before,
+                    "after": after,
+                    "delta": after - before,
+                }
+            )
+        deltas.sort(key=lambda row: abs(int(row["delta"])), reverse=True)
+        result["signature_deltas"] = deltas[:10]
+        result["signature_delta_summary"] = {
+            "changed_signatures": len(deltas),
+            "before_total": sum(self._last_signature_counts.values()),
+            "after_total": sum(current.values()),
+        }
+        self._last_signature_counts = current
+        return result

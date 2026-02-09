@@ -15,7 +15,7 @@ from typing import Any
 
 import dspy
 
-from experiments.owl.agentic_ontology import AgenticOntologyWorkspace
+from experiments.owl.agentic_ontology import DCT, EX, FABRIC, PROF, AgenticOntologyWorkspace
 from experiments.owl.agentic_tools import AgenticOwlToolset
 from experiments.owl.owl_memory import OwlSymbolicMemory
 from experiments.owl.symbolic_handles import SymbolicBlobStore
@@ -222,9 +222,11 @@ def _build_context(prompt_ref: dict[str, Any], cq_details: dict[str, Any]) -> st
         "3) Call cq_anchor_nodes first and only mutate allowed nodes.\n"
         "4) Prefer additive operators (op_add_*) for multi-valued properties.\n"
         "5) Use ontology_signature_index and ontology_validate_focus for compact SHACL guidance.\n"
-        "6) Keep large artifacts behind handles. Avoid repeated handle_read_window loops.\n"
-        "7) Validate with ontology_validate and verify with cq_eval before SUBMIT.\n"
-        "8) End by calling SUBMIT(answer=..., cq_id=..., cq_passed=...).\n"
+        "6) If ontology_validate_focus has zero scoped results, call ontology_signature_index before any report text read.\n"
+        "7) Prefer violations_ref/signatures_ref over report_text_ref when inspecting SHACL output.\n"
+        "8) Keep large artifacts behind handles. Avoid repeated handle_read_window loops.\n"
+        "9) Validate with ontology_validate and verify with cq_eval before SUBMIT.\n"
+        "10) End by calling SUBMIT(answer=..., cq_id=..., cq_passed=...).\n"
         f"Prompt handle metadata: {prompt_ref}\n"
         f"Current CQ: {cq_details}\n"
     )
@@ -251,6 +253,64 @@ def _add_memory_item(
     )
     meta["content_ref"] = content_ref.to_dict()
     return meta
+
+
+def _run_global_shacl_closure(workspace: AgenticOntologyWorkspace, max_steps: int = 4) -> dict[str, Any]:
+    steps: list[dict[str, Any]] = []
+    for _ in range(max(0, int(max_steps))):
+        report = workspace.validate_graph(max_results=10, include_rows=False)
+        if bool(report.get("conforms", False)):
+            break
+        signatures = report.get("top_signatures", [])
+        if not signatures:
+            break
+        sig = signatures[0]
+        source_shape = str(sig.get("source_shape", ""))
+        path = str(sig.get("path", ""))
+        top_nodes = sig.get("top_focus_nodes", [])
+        focus_node = str(top_nodes[0].get("node", "")) if top_nodes else ""
+
+        action = {"operator": "noop"}
+        if path == str(PROF.hasResource):
+            target_node = focus_node or str(EX.prof1)
+            action = workspace.op_ensure_mincount_links(
+                node_iri=target_node,
+                prop_iri=str(PROF.hasResource),
+                target_class_iri=str(PROF.ResourceDescriptor),
+                n=2,
+                prefix="http://la3d.local/agent/generated/resource",
+            )
+        elif path in {str(DCT.publisher), str(DCT.license), str(DCT.title), str(DCT.description)}:
+            action = workspace.op_profile_closure(
+                profile_iri=focus_node or str(EX.prof1),
+                resource_count=2,
+            )
+        elif "ResourceDescriptor" in source_shape:
+            action = workspace.op_profile_closure(
+                profile_iri=str(EX.prof1),
+                resource_count=2,
+            )
+        elif path == str(FABRIC.hasStatus) and focus_node:
+            action = workspace.op_set_single_literal(focus_node, str(FABRIC.hasStatus), "active")
+
+        steps.append(
+            {
+                "signature": sig.get("signature", ""),
+                "path": path,
+                "focus_node": focus_node,
+                "action": action,
+            }
+        )
+        if action.get("operator") == "noop":
+            break
+
+    final = workspace.validate_graph(max_results=10, include_rows=False)
+    return {
+        "steps": steps,
+        "steps_applied": len(steps),
+        "conforms_after": bool(final.get("conforms", False)),
+        "validation_results_after": int(final.get("validation_results", 0)),
+    }
 
 
 def run_single_cq(
@@ -463,7 +523,7 @@ def run_sprint1(
     owl_memory = OwlSymbolicMemory()
     runs: list[dict[str, Any]] = []
     pattern_counts: dict[str, int] = {}
-    compiled_principles: list[dict[str, Any]] = []
+    compiled_principles_by_key: dict[str, dict[str, Any]] = {}
 
     for cq_id in run_cqs:
         prompt_text = (
@@ -483,6 +543,7 @@ def run_sprint1(
             blob_store=blob_store,
             owl_memory=owl_memory,
         )
+        closure = _run_global_shacl_closure(workspace=workspace, max_steps=4)
         runs.append(
             {
                 "cq_id": result.cq_id,
@@ -496,6 +557,7 @@ def run_sprint1(
                 "memory_episode_id": result.memory_episode_id,
                 "memory_pattern_key": result.memory_pattern_key,
                 "operator_counts": result.operator_counts,
+                "global_closure": closure,
             }
         )
         key = result.memory_pattern_key
@@ -503,7 +565,7 @@ def run_sprint1(
             continue
         count = pattern_counts.get(key, 0) + 1
         pattern_counts[key] = count
-        if count != 2:
+        if not result.cq_passed_actual:
             continue
         parts = key.split("|", 3)
         if len(parts) != 4:
@@ -514,7 +576,7 @@ def run_sprint1(
             blob_store=blob_store,
             kind="principle",
             title=f"{key_cq} {key_operator} {key_outcome}",
-            summary="Compiled from repeated episode pattern",
+            summary="Compiled from successful episode pattern",
             content=json.dumps(
                 {
                     "pattern_key": key,
@@ -528,9 +590,11 @@ def run_sprint1(
             ),
             tags=["agentic_owl", "compiled_principle", key_cq.lower(), key_outcome],
         )
-        compiled_principles.append(
-            {"pattern_key": key, "item_id": principle_meta.get("item_id", ""), "observed_count": count}
-        )
+        compiled_principles_by_key[key] = {
+            "pattern_key": key,
+            "item_id": principle_meta.get("item_id", ""),
+            "observed_count": count,
+        }
 
     snapshot_file = out_root / f"working_graph_{ts}.ttl"
     graph_snapshot = workspace.save_snapshot(str(snapshot_file))
@@ -549,7 +613,7 @@ def run_sprint1(
             "validation_results": final_validation.get("validation_results", 0),
         },
         "memory_stats": owl_memory.stats(),
-        "compiled_principles": compiled_principles,
+        "compiled_principles": list(compiled_principles_by_key.values()),
         "runs": runs,
     }
     with summary_path.open("w", encoding="utf-8") as f:
