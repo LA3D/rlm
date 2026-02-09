@@ -1,0 +1,283 @@
+{
+  "timestamp": "20260209T143101Z",
+  "model": "anthropic/claude-sonnet-4-5-20250929",
+  "sub_model": "anthropic/claude-haiku-4-5-20251001",
+  "ontology_path": "ontology/core-vocabulary.ttl",
+  "shapes_path": "ontology/core-shapes.ttl",
+  "cqs": [
+    "CQ1",
+    "CQ2",
+    "CQ3",
+    "CQ4",
+    "CQ5"
+  ],
+  "trajectory_log": "experiments/owl/results/agentic_sprint1/trajectory_20260209T143101Z.jsonl",
+  "graph_snapshot": {
+    "path": "experiments/owl/results/agentic_sprint1/working_graph_20260209T143101Z.ttl",
+    "triples": 125
+  },
+  "final_validation": {
+    "conforms": false,
+    "validation_results": 14
+  },
+  "memory_stats": {
+    "items_total": 10,
+    "principles": 5,
+    "episodes": 5
+  },
+  "compiled_principles": [
+    {
+      "pattern_key": "CQ1|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_set_single_literal|pass",
+      "item_id": "49c456b711b2",
+      "observed_count": 1
+    },
+    {
+      "pattern_key": "CQ2|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_add_literal|pass",
+      "item_id": "dc0bec20eea1",
+      "observed_count": 1
+    },
+    {
+      "pattern_key": "CQ3|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_assert_type|pass",
+      "item_id": "d5fd5b748d17",
+      "observed_count": 1
+    },
+    {
+      "pattern_key": "CQ4|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_assert_type|pass",
+      "item_id": "dd3c962421a6",
+      "observed_count": 1
+    },
+    {
+      "pattern_key": "CQ5|nd0462c96dda543fdbe0a9ff3a76b5a98b14|http://www.w3.org/ns/dcat#mediaType|http://www.w3.org/ns/shacl#DatatypeConstraintComponent|op_add_iri_link|pass",
+      "item_id": "c570483cfef8",
+      "observed_count": 1
+    }
+  ],
+  "runs": [
+    {
+      "cq_id": "CQ1",
+      "answer": "Successfully constructed ontology state for CQ1. Applied the following operations:\n1. Asserted type: http://la3d.local/agent/kg1 rdf:type fabric:KnowledgeGraph\n2. Set fabric:hasCanonicalHash to 'z0000000000000000000000000000000000000000000000000000000000000000' (matches pattern ^z[0-9a-f]{64}$)\n3. Set fabric:hasStatus to 'active' (valid enum value)\n4. Set fabric:hasRole to 'primary' (valid enum value)\n\nCQ1 now passes (passed=True, matches_expected=True).\nSHACL validation for CQ1 focus node shows 0 violations.\nGlobal SHACL violations (5) are unrelated to CQ1, concerning http://www.w3.org/ns/dx/prof/Profile.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 6,
+      "lm_usage": {
+        "total_calls": 6,
+        "prompt_tokens": 41943,
+        "completion_tokens": 2928,
+        "total_tokens": 44871,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.16974899999999998
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 4,
+        "subcalls": 6,
+        "vars_n": 30
+      },
+      "memory_episode_id": "42b6a01cdc4f",
+      "memory_pattern_key": "CQ1|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_set_single_literal|pass",
+      "operator_counts": {
+        "op_assert_type": 1,
+        "op_set_single_literal": 3
+      },
+      "global_closure": {
+        "steps": [
+          {
+            "signature": "nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent",
+            "path": "nd0462c96dda543fdbe0a9ff3a76b5a98b34",
+            "focus_node": "http://www.w3.org/ns/dx/prof/Profile",
+            "action": {
+              "operator": "noop"
+            }
+          }
+        ],
+        "steps_applied": 1,
+        "conforms_after": false,
+        "validation_results_after": 5
+      }
+    },
+    {
+      "cq_id": "CQ2",
+      "answer": "Successfully constructed ontology state for CQ2. Applied operators to ds1: asserted type KnowledgeDataset, added hasMember link to kg1, added hasDatasetHash, hasCanonicalHash, and hasStatus properties. CQ2 now passes with all required triples satisfied.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 6,
+      "lm_usage": {
+        "total_calls": 6,
+        "prompt_tokens": 40218,
+        "completion_tokens": 2399,
+        "total_tokens": 42617,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.156639
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 3,
+        "subcalls": 6,
+        "vars_n": 58
+      },
+      "memory_episode_id": "addd32f51d79",
+      "memory_pattern_key": "CQ2|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_add_literal|pass",
+      "operator_counts": {
+        "op_assert_type": 1,
+        "op_add_iri_link": 1,
+        "op_add_literal": 3
+      },
+      "global_closure": {
+        "steps": [
+          {
+            "signature": "nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent",
+            "path": "nd0462c96dda543fdbe0a9ff3a76b5a98b34",
+            "focus_node": "http://www.w3.org/ns/dx/prof/Profile",
+            "action": {
+              "operator": "noop"
+            }
+          }
+        ],
+        "steps_applied": 1,
+        "conforms_after": false,
+        "validation_results_after": 5
+      }
+    },
+    {
+      "cq_id": "CQ3",
+      "answer": "CQ3 has been successfully satisfied. The service registration node (http://la3d.local/agent/svc1) now has:\n1. Type: fabric:ServiceRegistration\n2. Capability: SPARQL.Query (matches required regex pattern)\n\nCQ3 validation: PASSED\nCQ3-focused SHACL validation: 0 violations in scope\n\nNote: There are 5 global SHACL violations related to a Profile node (http://www.w3.org/ns/dx/prof/Profile), but this node is outside the allowed mutation scope for CQ3 (anchors: http://la3d.local/agent/svc1, allowed prefixes: http://la3d.local/agent/generated/).",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 6,
+      "lm_usage": {
+        "total_calls": 6,
+        "prompt_tokens": 39925,
+        "completion_tokens": 2873,
+        "total_tokens": 42798,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.16287
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 4,
+        "subcalls": 6,
+        "vars_n": 90
+      },
+      "memory_episode_id": "c1c7276f6b77",
+      "memory_pattern_key": "CQ3|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_assert_type|pass",
+      "operator_counts": {
+        "op_assert_type": 1,
+        "op_add_literal": 1
+      },
+      "global_closure": {
+        "steps": [
+          {
+            "signature": "nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent",
+            "path": "nd0462c96dda543fdbe0a9ff3a76b5a98b34",
+            "focus_node": "http://www.w3.org/ns/dx/prof/Profile",
+            "action": {
+              "operator": "noop"
+            }
+          }
+        ],
+        "steps_applied": 1,
+        "conforms_after": false,
+        "validation_results_after": 5
+      }
+    },
+    {
+      "cq_id": "CQ4",
+      "answer": "CQ4 has been successfully configured. The following assertions were added: (1) vc1 is typed as VerifiableCredential, (2) vc1 has attestsIntegrity link to kg1, (3) kg1 is typed as VerifiableKnowledgeAsset. CQ4 now passes validation.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 10,
+      "lm_usage": {
+        "total_calls": 10,
+        "prompt_tokens": 70137,
+        "completion_tokens": 3969,
+        "total_tokens": 74106,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.269946
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 6,
+        "subcalls": 10,
+        "vars_n": 126
+      },
+      "memory_episode_id": "217a5142b6b5",
+      "memory_pattern_key": "CQ4|nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_assert_type|pass",
+      "operator_counts": {
+        "op_assert_type": 2,
+        "op_add_iri_link": 1
+      },
+      "global_closure": {
+        "steps": [
+          {
+            "signature": "nd0462c96dda543fdbe0a9ff3a76b5a98b33|nd0462c96dda543fdbe0a9ff3a76b5a98b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent",
+            "path": "nd0462c96dda543fdbe0a9ff3a76b5a98b34",
+            "focus_node": "http://www.w3.org/ns/dx/prof/Profile",
+            "action": {
+              "operator": "noop"
+            }
+          }
+        ],
+        "steps_applied": 1,
+        "conforms_after": false,
+        "validation_results_after": 5
+      }
+    },
+    {
+      "cq_id": "CQ5",
+      "answer": "CQ5 evaluation: passed=True, matches_expected=True. SHACL validation: conforms=False, total_violations=14, focus_violations=10. Profile node http://la3d.local/agent/prof1 configured with required metadata (title, description, hasToken, versionInfo, publisher, license, creator) and two ResourceDescriptor nodes with complete properties.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 12,
+      "lm_usage": {
+        "total_calls": 12,
+        "prompt_tokens": 131844,
+        "completion_tokens": 10192,
+        "total_tokens": 142036,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.548412
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 13,
+        "subcalls": 12,
+        "vars_n": 178
+      },
+      "memory_episode_id": "efbd391d228e",
+      "memory_pattern_key": "CQ5|nd0462c96dda543fdbe0a9ff3a76b5a98b14|http://www.w3.org/ns/dcat#mediaType|http://www.w3.org/ns/shacl#DatatypeConstraintComponent|op_add_iri_link|pass",
+      "operator_counts": {
+        "op_assert_type": 3,
+        "op_set_single_literal": 4,
+        "op_set_single_iri": 3,
+        "op_add_iri_link": 22,
+        "op_add_literal": 11,
+        "op_remove_iri_link": 5,
+        "op_remove_literal": 2
+      },
+      "global_closure": {
+        "steps": [
+          {
+            "signature": "nd0462c96dda543fdbe0a9ff3a76b5a98b14|http://www.w3.org/ns/dcat#mediaType|http://www.w3.org/ns/shacl#DatatypeConstraintComponent",
+            "path": "http://www.w3.org/ns/dcat#mediaType",
+            "focus_node": "http://la3d.local/agent/generated/resource2",
+            "action": {
+              "operator": "noop"
+            }
+          }
+        ],
+        "steps_applied": 1,
+        "conforms_after": false,
+        "validation_results_after": 14
+      }
+    }
+  ]
+}

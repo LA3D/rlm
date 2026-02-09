@@ -1,0 +1,179 @@
+{
+  "timestamp": "20260209T133852Z",
+  "model": "anthropic/claude-sonnet-4-5-20250929",
+  "sub_model": "anthropic/claude-haiku-4-5-20251001",
+  "ontology_path": "ontology/core-vocabulary.ttl",
+  "shapes_path": "ontology/core-shapes.ttl",
+  "cqs": [
+    "CQ1",
+    "CQ2",
+    "CQ3",
+    "CQ4",
+    "CQ5"
+  ],
+  "trajectory_log": "experiments/owl/results/agentic_sprint1/trajectory_20260209T133852Z.jsonl",
+  "graph_snapshot": {
+    "path": "experiments/owl/results/agentic_sprint1/working_graph_20260209T133852Z.ttl",
+    "triples": 120
+  },
+  "final_validation": {
+    "conforms": false,
+    "validation_results": 15
+  },
+  "memory_stats": {
+    "items_total": 5,
+    "principles": 0,
+    "episodes": 5
+  },
+  "compiled_principles": [],
+  "runs": [
+    {
+      "cq_id": "CQ1",
+      "answer": "CQ1 successfully passes. The kg1 node has been configured as a KnowledgeGraph with required properties: type assertion, canonical hash (z0000000000000000000000000000000000000000000000000000000000000000), status (active), and role (main). All CQ1 requirements are satisfied.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 13,
+      "lm_usage": {
+        "total_calls": 13,
+        "prompt_tokens": 114964,
+        "completion_tokens": 5977,
+        "total_tokens": 120941,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.43454700000000007
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 5,
+        "subcalls": 13,
+        "vars_n": 22
+      },
+      "memory_episode_id": "2d9940d6767e",
+      "memory_pattern_key": "CQ1|n9a2b8766a1d34f78a4aa72398dfe91e9b33|n9a2b8766a1d34f78a4aa72398dfe91e9b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_set_single_literal|pass",
+      "operator_counts": {
+        "op_assert_type": 1,
+        "op_set_single_literal": 3
+      }
+    },
+    {
+      "cq_id": "CQ2",
+      "answer": "Successfully constructed ontology state for CQ2. Added the following triples to http://la3d.local/agent/ds1:\n1. Type assertion: fabric:KnowledgeDataset\n2. hasDatasetHash: z1111111111111111111111111111111111111111111111111111111111111111\n3. hasCanonicalHash: z2222222222222222222222222222222222222222222222222222222222222222\n4. hasStatus: active\n5. hasMember: link to http://la3d.local/agent/kg1\n\nAll required assertions from CQ2 query symbols are now present in the ontology. The ds1 node now has all mandatory properties with valid values matching the required patterns (hash regex and status enum constraints).",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 13,
+      "lm_usage": {
+        "total_calls": 13,
+        "prompt_tokens": 116402,
+        "completion_tokens": 6949,
+        "total_tokens": 123351,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.4534410000000001
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 4,
+        "subcalls": 13,
+        "vars_n": 50
+      },
+      "memory_episode_id": "23411702ca0f",
+      "memory_pattern_key": "CQ2|n9a2b8766a1d34f78a4aa72398dfe91e9b33|n9a2b8766a1d34f78a4aa72398dfe91e9b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_set_single_literal|pass",
+      "operator_counts": {
+        "op_assert_type": 1,
+        "op_set_single_literal": 3,
+        "op_set_single_iri": 1
+      }
+    },
+    {
+      "cq_id": "CQ3",
+      "answer": "Successfully constructed ontology state for CQ3:\n\n1. Asserted type: ex:svc1 rdf:type fabric:ServiceRegistration\n2. Added capability: ex:svc1 fabric:hasCapability \"SPARQL.Query\"\n\nCQ3 now passes: The service registration (ex:svc1) has the required type and at least one capability matching the allowed pattern (SPARQL.Query).\n\nSHACL validation for CQ3-related nodes: CLEAN (no violations)\nNote: There are 5 unrelated SHACL violations concerning http://www.w3.org/ns/dx/prof/Profile, which is outside the scope of CQ3.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 6,
+      "lm_usage": {
+        "total_calls": 6,
+        "prompt_tokens": 30886,
+        "completion_tokens": 2757,
+        "total_tokens": 33643,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.134013
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 2,
+        "subcalls": 6,
+        "vars_n": 69
+      },
+      "memory_episode_id": "24f9718a471a",
+      "memory_pattern_key": "CQ3|n9a2b8766a1d34f78a4aa72398dfe91e9b33|n9a2b8766a1d34f78a4aa72398dfe91e9b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_assert_type|pass",
+      "operator_counts": {
+        "op_assert_type": 1,
+        "op_add_literal": 1
+      }
+    },
+    {
+      "cq_id": "CQ4",
+      "answer": "CQ4 requirements satisfied: vc1 is a VerifiableCredential, kg1 is a VerifiableKnowledgeAsset, and vc1 attestsIntegrity of kg1.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 11,
+      "lm_usage": {
+        "total_calls": 11,
+        "prompt_tokens": 94832,
+        "completion_tokens": 5504,
+        "total_tokens": 100336,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.367056
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 4,
+        "subcalls": 11,
+        "vars_n": 97
+      },
+      "memory_episode_id": "a3a1bdd6bc34",
+      "memory_pattern_key": "CQ4|n9a2b8766a1d34f78a4aa72398dfe91e9b33|n9a2b8766a1d34f78a4aa72398dfe91e9b34|http://www.w3.org/ns/shacl#MinCountConstraintComponent|op_assert_type|pass",
+      "operator_counts": {
+        "op_assert_type": 2,
+        "op_add_iri_link": 1
+      }
+    },
+    {
+      "cq_id": "CQ5",
+      "answer": "CQ5 query passes successfully. SHACL validation has 15 remaining violations. Profile prof1 has been configured with all required metadata (title, description, hasToken, versionInfo, publisher, license, conformsTo, rights, fabric properties) and two resource descriptors with complete metadata.",
+      "cq_passed_reported": "True",
+      "cq_passed_actual": true,
+      "shacl_conforms": false,
+      "iterations": 12,
+      "lm_usage": {
+        "total_calls": 12,
+        "prompt_tokens": 104804,
+        "completion_tokens": 7311,
+        "total_tokens": 112115,
+        "cache_read_tokens": 0,
+        "cache_creation_tokens": 0,
+        "total_cost": 0.424077
+      },
+      "leakage": {
+        "stdout_chars": 0,
+        "large_returns": 9,
+        "subcalls": 12,
+        "vars_n": 140
+      },
+      "memory_episode_id": "3af4ae90d33c",
+      "memory_pattern_key": "CQ5|n9a2b8766a1d34f78a4aa72398dfe91e9b42|http://purl.org/dc/terms/conformsTo|http://www.w3.org/ns/shacl#HasValueConstraintComponent|op_set_single_literal|pass",
+      "operator_counts": {
+        "op_assert_type": 3,
+        "op_set_single_literal": 15,
+        "op_set_single_iri": 12,
+        "op_add_iri_link": 3
+      }
+    }
+  ]
+}
