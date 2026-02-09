@@ -1,0 +1,23 @@
+<|ref|>sub_title<|/ref|><|det|>[[277, 118, 473, 136]]<|/det|>
+## Statement of need
+
+<|ref|>text<|/ref|><|det|>[[275, 149, 931, 293]]<|/det|>
+OpenMD builds on the foundations of the Object-Oriented Parallel Simulation Engine (00PSE) program (Meineke et al., 2005), rewritten in modern C++. It differs from other contemporary molecular dynamics engines in its focus on complex interfaces. A number of features unique to OpenMD facilitate the study of this problem space, including efficient non-equilibrium algorithms, non-periodic simulations, metal polarizability models, and real space electrostatics. The first such feature is Reverse Non-Equilibrium Molecular Dynamics (RNEMD), a family of algorithms which impose a non-physical flux on a system and use linear response theory to compute transport properties as the system approaches steady state. The goal of RNEMD methods is to calculate the relevant transport property ( \( \lambda \) ) that connects the flux (J) and driving force ( \( \nabla X \) ) according to the generalized equation,
+
+<|ref|>equation<|/ref|><|det|>[[555, 301, 928, 317]]<|/det|>
+ \[ \mathbf{J}=-\lambda\nabla X. \quad (1) \] 
+
+<|ref|>text<|/ref|><|det|>[[275, 335, 931, 437]]<|/det|>
+OpenMD is also capable of performing condensed phase simulations without the use of periodic boundary conditions. To do so, an external pressure and temperature bath is applied to atoms comprising the system's convex hull, rather than the interior region. This method, the Langevin Hull, allows for constant pressure, temperature, or isobaric-isothermal (NPT) simulations of explicitly non-periodic molecular systems. Other major developments are the inclusion of advanced real-space electrostatics for point multipoles, and polarizable force fields using fluctuating charges or fluctuating electron densities.
+
+<|ref|>sub_title<|/ref|><|det|>[[277, 452, 669, 468]]<|/det|>
+## Reverse Non-Equilibrium Molecular Dynamics
+
+<|ref|>text<|/ref|><|det|>[[275, 475, 931, 633]]<|/det|>
+RNEMD methods impose a non-physical (heat, momentum, or particle) flux between different regions of the simulation. In response, the system develops a temperature, velocity, or concentration gradient between the two regions, and the linear coefficient connecting applied flux and measured gradient is a transport property of the material. Since the amount of the applied flux is known exactly in RNEMD, and the measurement of gradients is generally straightforward, imposed-flux methods typically take shorter simulation times to obtain converged results for transport properties, when compared with equilibrium MD or forward-NEMD approaches. If an interface lies between the two regions, these methods can also provide interfacial transport coefficients by mapping any spatial discontinuities in concentration, velocity, or temperature with the applied flux (Drisko & Gezelter, 2024; Kuang & Gezelter, 2012; Stocker & Gezelter, 2014).
+
+<|ref|>text<|/ref|><|det|>[[275, 638, 931, 739]]<|/det|>
+Non-equilibrium molecular dynamics is a well-developed area of research, and OpenMD supports many different RNEMD algorithms. The first is the original “swapping” approach by Müller-Plathe (Müller-Plathe, 1997, 1999). Here, the entire momentum vectors of two particles in separate slabs may be exchanged to generate a thermal flux. Occasionally, non-ideal Maxwell-Boltzmann distributions will develop in velocity profiles using this approach (Tenney & Maginn, 2010). OpenMD also introduces a number of new algorithms which extend the capabilities of RNEMD.
+
+<|ref|>text<|/ref|><|det|>[[275, 745, 931, 903]]<|/det|>
+Rather than using momentum exchanges between individual particles in each region, the Non-Isotropic Velocity Scaling (NIVS) algorithm applies velocity scaling to all of the selected particles in both regions (Kuang & Gezelter, 2010). NIVS was shown to be very effective at computing thermal conductivities, but is not suitable for imposing a momentum flux or for computing shear viscosities. However, simultaneous velocity shearing and scaling (VSS) exchanges between the two regions remove all of these limitations (Kuang & Gezelter, 2012). The VSS-RNEMD method yields a simple set of equations which satisfy energy and linear momentum conservation constraints, while simultaneously imposing a desired flux between the two regions. The VSS approach is versatile in that it may be used to implement both thermal and shear transport either separately or simultaneously. OpenMD is also capable of leveraging the VSS method in non-periodic simulations, in which the regions have been generalized.
