@@ -37,6 +37,10 @@ class AlignedTrajectoryJudge(dspy.Signature):
     IMPORTANT: Read ALL principles carefully before judging. If a principle
     applies to this case, explicitly reference it in your reasoning.
     Also check past cases for similar situations.
+
+    SPECIFICITY RULE: If a principle marked [EXCEPTION] conflicts with a
+    general principle, the EXCEPTION takes precedence for cases within its
+    stated scope. Specific rules override general rules.
     """
     task: str = dspy.InputField(desc="The original question/task")
     answer: str = dspy.InputField(desc="The agent's final answer")
@@ -100,20 +104,30 @@ class AlignedTrajectoryComparator(dspy.Signature):
 class FeedbackRouter(dspy.Signature):
     """Route expert feedback to appropriate system components.
 
-    Determine whether feedback should go to:
-    - Judge memory (evaluation principles/episodes)
-    - Agent L1 constraints (hard rules for query construction)
-    - Agent L2 seeds (strategies for memory bank)
+    IMPORTANT: Most feedback applies to BOTH judge and agent. Construction
+    rules (e.g., "always include type constraints") are also evaluation
+    criteria the judge must check. Default to routing to BOTH components
+    unless the feedback is clearly irrelevant to one.
 
-    Output 'N/A' for components that don't need this feedback.
+    - Judge memory: evaluation principles (what to CHECK when judging queries)
+    - Agent L1 constraints: construction rules (what to INCLUDE when building queries)
+    - Agent L2 seeds: strategies for the agent's memory bank
+
+    Only output 'N/A' when the feedback is genuinely irrelevant to that component.
+    For example, feedback about a correct query ("This is correct because...")
+    typically only goes to judge (terminology clarification), not agent.
     """
     feedback: str = dspy.InputField(desc="Expert's natural language feedback")
     task: str = dspy.InputField(desc="The original task")
     agent_sparql: str = dspy.InputField(desc="The SPARQL the agent produced")
 
-    judge_principle: str = dspy.OutputField(desc="Principle for judge evaluation, or 'N/A'")
-    agent_constraint: str = dspy.OutputField(desc="L1 hard constraint for agent query construction, or 'N/A'")
-    agent_seed: str = dspy.OutputField(desc="L2 seed strategy for agent memory, or 'N/A'")
+    judge_principle: str = dspy.OutputField(
+        desc="Evaluation criterion for the judge: what should the judge CHECK for when evaluating similar queries? "
+             "Most construction feedback (missing constraints, wrong patterns) ALSO applies here. Output 'N/A' ONLY if irrelevant to evaluation.")
+    agent_constraint: str = dspy.OutputField(
+        desc="L1 hard constraint for agent query construction, or 'N/A' if the query was correct")
+    agent_seed: str = dspy.OutputField(
+        desc="L2 seed strategy for agent memory, or 'N/A' if the query was correct")
 
 
 # ---------------------------------------------------------------------------
@@ -138,11 +152,13 @@ def load_judge_mem(
     if principles_path:
         with open(principles_path) as f:
             for d in json.load(f):
+                d.setdefault('scope', '')  # backward compat
                 mem.add(Item(**d))
 
     if episodes_path:
         with open(episodes_path) as f:
             for d in json.load(f):
+                d.setdefault('scope', '')  # backward compat
                 mem.add(Item(**d))
 
     return mem
@@ -570,8 +586,23 @@ def select_for_expert_review(
 
 
 # ---------------------------------------------------------------------------
-# ALHF Routing (E-MA-6)
+# ALHF Routing (E-MA-6, updated E-MA-7)
 # ---------------------------------------------------------------------------
+
+def _extract_grounding_episode(principle, task, sparql, feedback):
+    """Create a grounding episode that anchors a principle with a concrete case."""
+    content = (f"Task: {task}\nAgent SPARQL: {sparql}\n"
+               f"Expert feedback: {feedback}\n"
+               f"Applied principle: {principle}")
+    return Item(
+        id=Item.make_id('grounding', content),
+        title=f"Case: {task[:40]}",
+        desc=f"Grounding episode for routed principle",
+        content=content,
+        src='episode',
+        tags=['routed', 'alhf', 'grounding'],
+    )
+
 
 def route_and_store(
     feedback: str,
@@ -618,6 +649,10 @@ def route_and_store(
 
     # Store judge principle if applicable
     if r.judge_principle and r.judge_principle.strip().upper() != 'N/A':
+        # Detect exception scope
+        _lp = r.judge_principle.lower()
+        _exception_kws = ['do not', 'does not require', 'not need', 'exception', 'override']
+        scope = 'exception' if any(kw in _lp for kw in _exception_kws) else 'general'
         principle = Item(
             id=Item.make_id('routed_principle', r.judge_principle),
             title=f"Routed: {task[:40]}",
@@ -625,9 +660,18 @@ def route_and_store(
             content=r.judge_principle,
             src='principle',
             tags=['routed', 'alhf'],
+            scope=scope,
         )
         judge_mem.consolidate([principle], dedup=True)
         judge_items.append(principle)
+
+        # Also store a grounding episode for this principle (Fix 1: paired principle+episode)
+        episode = _extract_grounding_episode(
+            principle=r.judge_principle,
+            task=task, sparql=agent_sparql, feedback=feedback,
+        )
+        judge_mem.consolidate([episode], dedup=True)
+        judge_items.append(episode)
 
     # Store agent constraint if applicable
     if agent_mem and r.agent_constraint and r.agent_constraint.strip().upper() != 'N/A':

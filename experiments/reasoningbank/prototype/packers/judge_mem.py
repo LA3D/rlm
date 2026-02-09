@@ -31,7 +31,8 @@ def pack_working_memory(
     p_lines = []
     if principles:
         for i, p in enumerate(principles, 1):
-            p_lines.append(f"{i}. **{p.title}**: {p.content}")
+            prefix = "[EXCEPTION - overrides general rules when applicable] " if getattr(p, 'scope', '') == 'exception' else ""
+            p_lines.append(f"{i}. **{p.title}**: {prefix}{p.content}")
     principles_text = '\n\n'.join(p_lines)[:budget] if p_lines else "(no principles)"
 
     # Episodes section (episodic memory - retrieved)

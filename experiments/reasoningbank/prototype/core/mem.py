@@ -19,6 +19,7 @@ class Item:
     content: str     # full procedure
     src: str         # 'success' | 'failure' | 'seed' | 'contrastive' | 'pattern'
     tags: list[str] = field(default_factory=list)
+    scope: str = ''  # 'general' | 'exception' | '' (backward-compatible)
 
     @staticmethod
     def make_id(title:str, content:str) -> str:
@@ -124,4 +125,6 @@ class MemStore:
     def load(self, path:str):
         "Load items from JSON file."
         with open(path) as f:
-            for d in json.load(f): self._items[d['id']] = Item(**d)
+            for d in json.load(f):
+                d.setdefault('scope', '')  # backward compat
+                self._items[d['id']] = Item(**d)
