@@ -322,6 +322,7 @@ The structural gate achieved its goal of eliminating validation avoidance.
     |    op_set_single_iri_link   (replace)      |
     |    validate_graph      (mid-construction)  |
     |    finalize_graph      (pre-SUBMIT gate)   |
+    |    query_contains      (graph inspection)  |
     |    graph_stats                             |
     |    inspect_figure      (vision, optional)  |
     +--------------------------------------------+
@@ -348,10 +349,117 @@ The structural gate achieved its goal of eliminating validation avoidance.
    challenges (more figures, complex section hierarchy). A second data point
    is needed to validate the guardrails.
 
-## 10. Next Steps
+## 10. Guardrails v2: Structural Fixes (FAILED)
 
-- [ ] Implement 4.1: Add pre-section block grouping hint to task prompt
-- [ ] Implement 4.2: Improve SHACL containment message to mention both failure modes
-- [ ] Run PET paper with guardrails for a second data point
-- [ ] Consider 4.3 (query_contains) if repair cycles remain >3 after 4.1+4.2
-- [ ] Consider pre-computed section groupings in blocks if prompt hint is insufficient
+All four improvements from Section 4 were implemented:
+
+- **4.1** Section Grouping Rules added to task prompt (pre-section block handling)
+- **4.2** SHACL containment messages rewritten with dual failure modes
+- **4.3** `query_contains(node_iri)` graph inspection tool added
+- **4.4** Error-distinct responses: tool wrapper returns `TOOL_ERROR` key + sentinel values
+
+**Run ID:** `run_kag_1_guardrails_v2_chemrxiv_20260210T142530Z`
+
+### Result: Catastrophic Failure
+
+| Metric | v1 | **v2** |
+|--------|-----|--------|
+| Conforms | true | **false** |
+| Iterations | 22 | **30 (max)** |
+| Triples | 975 | **699** |
+| Cost | $0.89 | **$1.58** |
+| Violations | 0 | **21** |
+
+### Root Cause: Pyodide Sandbox Crash
+
+The initial implementation of fix 4.4 **re-raised exceptions** in the tool
+wrapper. This caused a catastrophic failure in the Deno/Pyodide sandbox:
+
+1. Agent called `query_contains()` successfully (returned dict)
+2. Agent tried `result[:500]` on the dict (slicing a dict = TypeError)
+3. The re-raised TypeError crossed the JavaScript/Python async boundary
+4. **"Unhandled async error: PythonError"** — sandbox crashed
+5. ALL tool function bindings (`op_assert_type`, `validate_graph`, etc.)
+   were wiped from the REPL namespace
+6. Agent was dead for remaining 23 iterations — every tool call raised
+   `NameError: name 'op_assert_type' is not defined`
+
+### Lesson Learned
+
+**NEVER re-raise exceptions in Pyodide/Deno tool wrappers.** The sandbox
+boundary between JavaScript and Python cannot handle exception propagation.
+Always return error dicts. The agent processes these as return values
+rather than triggering the exception handling pathway that crosses the
+async boundary.
+
+## 11. Guardrails v3: Pyodide Fix
+
+Reverted exception re-raising. Error handling now returns dicts with
+clear sentinel values:
+
+```python
+except Exception as exc:
+    result = {
+        "TOOL_ERROR": f"{type(exc).__name__}: {exc}",
+        "error": str(exc),
+        "conforms": False,
+        "total_violations": -1,
+    }
+```
+
+**Run ID:** `run_kag_1_guardrails_v3_chemrxiv_20260210T143440Z`
+
+### Result: Best Run Yet
+
+| Metric | v1 (initial) | v2 (crashed) | **v3 (final)** |
+|--------|-------------|--------------|----------------|
+| Conforms | true | false | **true** |
+| Iterations | 22 | 30 | **10** |
+| Triples | 975 | 699 | **784** |
+| Cost | $0.89 | $1.58 | **$0.31** |
+| Violations | 0 | 21 | **0** |
+| LM calls | — | 31 | **10** |
+| `op_assert_type` | 128 | 117 | **128** |
+| `op_add_iri_link` | 155 | 114 | **155** |
+| `op_set_single_iri_link` | — | 0 | **1** |
+
+### What Worked
+
+**Single repair cycle.** The agent called `finalize_graph` once with 21
+violations. The improved SHACL messages + `query_contains` tool + section
+grouping rules enabled it to fix all 21 violations in a single iteration.
+Compare: v1 spent 11 iterations on 2 orphan paragraphs.
+
+**10 iterations total.** Down from 22 (v1) and the sprint 2 baseline of
+15-18. The combination of block injection (no parsing) + actionable SHACL
+messages (fast repair) + finalize gate (no missed validation) cut the
+iteration count by 55%.
+
+**65% cost reduction.** $0.31 vs $0.89 (v1) and $0.50-1.50 (sprint 2).
+
+### What Didn't Change
+
+**Vision indexing still skipped.** 6 figure files found, 0 vision calls
+made. The agent submitted before reaching the figure description phase.
+This is stochastic — vision worked in v1 (6 calls) but the agent's
+strategy varies across runs.
+
+**Fewer triples than v1.** 784 vs 975. Likely because v1 had vision
+descriptions adding additional triples. The core structure is equivalent
+(128 `op_assert_type` calls in both).
+
+## 12. Summary: Guardrails Progression
+
+| Sprint | Runs | Conformance | Avg Iterations | Avg Cost |
+|--------|------|-------------|----------------|----------|
+| Sprint 2 (no guardrails) | 17 | 41% (7/17) | 15-18 | $0.50-1.50 |
+| Sprint 3 v1 (blocks + finalize) | 1 | 100% | 22 | $0.89 |
+| Sprint 3 v2 (+ fixes, broken) | 1 | 0% | 30 | $1.58 |
+| Sprint 3 v3 (Pyodide fix) | 1 | 100% | 10 | $0.31 |
+
+## 13. Next Steps
+
+- [ ] Run PET paper with guardrails v3 for a second data point
+- [ ] Investigate vision call stochasticity — agent skips figures in some strategies
+- [ ] Consider pre-computed section groupings if PET run shows section issues
+- [ ] Evaluate whether `query_contains` is being used proactively (not just reactively)

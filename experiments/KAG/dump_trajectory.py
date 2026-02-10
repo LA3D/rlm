@@ -81,15 +81,31 @@ def extract_l0_sense(events: list[dict]) -> dict | None:
     return None
 
 def extract_node_creations(events: list[dict]) -> list[dict]:
-    """Group op_assert_type + subsequent op_set_single_literal calls into node records.
+    """Group op_create_node / op_assert_type + subsequent op_set_single_literal calls into node records.
 
-    Walks tool_call events in order. Each op_assert_type starts a new node.
+    Walks tool_call events in order. Each op_create_node or op_assert_type starts a new node.
     Subsequent op_set_single_literal calls targeting the same subject accumulate
     properties on that node, until a different subject or a non-literal op appears.
+
+    op_create_node auto-sets properties, so we also check tool_result events
+    to extract the auto-generated properties for display.
     """
     nodes = []
     current_node = None
     current_subject = None
+
+    # Also build a mapping from op_create_node results for richer data
+    create_node_results: dict[str, dict] = {}
+    for ev in events:
+        if (ev.get("event_type") == "tool_result"
+                and ev["data"].get("tool") == "op_create_node"):
+            preview = ev["data"].get("result_preview", "")
+            try:
+                result = eval(preview)
+                if isinstance(result, dict) and "node" in result:
+                    create_node_results[result["node"]] = result
+            except Exception:
+                pass
 
     for ev in events:
         if ev.get("event_type") != "tool_call":
@@ -98,7 +114,28 @@ def extract_node_creations(events: list[dict]) -> list[dict]:
         tool = data.get("tool", "")
         args = data.get("args", [])
 
-        if tool == "op_assert_type" and len(args) >= 2:
+        if tool == "op_create_node" and len(args) >= 2:
+            # Flush previous node
+            if current_node:
+                nodes.append(current_node)
+            block_id = args[0]
+            class_iri = args[1]
+            # IRI is ex:{block_id}
+            node_iri = f"http://la3d.local/kag/doc/{block_id}"
+            current_subject = node_iri
+            current_node = {
+                "iri": node_iri,
+                "type": shorten(class_iri),
+                "props": {},
+            }
+            # Populate from result if available
+            result = create_node_results.get(node_iri, {})
+            if result.get("page"):
+                current_node["props"]["kag:pageNumber"] = str(result["page"])
+            if result.get("mainText_preview"):
+                current_node["props"]["kag:mainText"] = result["mainText_preview"]
+
+        elif tool == "op_assert_type" and len(args) >= 2:
             # Flush previous node
             if current_node:
                 nodes.append(current_node)

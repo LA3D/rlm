@@ -6,6 +6,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix cito: <http://purl.org/spar/cito/> .
 
 <http://la3d.local/kag/ontology> a owl:Ontology ;
     rdfs:label "KAG DoCO Extension"@en ;
@@ -22,6 +23,25 @@ kag:mainText a owl:DatatypeProperty ;
     rdfs:label "main text"@en ;
     rdfs:comment "Short text summary/title; not full payload."@en ;
     rdfs:range xsd:string .
+
+kag:fullText a owl:DatatypeProperty ;
+    rdfs:label "full text"@en ;
+    rdfs:comment "Complete block text for full-text search via SPARQL FILTER(CONTAINS())."@en ;
+    rdfs:range xsd:string .
+
+kag:citationNumber a owl:DatatypeProperty ;
+    rdfs:label "citation number"@en ;
+    rdfs:comment "Leading number extracted from a bibliography entry."@en ;
+    rdfs:range xsd:integer .
+
+kag:citationText a owl:DatatypeProperty ;
+    rdfs:label "citation text"@en ;
+    rdfs:comment "Full text of a bibliography entry for query convenience."@en ;
+    rdfs:range xsd:string .
+
+kag:refersTo a owl:ObjectProperty ;
+    rdfs:label "refers to"@en ;
+    rdfs:comment "In-text reference from paragraph to a figure, table, or equation."@en .
 
 kag:detectionLabel a owl:DatatypeProperty ;
     rdfs:label "detection label"@en ;

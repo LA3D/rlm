@@ -19,6 +19,7 @@ from experiments.KAG.symbolic_handles import BlobRef, SymbolicBlobStore, make_co
 
 DOCO = Namespace("http://purl.org/spar/doco/")
 DEO = Namespace("http://purl.org/spar/deo/")
+CITO = Namespace("http://purl.org/spar/cito/")
 KAG = Namespace("http://la3d.local/kag#")
 EX = Namespace("http://la3d.local/kag/doc/")
 
@@ -98,6 +99,7 @@ class KagDocToolset:
         self.graph = Graph()
         self.graph.bind("doco", DOCO)
         self.graph.bind("deo", DEO)
+        self.graph.bind("cito", CITO)
         self.graph.bind("kag", KAG)
         self.graph.bind("rdfs", RDFS)
         self.graph.bind("ex", EX)
@@ -234,6 +236,71 @@ class KagDocToolset:
             "added": True,
             "auto_content_ref": content_ref_id,
         }
+
+    # Map from OCR kind to DoCO/DEO class IRI
+    _KIND_TO_CLASS: dict[str, URIRef] = {
+        "title": DOCO.Title,
+        "section": DOCO.Section,
+        "paragraph": DOCO.Paragraph,
+        "equation": DOCO.Formula,
+        "figure": DOCO.Figure,
+        "table": DOCO.Table,
+        "caption": DEO.Caption,
+    }
+
+    def op_create_node(self, block_id: str, class_iri: str) -> dict[str, Any]:
+        """Create a graph node from a pre-parsed OCR block.
+
+        Looks up the block by ID, auto-generates IRI as ex:{block_id},
+        and sets ALL required properties: rdf:type, kag:pageNumber,
+        kag:hasBBox, kag:mainText, kag:fullText, kag:hasContentRef.
+        """
+        self._validated = False
+        block = self._block_by_id(block_id)
+        if block is None:
+            return {"TOOL_ERROR": f"Unknown block_id: {block_id}", "error": f"Unknown block_id: {block_id}"}
+
+        node = EX[block_id]
+        cls = self._resolve_iri(class_iri)
+
+        # rdf:type
+        self.graph.add((node, RDF.type, cls))
+
+        # hasContentRef (auto-generated)
+        kind = self._CONTENT_REF_KINDS.get(cls)
+        content_ref_id = None
+        if kind:
+            content_ref_id = make_content_ref_id(kind, str(node))
+            self.graph.add((node, KAG.hasContentRef, Literal(content_ref_id)))
+
+        # kag:pageNumber
+        self.graph.add((node, KAG.pageNumber, Literal(block.page_number, datatype=XSD.integer)))
+
+        # kag:hasBBox
+        self.graph.add((node, KAG.hasBBox, Literal(str(block.bbox))))
+
+        # kag:mainText (120-char preview)
+        self.graph.add((node, KAG.mainText, Literal(block.text_preview)))
+
+        # kag:fullText (complete text from blob store)
+        full_text = self._get_block_full_text(block)
+        self.graph.add((node, KAG.fullText, Literal(full_text)))
+
+        return {
+            "operator": "op_create_node",
+            "node": str(node),
+            "block_id": block_id,
+            "class": str(cls),
+            "page": block.page_number,
+            "mainText_preview": block.text_preview[:60],
+            "fullText_length": len(full_text),
+            "auto_content_ref": content_ref_id,
+        }
+
+    def _get_block_full_text(self, block: OCRBlock) -> str:
+        """Retrieve the full text for a block from the blob store."""
+        text = self.store._blobs.get(block.blob_ref.key, "")
+        return text
 
     def op_add_literal(
         self,
@@ -391,19 +458,25 @@ class KagDocToolset:
         return result
 
     def finalize_graph(self, answer: str) -> dict[str, Any]:
-        """Validate the graph and prepare for submission.
+        """Validate the graph, run enrichment post-processing, and prepare for submission.
 
         Call this before SUBMIT. Returns status='READY' if the graph
         conforms to SHACL shapes, or status='NOT_READY' with violations.
+        When the graph conforms, runs deterministic enrichment:
+        DEO section classification, bibliography structuring,
+        cross-reference linking, and citation linking.
         """
         result = self.validate_graph()
         if result["conforms"]:
+            # Run deterministic enrichment post-processing
+            enrichment = self._run_enrichment()
             self._validated = True
             return {
                 "status": "READY",
                 "message": f"Graph conforms. Call SUBMIT(answer='{answer[:80]}...')",
                 "conforms": True,
                 "total_violations": 0,
+                "enrichment": enrichment,
             }
         else:
             self._validated = False
@@ -414,6 +487,220 @@ class KagDocToolset:
                 "total_violations": result["total_violations"],
                 "violations": result.get("violations", []),
             }
+
+    def _run_enrichment(self) -> dict[str, Any]:
+        """Run all deterministic post-processing enrichments."""
+        return {
+            "sections_classified": self._classify_sections(),
+            "bibliography": self._structure_bibliography(),
+            "cross_references": self._link_cross_references(),
+            "citations": self._link_citations(),
+        }
+
+    # ── Phase 2.1: DEO Rhetorical Section Classification ─────────────
+
+    TITLE_TO_DEO: dict[str, URIRef] = {
+        "introduction": DEO.Introduction,
+        "background": DEO.Background,
+        "methods": DEO.Methods,
+        "methodology": DEO.Methods,
+        "experimental": DEO.Methods,
+        "materials and methods": DEO.Methods,
+        "results": DEO.Results,
+        "discussion": DEO.Discussion,
+        "results and discussion": DEO.Discussion,
+        "conclusion": DEO.Conclusion,
+        "conclusions": DEO.Conclusion,
+        "acknowledgements": DEO.Acknowledgements,
+        "acknowledgments": DEO.Acknowledgements,
+        "abstract": DEO.Abstract,
+        "summary": DEO.Abstract,
+    }
+
+    REFERENCES_TITLES = {"references", "bibliography", "literature cited", "works cited"}
+
+    def _classify_sections(self) -> dict[str, Any]:
+        """Add DEO rhetorical types to sections based on title text."""
+        classified = 0
+        references_retyped = 0
+        for section in list(self.graph.subjects(RDF.type, DOCO.Section)):
+            header = self.graph.value(section, KAG.containsAsHeader)
+            if header is None:
+                continue
+            title_text = str(self.graph.value(header, KAG.mainText) or "")
+            title_lower = title_text.strip().lower()
+            # Check for exact or prefix match against DEO map
+            deo_cls = self.TITLE_TO_DEO.get(title_lower)
+            if deo_cls is None:
+                # Try prefix matching for numbered sections ("1. Introduction")
+                cleaned = re.sub(r"^[\d.]+\s*", "", title_lower).strip()
+                deo_cls = self.TITLE_TO_DEO.get(cleaned)
+            if deo_cls:
+                self.graph.add((section, RDF.type, deo_cls))
+                classified += 1
+            # Check for references section -> retype as ListOfReferences
+            if title_lower in self.REFERENCES_TITLES or re.sub(r"^[\d.]+\s*", "", title_lower).strip() in self.REFERENCES_TITLES:
+                self.graph.add((section, RDF.type, DOCO.ListOfReferences))
+                references_retyped += 1
+        return {"classified": classified, "references_retyped": references_retyped}
+
+    # ── Phase 2.2: Structured Bibliography Entries ────────────────────
+
+    _CITE_NUM_RE = re.compile(r"^\s*\[?(\d+)\]?[\.\)\s]")
+
+    def _structure_bibliography(self) -> dict[str, Any]:
+        """Add deo:BibliographicReference type and citationNumber to reference entries."""
+        structured = 0
+        for ref_section in self.graph.subjects(RDF.type, DOCO.ListOfReferences):
+            for child in self.graph.objects(ref_section, KAG.contains):
+                # Only process Paragraph children
+                if (child, RDF.type, DOCO.Paragraph) not in self.graph:
+                    continue
+                self.graph.add((child, RDF.type, DEO.BibliographicReference))
+                # Extract citation number from fullText or mainText
+                full_text = str(self.graph.value(child, KAG.fullText) or
+                                self.graph.value(child, KAG.mainText) or "")
+                m = self._CITE_NUM_RE.match(full_text)
+                if m:
+                    num = int(m.group(1))
+                    self.graph.add((child, KAG.citationNumber, Literal(num, datatype=XSD.integer)))
+                # Copy fullText to citationText for convenience
+                if full_text:
+                    self.graph.add((child, KAG.citationText, Literal(full_text)))
+                structured += 1
+        return {"entries_structured": structured}
+
+    # ── Phase 2.3: In-Text Cross-Reference Linking ───────────────────
+
+    _FIGURE_REF_RE = re.compile(r"Fig(?:ure|\.)\s*(\d+)", re.IGNORECASE)
+    _TABLE_REF_RE = re.compile(r"Table\s*(\d+)", re.IGNORECASE)
+    _SCHEME_REF_RE = re.compile(r"Scheme\s*(\d+)", re.IGNORECASE)
+    _EQUATION_REF_RE = re.compile(r"Eq(?:uation|\.)\s*\(?(\d+)\)?", re.IGNORECASE)
+
+    def _link_cross_references(self) -> dict[str, Any]:
+        """Link paragraphs to figures/tables they mention via kag:refersTo."""
+        # Build caption index: "Figure 3" -> figure_node_iri
+        caption_index: dict[str, URIRef] = {}
+        for caption in self.graph.subjects(RDF.type, DEO.Caption):
+            text = str(self.graph.value(caption, KAG.fullText) or
+                       self.graph.value(caption, KAG.mainText) or "")
+            target = self.graph.value(caption, KAG.describes)
+            if not target:
+                continue
+            # Match caption text to figure/table number
+            for pat, prefix in [
+                (self._FIGURE_REF_RE, "figure"),
+                (self._TABLE_REF_RE, "table"),
+                (self._SCHEME_REF_RE, "scheme"),
+            ]:
+                m = pat.search(text)
+                if m:
+                    key = f"{prefix}_{m.group(1)}"
+                    caption_index[key] = target
+
+        links_added = 0
+        for para in self.graph.subjects(RDF.type, DOCO.Paragraph):
+            text = str(self.graph.value(para, KAG.fullText) or
+                       self.graph.value(para, KAG.mainText) or "")
+            if not text:
+                continue
+            seen: set[URIRef] = set()
+            for pat, prefix in [
+                (self._FIGURE_REF_RE, "figure"),
+                (self._TABLE_REF_RE, "table"),
+                (self._SCHEME_REF_RE, "scheme"),
+                (self._EQUATION_REF_RE, "equation"),
+            ]:
+                for m in pat.finditer(text):
+                    key = f"{prefix}_{m.group(1)}"
+                    target = caption_index.get(key)
+                    if target and target not in seen:
+                        self.graph.add((para, KAG.refersTo, target))
+                        seen.add(target)
+                        links_added += 1
+        return {"links_added": links_added}
+
+    # ── Phase 2.5: Citation Linking ──────────────────────────────────
+
+    _CITATION_RE = re.compile(r"\[(\d+(?:\s*[,\-–]\s*\d+)*)\]")
+
+    def _link_citations(self) -> dict[str, Any]:
+        """Link paragraphs to bibliography entries via cito:cites."""
+        # Build citation number index: int -> bib_ref_node
+        bib_index: dict[int, URIRef] = {}
+        for bib_ref in self.graph.subjects(RDF.type, DEO.BibliographicReference):
+            num_lit = self.graph.value(bib_ref, KAG.citationNumber)
+            if num_lit is not None:
+                bib_index[int(num_lit)] = bib_ref
+
+        if not bib_index:
+            return {"links_added": 0}
+
+        links_added = 0
+        # Skip bibliography entries themselves (they contain [N] patterns but aren't citations)
+        bib_nodes = set(bib_index.values())
+        for para in self.graph.subjects(RDF.type, DOCO.Paragraph):
+            if para in bib_nodes:
+                continue
+            text = str(self.graph.value(para, KAG.fullText) or
+                       self.graph.value(para, KAG.mainText) or "")
+            if not text:
+                continue
+            seen: set[int] = set()
+            for m in self._CITATION_RE.finditer(text):
+                nums = self._expand_citation_range(m.group(1))
+                for num in nums:
+                    if num in seen:
+                        continue
+                    seen.add(num)
+                    target = bib_index.get(num)
+                    if target:
+                        self.graph.add((para, CITO.cites, target))
+                        links_added += 1
+        return {"links_added": links_added}
+
+    @staticmethod
+    def _expand_citation_range(raw: str) -> list[int]:
+        """Expand '1,2,4-6' to [1, 2, 4, 5, 6]."""
+        nums: list[int] = []
+        for part in re.split(r"\s*,\s*", raw):
+            dash_parts = re.split(r"\s*[\-–]\s*", part)
+            if len(dash_parts) == 2:
+                try:
+                    start, end = int(dash_parts[0]), int(dash_parts[1])
+                    nums.extend(range(start, end + 1))
+                except ValueError:
+                    pass
+            else:
+                try:
+                    nums.append(int(dash_parts[0]))
+                except ValueError:
+                    pass
+        return nums
+
+    # ── Content Store Export ──────────────────────────────────────────
+
+    def export_content_store(self) -> list[dict[str, Any]]:
+        """Export content store as JSONL-ready list of dicts.
+
+        Each entry maps a hasContentRef value to its full text and metadata.
+        """
+        entries: list[dict[str, Any]] = []
+        for s, _, ref_lit in self.graph.triples((None, KAG.hasContentRef, None)):
+            ref = str(ref_lit)
+            full_text = str(self.graph.value(s, KAG.fullText) or "")
+            main_text = str(self.graph.value(s, KAG.mainText) or "")
+            page_lit = self.graph.value(s, KAG.pageNumber)
+            node_type = self.graph.value(s, RDF.type)
+            entries.append({
+                "ref": ref,
+                "node": str(s),
+                "kind": ref.split(":")[0] if ":" in ref else "unknown",
+                "page": int(page_lit) if page_lit is not None else None,
+                "type": str(node_type).split("/")[-1] if node_type else "unknown",
+                "text": full_text or main_text,
+            })
+        return entries
 
     def inspect_figure(self, figure_node_iri: str) -> dict[str, Any]:
         """Describe a figure's image using a vision model.
@@ -551,6 +838,7 @@ class KagDocToolset:
             self.ocr_list_blocks,
             self.ocr_block_read_window,
             self.graph_stats,
+            self.op_create_node,
             self.op_assert_type,
             self.op_add_literal,
             self.op_set_single_literal,
