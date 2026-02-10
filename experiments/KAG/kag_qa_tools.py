@@ -1,6 +1,6 @@
 """Read-only QA toolset for exploring enriched KAG document graphs.
 
-Provides progressive disclosure (L0-L3) over a pre-built TTL + content store.
+Provides 5 bounded-view tools + pre-assembled context over a TTL + content store.
 """
 
 from __future__ import annotations
@@ -63,9 +63,9 @@ class KagQAToolset:
     def _node_types(self, node: URIRef) -> list[str]:
         return [self._compact_iri(t) for t in self.graph.objects(node, RDF.type)]
 
-    # ── L0: Overview ─────────────────────────────────────────────────
+    # ── Context assembly (replaces L0 tools) ─────────────────────────
 
-    def g_stats(self) -> dict[str, Any]:
+    def _stats(self) -> dict[str, Any]:
         """Graph overview: triple count, section/figure/table/paragraph counts."""
         sections = sum(1 for _ in self.graph.subjects(RDF.type, DOCO.Section))
         figures = sum(1 for _ in self.graph.subjects(RDF.type, DOCO.Figure))
@@ -86,7 +86,7 @@ class KagQAToolset:
             "content_store_entries": len(self.content_store),
         }
 
-    def g_sections(self) -> list[dict[str, Any]]:
+    def _sections(self) -> list[dict[str, Any]]:
         """List all sections with titles and DEO rhetorical roles."""
         rows: list[dict[str, Any]] = []
         for section in self.graph.subjects(RDF.type, DOCO.Section):
@@ -109,13 +109,39 @@ class KagQAToolset:
         rows.sort(key=lambda r: (r["page"] or 0, r["title"]))
         return rows
 
+    def build_context(self) -> str:
+        """Pre-assembled graph context for prompt injection (replaces g_stats + g_sections)."""
+        stats = self._stats()
+        sections = self._sections()
+        lines = [
+            "## Document Graph Overview",
+            f"Triples: {stats['triples']} | Sections: {stats['sections']} | "
+            f"Paragraphs: {stats['paragraphs']} | Figures: {stats['figures']} | "
+            f"Tables: {stats['tables']} | Formulas: {stats['formulas']} | "
+            f"Bib refs: {stats['bibliographic_references']}",
+            "",
+            "## Sections",
+        ]
+        for sec in sections:
+            roles = ", ".join(sec["deo_roles"]) if sec["deo_roles"] else ""
+            role_str = f" [{roles}]" if roles else ""
+            lines.append(
+                f"- {sec['iri']}: \"{sec['title']}\" (p{sec['page']}, "
+                f"{sec['child_count']} children){role_str}"
+            )
+        return "\n".join(lines)
+
     # ── L1: Navigation ───────────────────────────────────────────────
 
-    def g_section_content(self, section_iri: str) -> dict[str, Any]:
-        """List content nodes in a section: type, text preview, page."""
+    def g_section_content(self, section_iri: str) -> list[dict[str, Any]]:
+        """Children of a section: type, text preview, page.
+
+        Returns list of dicts with keys: iri, types, text_preview, page.
+        The first element includes _section_title with the section heading.
+        """
         section = self._resolve_iri(section_iri)
         if (section, RDF.type, DOCO.Section) not in self.graph:
-            return {"error": f"Not a doco:Section: {section_iri}"}
+            return [{"error": f"Not a doco:Section: {section_iri}"}]
         header = self.graph.value(section, KAG.containsAsHeader)
         title = str(self.graph.value(header, KAG.mainText) or "") if header else ""
         children: list[dict[str, Any]] = []
@@ -130,15 +156,15 @@ class KagQAToolset:
                 "page": int(page_lit) if page_lit is not None else None,
             })
         children.sort(key=lambda c: (c["page"] or 0, c["iri"]))
-        return {
-            "section": self._compact_iri(section),
-            "title": title,
-            "child_count": len(children),
-            "children": children,
-        }
+        if children:
+            children[0]["_section_title"] = title
+        return children
 
     def g_node_detail(self, node_iri: str) -> dict[str, Any]:
-        """Full properties of a single node (text truncated to 500 chars)."""
+        """Full properties of a single node (text truncated to 500 chars).
+
+        Returns dict with keys: iri, properties (dict of all RDF properties).
+        """
         node = self._resolve_iri(node_iri)
         props: dict[str, Any] = {}
         for p, o in self.graph.predicate_objects(node):
@@ -166,7 +192,10 @@ class KagQAToolset:
     # ── L2: Search ───────────────────────────────────────────────────
 
     def g_search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
-        """Full-text search over kag:fullText. Returns matching nodes with previews."""
+        """Full-text search over kag:fullText.
+
+        Returns list of dicts with keys: iri, types, page, score, snippet, text_preview.
+        """
         safe_limit = max(1, min(int(limit), 50))
         query_lower = query.lower()
         terms = query_lower.split()
@@ -211,7 +240,10 @@ class KagQAToolset:
         return snippet
 
     def g_figure_info(self, figure_iri: str) -> dict[str, Any]:
-        """Figure details: caption text, page, image description."""
+        """Figure details: caption text, page, image description.
+
+        Returns dict with keys: iri, page, caption, image_description, image_path, referring_paragraphs.
+        """
         node = self._resolve_iri(figure_iri)
         if (node, RDF.type, DOCO.Figure) not in self.graph:
             return {"error": f"Not a doco:Figure: {figure_iri}"}
@@ -242,94 +274,93 @@ class KagQAToolset:
             "referring_paragraphs": referring,
         }
 
-    # ── L3: Relationships ────────────────────────────────────────────
+    # ── Relationships (bidirectional) ─────────────────────────────────
 
-    def g_citations(self, paragraph_iri: str) -> dict[str, Any]:
-        """Bibliography entries cited by a paragraph (via cito:cites)."""
-        para = self._resolve_iri(paragraph_iri)
-        if (para, RDF.type, DOCO.Paragraph) not in self.graph:
-            return {"error": f"Not a doco:Paragraph: {paragraph_iri}"}
-        refs: list[dict[str, Any]] = []
-        for bib_ref in self.graph.objects(para, CITO.cites):
+    def g_node_refs(self, node_iri: str) -> dict[str, Any]:
+        """Bidirectional relationships: citations, cross-references, and inverses.
+
+        Returns dict with keys: iri, types, plus optional: cites, cited_by, refers_to, referred_by.
+        """
+        node = self._resolve_iri(node_iri)
+        types = self._node_types(node)
+        if not types:
+            return {"error": f"Node not found: {node_iri}"}
+        result: dict[str, Any] = {
+            "iri": self._compact_iri(node),
+            "types": types,
+        }
+
+        # Outgoing cito:cites (paragraph -> bib ref)
+        cites: list[dict[str, Any]] = []
+        for bib_ref in self.graph.objects(node, CITO.cites):
             num_lit = self.graph.value(bib_ref, KAG.citationNumber)
             cite_text = str(self.graph.value(bib_ref, KAG.citationText) or
                            self.graph.value(bib_ref, KAG.fullText) or "")
-            refs.append({
+            cites.append({
                 "iri": self._compact_iri(bib_ref),
                 "citation_number": int(num_lit) if num_lit is not None else None,
                 "text_preview": cite_text[:200],
             })
-        refs.sort(key=lambda r: r.get("citation_number") or 999)
-        return {
-            "paragraph": self._compact_iri(para),
-            "citations": refs,
-            "count": len(refs),
-        }
+        if cites:
+            cites.sort(key=lambda r: r.get("citation_number") or 999)
+            result["cites"] = cites
 
-    def g_citing_paragraphs(self, ref_iri: str) -> dict[str, Any]:
-        """Paragraphs that cite a bibliography entry (inverse cito:cites)."""
-        ref = self._resolve_iri(ref_iri)
-        if (ref, RDF.type, DEO.BibliographicReference) not in self.graph:
-            return {"error": f"Not a deo:BibliographicReference: {ref_iri}"}
-        num_lit = self.graph.value(ref, KAG.citationNumber)
-        cite_text = str(self.graph.value(ref, KAG.citationText) or "")
-        paras: list[dict[str, Any]] = []
-        for para in self.graph.subjects(CITO.cites, ref):
+        # Incoming cito:cites (bib ref <- paragraph)
+        cited_by: list[dict[str, Any]] = []
+        for para in self.graph.subjects(CITO.cites, node):
             main = str(self.graph.value(para, KAG.mainText) or "")
             page_lit = self.graph.value(para, KAG.pageNumber)
-            paras.append({
+            cited_by.append({
                 "iri": self._compact_iri(para),
                 "text_preview": main[:150],
                 "page": int(page_lit) if page_lit is not None else None,
             })
-        return {
-            "reference": self._compact_iri(ref),
-            "citation_number": int(num_lit) if num_lit is not None else None,
-            "text_preview": cite_text[:200],
-            "citing_paragraphs": paras,
-            "count": len(paras),
-        }
+        if cited_by:
+            result["cited_by"] = cited_by
 
-    def g_cross_refs(self, paragraph_iri: str) -> dict[str, Any]:
-        """Figures/tables referred to by a paragraph (via kag:refersTo)."""
-        para = self._resolve_iri(paragraph_iri)
-        if (para, RDF.type, DOCO.Paragraph) not in self.graph:
-            return {"error": f"Not a doco:Paragraph: {paragraph_iri}"}
-        refs: list[dict[str, Any]] = []
-        for target in self.graph.objects(para, KAG.refersTo):
-            types = self._node_types(target)
+        # Outgoing kag:refersTo (paragraph -> figure/table)
+        refers_to: list[dict[str, Any]] = []
+        for target in self.graph.objects(node, KAG.refersTo):
+            t_types = self._node_types(target)
             page_lit = self.graph.value(target, KAG.pageNumber)
-            # Get caption
             caption = ""
             for cap_node in self.graph.subjects(KAG.describes, target):
                 ct = self.graph.value(cap_node, KAG.fullText) or self.graph.value(cap_node, KAG.mainText)
                 if ct:
                     caption = str(ct)[:200]
                     break
-            refs.append({
+            refers_to.append({
                 "iri": self._compact_iri(target),
-                "types": types,
+                "types": t_types,
                 "page": int(page_lit) if page_lit is not None else None,
                 "caption_preview": caption,
             })
-        return {
-            "paragraph": self._compact_iri(para),
-            "cross_references": refs,
-            "count": len(refs),
-        }
+        if refers_to:
+            result["refers_to"] = refers_to
+
+        # Incoming kag:refersTo (figure/table <- paragraph)
+        referred_by: list[dict[str, Any]] = []
+        for para in self.graph.subjects(KAG.refersTo, node):
+            main = str(self.graph.value(para, KAG.mainText) or "")
+            page_lit = self.graph.value(para, KAG.pageNumber)
+            referred_by.append({
+                "iri": self._compact_iri(para),
+                "text_preview": main[:150],
+                "page": int(page_lit) if page_lit is not None else None,
+            })
+        if referred_by:
+            result["referred_by"] = referred_by
+
+        return result
 
     # ── Tool surface for DSPy RLM ────────────────────────────────────
 
     def as_tools(self) -> list:
-        """Return all QA tools as callables for DSPy RLM."""
+        """Return 5 QA tools as callables for DSPy RLM."""
         return [
-            self.g_stats,
-            self.g_sections,
             self.g_section_content,
             self.g_node_detail,
             self.g_search,
             self.g_figure_info,
-            self.g_citations,
-            self.g_citing_paragraphs,
-            self.g_cross_refs,
+            self.g_node_refs,
         ]

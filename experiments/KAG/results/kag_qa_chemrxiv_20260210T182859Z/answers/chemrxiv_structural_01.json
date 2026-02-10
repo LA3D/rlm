@@ -1,0 +1,19 @@
+{
+  "question_id": "chemrxiv_structural_01",
+  "question": "How many sections does this paper have, and what are their titles?",
+  "type": "structural",
+  "answer": "This paper has 11 sections. Their titles are:\n\n1. Abstract\n2. Introduction\n3. Results and Discussion\n4. Thermal Reversibility & Thermodynamics\n5. Reaction Kinetics and Energy Barriers\n6. X-ray Crystallography\n7. Acknowledgements\n8. Author Contributions\n9. Conclusions\n10. Conflicts of interest\n11. Notes and references",
+  "iterations": 2,
+  "tools_used": [],
+  "tool_counts": {},
+  "cost": 0.02517,
+  "lm_usage": {
+    "total_calls": 2,
+    "prompt_tokens": 4020,
+    "completion_tokens": 874,
+    "total_tokens": 4894,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.02517
+  }
+}

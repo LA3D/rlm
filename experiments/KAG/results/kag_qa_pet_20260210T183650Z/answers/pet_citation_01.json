@@ -1,0 +1,29 @@
+{
+  "question_id": "pet_citation_01",
+  "question": "How many references does this paper cite? List the first 5 by number and title.",
+  "type": "citation",
+  "answer": "This paper cites 37 references.\n\nThe first 5 references by number and title are:\n\n1. Coffelt SB, de Visser KE. Immune-mediated mechanisms influencing the efficacy of anticancer therapies. Trends Immunol. 2015;36:198\u2013216.\n\n2. Waldmann TA. Immunotherapy: past, present and future. Nat Med. 2003;9:269\u2013277.\n\n3. Scott AM, Wolchok JD, Old LJ. Antibody therapy of cancer. Nat Rev Cancer. 2012;12:278\u2013287.\n\n4. Sharpe AH, Wherry EJ, Ahmed R, Freeman GJ. The function of programmed cell death 1 and its ligands in regulating autoimmunity and infection. Nat Immunol. 2007;8:239\u2013245.\n\n5. Chen DS, Irving BA, Hodi FS. Molecular pathways: next-generation immunotherapy-inhibiting programmed death-ligand 1 and programmed death-1. Clin Cancer Res. 2012;18:6580\u20139587.",
+  "iterations": 10,
+  "tools_used": [
+    "g_search",
+    "g_section_content",
+    "g_node_detail",
+    "g_node_refs"
+  ],
+  "tool_counts": {
+    "g_search": 6,
+    "g_section_content": 22,
+    "g_node_detail": 16,
+    "g_node_refs": 1
+  },
+  "cost": 0.18321600000000002,
+  "lm_usage": {
+    "total_calls": 10,
+    "prompt_tokens": 40487,
+    "completion_tokens": 4117,
+    "total_tokens": 44604,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.18321600000000002
+  }
+}

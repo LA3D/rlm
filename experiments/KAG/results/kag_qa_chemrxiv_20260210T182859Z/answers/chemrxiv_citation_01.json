@@ -1,0 +1,25 @@
+{
+  "question_id": "chemrxiv_citation_01",
+  "question": "Which references are cited in the Introduction section? List them by number.",
+  "type": "citation",
+  "answer": "References cited in the Introduction section: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27",
+  "iterations": 3,
+  "tools_used": [
+    "g_section_content",
+    "g_node_refs"
+  ],
+  "tool_counts": {
+    "g_section_content": 1,
+    "g_node_refs": 4
+  },
+  "cost": 0.038979,
+  "lm_usage": {
+    "total_calls": 3,
+    "prompt_tokens": 8438,
+    "completion_tokens": 911,
+    "total_tokens": 9349,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.038979
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "question_id": "pet_cross_ref_01",
+  "question": "What data does Table 1 contain? Which paragraphs reference it?",
+  "type": "cross_ref",
+  "answer": "Table 1 contains \"Injected Doses of \u2078\u2079Zr-Nivolumab for Tracer only and Carrier-Added Studies in NHPs.\"\n\nThe table presents data for three experimental conditions:\n1. Tracer only\n2. Carrier-Added 1 mg/kg\n3. Carrier-Added 3 mg/kg\n\nFor each condition, the table provides:\n- \u2078\u2079Zr-nivolumab (RCY) - radiochemical yield values (225 MBq, 341 MBq, and 252 MBq respectively)\n- Specific activity (EOS) - end of synthesis values (252 MBq/mg, 402 MBq/mg, and 402 MBq/mg)\n- Radiochemical Purity (90%, 87%, and 87%)\n- Body weight NHP (non-human primate)\n- Injected dose\n- Injected activity\n\nThe table is referenced by one paragraph:\n- Paragraph ex:b_p005_0010 (page 5), which states: \"specific activity was calculated to be 352 \u00b1 87 MBq/mg, see Table 1 for individual reaction data.\"\n",
+  "iterations": 4,
+  "tools_used": [
+    "g_search",
+    "g_node_detail",
+    "g_node_refs"
+  ],
+  "tool_counts": {
+    "g_search": 2,
+    "g_node_detail": 3,
+    "g_node_refs": 1
+  },
+  "cost": 0.068685,
+  "lm_usage": {
+    "total_calls": 4,
+    "prompt_tokens": 13745,
+    "completion_tokens": 1830,
+    "total_tokens": 15575,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.068685
+  }
+}

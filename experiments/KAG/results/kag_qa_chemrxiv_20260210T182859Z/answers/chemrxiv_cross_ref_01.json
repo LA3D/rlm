@@ -1,0 +1,29 @@
+{
+  "question_id": "chemrxiv_cross_ref_01",
+  "question": "What does Figure 4 show? Which section discusses the VT NMR experiments it depicts?",
+  "type": "cross_ref",
+  "answer": "Figure 4 shows VT (Variable Temperature) \u00b9H NMR experiments for TMAnnBu, with spectra shown every 20 \u00b0C. The experiment involved combining separate solutions of equimolar TMAnnBu and TCNE at 25 \u00b0C in an NMR tube. The figure demonstrates that warming from -80 \u00b0C to room temperature (RT) shows the complete cyclo-reversion of TMAnnBu-DA.\n\nThe section that discusses the VT NMR experiments depicted in Figure 4 is \"Thermal Reversibility & Thermodynamics\" (section 4, starting on page 4).",
+  "iterations": 5,
+  "tools_used": [
+    "g_figure_info",
+    "g_search",
+    "g_node_detail",
+    "g_section_content"
+  ],
+  "tool_counts": {
+    "g_figure_info": 2,
+    "g_search": 1,
+    "g_node_detail": 1,
+    "g_section_content": 2
+  },
+  "cost": 0.06149400000000001,
+  "lm_usage": {
+    "total_calls": 5,
+    "prompt_tokens": 12453,
+    "completion_tokens": 1609,
+    "total_tokens": 14062,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.06149400000000001
+  }
+}

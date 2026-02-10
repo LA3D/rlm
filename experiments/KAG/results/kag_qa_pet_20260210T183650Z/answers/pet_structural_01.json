@@ -1,0 +1,25 @@
+{
+  "question_id": "pet_structural_01",
+  "question": "List all sections and subsections in this paper.",
+  "type": "structural",
+  "answer": "Sections and subsections in the paper:\n\n- ARTICLE INFO\n- A B S T R A C T\n- 1. Introduction\n- 2. Experimental\n  - 2.1. Nivolumab conjugation with DFO\n  - 2.2. Radiolabeling and quality control of  \\( ^{89} \\) Zr-nivolumab\n  - 2.3. Animal preparation\n  - 2.4. Magnetic resonance imaging\n  - 2.5. Positron emission tomography imaging and image analysis\n- 3. Results and discussion\n  - 3.1. Conjugation and characterization of nivolumab-DFO\n  - 3.2. Radiolabeling and quality control of  \\( ^{89} \\) Zr-nivolumab\n  - 3.3. In vivo PET imaging in normal healthy cynomolgus monkeys\n- 4. Conclusion\n- Conflict of interest statement\n- Acknowledgements\n- Supplementary data\n- References",
+  "iterations": 4,
+  "tools_used": [
+    "g_search",
+    "g_section_content"
+  ],
+  "tool_counts": {
+    "g_search": 1,
+    "g_section_content": 24
+  },
+  "cost": 0.065079,
+  "lm_usage": {
+    "total_calls": 4,
+    "prompt_tokens": 12548,
+    "completion_tokens": 1829,
+    "total_tokens": 14377,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.065079
+  }
+}

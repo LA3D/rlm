@@ -4,7 +4,7 @@
     "paper": "chemrxiv",
     "question": "How many sections does this paper have, and what are their titles?",
     "type": "structural",
-    "expected_tools": ["g_sections"],
+    "expected_tools": [],
     "evidence_hints": ["section_01", "Introduction", "Results and Discussion", "Conclusions"]
   },
   {
@@ -20,16 +20,16 @@
     "paper": "chemrxiv",
     "question": "What does Figure 4 show? Which section discusses the VT NMR experiments it depicts?",
     "type": "cross_ref",
-    "expected_tools": ["g_search", "g_figure_info", "g_cross_refs", "g_section_content"],
+    "expected_tools": ["g_search", "g_figure_info", "g_node_refs", "g_section_content"],
     "evidence_hints": ["Figure 4", "VT NMR", "variable temperature"]
   },
   {
     "id": "chemrxiv_citation_01",
     "paper": "chemrxiv",
-    "question": "Which references are cited in the Conclusions section?",
+    "question": "Which references are cited in the Introduction section? List them by number.",
     "type": "citation",
-    "expected_tools": ["g_sections", "g_section_content", "g_citations"],
-    "evidence_hints": ["Conclusions", "cito:cites", "BibliographicReference"]
+    "expected_tools": ["g_section_content", "g_node_refs"],
+    "evidence_hints": ["Introduction", "cito:cites", "BibliographicReference", "[16]", "[27]"]
   },
   {
     "id": "chemrxiv_synthesis_01",
@@ -52,7 +52,7 @@
     "paper": "pet",
     "question": "List all sections and subsections in this paper.",
     "type": "structural",
-    "expected_tools": ["g_sections", "g_section_content"],
+    "expected_tools": ["g_section_content"],
     "evidence_hints": ["section", "SectionTitle"]
   },
   {
@@ -68,7 +68,7 @@
     "paper": "pet",
     "question": "What data does Table 1 contain? Which paragraphs reference it?",
     "type": "cross_ref",
-    "expected_tools": ["g_search", "g_figure_info", "g_cross_refs"],
+    "expected_tools": ["g_search", "g_node_refs"],
     "evidence_hints": ["Table 1", "refersTo"]
   },
   {
@@ -76,7 +76,7 @@
     "paper": "pet",
     "question": "How many references does this paper cite? List the first 5 by number and title.",
     "type": "citation",
-    "expected_tools": ["g_stats", "g_sections", "g_section_content", "g_node_detail"],
+    "expected_tools": ["g_section_content", "g_node_detail"],
     "evidence_hints": ["BibliographicReference", "citationNumber", "citationText"]
   },
   {
@@ -84,7 +84,7 @@
     "paper": "pet",
     "question": "What is the main conclusion about 89Zr-nivolumab biodistribution in the spleen?",
     "type": "synthesis",
-    "expected_tools": ["g_search", "g_sections", "g_node_detail"],
+    "expected_tools": ["g_search", "g_node_detail"],
     "evidence_hints": ["spleen", "biodistribution", "89Zr-nivolumab", "uptake"]
   },
   {

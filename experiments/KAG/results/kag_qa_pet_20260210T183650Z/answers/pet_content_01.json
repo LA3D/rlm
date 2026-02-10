@@ -1,0 +1,25 @@
+{
+  "question_id": "pet_content_01",
+  "question": "What is the radiochemical yield and purity of 89Zr-nivolumab reported in this study?",
+  "type": "content",
+  "answer": "The radiochemical yield and purity of 89Zr-nivolumab reported in this study are:\n\n**Radiochemical Yield**: 53 \u00b1 8% (non-decay-corrected)\n\n**Radiochemical Purity**: \n- 90% for tracer only\n- 87% for carrier-added conditions (both 1 mg/kg and 3 mg/kg)\n\nNote: The radiochemical purity values represent single peak with impurity of high molecular weight species (HMWs).",
+  "iterations": 4,
+  "tools_used": [
+    "g_search",
+    "g_node_detail"
+  ],
+  "tool_counts": {
+    "g_search": 1,
+    "g_node_detail": 4
+  },
+  "cost": 0.060477,
+  "lm_usage": {
+    "total_calls": 4,
+    "prompt_tokens": 12369,
+    "completion_tokens": 1558,
+    "total_tokens": 13927,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.060477
+  }
+}

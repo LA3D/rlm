@@ -1,0 +1,25 @@
+{
+  "question_id": "chemrxiv_content_02",
+  "question": "What are the 50/50 equilibrium temperatures for each anthracene in the TMAnR series?",
+  "type": "content",
+  "answer": "The 50/50 equilibrium temperatures for each anthracene in the TMAnR series are:\n- TMAnMe: 130\u00b0C\n- TMAnEt: 20\u00b0C\n- TMAnnBu: -8.4\u00b0C\n- TMAnnHept: -10\u00b0C\n- TMAnEtPh: -46\u00b0C",
+  "iterations": 5,
+  "tools_used": [
+    "g_search",
+    "g_node_detail"
+  ],
+  "tool_counts": {
+    "g_search": 3,
+    "g_node_detail": 2
+  },
+  "cost": 0.081807,
+  "lm_usage": {
+    "total_calls": 5,
+    "prompt_tokens": 18054,
+    "completion_tokens": 1843,
+    "total_tokens": 19897,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.081807
+  }
+}

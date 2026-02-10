@@ -1,0 +1,25 @@
+{
+  "question_id": "pet_content_02",
+  "question": "What were the K_D values for nivolumab and nivolumab-DFO binding to hPD-1?",
+  "type": "content",
+  "answer": "The K_D values for nivolumab and nivolumab-DFO binding to hPD-1 are:\n- Nivolumab: 3.10 nM\n- Nivolumab-DFO: 3.75 nM",
+  "iterations": 3,
+  "tools_used": [
+    "g_search",
+    "g_node_detail"
+  ],
+  "tool_counts": {
+    "g_search": 1,
+    "g_node_detail": 1
+  },
+  "cost": 0.038907,
+  "lm_usage": {
+    "total_calls": 3,
+    "prompt_tokens": 8234,
+    "completion_tokens": 947,
+    "total_tokens": 9181,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.038907
+  }
+}

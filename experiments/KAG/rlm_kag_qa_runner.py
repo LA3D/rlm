@@ -31,35 +31,26 @@ from experiments.reasoningbank.prototype.tools.dspy_patches import apply_all_pat
 def _build_qa_task() -> str:
     return (
         "Answer the question about a scientific paper using the graph exploration tools.\n"
+        "The context above contains graph stats and section listings — do NOT call\n"
+        "tools just for orientation. Jump straight to the question.\n"
         "\n"
-        "## Available Tools (progressive disclosure)\n"
-        "L0 Overview:\n"
-        "  g_stats()                       - triple count, section/figure/table counts\n"
-        "  g_sections()                    - section titles + DEO rhetorical roles\n"
-        "\n"
-        "L1 Navigation:\n"
-        "  g_section_content(section_iri)  - content nodes in a section (type, preview, page)\n"
-        "  g_node_detail(node_iri)         - full properties of a single node\n"
-        "\n"
-        "L2 Search:\n"
-        "  g_search(query, limit=10)       - full-text search over content\n"
-        "  g_figure_info(figure_iri)       - caption + page + image description\n"
-        "\n"
-        "L3 Relationships:\n"
-        "  g_citations(paragraph_iri)      - bibliography entries cited by paragraph\n"
-        "  g_citing_paragraphs(ref_iri)    - paragraphs that cite a bibliography entry\n"
-        "  g_cross_refs(paragraph_iri)     - figures/tables referred to by paragraph\n"
+        "## Available Tools\n"
+        "  g_section_content(section_iri)  — content nodes in a section (type, preview, page)\n"
+        "  g_node_detail(node_iri)         — full properties of a single node\n"
+        "  g_search(query, limit=10)       — full-text search over content\n"
+        "  g_figure_info(figure_iri)       — caption + page + image description + referring paragraphs\n"
+        "  g_node_refs(node_iri)           — bidirectional relationships (cites/cited-by, refs/referred-by)\n"
         "\n"
         "## Strategy\n"
-        "1. Start with g_sections() for orientation (section titles + roles)\n"
+        "1. Read the section listing in the context to find relevant sections\n"
         "2. Use g_search() to find relevant content by keywords\n"
         "3. Drill into specific nodes with g_section_content() or g_node_detail()\n"
-        "4. Follow cross-references and citations as needed\n"
+        "4. Use g_node_refs() for citations and cross-references (works on any node type)\n"
         "5. SUBMIT(answer='your detailed answer with evidence')\n"
         "\n"
         "## IRI Format\n"
         "Use compact IRIs: 'ex:b_p002_0005' or 'ex:section_01'\n"
-        "For sections, use the IRIs returned by g_sections().\n"
+        "Section IRIs are listed in the context above.\n"
         "\n"
         "## Answer Format\n"
         "Provide a clear, specific answer grounded in the graph content.\n"
@@ -111,9 +102,10 @@ def run_rlm_kag_qa(
 
     logger = JsonlTrajectoryLogger(run_out / "trajectory.jsonl")
 
-    # Load graph ONCE
+    # Load graph ONCE and build context
     toolset = KagQAToolset(str(ttl_path), str(content_store_path))
-    graph_summary = toolset.g_stats()
+    graph_stats = toolset._stats()
+    context = toolset.build_context()
 
     logger.log("run_start", {
         "run_id": run_id,
@@ -123,10 +115,13 @@ def run_rlm_kag_qa(
         "sub_model": sub_model,
         "max_iters": max_iters,
         "questions": len(questions),
-        "graph_stats": graph_summary,
+        "graph_stats": graph_stats,
+        "context_length": len(context),
     })
 
     task = _build_qa_task()
+    # Merge context (graph overview + sections) with task instructions
+    full_context = context + "\n\n" + task
     sub_lm = dspy.LM(sub_model, api_key=api_key, temperature=0.0)
     total_cost = 0.0
     results: list[dict[str, Any]] = []
@@ -140,17 +135,13 @@ def run_rlm_kag_qa(
         operator_counts: dict[str, int] = {}
         tool_counts: dict[str, int] = {}
 
-        # Build per-question tool dict from the shared toolset
+        # Build per-question tool dict from the shared toolset (5 tools)
         qa_tools = {
-            "g_stats": toolset.g_stats,
-            "g_sections": toolset.g_sections,
             "g_section_content": toolset.g_section_content,
             "g_node_detail": toolset.g_node_detail,
             "g_search": toolset.g_search,
             "g_figure_info": toolset.g_figure_info,
-            "g_citations": toolset.g_citations,
-            "g_citing_paragraphs": toolset.g_citing_paragraphs,
-            "g_cross_refs": toolset.g_cross_refs,
+            "g_node_refs": toolset.g_node_refs,
         }
 
         wrapped_dict = _wrap_tools_with_logging(
@@ -181,7 +172,7 @@ def run_rlm_kag_qa(
         })
 
         rlm = dspy.RLM(
-            "question, task, graph_summary -> answer",
+            "context, question -> answer",
             tools=wrapped_tools,
             max_iterations=max_iters,
             max_llm_calls=max_calls,
@@ -194,9 +185,8 @@ def run_rlm_kag_qa(
         out = None
         try:
             out = rlm(
+                context=full_context,
                 question=question_text,
-                task=task,
-                graph_summary=json.dumps(graph_summary),
             )
             answer = str(getattr(out, "answer", ""))
         except Exception as exc:
@@ -209,7 +199,9 @@ def run_rlm_kag_qa(
         trajectory = getattr(out, "trajectory", None) if out is not None else None
         iteration_count = len(trajectory) if trajectory else 0
 
-        # Log trajectory entries
+        # Log trajectory entries with error classification
+        sandbox_crashes = 0
+        tool_binding_errors = 0
         if trajectory:
             for idx, entry in enumerate(trajectory):
                 reasoning = (entry.get("reasoning", "") if isinstance(entry, dict)
@@ -218,13 +210,29 @@ def run_rlm_kag_qa(
                         else getattr(entry, "code", "")) or ""
                 output = (entry.get("output", "") if isinstance(entry, dict)
                           else getattr(entry, "output", "")) or ""
+                output_str = str(output)[:2000]
+                has_error = "[Error]" in output_str
+                error_type = None
+                if has_error:
+                    if "NameError" in output_str or "is not defined" in output_str:
+                        error_type = "tool_binding_lost"
+                        tool_binding_errors += 1
+                    elif "Unhandled async error" in output_str:
+                        error_type = "sandbox_crash"
+                        sandbox_crashes += 1
+                    elif "TypeError" in output_str:
+                        error_type = "type_error"
+                    else:
+                        error_type = "unknown"
                 logger.log("iteration", {
                     "run_id": run_id,
                     "question_id": qid,
                     "iteration": idx + 1,
                     "reasoning": str(reasoning)[:2000],
                     "code": str(code)[:4000],
-                    "output": str(output)[:2000],
+                    "output": output_str,
+                    "has_error": has_error,
+                    "error_type": error_type,
                 })
 
         question_cost = lm_usage.get("total_cost", 0.0)
@@ -257,6 +265,8 @@ def run_rlm_kag_qa(
             "tools_used": tools_used,
             "cost": question_cost,
             "answer_length": len(answer),
+            "sandbox_crashes": sandbox_crashes,
+            "tool_binding_errors": tool_binding_errors,
         })
 
         print(f"  -> {iteration_count} iters, ${question_cost:.3f}, {len(tools_used)} tools: {tools_used}")
