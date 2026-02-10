@@ -103,17 +103,14 @@ def _wrap_tools_with_logging(
                 result = __fn(*args, **kwargs)
             except Exception as exc:
                 error = str(exc)
-                logger.log(
-                    "tool_result",
-                    {
-                        "run_id": run_id,
-                        "tool": __name,
-                        "error": error,
-                        "result_size": 0,
-                        "result_preview": f"EXCEPTION: {type(exc).__name__}: {exc}",
-                    },
-                )
-                raise  # Let REPL show traceback instead of misleading empty dict
+                # Return error dict instead of re-raising — re-raising crashes
+                # the Pyodide sandbox and wipes all tool bindings from the REPL.
+                result = {
+                    "TOOL_ERROR": f"{type(exc).__name__}: {exc}",
+                    "error": str(exc),
+                    "conforms": False,
+                    "total_violations": -1,
+                }
             result_len = len(str(result))
             if result_len > 4000:
                 leakage.large_returns += 1
