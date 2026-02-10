@@ -1,294 +1,303 @@
-# KAG: Agentic Knowledge-Augmented Generation (RLM-Based)
+# KAG: Agentic Search Indexer for Progressive Disclosure
 
 ## Overview
 
-This experiment implements **agentic document understanding** using RLM principles to build hierarchical knowledge graphs from scientific papers. Unlike the original KAG architecture which uses LLM workflow patterns, this is a **fully agentic multi-agent system** with local memory layers.
+KAG is the **write side** of an agentic search system. It builds DoCO-based
+knowledge graphs from scientific papers (OCR markdown + figures), producing
+SHACL-conformant RDF that gets loaded into a SPARQL graph store. The **read
+side** uses the same RLM progressive disclosure pattern (from `experiments/
+reasoningbank/`) to query the store and answer questions.
 
-**Goal:** Build document graphs agentically from DeepSeek OCR outputs, enabling multi-hop reasoning and figure understanding.
+```
+WRITE (KAG Indexer)                          READ (RLM Retrieval)
 
-## Why This Experiment?
+Document (PDF/OCR)                           User question
+  -> RLM agent builds DoCO graph               -> RLM agent queries graph store
+    -> SHACL validation loop                     -> g_stats / g_sections / g_search
+      -> SPARQL graph store  ─────────────>        -> bounded answers with evidence
 
-### Original KAG (from KAG notebooks)
-- LLM workflow: `text → llm.extract_entities() → graph.add()`
-- Hardcoded extraction rules
-- Domain-specific (requires rewriting for new domains)
-- No memory/learning
+ReasoningBank provides strategies for BOTH sides
+```
 
-### RLM-Based KAG (This Experiment)
-- Multi-agent reasoning: Agents decide structure, not hardcoded rules
-- Memory layers (L0-L4): Deterministic analysis → Learned strategies
-- Domain-agnostic: Same agents work on chemistry, medical, technical docs
-- Handle-based: No payload leakage, bounded access
-- Learns from failures: Accumulates parsing strategies
+## Status
+
+### Implemented
+
+| Component | File | Status |
+|---|---|---|
+| Deterministic baseline | `agentic_kag_runner.py`, `agentic_doc_agents.py` | Done |
+| Bounded tool surface | `agentic_doc_tools.py` | Done |
+| Symbolic handle store | `symbolic_handles.py` | Done |
+| Memory layers (L0-L2) | `kag_memory.py` | Done |
+| DoCO + KAG ontology | `kag_ontology/kag_document_ext.ttl` | Done |
+| SHACL shapes | `kag_ontology/kag_document_shapes.ttl` | Done |
+| **RLM context-first runner** | **`rlm_kag_runner.py`** | **Done** |
+| RLM entrypoint | `run_kag_1.py` | Done |
+| Trajectory dump | `dump_trajectory.py` | Done |
+| DSPy patches | `../reasoningbank/prototype/tools/dspy_patches.py` | Done |
+
+### Validated (Run 3, 2026-02-10)
+
+| Metric | Value |
+|---|---|
+| SHACL conforms | **true** |
+| Violations | 0 |
+| Triples | 741 |
+| Nodes | 126 (1 Document, 11 Sections, 78 Paragraphs, 9 Figures, 9 Captions, 3 Tables, 4 Formulas) |
+| RLM iterations | 9 / 20 max |
+| Cost | $0.30 |
+| Leakage | 0 large returns, 0 stdout chars |
+
+### Planned
+
+| Component | Description |
+|---|---|
+| `inspect_figure` tool | Vision sub-LM describes figures at index time |
+| `ask_figure` tool | Vision sub-LM answers questions about figures at retrieval time |
+| Local SPARQL mode | `SPARQLToolsV2` with `graph.query()` backend |
+| Named graph store | Multiple documents per store, one graph per document |
+| ReasoningBank integration | Seed strategies from run trajectories, closed loop |
+| Retrieval agent | RLM agent with SPARQL tools pointed at graph store |
 
 ## Architecture
 
-### Multi-Agent Pipeline
+### Two-Sided Design
+
+**KAG Indexer (write)** takes a document and produces a knowledge graph:
 
 ```
-Input: DeepSeek OCR Markdown
-    ↓
-┌─────────────────────────────────────┐
-│ L0: OCR Sense (Deterministic)       │ ← Fast metadata extraction
-│ - Page count, detection types       │ ← No LLM needed
-│ - Inferred document type            │
-└─────────────────────────────────────┘
-    ↓
-┌─────────────────────────────────────┐
-│ Agent 1: StructureParser            │ ← Reasons about hierarchy
-│ - Parses detection tags             │ ← Builds DocumentTree
-│ - Returns: DocumentTreeRef (handle) │
-└─────────────────────────────────────┘
-    ↓
-┌─────────────────────────────────────┐
-│ Agent 2: HierarchicalSummarizer     │ ← Multi-level summaries
-│ - Bottom-up (leaf → root)           │ ← Coarse → fine
-│ - Returns: SummaryTreeRef (handle)  │
-└─────────────────────────────────────┘
-    ↓
-┌─────────────────────────────────────┐
-│ Agent 3: RelationExtractor          │ ← Links elements
-│ - Section ↔ Figure ↔ Table          │ ← Semantic relations
-│ - Returns: RelationGraphRef (handle)│
-└─────────────────────────────────────┘
-    ↓
-┌─────────────────────────────────────┐
-│ Agent 4: KGConstructor              │ ← Builds RDF graph
-│ - Document + Fact graphs            │ ← PROV provenance
-│ - Returns: KnowledgeGraphRef        │
-└─────────────────────────────────────┘
-    ↓
-┌─────────────────────────────────────┐
-│ Judge: StructureValidator           │ ← Quality check
-│ - Validates completeness            │ ← Learns from failures
-│ - Returns: ValidationReport         │
-└─────────────────────────────────────┘
+document.md (40KB OCR markdown)
+  -> DSPy RLM agent (context=document, task=goal)
+    -> Tools: op_assert_type, op_set_single_literal, op_add_iri_link,
+              validate_graph, graph_stats
+    -> Agent parses OCR tags, builds DoCO hierarchy, validates with SHACL
+    -> Output: knowledge_graph.ttl (SHACL-conformant)
 ```
 
-### Memory Layers (Following reasoningbank pattern)
+**RLM Retrieval (read)** takes a question and queries the graph:
 
-**L0: OCR Sense** (Deterministic, Fast)
-```python
-{
-    "page_count": 8,
-    "detection_types": ["title", "text", "equation", "image"],
-    "inferred_type": "research_paper",
-    "has_equations": True
-}
+```
+User question
+  -> RLM agent (progressive disclosure)
+    -> L0: g_stats()           -> 741 triples, 11 sections, 9 figures
+    -> L1: g_sections()        -> find "Reaction Kinetics" on p5
+    -> L2: g_section_content() -> 10 nodes with text previews
+    -> L2: g_search("TCNE")    -> 6 hits across the paper
+    -> L1: g_captions()        -> Figure 5 = kinetic traces
+    -> Synthesize answer from bounded retrievals
 ```
 
-**L1: Document Schema** (Constraints)
-```python
-{
-    "type": "research_paper",
-    "expected_structure": {
-        "Document": ["Section"],
-        "Section": ["Paragraph", "Figure", "Equation"]
-    }
-}
-```
+### Context-First RLM Pattern
 
-**L2: Procedural Memory** (Learned Strategies)
-```python
-{
-    "pattern": "chemistry_paper_with_equations",
-    "parse_steps": ["Group equations with text", "Link figures by proximity"],
-    "success_count": 15
-}
-```
+The key insight: **context = data, task = goal**. The full document markdown is
+passed as the `document` input to DSPy RLM. The agent explores it via REPL code
+(`print(document[:2000])`, regex, split) rather than through OCR exploration
+tools. Tools are limited to graph construction + SHACL validation.
 
-**L3: Materialized Guides** (Packed Summaries)
-```
-"8-page chemistry paper. IMRaD format. 12 equations, 6 figures."
-```
-
-**L4: Trajectories** (Logged, not injected)
-```jsonl
-{"event": "agent_start", "agent": "StructureParser", ...}
-{"event": "tool_call", "tool": "parse_detection_tags", ...}
-```
-
-## RLM Principles (Following owl/ patterns)
-
-### Handles Not Payloads
+This replaces the original approach where `context` contained procedural
+instructions telling the LLM how to build the graph step-by-step.
 
 ```python
-# ❌ BAD: Payload leakage
-page_content = file.read_text()  # 10KB text
-agent(page_content=page_content)  # Injected into context!
+# Old approach (broken heuristics)
+context = "1) Use ocr_list_blocks() to see all blocks..."
+task = "Build a DoCO graph using ocr_list_blocks..."
 
-# ✅ GOOD: Handle-based
-page_ref = blob_store.store(file.read_text())  # ContentRef
-agent(page_ref=page_ref)  # Only handle (50 bytes) in context
+# New approach (context-first)
+document = Path("document.md").read_text()  # 40KB OCR markdown
+task = "Build a DoCO graph from `document`. Namespaces: ... SHACL: ..."
+rlm = dspy.RLM("document, task -> answer", tools=[graph_ops...])
+result = rlm(document=document, task=task)
 ```
 
-### Bounded Access
+### Figure Handling (RLM Progressive Disclosure)
 
-```python
-# Tools return bounded previews, not full content
-def get_page_content(page_ref: ContentRef, max_chars: int = 500) -> str:
-    full_content = blob_store.retrieve(page_ref)
-    return full_content[:max_chars]  # Bounded!
+Figures follow the handles-not-dumps principle:
+
+```
+L0  Caption text + page + bbox       (already in KG, free)
+     -> "Figure 3. Dynamic equilibrium of TMAnR..."
+
+L1  inspect_figure(figure_id)         (tool call -> vision sub-LM)
+     -> "Bar chart showing K_eqCT values for 4 TMAnR variants..."
+
+L2  ask_figure(figure_id, question)   (tool call -> vision sub-LM + question)
+     -> "K_eqCT for TMAnnBu is approximately 80 M^-1"
 ```
 
-### Safe Repr
+At **index time**, KAG calls `inspect_figure` to generate L1 descriptions
+stored as `kag:imageDescription` in the KG. At **retrieval time**, the agent
+searches descriptions via SPARQL, and calls `ask_figure` only for deeper
+follow-up.
 
-```python
-@dataclass
-class ContentRef:
-    ref_id: str
-    size_bytes: int
+### Memory (ReasoningBank Pattern)
 
-    def __repr__(self):
-        # Safe - doesn't leak payload
-        return f"ContentRef({self.ref_id}, {self.size_bytes}B)"
+Strategies extracted from indexing trajectories, stored as `Item` objects:
+
+| src | Example |
+|---|---|
+| `seed` | "Sections need hasContentRef (kind: + 16 hex SHA256)" |
+| `failure` | "validate_graph needs exact file paths, not guessable names" |
+| `success` | "Parse sub_title blocks to identify sections, assign content by position" |
+| `pattern` | "table_title captions describe Tables, not Figures" |
+| `observation` | "Figure 1 shows reaction scheme + crystal structures" |
+
+The closed loop:
+
+```
+1. RETRIEVE   mem.search("document graph DoCO sections")     -> [metadata]
+2. INJECT     L0(doc sense) + L1(schema) + L2(strategies)    -> enriched task
+3. RUN        RLM(document=md, task=goal, tools=graph_ops)   -> KG + trajectory
+4. JUDGE      validate_graph() -> conforms? + structural checks
+5. EXTRACT    from trajectory: what worked, what failed       -> [Item(...)]
+6. STORE      mem.consolidate(items, dedup=True)              -> ready for next doc
 ```
 
-### Trajectory Logging
+## DoCO-Based Document Graphs
 
-```python
-logger.log("tool_call", {
-    "tool": "parse_detection_tags",
-    "page_ref": str(page_ref),  # Handle, not content
-    "tags_found": len(tags)
-})
-```
+We use SPAR's DoCO ontology with a local KAG extension namespace. Do not rely
+on network dereferencing of `owl:imports` -- load vendored files:
 
-## File Structure (Following owl/ and reasoningbank/)
+- `ontology/doco.ttl` -- Document Components Ontology
+- `ontology/deo.ttl` -- Discourse Elements Ontology
+- `experiments/KAG/kag_ontology/kag_document_ext.ttl` -- KAG extensions
+- `experiments/KAG/kag_ontology/kag_document_shapes.ttl` -- SHACL shapes
+
+### Namespaces
+
+| Prefix | URI | Purpose |
+|---|---|---|
+| `doco:` | `http://purl.org/spar/doco/` | Document, Section, SectionTitle, Paragraph, Table, Figure, Formula |
+| `deo:` | `http://purl.org/spar/deo/` | Caption |
+| `kag:` | `http://la3d.local/kag#` | contains, containsAsHeader, describes, hasContentRef, pageNumber, order, hasBBox, mainText |
+| `ex:` | `http://la3d.local/kag/doc/` | Instance namespace |
+
+### SHACL Constraints
+
+- Document must contain >=1 Section (via `kag:contains`)
+- Section must have exactly 1 SectionTitle (via `kag:containsAsHeader`) and >=1 child
+- All content nodes must be inside a Section
+- Caption must describe exactly 1 Figure or Table (via `kag:describes`)
+- `hasContentRef` pattern: `kind:` + 16 hex chars (SHA256 hash)
+- `pageNumber` required on all nodes (`xsd:integer`, >=1)
+- `hasBBox` required on all content nodes including Figures
+
+## File Structure
 
 ```
 KAG/
-├── README.md                      # This file
-├── test_data/                     # Test documents (copied from techindex-exp)
-│   ├── chemrxiv_ocr/
-│   ├── pet_test_ocr/
-│   └── omd_test_ocr/
+├── README.md                          # This file
 │
-├── Core Components
-├── agentic_kag_runner.py          # Main runner (like agentic_owl_runner.py)
-├── agentic_doc_agents.py          # 5 agents (Parser, Summarizer, etc.)
-├── agentic_doc_tools.py           # Bounded tools for agents
-├── kag_memory.py                  # Memory layers (L0-L4)
-├── symbolic_handles.py            # Handle store (similar to owl/)
+├── Core (Implemented)
+├── agentic_kag_runner.py              # Run 0: deterministic baseline runner
+├── agentic_doc_agents.py              # Run 0: deterministic structure parser
+├── agentic_doc_tools.py               # Bounded tool surface (OCR + graph ops)
+├── rlm_kag_runner.py                  # Run 1: DSPy RLM context-first runner
+├── kag_memory.py                      # Memory layers (L0-L2)
+├── symbolic_handles.py                # Handle-based blob store
+├── dump_trajectory.py                 # Trajectory JSONL -> markdown report
 │
-├── Schemas & Strategies
-├── document_schemas.py            # L1 schemas (research_paper, etc.)
-├── parsing_strategies.py          # L2 learned strategies
+├── Entrypoints
+├── run_kag_0.py                       # Run deterministic baseline
+├── run_kag_1.py                       # Run RLM context-first agent
 │
-├── Experiment Runs
-├── run_kag_0.py                   # Baseline: Single agent
-├── run_kag_1.py                   # + L0 optimization
-├── run_kag_2.py                   # + L1 schema
-├── run_kag_3.py                   # + L2 strategy learning
-├── run_kag_full.py                # Full 5-agent pipeline
+├── Ontology
+├── kag_ontology/
+│   ├── kag_document_ext.ttl           # DoCO extensions (handles, bbox, etc.)
+│   └── kag_document_shapes.ttl        # SHACL shapes for validation
+│
+├── Test Data
+├── test_data/
+│   ├── chemrxiv_ocr/                  # 8-page chemistry paper (page_*.md + document.md)
+│   ├── chemrxiv_figures/              # Cropped figure PNGs (6 files, 468KB)
+│   ├── pet_test_ocr/                  # PET imaging paper
+│   └── omd_test_ocr/                  # Materials science paper
 │
 ├── Tests
-├── test_structure_parser.py       # Unit tests for Agent 1
-├── test_rlm_compliance.py         # Leakage tracking
+├── test_rlm_compliance.py             # Leakage + correctness tests (baseline)
+├── test_structure_parser.py           # Structure parsing tests
 │
-└── results/                       # Experiment outputs
-    ├── chemrxiv/
-    │   ├── blobs/                 # Content behind handles
-    │   ├── trajectory.jsonl       # Execution log
-    │   ├── document_tree.json     # Built structure
-    │   └── knowledge_graph.ttl    # RDF graph
-    └── pet_test/
+└── results/                           # Run outputs (gitignored)
+    └── run_kag_1_<timestamp>/
+        ├── knowledge_graph.ttl        # SHACL-conformant DoCO graph
+        ├── trajectory.jsonl           # Full RLM iteration trace
+        └── summary.json               # Metrics, costs, validation
 ```
 
-## Experiment Progression
+## Running
 
-### Run 0: Baseline (Prove RLM Compliance)
-- Single agent: StructureParser
-- Minimal memory (no L2 strategies)
-- **Goal:** Parse chemrxiv into DocumentTree without payload leakage
-- **Metrics:** stdout_chars < 2000, large_returns = 0
+```bash
+source ~/uvws/.venv/bin/activate
 
-### Run 1: OCR Sense Optimization
-- Add L0 analysis for fast orientation
-- Cache detection type counts
-- **Goal:** Reduce initial exploration overhead by 50%
+# Run 0: Deterministic baseline
+python experiments/KAG/run_kag_0.py
 
-### Run 2: Schema Guidance
-- Add L1 DocumentSchema per inferred type
-- Schema validates expected structure
-- **Goal:** Catch structural errors early
+# Run 1: RLM context-first agent (requires ANTHROPIC_API_KEY)
+python experiments/KAG/run_kag_1.py \
+  --ocr-dir experiments/KAG/test_data/chemrxiv_ocr \
+  --out-dir experiments/KAG/results
 
-### Run 3: Strategy Learning
-- Add L2 procedural memory
-- Extract patterns from successful parses
-- **Goal:** Reuse strategies across similar documents
+# Dump trajectory as markdown report
+python experiments/KAG/dump_trajectory.py experiments/KAG/results/run_kag_1_*/
 
-### Run Full: Complete Pipeline
-- All 5 agents + Judge
-- Full memory layers (L0-L4)
-- **Goal:** Build complete KG with provenance
-
-## Integration Points
-
-### With Original KAG Notebooks
-```python
-# Use agentic output in KAG notebooks
-from rlm.experiments.KAG.agentic_kag_runner import run_pipeline
-
-result = run_pipeline("test_data/chemrxiv_ocr")
-document_tree = result["document_tree"]  # Handle
-
-# Build LLMFriSPG on top
-build_llmfrispg(document_tree)
+# Query the output graph
+python -c "
+from rdflib import Graph
+g = Graph()
+g.parse('experiments/KAG/results/run_kag_1_*/knowledge_graph.ttl')
+for row in g.query('''
+    PREFIX doco: <http://purl.org/spar/doco/>
+    PREFIX kag: <http://la3d.local/kag#>
+    SELECT ?title WHERE {
+        ?sec a doco:Section .
+        ?sec kag:containsAsHeader ?st .
+        ?st kag:mainText ?title .
+    }
+'''):
+    print(row.title)
+"
 ```
 
-### With RLM+OWL System
-```python
-# Store learned strategies in OWL memory
-from rlm.experiments.owl.owl_memory import OwlMemoryStore
+## Experiment History
 
-memory = OwlMemoryStore()
-memory.add_procedure(
-    title="Parse chemistry papers",
-    compiled_fields=strategy.parse_steps,
-    content_ref=blob_store.store(full_strategy)
-)
-```
+### Run 0: Deterministic Baseline
 
-## Success Criteria
+Procedural pipeline (no LLM). Proves tool surface, SHACL validation,
+trajectory logging. Conforms on simple documents but uses hardcoded heuristics
+for section assignment and caption linking.
 
-### RLM Compliance
-- [ ] All content behind handles
-- [ ] Bounded access (max_chars enforced)
-- [ ] Safe repr() - no payload leakage
-- [ ] Trajectory logging complete
-- [ ] stdout_chars < 2000
-- [ ] large_returns = 0
+### Run 1: RLM Context-First (3 iterations)
 
-### Agentic Behavior
-- [ ] No hardcoded rules (agents reason)
-- [ ] Domain-agnostic (works on chem, medical, tech docs)
-- [ ] Learns strategies (L2 accumulation)
-- [ ] Self-validates (Judge catches errors)
+| | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|
+| Context | Procedural instructions | Document markdown | Document markdown |
+| Task | "use ocr_list_blocks..." | Goal + SHACL constraints | Goal + SHACL + **validation paths** |
+| Conforms | false (20 violations) | false (9 violations) | **true (0 violations)** |
+| Triples | 831 | 842 | 741 |
+| Iterations | 15 | 15 | 9 |
+| Cost | $0.61 | $0.61 | $0.30 |
+| Trajectory | empty (logging bug) | full (bug fixed) | full |
 
-### Output Quality
-- [ ] Correct hierarchy (Document → Section → Paragraph)
-- [ ] Figures linked to captions
-- [ ] Equations grouped with text
-- [ ] Multi-level summaries (coarse → fine)
-- [ ] Full provenance (fact → source)
+Key learnings:
+- Context = data, task = goal (not procedural instructions)
+- Agent needs exact file paths for `validate_graph()`
+- Agent needs to know `hasBBox` is required on Figures
+- Deno sandbox works (no LocalPythonInterpreter needed)
+- Agent self-corrects when it gets real SHACL violation feedback
 
 ## Next Steps
 
-1. ✅ Copy test data from techindex-exp
-2. ⬜ Implement symbolic_handles.py (following owl/)
-3. ⬜ Implement kag_memory.py (L0-L4 layers)
-4. ⬜ Implement agentic_doc_tools.py (bounded tools)
-5. ⬜ Implement Agent 1 (StructureParser)
-6. ⬜ Create run_kag_0.py baseline experiment
-7. ⬜ Test on chemrxiv → validate RLM compliance
-8. ⬜ Implement remaining agents (2-5)
-9. ⬜ Test on all three papers
-10. ⬜ Extract learned strategies → L2 memory
+1. Add `inspect_figure` / `ask_figure` vision tools to indexer
+2. Add `kag:imageDescription` and `kag:imagePath` to KG during indexing
+3. Add local graph mode to `SPARQLToolsV2` (swap `urlopen` for `graph.query()`)
+4. Build retrieval agent with bounded SPARQL tools
+5. Named graph store for multi-document indexing
+6. Wire ReasoningBank: seed strategies from run trajectories, closed loop
+7. Test on pet_test_ocr and omd_test_ocr documents
 
 ## References
 
 - Original KAG: https://arxiv.org/html/2409.13731v3
-- DeepSeek-OCR-2: Uses semantic detection tags for structure
+- DoCO: http://purl.org/spar/doco/ (Document Components Ontology)
+- DEO: http://purl.org/spar/deo/ (Discourse Elements Ontology)
 - RLM patterns: `../owl/` and `../reasoningbank/`
-- PROV-O: W3C provenance ontology
+- DSPy RLM: `dspy.predict.rlm` (DSPy 3.1.3)

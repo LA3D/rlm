@@ -1,0 +1,68 @@
+@prefix kag: <http://la3d.local/kag#> .
+@prefix doco: <http://purl.org/spar/doco/> .
+@prefix deo: <http://purl.org/spar/deo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+<http://la3d.local/kag/ontology> a owl:Ontology ;
+    rdfs:label "KAG DoCO Extension"@en ;
+    rdfs:comment "Small extension for handle-first document graph construction."@en ;
+    owl:imports <http://purl.org/spar/doco> ,
+                <http://purl.org/spar/deo> .
+
+kag:hasContentRef a owl:DatatypeProperty ;
+    rdfs:label "has content ref"@en ;
+    rdfs:comment "Handle id to content in blob storage."@en ;
+    rdfs:range xsd:string .
+
+kag:mainText a owl:DatatypeProperty ;
+    rdfs:label "main text"@en ;
+    rdfs:comment "Short text summary/title; not full payload."@en ;
+    rdfs:range xsd:string .
+
+kag:detectionLabel a owl:DatatypeProperty ;
+    rdfs:label "detection label"@en ;
+    rdfs:range xsd:string .
+
+kag:hasBBox a owl:DatatypeProperty ;
+    rdfs:label "bbox"@en ;
+    rdfs:comment "Normalized bounding box JSON-like string [x1,y1,x2,y2]."@en ;
+    rdfs:range xsd:string .
+
+kag:pageNumber a owl:DatatypeProperty ;
+    rdfs:label "page number"@en ;
+    rdfs:range xsd:integer .
+
+kag:order a owl:DatatypeProperty ;
+    rdfs:label "order"@en ;
+    rdfs:range xsd:integer .
+
+kag:imageDescription a owl:DatatypeProperty ;
+    rdfs:label "image description"@en ;
+    rdfs:comment "Vision model description of a figure image."@en ;
+    rdfs:range xsd:string .
+
+kag:imagePath a owl:DatatypeProperty ;
+    rdfs:label "image path"@en ;
+    rdfs:comment "Relative file path to the extracted figure image."@en ;
+    rdfs:range xsd:string .
+
+kag:contains a owl:ObjectProperty ;
+    rdfs:label "contains"@en ;
+    rdfs:comment "Containment relation used by baseline KAG document graph."@en .
+
+kag:containsAsHeader a owl:ObjectProperty ;
+    rdfs:label "contains as header"@en ;
+    rdfs:comment "Links section to section header/title node."@en .
+
+kag:describes a owl:ObjectProperty ;
+    rdfs:label "describes"@en ;
+    rdfs:comment "Links caption to the described figure or table."@en .
+
+kag:sourcePage a owl:ObjectProperty ;
+    rdfs:label "source page"@en ;
+    rdfs:subPropertyOf prov:wasDerivedFrom .
+
