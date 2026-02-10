@@ -517,7 +517,17 @@ class KagDocToolset:
         "summary": DEO.Abstract,
     }
 
-    REFERENCES_TITLES = {"references", "bibliography", "literature cited", "works cited"}
+    REFERENCES_TITLES = {"references", "bibliography", "literature cited", "works cited",
+                         "notes and references"}
+
+    @staticmethod
+    def _clean_title(raw: str) -> str:
+        """Strip markdown heading markers, numbering, and whitespace from a title."""
+        # Strip markdown heading markers (## , # , ### , etc.)
+        cleaned = re.sub(r"^#+\s*", "", raw.strip()).strip()
+        # Strip leading numbering (1. , 2.1 , etc.)
+        cleaned = re.sub(r"^[\d.]+\s*", "", cleaned).strip()
+        return cleaned.lower()
 
     def _classify_sections(self) -> dict[str, Any]:
         """Add DEO rhetorical types to sections based on title text."""
@@ -528,18 +538,14 @@ class KagDocToolset:
             if header is None:
                 continue
             title_text = str(self.graph.value(header, KAG.mainText) or "")
-            title_lower = title_text.strip().lower()
-            # Check for exact or prefix match against DEO map
+            title_lower = self._clean_title(title_text)
+            # Check for exact match against DEO map
             deo_cls = self.TITLE_TO_DEO.get(title_lower)
-            if deo_cls is None:
-                # Try prefix matching for numbered sections ("1. Introduction")
-                cleaned = re.sub(r"^[\d.]+\s*", "", title_lower).strip()
-                deo_cls = self.TITLE_TO_DEO.get(cleaned)
             if deo_cls:
                 self.graph.add((section, RDF.type, deo_cls))
                 classified += 1
             # Check for references section -> retype as ListOfReferences
-            if title_lower in self.REFERENCES_TITLES or re.sub(r"^[\d.]+\s*", "", title_lower).strip() in self.REFERENCES_TITLES:
+            if title_lower in self.REFERENCES_TITLES:
                 self.graph.add((section, RDF.type, DOCO.ListOfReferences))
                 references_retyped += 1
         return {"classified": classified, "references_retyped": references_retyped}
