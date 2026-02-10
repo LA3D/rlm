@@ -1,0 +1,118 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix kag: <http://la3d.local/kag#> .
+
+# ── SHACL Shapes for G_entity (SIO + QUDT layer) ─────────────────────
+# Validates entity extraction graph: material entities, chemical entities,
+# processes, measured values with provenance links back to G_doc.
+
+# ── Every SIO Entity must have a label and provenance ────────────────
+
+kag:EntityShape a sh:NodeShape ;
+    sh:targetClass sio:Entity ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Every entity must have an rdfs:label. Fix: op_set_literal(entity_iri, 'rdfs:label', 'name of entity')."
+    ] ;
+    sh:property [
+        sh:path prov:wasDerivedFrom ;
+        sh:minCount 1 ;
+        sh:message "Every entity must link to its G_doc source span via prov:wasDerivedFrom. Fix: op_add_link(entity_iri, 'prov:wasDerivedFrom', 'ex:b_pNNN_NNNN')."
+    ] .
+
+# ── Material entities inherit Entity constraints ─────────────────────
+
+kag:MaterialEntityShape a sh:NodeShape ;
+    sh:targetClass sio:MaterialEntity ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "MaterialEntity must have an rdfs:label. Fix: op_set_literal(entity_iri, 'rdfs:label', 'name')."
+    ] ;
+    sh:property [
+        sh:path prov:wasDerivedFrom ;
+        sh:minCount 1 ;
+        sh:message "MaterialEntity must link to G_doc source via prov:wasDerivedFrom. Fix: op_add_link(entity_iri, 'prov:wasDerivedFrom', doc_node_iri)."
+    ] .
+
+kag:ChemicalEntityShape a sh:NodeShape ;
+    sh:targetClass sio:ChemicalEntity ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "ChemicalEntity must have an rdfs:label (e.g., compound name, IUPAC name). Fix: op_set_literal(entity_iri, 'rdfs:label', 'TCNE')."
+    ] ;
+    sh:property [
+        sh:path prov:wasDerivedFrom ;
+        sh:minCount 1 ;
+        sh:message "ChemicalEntity must link to G_doc source via prov:wasDerivedFrom. Fix: op_add_link(entity_iri, 'prov:wasDerivedFrom', doc_node_iri)."
+    ] .
+
+# ── Process must have at least one participant ───────────────────────
+
+kag:ProcessShape a sh:NodeShape ;
+    sh:targetClass sio:Process ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Process must have an rdfs:label. Fix: op_set_literal(process_iri, 'rdfs:label', 'reaction name')."
+    ] ;
+    sh:property [
+        sh:path prov:wasDerivedFrom ;
+        sh:minCount 1 ;
+        sh:message "Process must link to G_doc source via prov:wasDerivedFrom."
+    ] ;
+    sh:property [
+        sh:path sio:has-participant ;
+        sh:minCount 1 ;
+        sh:message "Process should have at least one participant. Fix: op_add_link(process_iri, 'sio:has-participant', entity_iri)."
+        # sh:severity sh:Warning  -- uncomment to make this a warning
+    ] .
+
+# ── MeasuredValue must have numeric value + unit ─────────────────────
+
+kag:MeasuredValueShape a sh:NodeShape ;
+    sh:targetClass sio:MeasuredValue ;
+    sh:property [
+        sh:path qudt:numericValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MeasuredValue must have exactly one qudt:numericValue. Fix: op_set_literal(mv_iri, 'qudt:numericValue', '1.637', datatype_iri='xsd:double')."
+    ] ;
+    sh:property [
+        sh:path qudt:unit ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "MeasuredValue must have exactly one qudt:unit. Fix: op_set_link(mv_iri, 'qudt:unit', 'unit:ANGSTROM')."
+    ] ;
+    sh:property [
+        sh:path prov:wasDerivedFrom ;
+        sh:minCount 1 ;
+        sh:message "MeasuredValue must link to G_doc source via prov:wasDerivedFrom."
+    ] .
+
+# ── QuantityValue (QUDT native pattern) ──────────────────────────────
+
+kag:QuantityValueShape a sh:NodeShape ;
+    sh:targetClass qudt:QuantityValue ;
+    sh:property [
+        sh:path qudt:numericValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "QuantityValue must have exactly one qudt:numericValue. Fix: op_set_literal(qv_iri, 'qudt:numericValue', '25.0', datatype_iri='xsd:double')."
+    ] ;
+    sh:property [
+        sh:path qudt:unit ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "QuantityValue must have exactly one qudt:unit. Fix: op_set_link(qv_iri, 'qudt:unit', 'unit:DEG_C')."
+    ] .

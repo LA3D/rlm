@@ -1,0 +1,53 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix cito: <http://purl.org/spar/cito/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix kag: <http://la3d.local/kag#> .
+
+# ── SHACL Shapes for G_claim (SIO + PROV + CiTO layer) ──────────────
+# Validates claim extraction graph: propositions, evidence, and their
+# provenance links to G_doc and G_entity.
+
+# ── Proposition must be about an entity and grounded to G_doc ────────
+
+kag:PropositionShape a sh:NodeShape ;
+    sh:targetClass sio:Proposition ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Proposition must have an rdfs:label (short claim text). Fix: op_set_literal(prop_iri, 'rdfs:label', 'claim text', graph='claim')."
+    ] ;
+    sh:property [
+        sh:path sio:is-about ;
+        sh:minCount 1 ;
+        sh:message "Proposition must link to the entity it is about via sio:is-about. Fix: op_add_link(prop_iri, 'sio:is-about', entity_iri, graph='claim')."
+    ] ;
+    sh:property [
+        sh:path prov:wasDerivedFrom ;
+        sh:minCount 1 ;
+        sh:message "Proposition must link to G_doc source span via prov:wasDerivedFrom. Fix: op_add_link(prop_iri, 'prov:wasDerivedFrom', 'ex:b_pNNN_NNNN', graph='claim')."
+    ] .
+
+# ── Evidence must support a proposition and be grounded ──────────────
+
+kag:EvidenceShape a sh:NodeShape ;
+    sh:targetClass sio:Evidence ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Evidence must have an rdfs:label (evidence summary). Fix: op_set_literal(ev_iri, 'rdfs:label', 'summary text', graph='claim')."
+    ] ;
+    sh:property [
+        sh:path sio:is-evidence-for ;
+        sh:minCount 1 ;
+        sh:message "Evidence must link to the proposition it supports via sio:is-evidence-for. Fix: op_add_link(ev_iri, 'sio:is-evidence-for', proposition_iri, graph='claim')."
+    ] ;
+    sh:property [
+        sh:path prov:wasDerivedFrom ;
+        sh:minCount 1 ;
+        sh:message "Evidence must link to G_doc source span via prov:wasDerivedFrom. Fix: op_add_link(ev_iri, 'prov:wasDerivedFrom', 'ex:b_pNNN_NNNN', graph='claim')."
+    ] .

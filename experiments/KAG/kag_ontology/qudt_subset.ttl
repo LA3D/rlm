@@ -1,0 +1,171 @@
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ── QUDT Subset for KAG Entity Extraction ────────────────────────────
+# Vendored subset of QUDT (Quantities, Units, Dimensions and Types).
+# Full ontology: http://qudt.org/
+# Only quantity kinds and units relevant to chemistry/biology papers.
+
+<http://la3d.local/kag/ontology/qudt-subset> a owl:Ontology ;
+    rdfs:label "QUDT Subset for KAG"@en ;
+    rdfs:comment "Minimal QUDT subset for scientific measurement representation."@en .
+
+# ── Core Schema Classes ──────────────────────────────────────────────
+
+qudt:QuantityValue a owl:Class ;
+    rdfs:label "quantity value"@en ;
+    rdfs:comment "A quantity value pairs a numeric value with a unit."@en .
+
+qudt:QuantityKind a owl:Class ;
+    rdfs:label "quantity kind"@en ;
+    rdfs:comment "A kind of quantity (length, mass, temperature, etc.)."@en .
+
+qudt:Unit a owl:Class ;
+    rdfs:label "unit"@en ;
+    rdfs:comment "A unit of measurement."@en .
+
+# ── Core Properties ──────────────────────────────────────────────────
+
+qudt:numericValue a owl:DatatypeProperty ;
+    rdfs:label "numeric value"@en ;
+    rdfs:comment "The numeric magnitude of a quantity value."@en ;
+    rdfs:domain qudt:QuantityValue ;
+    rdfs:range xsd:double .
+
+qudt:unit a owl:ObjectProperty ;
+    rdfs:label "unit"@en ;
+    rdfs:comment "The unit of measurement for a quantity value."@en ;
+    rdfs:domain qudt:QuantityValue ;
+    rdfs:range qudt:Unit .
+
+qudt:hasQuantityKind a owl:ObjectProperty ;
+    rdfs:label "has quantity kind"@en ;
+    rdfs:comment "The kind of quantity being measured."@en ;
+    rdfs:domain qudt:QuantityValue ;
+    rdfs:range qudt:QuantityKind .
+
+# ── Quantity Kinds (Chemistry/Biology) ───────────────────────────────
+
+quantitykind:Length a qudt:QuantityKind ;
+    rdfs:label "length"@en .
+
+quantitykind:BondLength a qudt:QuantityKind ;
+    rdfs:label "bond length"@en .
+
+quantitykind:Temperature a qudt:QuantityKind ;
+    rdfs:label "temperature"@en .
+
+quantitykind:Mass a qudt:QuantityKind ;
+    rdfs:label "mass"@en .
+
+quantitykind:MolarMass a qudt:QuantityKind ;
+    rdfs:label "molar mass"@en .
+
+quantitykind:AmountOfSubstanceConcentration a qudt:QuantityKind ;
+    rdfs:label "molar concentration"@en .
+
+quantitykind:ActivationEnergy a qudt:QuantityKind ;
+    rdfs:label "activation energy"@en .
+
+quantitykind:EquilibriumConstant a qudt:QuantityKind ;
+    rdfs:label "equilibrium constant"@en .
+
+quantitykind:DissociationConstant a qudt:QuantityKind ;
+    rdfs:label "dissociation constant"@en .
+
+quantitykind:Time a qudt:QuantityKind ;
+    rdfs:label "time"@en .
+
+quantitykind:Frequency a qudt:QuantityKind ;
+    rdfs:label "frequency"@en .
+
+quantitykind:Energy a qudt:QuantityKind ;
+    rdfs:label "energy"@en .
+
+quantitykind:Dimensionless a qudt:QuantityKind ;
+    rdfs:label "dimensionless"@en .
+
+quantitykind:Radioactivity a qudt:QuantityKind ;
+    rdfs:label "radioactivity"@en .
+
+quantitykind:MassPercentage a qudt:QuantityKind ;
+    rdfs:label "mass percentage"@en .
+
+# ── Units ────────────────────────────────────────────────────────────
+
+unit:ANGSTROM a qudt:Unit ;
+    rdfs:label "angstrom"@en .
+
+unit:NanoM a qudt:Unit ;
+    rdfs:label "nanometer"@en .
+
+unit:PicoM a qudt:Unit ;
+    rdfs:label "picometer"@en .
+
+unit:MicroM a qudt:Unit ;
+    rdfs:label "micrometer"@en .
+
+unit:MilliM a qudt:Unit ;
+    rdfs:label "millimeter"@en .
+
+unit:DEG_C a qudt:Unit ;
+    rdfs:label "degree Celsius"@en .
+
+unit:K a qudt:Unit ;
+    rdfs:label "kelvin"@en .
+
+unit:MOL-PER-L a qudt:Unit ;
+    rdfs:label "moles per litre"@en .
+
+unit:MilliMOL-PER-L a qudt:Unit ;
+    rdfs:label "millimoles per litre"@en .
+
+unit:MicroMOL-PER-L a qudt:Unit ;
+    rdfs:label "micromoles per litre"@en .
+
+unit:NanoMOL-PER-L a qudt:Unit ;
+    rdfs:label "nanomoles per litre"@en .
+
+unit:KiloGM-PER-MOL a qudt:Unit ;
+    rdfs:label "kilograms per mole"@en .
+
+unit:GM-PER-MOL a qudt:Unit ;
+    rdfs:label "grams per mole"@en .
+
+unit:KiloJ-PER-MOL a qudt:Unit ;
+    rdfs:label "kilojoules per mole"@en .
+
+unit:KiloCAL-PER-MOL a qudt:Unit ;
+    rdfs:label "kilocalories per mole"@en .
+
+unit:EV a qudt:Unit ;
+    rdfs:label "electronvolt"@en .
+
+unit:SEC a qudt:Unit ;
+    rdfs:label "second"@en .
+
+unit:MIN a qudt:Unit ;
+    rdfs:label "minute"@en .
+
+unit:HR a qudt:Unit ;
+    rdfs:label "hour"@en .
+
+unit:MegaBQ a qudt:Unit ;
+    rdfs:label "megabecquerel"@en .
+
+unit:GigaBQ a qudt:Unit ;
+    rdfs:label "gigabecquerel"@en .
+
+unit:PERCENT a qudt:Unit ;
+    rdfs:label "percent"@en .
+
+unit:PER-M a qudt:Unit ;
+    rdfs:label "per mole"@en .
+
+unit:L-PER-MOL a qudt:Unit ;
+    rdfs:label "litres per mole"@en .

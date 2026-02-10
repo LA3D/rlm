@@ -1,0 +1,144 @@
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ── SIO Subset for KAG Entity Extraction ─────────────────────────────
+# Vendored subset of the Semanticscience Integrated Ontology (SIO).
+# Full ontology: https://raw.githubusercontent.com/MaastrichtU-IDS/semanticscience/master/ontology/sio.owl
+# Only classes and properties needed for KAG entity/claim extraction are included.
+# Opaque SIO IRIs (SIO_NNNNNN) are mapped to readable labels.
+
+<http://la3d.local/kag/ontology/sio-subset> a owl:Ontology ;
+    rdfs:label "SIO Subset for KAG"@en ;
+    rdfs:comment "Minimal SIO subset for entity-centric knowledge graph construction."@en .
+
+# ── Core Classes (Entity Spine) ──────────────────────────────────────
+
+sio:Entity a owl:Class ;                          # SIO_000776
+    rdfs:label "entity"@en ;
+    rdfs:comment "Every individual is an entity."@en .
+
+sio:Object a owl:Class ;                          # SIO_000776 subclass
+    rdfs:subClassOf sio:Entity ;
+    rdfs:label "object"@en ;
+    rdfs:comment "An object is an entity that is wholly identifiable at any instant of time."@en .
+
+sio:Process a owl:Class ;                         # SIO_000006
+    rdfs:subClassOf sio:Entity ;
+    rdfs:label "process"@en ;
+    rdfs:comment "A process is an entity that is identifiable by its temporal unfolding."@en .
+
+sio:Attribute a owl:Class ;                       # SIO_000614
+    rdfs:subClassOf sio:Entity ;
+    rdfs:label "attribute"@en ;
+    rdfs:comment "An attribute is a characteristic of some entity."@en .
+
+sio:InformationContentEntity a owl:Class ;        # SIO_000015
+    rdfs:subClassOf sio:Object ;
+    rdfs:label "information content entity"@en ;
+    rdfs:comment "An information content entity is an object that requires interpretation."@en .
+
+# ── Material Entities ────────────────────────────────────────────────
+
+sio:MaterialEntity a owl:Class ;                  # SIO_000004
+    rdfs:subClassOf sio:Object ;
+    rdfs:label "material entity"@en ;
+    rdfs:comment "A material entity has spatial extent and mass."@en .
+
+sio:ChemicalEntity a owl:Class ;                  # SIO_010004
+    rdfs:subClassOf sio:MaterialEntity ;
+    rdfs:label "chemical entity"@en ;
+    rdfs:comment "A chemical entity is a material entity with a defined molecular composition."@en .
+
+sio:Molecule a owl:Class ;                        # SIO_010043
+    rdfs:subClassOf sio:ChemicalEntity ;
+    rdfs:label "molecule"@en ;
+    rdfs:comment "A molecule is a chemical entity composed of two or more atoms."@en .
+
+sio:Protein a owl:Class ;                         # SIO_010043 subclass
+    rdfs:subClassOf sio:Molecule ;
+    rdfs:label "protein"@en ;
+    rdfs:comment "A protein is a polypeptide chain."@en .
+
+# ── Information Entities (Claims, Evidence) ──────────────────────────
+
+sio:Proposition a owl:Class ;                     # SIO_000256
+    rdfs:subClassOf sio:InformationContentEntity ;
+    rdfs:label "proposition"@en ;
+    rdfs:comment "A proposition is an information content entity that is either true or false."@en .
+
+sio:Evidence a owl:Class ;                        # SIO_000015 subclass
+    rdfs:subClassOf sio:InformationContentEntity ;
+    rdfs:label "evidence"@en ;
+    rdfs:comment "Evidence is information that supports or refutes a proposition."@en .
+
+sio:MeasuredValue a owl:Class ;                   # SIO_000070
+    rdfs:subClassOf sio:Attribute ;
+    rdfs:label "measured value"@en ;
+    rdfs:comment "A measured value is the outcome of a measurement process."@en .
+
+# ── Core Object Properties ───────────────────────────────────────────
+
+sio:has-attribute a owl:ObjectProperty ;           # SIO_000008
+    rdfs:label "has attribute"@en ;
+    rdfs:comment "Relates an entity to its attribute."@en ;
+    rdfs:domain sio:Entity ;
+    rdfs:range sio:Attribute .
+
+sio:is-attribute-of a owl:ObjectProperty ;         # SIO_000011
+    owl:inverseOf sio:has-attribute ;
+    rdfs:label "is attribute of"@en .
+
+sio:has-value a owl:DatatypeProperty ;             # SIO_000300
+    rdfs:label "has value"@en ;
+    rdfs:comment "Relates an attribute to its value."@en ;
+    rdfs:domain sio:Attribute .
+
+sio:has-unit a owl:ObjectProperty ;                # SIO_000221
+    rdfs:label "has unit"@en ;
+    rdfs:comment "Relates a measured value to its unit of measurement."@en ;
+    rdfs:domain sio:MeasuredValue .
+
+sio:has-measurement-value a owl:ObjectProperty ;   # SIO_000216
+    rdfs:label "has measurement value"@en ;
+    rdfs:comment "Relates an entity to a quantitative measurement."@en ;
+    rdfs:domain sio:Entity ;
+    rdfs:range sio:MeasuredValue .
+
+sio:is-about a owl:ObjectProperty ;                # SIO_000332
+    rdfs:label "is about"@en ;
+    rdfs:comment "Relates an information entity to what it is about."@en ;
+    rdfs:domain sio:InformationContentEntity ;
+    rdfs:range sio:Entity .
+
+sio:has-evidence a owl:ObjectProperty ;            # SIO_000772
+    rdfs:label "has evidence"@en ;
+    rdfs:comment "Relates a proposition to its supporting evidence."@en ;
+    rdfs:domain sio:Proposition ;
+    rdfs:range sio:Evidence .
+
+sio:is-evidence-for a owl:ObjectProperty ;         # SIO_000773
+    owl:inverseOf sio:has-evidence ;
+    rdfs:label "is evidence for"@en .
+
+sio:refers-to a owl:ObjectProperty ;               # SIO_000628
+    rdfs:label "refers to"@en ;
+    rdfs:comment "Relates an information entity to the entity it refers to."@en ;
+    rdfs:domain sio:InformationContentEntity ;
+    rdfs:range sio:Entity .
+
+sio:has-participant a owl:ObjectProperty ;          # SIO_000132
+    rdfs:label "has participant"@en ;
+    rdfs:comment "Relates a process to an entity that participates in it."@en ;
+    rdfs:domain sio:Process ;
+    rdfs:range sio:Entity .
+
+sio:has-part a owl:ObjectProperty ;                # SIO_000028
+    rdfs:label "has part"@en ;
+    rdfs:comment "Relates a whole to a part."@en .
+
+sio:is-part-of a owl:ObjectProperty ;              # SIO_000068
+    owl:inverseOf sio:has-part ;
+    rdfs:label "is part of"@en .
