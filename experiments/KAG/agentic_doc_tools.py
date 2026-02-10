@@ -503,6 +503,29 @@ class KagDocToolset:
             "answer": result.answer,
         }
 
+    def query_contains(self, node_iri: str) -> dict[str, Any]:
+        """Show what contains this node and what this node contains via kag:contains."""
+        node = self._resolve_iri(node_iri)
+        contained_by = []
+        for s in self.graph.subjects(KAG.contains, node):
+            node_type = self.graph.value(s, RDF.type)
+            contained_by.append({
+                "iri": str(s),
+                "type": str(node_type).split("/")[-1] if node_type else "unknown",
+            })
+        contains = []
+        for o in self.graph.objects(node, KAG.contains):
+            node_type = self.graph.value(o, RDF.type)
+            contains.append({
+                "iri": str(o),
+                "type": str(node_type).split("/")[-1] if node_type else "unknown",
+            })
+        return {
+            "node": str(node),
+            "contained_by": contained_by,
+            "contains": contains,
+        }
+
     def blocks_for_repl(self) -> list[dict]:
         """Slim block list for REPL injection. ~80 bytes per block."""
         return [

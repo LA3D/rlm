@@ -103,7 +103,17 @@ def _wrap_tools_with_logging(
                 result = __fn(*args, **kwargs)
             except Exception as exc:
                 error = str(exc)
-                result = {"error": str(exc), "exception_type": type(exc).__name__}
+                logger.log(
+                    "tool_result",
+                    {
+                        "run_id": run_id,
+                        "tool": __name,
+                        "error": error,
+                        "result_size": 0,
+                        "result_preview": f"EXCEPTION: {type(exc).__name__}: {exc}",
+                    },
+                )
+                raise  # Let REPL show traceback instead of misleading empty dict
             result_len = len(str(result))
             if result_len > 4000:
                 leakage.large_returns += 1
@@ -199,10 +209,21 @@ def _build_task(enable_figure_indexing: bool = False) -> str:
         "To fix wrong IRI links: op_set_single_iri_link(subject, predicate, correct_object)\n"
         "  — this REPLACES all existing values for that (subject, predicate) pair.\n"
         "\n"
+        "## Section Grouping Rules\n"
+        "Sections are delimited by sub_title blocks (kind='section'). Group blocks between consecutive\n"
+        "sub_titles into the same Section. IMPORTANT edge cases:\n"
+        "- Blocks BEFORE the first sub_title (e.g., author list, abstract text) must go into an\n"
+        "  'Abstract' or 'Front Matter' section. Create a doco:Section + doco:SectionTitle for them.\n"
+        "  Check `blocks` for a sub_title containing 'Abstract' on an earlier page (cover pages).\n"
+        "- Content nodes (Paragraph, Figure, Table, Formula, Caption) must ONLY be contained by\n"
+        "  Sections, NOT by Document directly. Document should contain only Title and Sections.\n"
+        "- Preprint cover pages (page 1) often duplicate the title and abstract from page 2.\n"
+        "  Skip duplicates but use cover-page section titles if they exist.\n"
+        "\n"
         "## Goal\n"
         "1. Iterate `blocks` to build the graph: for every block, call op_assert_type, then set pageNumber, hasBBox, mainText\n"
-        "2. Group blocks into Sections based on sub_title boundaries\n"
-        "3. Handle duplicate content across pages (preprint cover pages repeat title/abstract)\n"
+        "2. Group blocks into Sections following the Section Grouping Rules above\n"
+        "3. Link Document to Title and Sections only (NOT to Paragraphs/Figures directly)\n"
         "4. Link each Caption to the Figure or Table it describes (read the caption text)\n"
         "5. Call finalize_graph('...summary...') — if violations exist, fix them and call again\n"
         "6. SUBMIT(answer='...summary...') ONLY when finalize_graph returns status='READY'\n"
@@ -308,6 +329,7 @@ def run_rlm_kag(
         "op_set_single_iri_link": toolset.op_set_single_iri_link,
         "validate_graph": toolset.validate_graph,
         "finalize_graph": toolset.finalize_graph,
+        "query_contains": toolset.query_contains,
         "graph_stats": toolset.graph_stats,
     }
 

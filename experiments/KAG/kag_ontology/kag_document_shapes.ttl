@@ -49,7 +49,7 @@ kag:ParagraphShape a sh:NodeShape ;
         sh:path [ sh:inversePath kag:contains ] ;
         sh:minCount 1 ;
         sh:class doco:Section ;
-        sh:message "Paragraph must be contained by a Section. Fix: op_add_iri_link(section_iri, 'kag:contains', this_paragraph_iri)."
+        sh:message "Paragraph must be contained ONLY by Sections (not Document). If already in a Section but also linked from Document, remove the Document link by rebuilding Document's kag:contains with op_set_single_iri_link + op_add_iri_link (Title and Sections only). If not in any Section, add it: op_add_iri_link(section_iri, 'kag:contains', this_paragraph_iri). Use query_contains(node_iri) to check."
     ] ;
     sh:property [
         sh:path kag:hasContentRef ;
@@ -73,7 +73,7 @@ kag:FormulaShape a sh:NodeShape ;
         sh:path [ sh:inversePath kag:contains ] ;
         sh:minCount 1 ;
         sh:class doco:Section ;
-        sh:message "Formula must be contained by a Section. Fix: op_add_iri_link(section_iri, 'kag:contains', this_formula_iri)."
+        sh:message "Formula must be contained ONLY by Sections (not Document). If also linked from Document, rebuild Document's kag:contains without this node. If not in any Section: op_add_iri_link(section_iri, 'kag:contains', this_formula_iri). Use query_contains(node_iri) to check."
     ] ;
     sh:property [
         sh:path kag:hasContentRef ;
@@ -90,7 +90,7 @@ kag:FigureShape a sh:NodeShape ;
         sh:path [ sh:inversePath kag:contains ] ;
         sh:minCount 1 ;
         sh:class doco:Section ;
-        sh:message "Figure must be contained by a Section. Fix: op_add_iri_link(section_iri, 'kag:contains', this_figure_iri)."
+        sh:message "Figure must be contained ONLY by Sections (not Document). If also linked from Document, rebuild Document's kag:contains without this node. If not in any Section: op_add_iri_link(section_iri, 'kag:contains', this_figure_iri). Use query_contains(node_iri) to check."
     ] ;
     sh:property [
         sh:path kag:hasContentRef ;
@@ -124,7 +124,7 @@ kag:TableShape a sh:NodeShape ;
         sh:path [ sh:inversePath kag:contains ] ;
         sh:minCount 1 ;
         sh:class doco:Section ;
-        sh:message "Table must be contained by a Section. Fix: op_add_iri_link(section_iri, 'kag:contains', this_table_iri)."
+        sh:message "Table must be contained ONLY by Sections (not Document). If also linked from Document, rebuild Document's kag:contains without this node. If not in any Section: op_add_iri_link(section_iri, 'kag:contains', this_table_iri). Use query_contains(node_iri) to check."
     ] ;
     sh:property [
         sh:path kag:hasContentRef ;
@@ -141,7 +141,7 @@ kag:CaptionShape a sh:NodeShape ;
         sh:path [ sh:inversePath kag:contains ] ;
         sh:minCount 1 ;
         sh:class doco:Section ;
-        sh:message "Caption must be contained by a Section. Fix: op_add_iri_link(section_iri, 'kag:contains', this_caption_iri)."
+        sh:message "Caption must be contained ONLY by Sections (not Document). If also linked from Document, rebuild Document's kag:contains without this node. If not in any Section: op_add_iri_link(section_iri, 'kag:contains', this_caption_iri). Use query_contains(node_iri) to check."
     ] ;
     sh:property [
         sh:path kag:hasContentRef ;
