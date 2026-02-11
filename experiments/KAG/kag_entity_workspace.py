@@ -199,16 +199,19 @@ class KagEntityWorkspace:
         """Expand CURIE prefixes (e.g. 'sio:ChemicalEntity') to full URIs.
 
         Bare names without a prefix or scheme are auto-prefixed with ex:
-        to prevent accidental creation of relative URI nodes.
+        and lowercased to prevent case-sensitive IRI duplicates (ex:tcne vs ex:TCNE).
         """
         if ":" in iri and not iri.startswith(("http://", "https://", "urn:")):
             prefix, local = iri.split(":", 1)
             ns = KNOWN_PREFIXES.get(prefix)
             if ns:
+                # Lowercase local names under ex: to prevent case duplicates
+                if prefix == "ex":
+                    local = local.lower()
                 return URIRef(ns + local)
-        # Bare name (no prefix, no scheme) -> auto-prefix with ex:
+        # Bare name (no prefix, no scheme) -> auto-prefix with ex: (lowercased)
         if ":" not in iri and "/" not in iri:
-            return EX[iri]
+            return EX[iri.lower()]
         return URIRef(iri)
 
     def compact_iri(self, uri: URIRef) -> str:
@@ -249,7 +252,7 @@ class KagEntityWorkspace:
         if profile.read_only:
             return {"TOOL_ERROR": f"Graph '{graph}' is read-only.", "error": "read_only"}
 
-        node = self.resolve_iri(entity_id) if ":" in entity_id else EX[entity_id]
+        node = self.resolve_iri(entity_id) if ":" in entity_id else EX[entity_id.lower()]
         cls = self.resolve_iri(class_iri)
         g.add((node, RDF.type, cls))
         self._validated[graph] = False
@@ -395,6 +398,45 @@ class KagEntityWorkspace:
             "predicate": self.compact_iri(p),
             "object": self.compact_iri(o),
             "removed": removed,
+            "graph": graph,
+        }
+
+    def op_remove_node(
+        self,
+        node_iri: str,
+        graph: str = "entity",
+    ) -> dict[str, Any]:
+        """Remove a node and ALL its triples (as subject or object) from the graph.
+
+        Use to clean up phantom nodes, duplicates, or incorrectly created entities.
+        """
+        g = self.get_graph(graph)
+        profile = self.get_profile(graph)
+        if profile.read_only:
+            return {"TOOL_ERROR": f"Graph '{graph}' is read-only.", "error": "read_only"}
+
+        node = self.resolve_iri(node_iri)
+
+        # Remove triples where node is subject
+        as_subject = list(g.triples((node, None, None)))
+        for triple in as_subject:
+            g.remove(triple)
+
+        # Remove triples where node is object
+        as_object = list(g.triples((None, None, node)))
+        for triple in as_object:
+            g.remove(triple)
+
+        removed = len(as_subject) + len(as_object)
+        if removed > 0:
+            self._validated[graph] = False
+
+        return {
+            "operator": "op_remove_node",
+            "node": self.compact_iri(node),
+            "triples_removed": removed,
+            "as_subject": len(as_subject),
+            "as_object": len(as_object),
             "graph": graph,
         }
 

@@ -188,6 +188,27 @@ class KagEntityToolset:
         except Exception as exc:
             return {"TOOL_ERROR": f"{type(exc).__name__}: {exc}", "error": str(exc)}
 
+    def op_remove_node(
+        self,
+        node_iri: str,
+        graph: str = "entity",
+    ) -> dict[str, Any]:
+        """Remove a node and ALL its triples from the target graph.
+
+        Use to clean up phantom nodes, duplicates, or incorrectly created entities.
+        Removes all triples where the node appears as subject or object.
+
+        Args:
+            node_iri: Node IRI to remove (e.g., 'ex:tcne_duplicate')
+            graph: Target graph - 'entity' or 'claim' (default: 'entity')
+
+        Returns dict with keys: operator, node, triples_removed, as_subject, as_object, graph.
+        """
+        try:
+            return self.ws.op_remove_node(node_iri, graph=graph)
+        except Exception as exc:
+            return {"TOOL_ERROR": f"{type(exc).__name__}: {exc}", "error": str(exc)}
+
     def validate_graph(self, graph: str = "all") -> dict[str, Any]:
         """Validate one graph layer or all layers.
 
@@ -222,7 +243,7 @@ class KagEntityToolset:
     # ── Tool surface for DSPy RLM ────────────────────────────────────
 
     def as_tools(self) -> list:
-        """Return combined tool surface (5 read + 7 write) for DSPy RLM."""
+        """Return combined tool surface (5 read + 8 write) for DSPy RLM."""
         return [
             # Read tools (G_doc navigation)
             self.g_section_content,
@@ -236,6 +257,7 @@ class KagEntityToolset:
             self.op_set_literal,
             self.op_add_link,
             self.op_set_link,
+            self.op_remove_node,
             # Validation
             self.validate_graph,
             self.finalize_graph,
