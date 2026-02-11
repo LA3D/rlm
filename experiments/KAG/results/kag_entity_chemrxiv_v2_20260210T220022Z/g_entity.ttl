@@ -1,0 +1,285 @@
+@prefix ex: <http://la3d.local/kag/doc/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:TCNE a sio:ChemicalEntity ;
+    rdfs:label "TCNE" ;
+    rdfs:comment "tetracyanoethylene" ;
+    prov:wasDerivedFrom ex:b_p001_0004 .
+
+ex:anme a sio:ChemicalEntity ;
+    rdfs:label "AnMe" ;
+    sio:has-measurement-value ex:anme_dg193k,
+        ex:anme_dg298k,
+        ex:anme_dg_dagger,
+        ex:anme_dh,
+        ex:anme_ds,
+        ex:anme_kobs,
+        ex:anme_teq ;
+    rdfs:comment "9,10-dimethylanthracene" ;
+    prov:wasDerivedFrom ex:b_p002_0006 .
+
+ex:tcne a sio:ChemicalEntity ;
+    rdfs:label "TCNE" ;
+    sio:has-attribute "TCNE" ;
+    prov:wasDerivedFrom ex:b_p001_0004 .
+
+ex:tmanet a sio:ChemicalEntity ;
+    rdfs:label "TMAnEt" ;
+    sio:has-measurement-value ex:tmanet_dg193k,
+        ex:tmanet_dg298k,
+        ex:tmanet_dg_dagger,
+        ex:tmanet_dh,
+        ex:tmanet_ds,
+        ex:tmanet_kobs,
+        ex:tmanet_teq ;
+    rdfs:comment "2,3,6,7-tetramethoxy-9,10-diet-anthracene" ;
+    prov:wasDerivedFrom ex:b_p003_0003 .
+
+ex:tmanetph a sio:ChemicalEntity ;
+    rdfs:label "TMAnEtPh" ;
+    sio:has-measurement-value ex:tmanetph_teq ;
+    rdfs:comment "2,3,6,7-tetramethoxy-9,10-dietph-anthracene" ;
+    prov:wasDerivedFrom ex:b_p003_0003 .
+
+ex:tmanme a sio:ChemicalEntity ;
+    rdfs:label "TMAnMe" ;
+    sio:has-measurement-value ex:tmanme_dg193k,
+        ex:tmanme_dg298k,
+        ex:tmanme_dg_dagger,
+        ex:tmanme_dh,
+        ex:tmanme_ds,
+        ex:tmanme_kobs,
+        ex:tmanme_teq ;
+    rdfs:comment "2,3,6,7-tetramethoxy-9,10-dime-anthracene" ;
+    prov:wasDerivedFrom ex:b_p003_0003 .
+
+ex:tmannbu a sio:ChemicalEntity ;
+    rdfs:label "TMAnnBu" ;
+    sio:has-measurement-value ex:tmannbu_dg193k,
+        ex:tmannbu_dg298k,
+        ex:tmannbu_dg_dagger,
+        ex:tmannbu_dh,
+        ex:tmannbu_ds,
+        ex:tmannbu_kobs,
+        ex:tmannbu_teq ;
+    rdfs:comment "2,3,6,7-tetramethoxy-9,10-dinbu-anthracene" ;
+    prov:wasDerivedFrom ex:b_p003_0003 .
+
+ex:tmannhept a sio:ChemicalEntity ;
+    rdfs:label "TMAnnHept" ;
+    sio:has-measurement-value ex:tmannhept_dg193k,
+        ex:tmannhept_dg298k,
+        ex:tmannhept_dg_dagger,
+        ex:tmannhept_kobs,
+        ex:tmannhept_teq ;
+    rdfs:comment "2,3,6,7-tetramethoxy-9,10-dinhept-anthracene" ;
+    prov:wasDerivedFrom ex:b_p003_0003 .
+
+ex:anme_dg193k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 193K for AnMe" ;
+    qudt:numericValue -1.4e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:anme_dg298k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 298K for AnMe" ;
+    qudt:numericValue -1e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:anme_dg_dagger a qudt:QuantityValue ;
+    rdfs:label "Activation free energy at 193K for AnMe" ;
+    qudt:numericValue 9e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:anme_dh a qudt:QuantityValue ;
+    rdfs:label "ΔH for AnMe" ;
+    qudt:numericValue -2.1e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:anme_ds a qudt:QuantityValue ;
+    rdfs:label "ΔS for AnMe" ;
+    qudt:numericValue -3.6e+01 ;
+    qudt:unit "cal/mol·K" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:anme_kobs a qudt:QuantityValue ;
+    rdfs:label "Rate constant at 193K for AnMe" ;
+    qudt:numericValue 9.4e+01 ;
+    qudt:unit "s^-1" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:anme_teq a qudt:QuantityValue ;
+    rdfs:label "50/50 equilibrium temperature for AnMe" ;
+    qudt:numericValue 1.65e+02 ;
+    qudt:unit "°C" ;
+    prov:wasDerivedFrom ex:b_p005_0006 .
+
+ex:tmanet_dg193k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 193K for TMAnEt" ;
+    qudt:numericValue -7e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanet_dg298k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 298K for TMAnEt" ;
+    qudt:numericValue -3e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanet_dg_dagger a qudt:QuantityValue ;
+    rdfs:label "Activation free energy at 193K for TMAnEt" ;
+    qudt:numericValue 1.2e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmanet_dh a qudt:QuantityValue ;
+    rdfs:label "ΔH for TMAnEt" ;
+    qudt:numericValue -1.4e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanet_ds a qudt:QuantityValue ;
+    rdfs:label "ΔS for TMAnEt" ;
+    qudt:numericValue -3.6e+01 ;
+    qudt:unit "cal/mol·K" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanet_kobs a qudt:QuantityValue ;
+    rdfs:label "Rate constant at 193K for TMAnEt" ;
+    qudt:numericValue 1.2e-01 ;
+    qudt:unit "s^-1" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmanet_teq a qudt:QuantityValue ;
+    rdfs:label "50/50 equilibrium temperature for TMAnEt" ;
+    qudt:numericValue 2e+01 ;
+    qudt:unit "°C" ;
+    prov:wasDerivedFrom ex:b_p005_0006 .
+
+ex:tmanetph_teq a qudt:QuantityValue ;
+    rdfs:label "50/50 equilibrium temperature for TMAnEtPh" ;
+    qudt:numericValue -4.6e+01 ;
+    qudt:unit "°C" ;
+    prov:wasDerivedFrom ex:b_p005_0006 .
+
+ex:tmanme_dg193k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 193K for TMAnMe" ;
+    qudt:numericValue -6e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanme_dg298k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 298K for TMAnMe" ;
+    qudt:numericValue -5e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanme_dg_dagger a qudt:QuantityValue ;
+    rdfs:label "Activation free energy at 193K for TMAnMe" ;
+    qudt:numericValue 1.1e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmanme_dh a qudt:QuantityValue ;
+    rdfs:label "ΔH for TMAnMe" ;
+    qudt:numericValue -8e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanme_ds a qudt:QuantityValue ;
+    rdfs:label "ΔS for TMAnMe" ;
+    qudt:numericValue -7e+00 ;
+    qudt:unit "cal/mol·K" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmanme_kobs a qudt:QuantityValue ;
+    rdfs:label "Rate constant at 193K for TMAnMe" ;
+    qudt:numericValue 2.3e+00 ;
+    qudt:unit "s^-1" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmanme_teq a qudt:QuantityValue ;
+    rdfs:label "50/50 equilibrium temperature for TMAnMe" ;
+    qudt:numericValue 1.3e+02 ;
+    qudt:unit "°C" ;
+    prov:wasDerivedFrom ex:b_p005_0006 .
+
+ex:tmannbu_dg193k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 193K for TMAnnBu" ;
+    qudt:numericValue -6e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmannbu_dg298k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 298K for TMAnnBu" ;
+    qudt:numericValue -2e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmannbu_dg_dagger a qudt:QuantityValue ;
+    rdfs:label "Activation free energy at 193K for TMAnnBu" ;
+    qudt:numericValue 1.2e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmannbu_dh a qudt:QuantityValue ;
+    rdfs:label "ΔH for TMAnnBu" ;
+    qudt:numericValue -1.2e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmannbu_ds a qudt:QuantityValue ;
+    rdfs:label "ΔS for TMAnnBu" ;
+    qudt:numericValue -3.5e+01 ;
+    qudt:unit "cal/mol·K" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmannbu_kobs a qudt:QuantityValue ;
+    rdfs:label "Rate constant at 193K for TMAnnBu" ;
+    qudt:numericValue 6.2e-02 ;
+    qudt:unit "s^-1" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmannbu_teq a qudt:QuantityValue ;
+    rdfs:label "50/50 equilibrium temperature for TMAnnBu" ;
+    qudt:numericValue -8.4e+00 ;
+    qudt:unit "°C" ;
+    prov:wasDerivedFrom ex:b_p005_0006 .
+
+ex:tmannhept_dg193k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 193K for TMAnnHept" ;
+    qudt:numericValue -6e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmannhept_dg298k a qudt:QuantityValue ;
+    rdfs:label "ΔG at 298K for TMAnnHept" ;
+    qudt:numericValue -2e+00 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p005_0008 .
+
+ex:tmannhept_dg_dagger a qudt:QuantityValue ;
+    rdfs:label "Activation free energy at 193K for TMAnnHept" ;
+    qudt:numericValue 1.2e+01 ;
+    qudt:unit "kcal/mol" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmannhept_kobs a qudt:QuantityValue ;
+    rdfs:label "Rate constant at 193K for TMAnnHept" ;
+    qudt:numericValue 7.9e-02 ;
+    qudt:unit "s^-1" ;
+    prov:wasDerivedFrom ex:b_p006_0006 .
+
+ex:tmannhept_teq a qudt:QuantityValue ;
+    rdfs:label "50/50 equilibrium temperature for TMAnnHept" ;
+    qudt:numericValue -1e+01 ;
+    qudt:unit "°C" ;
+    prov:wasDerivedFrom ex:b_p005_0006 .
+

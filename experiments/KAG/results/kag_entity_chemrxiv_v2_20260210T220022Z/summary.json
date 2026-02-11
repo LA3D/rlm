@@ -1,0 +1,100 @@
+{
+  "run_id": "kag_entity_chemrxiv_v2_20260210T220022Z",
+  "graph_dir": "experiments/KAG/results/sprint4b_chemrxiv_20260210T152308Z",
+  "out_dir": "experiments/KAG/results/kag_entity_chemrxiv_v2_20260210T220022Z",
+  "answer": "\nExtracted key entities, measurements, and claims from a study on low-temperature retro Diels-Alder reactions.\n\nCHEMICAL ENTITIES (7):\n- TCNE (tetracyanoethylene) - dienophile\n- AnMe (9,10-dimethylanthracene) - reference compound\n- TMAnMe, TMAnEt, TMAnnBu, TMAnnHept, TMAnEtPh - tetramethoxy-anthracene derivatives\n\nMEASUREMENTS (40+):\n- Thermodynamic: \u0394G (193K, 298K), \u0394H, \u0394S for each compound\n- Equilibrium temperatures: ranging from 165\u00b0C (AnMe) to -46\u00b0C (TMAnEtPh)\n- Kinetic: rate constants (kobs) and activation free energies (\u0394G\u2021) at 193K\n\nKEY CLAIMS (4):\n1. Low-temperature rDA reactivity: TMAnEtPh achieves 50/50 equilibrium at -46\u00b0C, demonstrating rapid rDA below -50\u00b0C\n2. Steric tuning: increasing bridgehead substituent size (Me\u2192Et\u2192nBu\u2192nHept\u2192EtPh) progressively lowers equilibrium temperature\n3. Kinetic accessibility: all DA adducts form rapidly, with quantitative formation within 1 minute at -80\u00b0C\n4. Methoxy effect: electron-donating methoxy groups stabilize free anthracene, making DA formation 5 kcal/mol less favorable\n\nAll measurements properly grounded to source tables (Table 1, 2, 3) and relevant document sections.\n",
+  "validation": {
+    "conforms": false,
+    "layers": {
+      "entity": {
+        "conforms": false,
+        "total_violations": 2,
+        "violations": [
+          {
+            "node": "TCNE",
+            "message": "Every entity must have an rdfs:label. Fix: op_set_literal(entity_iri, 'rdfs:label', 'name of entity')."
+          },
+          {
+            "node": "TCNE",
+            "message": "Every entity must link to its G_doc source span via prov:wasDerivedFrom. Fix: op_add_link(entity_iri, 'prov:wasDerivedFrom', 'ex:b_pNNN_NNNN')."
+          }
+        ]
+      },
+      "claim": {
+        "conforms": true,
+        "total_violations": 0
+      },
+      "cross_graph": {
+        "conforms": true,
+        "ungrounded": [],
+        "total_ungrounded": 0
+      }
+    }
+  },
+  "stats": {
+    "doc": {
+      "triples": 1043,
+      "types": {
+        "doco:Document": 1,
+        "doco:Title": 2,
+        "doco:Paragraph": 79,
+        "doco:SectionTitle": 11,
+        "deo:Caption": 9,
+        "doco:Figure": 8,
+        "doco:Formula": 4,
+        "doco:Table": 3,
+        "deo:BibliographicReference": 47,
+        "deo:Abstract": 1,
+        "doco:Section": 11,
+        "deo:Introduction": 1,
+        "deo:Discussion": 1,
+        "deo:Conclusion": 1,
+        "deo:Acknowledgements": 1,
+        "doco:ListOfReferences": 1
+      }
+    },
+    "entity": {
+      "triples": 236,
+      "types": {
+        "sio:ChemicalEntity": 8,
+        "qudt:QuantityValue": 34
+      }
+    },
+    "claim": {
+      "triples": 39,
+      "types": {
+        "sio:Observation": 4
+      }
+    }
+  },
+  "iterations": 24,
+  "operator_counts": {
+    "op_create_entity": 45,
+    "op_set_literal": 128,
+    "op_add_link": 105,
+    "op_assert_type": 1
+  },
+  "lm_usage": {
+    "total_calls": 24,
+    "prompt_tokens": 448337,
+    "completion_tokens": 19739,
+    "total_tokens": 468076,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 1.641096
+  },
+  "leakage": {
+    "stdout_chars": 0,
+    "large_returns": 3
+  },
+  "errors": {
+    "sandbox_crashes": 0,
+    "tool_binding_errors": 0
+  },
+  "artifacts": {
+    "trajectory_jsonl": "experiments/KAG/results/kag_entity_chemrxiv_v2_20260210T220022Z/trajectory.jsonl",
+    "summary_json": "experiments/KAG/results/kag_entity_chemrxiv_v2_20260210T220022Z/summary.json",
+    "g_entity_ttl": "experiments/KAG/results/kag_entity_chemrxiv_v2_20260210T220022Z/g_entity.ttl",
+    "g_claim_ttl": "experiments/KAG/results/kag_entity_chemrxiv_v2_20260210T220022Z/g_claim.ttl"
+  }
+}

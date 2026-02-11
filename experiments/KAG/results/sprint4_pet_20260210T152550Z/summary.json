@@ -1,0 +1,73 @@
+{
+  "run_id": "sprint4_pet_20260210T152550Z",
+  "ocr_dir": "experiments/KAG/test_data/pet_test_ocr",
+  "out_dir": "experiments/KAG/results/sprint4_pet_20260210T152550Z",
+  "answer": "DoCO-based document graph successfully created with 130 content nodes, 18 sections (with proper hierarchy), and all required relationships (containment, captions, etc.). Graph conforms to SHACL shapes and has been enriched with DEO classifications and cross-references.",
+  "validation": {
+    "conforms": true,
+    "total_violations": 0,
+    "auto_filled": {
+      "section_page_numbers": 0
+    }
+  },
+  "graph_stats": {
+    "triples": 1133
+  },
+  "leakage": {
+    "stdout_chars": 0,
+    "large_returns": 1,
+    "subcalls": 20,
+    "vars_n": 143
+  },
+  "lm_usage": {
+    "total_calls": 20,
+    "prompt_tokens": 203210,
+    "completion_tokens": 9315,
+    "total_tokens": 212525,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.7493550000000001
+  },
+  "operator_counts": {
+    "op_create_node": 130,
+    "op_assert_type": 19,
+    "op_add_iri_link": 183,
+    "op_set_single_iri_link": 2
+  },
+  "iterations": 20,
+  "memory": {
+    "procedures": [
+      {
+        "pattern": "rlm_context_first_structure",
+        "parse_steps": [
+          "RLM agent constructed graph from document markdown context"
+        ],
+        "success_count": 1,
+        "updated_at": "2026-02-10T15:28:53.152179+00:00"
+      }
+    ],
+    "latest": {
+      "pattern": "rlm_context_first_structure",
+      "success_count": 1
+    }
+  },
+  "vision_stats": {
+    "enabled": false,
+    "figures_dir": "experiments/KAG/test_data/pet_test_figures",
+    "figure_files_found": 5,
+    "vision_calls_agent": 0,
+    "vision_calls_post": 0,
+    "vision_errors": 0,
+    "vision_model": null
+  },
+  "content_store": {
+    "entries": 147,
+    "path": "experiments/KAG/results/sprint4_pet_20260210T152550Z/content_store.jsonl"
+  },
+  "artifacts": {
+    "trajectory_jsonl": "experiments/KAG/results/sprint4_pet_20260210T152550Z/trajectory.jsonl",
+    "summary_json": "experiments/KAG/results/sprint4_pet_20260210T152550Z/summary.json",
+    "knowledge_graph_ttl": "experiments/KAG/results/sprint4_pet_20260210T152550Z/knowledge_graph.ttl",
+    "content_store_jsonl": "experiments/KAG/results/sprint4_pet_20260210T152550Z/content_store.jsonl"
+  }
+}

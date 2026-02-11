@@ -1,0 +1,48 @@
+@prefix ex: <http://la3d.local/kag/doc/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sio: <http://semanticscience.org/resource/> .
+
+ex:claim_kinetic_accessibility a sio:Observation ;
+    rdfs:label "Rapid DA adduct formation at low temperatures" ;
+    sio:is-about ex:anme_dg_dagger,
+        ex:anme_kobs,
+        ex:tmanet_dg_dagger,
+        ex:tmanet_kobs,
+        ex:tmanme_dg_dagger,
+        ex:tmanme_kobs,
+        ex:tmannbu_dg_dagger,
+        ex:tmannbu_kobs,
+        ex:tmannhept_dg_dagger,
+        ex:tmannhept_kobs ;
+    rdfs:comment "All TMAnR-DA adducts form rapidly, with quantitative formation within one minute at -80°C even for the slowest (TMAnnHept)" ;
+    prov:wasDerivedFrom ex:b_p006_0004,
+        ex:b_p006_0006 .
+
+ex:claim_low_temp_rda a sio:Observation ;
+    rdfs:label "Low-temperature retro Diels-Alder reactivity below -50°C" ;
+    sio:is-about ex:tmanetph,
+        ex:tmanetph_teq ;
+    rdfs:comment "TMAnEtPh achieves 50/50 DA/rDA equilibrium at -46°C, demonstrating rapid rDA reactivity below -50°C with TCNE" ;
+    prov:wasDerivedFrom ex:b_p001_0004,
+        ex:b_p005_0006 .
+
+ex:claim_methoxy_effect a sio:Observation ;
+    rdfs:label "Methoxy groups stabilize free anthracene platform" ;
+    sio:is-about ex:anme,
+        ex:tmanme ;
+    rdfs:comment "TMAnMe-DA is 5 kcal/mol less favorable than AnMe-DA at 298K due to electron-donating methoxy groups stabilizing the free donor" ;
+    prov:wasDerivedFrom ex:b_p005_0009 .
+
+ex:claim_steric_thermodynamics a sio:Observation ;
+    rdfs:label "Steric tuning of bridgehead substituents modulates DA thermodynamics" ;
+    sio:is-about ex:tmanet,
+        ex:tmanetph,
+        ex:tmanme,
+        ex:tmannbu,
+        ex:tmannhept ;
+    rdfs:comment "Increasing bridgehead alkyl substituent size (Me→Et→nBu→nHept→EtPh) makes ΔG less favorable, lowering equilibrium temperature from 130°C (TMAnMe) to -46°C (TMAnEtPh)" ;
+    prov:wasDerivedFrom ex:b_p005_0006,
+        ex:b_p005_0008,
+        ex:b_p005_0009 .
+

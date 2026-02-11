@@ -1,0 +1,127 @@
+@prefix ex: <http://la3d.local/kag/doc/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sio: <http://semanticscience.org/resource/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:pdl1_protein_01 a sio:Protein ;
+    rdfs:label "PD-L1" ;
+    rdfs:comment "Programmed Death-Ligand 1, binds to PD-1 as immune escape mechanism" ;
+    prov:wasDerivedFrom ex:b_p001_0009 .
+
+ex:pdl2_protein_01 a sio:Protein ;
+    rdfs:label "PD-L2" ;
+    rdfs:comment "Programmed Death-Ligand 2, binds to PD-1 as immune escape mechanism" ;
+    prov:wasDerivedFrom ex:b_p001_0009 .
+
+ex:zr89_nivolumab_01 a sio:ChemicalEntity ;
+    rdfs:label "89Zr-Nivolumab" ;
+    sio:has-component-part ex:nivolumab_dfo_01,
+        ex:zr89_01 ;
+    sio:has-measurement-value ex:activity_range_01,
+        ex:injected_dose_01,
+        ex:radiochemical_yield_01,
+        ex:specific_activity_01 ;
+    rdfs:comment "Zirconium-89 labeled Nivolumab PET tracer" ;
+    prov:wasDerivedFrom ex:b_p004_0014 .
+
+ex:activity_range_01 a qudt:QuantityValue ;
+    rdfs:label "Activity of 89Zr-Nivolumab" ;
+    qudt:numericValue 2.83e+02 ;
+    qudt:unit unit:MegaBQ ;
+    rdfs:comment "Activity range 225-341 MBq (mean ~283 MBq)" ;
+    prov:wasDerivedFrom ex:b_p004_0014 .
+
+ex:car_measurement_01 a qudt:QuantityValue ;
+    rdfs:label "CAR of Nivolumab-DFO" ;
+    qudt:numericValue 1.14e+00 ;
+    qudt:unit unit:UNITLESS ;
+    rdfs:comment "Chelator-to-antibody ratio determined by LC-MS" ;
+    prov:wasDerivedFrom ex:b_p004_0011 .
+
+ex:conjugation_yield_01 a qudt:QuantityValue ;
+    rdfs:label "Conjugation yield" ;
+    qudt:numericValue 8.8e+01 ;
+    qudt:unit unit:PERCENT ;
+    rdfs:comment "Yield of Nivolumab-DFO after purification (8.8 mg from 10 mg parent)" ;
+    prov:wasDerivedFrom ex:b_p004_0011 .
+
+ex:dfo_chelator_01 a sio:ChemicalEntity ;
+    rdfs:label "p-SCN-Bn-DFO" ;
+    rdfs:comment "1-(4-isothiocyanatophenyl)-3-[6,17-dihydroxy-7,10,18,21-tetraoxo-27-(N-acetylhydroxylamino)-6,11,17,22-tetraazaheptaecisoanet]thiourea" ;
+    prov:wasDerivedFrom ex:b_p002_0008 .
+
+ex:injected_dose_01 a qudt:QuantityValue ;
+    rdfs:label "Injected dose in NHP" ;
+    qudt:numericValue 5.45e+01 ;
+    qudt:unit unit:MegaBQ ;
+    rdfs:comment "Injected dose 54.5 ± 11.0 MBq in non-human primates" ;
+    prov:wasDerivedFrom ex:b_p004_0007 .
+
+ex:kd_nivolumab_01 a qudt:QuantityValue ;
+    rdfs:label "KD of Nivolumab to PD-1" ;
+    qudt:numericValue 3.1e+00 ;
+    qudt:unit unit:NanoMOL-PER-L ;
+    rdfs:comment "Dissociation constant for Nivolumab binding to human PD-1, measured by SPR" ;
+    prov:wasDerivedFrom ex:b_p004_0012 .
+
+ex:kd_nivolumab_dfo_01 a qudt:QuantityValue ;
+    rdfs:label "KD of Nivolumab-DFO to PD-1" ;
+    qudt:numericValue 3.75e+00 ;
+    qudt:unit unit:NanoMOL-PER-L ;
+    rdfs:comment "Dissociation constant for Nivolumab-DFO binding to human PD-1, measured by SPR" ;
+    prov:wasDerivedFrom ex:b_p004_0012 .
+
+ex:nivolumab_01 a sio:ChemicalEntity,
+        sio:Protein ;
+    rdfs:label "Nivolumab" ;
+    sio:has-measurement-value ex:kd_nivolumab_01 ;
+    sio:has-target ex:pd1_protein_01 ;
+    rdfs:comment "Fully human IgG4 anti-PD-1 monoclonal antibody" ;
+    prov:wasDerivedFrom ex:b_p001_0009 .
+
+ex:nivolumab_dfo_01 a sio:ChemicalEntity ;
+    rdfs:label "Nivolumab-DFO conjugate" ;
+    sio:has-component-part ex:dfo_chelator_01,
+        ex:nivolumab_01 ;
+    sio:has-measurement-value ex:car_measurement_01,
+        ex:conjugation_yield_01,
+        ex:kd_nivolumab_dfo_01,
+        ex:purity_measurement_01 ;
+    rdfs:comment "Nivolumab conjugated with p-SCN-Bn-DFO via thiourea linkage" ;
+    prov:wasDerivedFrom ex:b_p004_0011 .
+
+ex:pd1_protein_01 a sio:Protein ;
+    rdfs:label "PD-1" ;
+    rdfs:comment "Programmed Death-1 protein, immunoinhibitory receptor expressed by activated cytotoxic T-lymphocytes" ;
+    prov:wasDerivedFrom ex:b_p001_0009 .
+
+ex:purity_measurement_01 a qudt:QuantityValue ;
+    rdfs:label "Purity of Nivolumab-DFO" ;
+    qudt:numericValue 9.5e+01 ;
+    qudt:unit unit:PERCENT ;
+    rdfs:comment "Purity >95%" ;
+    prov:wasDerivedFrom ex:b_p004_0011 .
+
+ex:radiochemical_yield_01 a qudt:QuantityValue ;
+    rdfs:label "Radiochemical yield" ;
+    qudt:numericValue 5.3e+01 ;
+    qudt:unit unit:PERCENT ;
+    rdfs:comment "Radiochemical yield 53 ± 8% (non-decay-corrected)" ;
+    prov:wasDerivedFrom ex:b_p004_0014 .
+
+ex:specific_activity_01 a qudt:QuantityValue ;
+    rdfs:label "Specific activity" ;
+    qudt:numericValue 3.52e+02 ;
+    qudt:unit unit:MegaBQ-PER-GM ;
+    rdfs:comment "Specific activity 352 ± 87 MBq/mg" ;
+    prov:wasDerivedFrom ex:b_p005_0010 .
+
+ex:zr89_01 a sio:Atom,
+        sio:ChemicalEntity ;
+    rdfs:label "Zirconium-89" ;
+    rdfs:comment "Radioisotope for PET imaging" ;
+    prov:wasDerivedFrom ex:b_p003_0003 .
+

@@ -1,0 +1,43 @@
+@prefix ex: <http://la3d.local/kag/doc/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sio: <http://semanticscience.org/resource/> .
+
+ex:claim_binding_preservation_01 a sio:Statement ;
+    rdfs:label "Binding affinity preserved after DFO conjugation" ;
+    sio:is-about ex:kd_nivolumab_01,
+        ex:kd_nivolumab_dfo_01,
+        ex:nivolumab_dfo_01 ;
+    rdfs:comment "KD values for nivolumab (3.10 nM) and nivolumab-DFO (3.75 nM) binding to hPD-1 are similar, indicating that DFO conjugation does not significantly affect binding affinity" ;
+    prov:wasDerivedFrom ex:b_p004_0012 .
+
+ex:claim_conjugation_01 a sio:Statement ;
+    rdfs:label "Efficient DFO conjugation to nivolumab" ;
+    sio:is-about ex:car_measurement_01,
+        ex:conjugation_yield_01,
+        ex:nivolumab_dfo_01 ;
+    rdfs:comment "Nivolumab-DFO was isolated with 88% yield (8.8 mg from 10 mg parent), >95% purity, and CAR of 1.14" ;
+    prov:wasDerivedFrom ex:b_p004_0011 .
+
+ex:claim_pet_imaging_01 a sio:Statement ;
+    rdfs:label "89Zr-nivolumab enables PET imaging in non-human primates" ;
+    sio:is-about ex:zr89_nivolumab_01 ;
+    rdfs:comment "89Zr-nivolumab was successfully used for PET imaging in healthy non-human primates, showing specific biodistribution to spleen and liver with reduced background in other tissues" ;
+    prov:wasDerivedFrom ex:b_p001_0009,
+        ex:b_p005_0013 .
+
+ex:claim_radiolabeling_01 a sio:Statement ;
+    rdfs:label "Successful 89Zr radiolabeling of nivolumab-DFO" ;
+    sio:is-about ex:radiochemical_yield_01,
+        ex:specific_activity_01,
+        ex:zr89_nivolumab_01 ;
+    rdfs:comment "89Zr-labeling yielded 225-341 MBq with moderate radiochemical yield of 53 ± 8% (non-decay-corrected) and specific activity of 352 ± 87 MBq/mg" ;
+    prov:wasDerivedFrom ex:b_p004_0014,
+        ex:b_p005_0010 .
+
+ex:claim_spleen_uptake_01 a sio:Statement ;
+    rdfs:label "Spleen uptake reduction with carrier-added nivolumab" ;
+    sio:is-about ex:zr89_nivolumab_01 ;
+    rdfs:comment "Distribution of radioactivity into the spleen was reduced by 82.5 ± 4.6% (range: -75.2 to -87.0%) by addition of unlabeled nivolumab compared to tracer only studies at all imaging time points" ;
+    prov:wasDerivedFrom ex:b_p005_0013 .
+

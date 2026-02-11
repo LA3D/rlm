@@ -1,0 +1,1178 @@
+@prefix cito: <http://purl.org/spar/cito/> .
+@prefix deo: <http://purl.org/spar/deo/> .
+@prefix doco: <http://purl.org/spar/doco/> .
+@prefix ex: <http://la3d.local/kag/doc/> .
+@prefix kag: <http://la3d.local/kag#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:document a doco:Document ;
+    kag:contains ex:b_p001_0001,
+        ex:section_01,
+        ex:section_02,
+        ex:section_03,
+        ex:section_04,
+        ex:section_05,
+        ex:section_06,
+        ex:section_07,
+        ex:section_08,
+        ex:section_09,
+        ex:section_10,
+        ex:section_11 ;
+    kag:hasContentRef "document:0000000000000001"^^xsd:string .
+
+ex:b_p001_0001 a doco:Title ;
+    kag:fullText "# Low-temperature retro Diels-Alder reactions" ;
+    kag:hasBBox "[[75, 133, 744, 160]]" ;
+    kag:mainText "# Low-temperature retro Diels-Alder reactions" ;
+    kag:pageNumber 1 .
+
+ex:b_p001_0002 a doco:Paragraph ;
+    kag:fullText "Sadie A Wolfarth, Noah J Gibson, Kassandra T Castaldi, Aleksa K Banki, Sebastian M Krajewski, James M Mayer, Amymarie K Bartholomew" ;
+    kag:hasBBox "[[74, 186, 876, 221]]" ;
+    kag:hasContentRef "paragraph:39acd3487afc4860" ;
+    kag:mainText "Sadie A Wolfarth, Noah J Gibson, Kassandra T Castaldi, Aleksa K Banki, Sebastian M Krajewski, James M Mayer, Amymarie K " ;
+    kag:pageNumber 1 .
+
+ex:b_p001_0004 a doco:Paragraph ;
+    kag:fullText "The Diels-Alder (DA) reaction is a widespread synthetic tool that can be employed both in the forward and reverse directions. The retro Diels-Alder (rDA) reaction is used to prepare reactive organic molecules and, more recently, as a type of Dynamic Covalent Chemistry (DCC) for applications in polymer healing and reprocessibility. Synthetic and DCC applications of the rDA are limited by the high temperatures it typically requires. By tuning the sterics of a modular, electron-rich tetramethoxyanthracene donor platform, we are able to observe rapid rDA reactivity below-50 °C for cycloadducts with tetracyanoethylene (TCNE). We access these frontiers of reversibility by simultaneously stabilizing the free anthracene and destabilizing the DA adduct: the electron-rich nature of the tetramethoxyanthracenes lowers the energy of the starting materials, while alkyl substituents at the 9,10-positions of the anthracene donor destabilize the DA adduct. These features manifest in dynamic DA adducts with kinetically accessible DA/rDA reactions between-70 and 55 °C, as well as in the longest-known CC bond in a DA adduct formed by intermolecular cycloaddition (1.637(4) Å)." ;
+    kag:hasBBox "[[73, 278, 923, 587]]" ;
+    kag:hasContentRef "paragraph:e6939d0d85cd1fe1" ;
+    kag:mainText "The Diels-Alder (DA) reaction is a widespread synthetic tool that can be employed both in the forward and reverse direct" ;
+    kag:pageNumber 1 .
+
+ex:b_p002_0001 a doco:Title ;
+    kag:fullText "# Low-temperature retro Diels-Alder reactions" ;
+    kag:hasBBox "[[254, 113, 710, 131]]" ;
+    kag:mainText "# Low-temperature retro Diels-Alder reactions" ;
+    kag:pageNumber 2 .
+
+ex:b_p002_0002 a doco:Paragraph ;
+    kag:fullText "Sadie A. Wolfarth, \\( ^{a} \\)  Noah J. Gibson, \\( ^{a} \\)  Kassandra T. Castaldi, \\( ^{a} \\)  Aleksa K. Banki, \\( ^{a} \\)  Sebastian M. Krajewski, \\( ^{a} \\)  James M. Mayer, \\( ^{a} \\)  Amymarie K. Bartholomew \\( ^{*a} \\)" ;
+    kag:hasBBox "[[252, 142, 930, 170]]" ;
+    kag:hasContentRef "paragraph:02cba83680073a2d" ;
+    kag:mainText "Sadie A. Wolfarth, \\( ^{a} \\)  Noah J. Gibson, \\( ^{a} \\)  Kassandra T. Castaldi, \\( ^{a} \\)  Aleksa K. Banki, \\( ^{a} \\" ;
+    kag:pageNumber 2 .
+
+ex:b_p002_0003 a doco:Paragraph ;
+    kag:fullText "The Diels-Alder (DA) reaction is a widespread synthetic tool that can be employed both in the forward and reverse directions. The retro Diels-Alder (rDA) reaction is used to prepare reactive organic molecules and, more recently, as a type of Dynamic Covalent Chemistry (DCC) for applications in polymer healing and reprocessibility. Synthetic and DCC applications of the rDA are limited by the high temperatures it typically requires. By tuning the sterics of a modular, electron-rich tetramethoxyanthracene donor platform, we are able to observe rapid rDA reactivity below -50 °C for cycloadducts with tetracyanoethylene (TCNE). We access these frontiers of reversibility by simultaneously stabilizing the free anthracene and destabilizing the DA adduct: the electron-rich nature of the tetramethoxyanthracenes lowers the energy of the starting materials, while alkyl substituents at the 9,10-positions of the anthracene donor destabilize the DA adduct. These features manifest in dynamic DA adducts with kinetically accessible DA/rDA reactions between -70 and 55 °C, as well as in the longest-known C-C bond in a DA adduct formed by intermolecular cycloaddition (1.637(4) Å)." ;
+    kag:hasBBox "[[252, 184, 931, 325]]" ;
+    kag:hasContentRef "paragraph:e67957861d3aa33a" ;
+    kag:mainText "The Diels-Alder (DA) reaction is a widespread synthetic tool that can be employed both in the forward and reverse direct" ;
+    kag:pageNumber 2 .
+
+ex:b_p002_0004 a doco:SectionTitle ;
+    kag:fullText "## Introduction" ;
+    kag:hasBBox "[[67, 391, 179, 405]]" ;
+    kag:hasContentRef "section_title:9b5b2b0c163b664e" ;
+    kag:mainText "## Introduction" ;
+    kag:pageNumber 2 .
+
+ex:b_p002_0005 a doco:Paragraph ;
+    kag:fullText "Diels-Alder (DA) reactions are ubiquitous throughout chemistry. The utility of these reactions arises from the facile  \\( [4+2] \\)  cycloaddition of diene and dienophile, forming new C-C bonds, and giving rise to structurally and functionally diverse adducts. \\( ^{1} \\)  The synthetic utility of DA reactions is not limited to the forward reaction but also encompasses the retro Diels-Alder (rDA) cyclo-reversion, which can be used to access compounds challenging to obtain by other means. rDA reactions are often used to prepare reactive olefins and can be used in conjunction with the forward DA to isolate reactive molecules, such as benzoquinone epoxide. \\( ^{2,3} \\)  However, the need for elevated temperatures to promote cyclo-reversion has limited use of the reaction in synthetic chemistry. Molecules that access the rDA at milder conditions have received more attention in recent years, \\( ^{4} \\)  particularly for their use in Dynamic Covalent Chemistry (DCC). \\( ^{5,6} \\)  To develop stimuli-responsive and adaptive materials, DCC looks to harness properties that can aid in polymer healing, reprocessibility, and other dynamic functionalities. \\( ^{5,7-11} \\)  Though there are few reports detailing the features of rDA reactions, there are examples of steric and electronic changes of the diene and dienophile that give rise to reversible reactions at milder temperatures, in the range of -10 - 60 °C, \\( ^{12-14} \\)  and at varying rates. \\( ^{12,15} \\)  We looked to systematically explore the frontiers of DA reversibility by exploiting the electron-rich and sterically tunable 2,3,6,7-tetramethoxy-9,10-dialkylanthracene (TMAnR) platform (Figure 1)." ;
+    kag:hasBBox "[[65, 411, 492, 751]]" ;
+    kag:hasContentRef "paragraph:6b776cd598e38cb7" ;
+    kag:mainText "Diels-Alder (DA) reactions are ubiquitous throughout chemistry. The utility of these reactions arises from the facile  \\" ;
+    kag:pageNumber 2 ;
+    kag:refersTo ex:b_p002_0008 .
+
+ex:b_p002_0006 a doco:Paragraph ;
+    kag:fullText "Anthracene (An) is a common diene that can form DA adducts with a range of dienophiles, including substituted ethylenes and maleimides. \\( ^{[16-20]} \\)  The reaction between An and tetracyanoethylene (TCNE) has been well-characterized and is distinguished by a transient blue-green color, indicative of a charge-transfer (CT) interaction. \\( ^{[21]} \\)  An functions as the electron-rich donor with TCNE as the electron-poor acceptor. Through experimental and computational study of the reactions of both An and 9,10-dimethylanthracene (AnMe) with TCNE, this CT state has been identified as an intermediate on the reaction pathway, as opposed to a reversible side product. \\( ^{[22-26]} \\)  Our strategy for accessing extremes of DA reversibility centered around the stabilization of donating starting materials, leading us to focus on An-based aromatic donors that are electron-rich. TMAnR are not only highly donating \\( ^{[27]} \\)  but are also readily prepared with almost any alkyl or aryl substituent at the 9,10-positions by the combination of 1,2-dimethoxy-benzene (veratrole) and the appropriate aldehyde in sulfuric acid." ;
+    kag:hasBBox "[[66, 751, 492, 790], [502, 336, 931, 532]]" ;
+    kag:hasContentRef "paragraph:cb715e81467e0ec9" ;
+    kag:mainText "Anthracene (An) is a common diene that can form DA adducts with a range of dienophiles, including substituted ethylenes " ;
+    kag:pageNumber 2 ;
+    cito:cites ex:b_p008_0017,
+        ex:b_p008_0018,
+        ex:b_p008_0019,
+        ex:b_p008_0020,
+        ex:b_p008_0021,
+        ex:b_p008_0022,
+        ex:b_p008_0023,
+        ex:b_p008_0024,
+        ex:b_p008_0025,
+        ex:b_p008_0026,
+        ex:b_p008_0027,
+        ex:b_p008_0028 .
+
+ex:b_p002_0007 a doco:Paragraph ;
+    kag:fullText "Using the synthetic modularity of the TMAnR platform, we were able to tune the thermodynamics of the DA/rDA equilibrium for TMAnR and TCNE (Figure 1), resulting in kinetically accessible rDA reactivity between -70 and 55 °C depending on the 9,10-disubstituents. The observed DA/rDA thermodynamics are well-correlated to cyclic voltammetry, calculated ionization potentials, CT band energies, and DA" ;
+    kag:hasBBox "[[502, 532, 931, 623]]" ;
+    kag:hasContentRef "paragraph:85a357a95bcd65c8" ;
+    kag:mainText "Using the synthetic modularity of the TMAnR platform, we were able to tune the thermodynamics of the DA/rDA equilibrium " ;
+    kag:pageNumber 2 ;
+    kag:refersTo ex:b_p002_0008 .
+
+ex:b_p002_0009 a deo:Caption ;
+    kag:describes ex:b_p002_0008 ;
+    kag:fullText "Figure 1. (a) Scheme for the reaction of TMAnR with TCNE. TMAnR and TCNE are in dynamic equilibrium with a CT complex, which is an intermediate on the reaction pathway to the DA adduct. (b) Crystal structures of the DA adducts of AnMe (left) and TMAnHepT (right) and TCNE with thermal ellipsoids shown at 50% probability (C, grey; O, red; N, blue). Hydrogen atoms, additional, unbound equivalents of TCNE, and solvent molecules are omitted for clarity." ;
+    kag:hasBBox "[[504, 821, 929, 892]]" ;
+    kag:hasContentRef "caption:75b5ae897e2dd326" ;
+    kag:mainText "Figure 1. (a) Scheme for the reaction of TMAnR with TCNE. TMAnR and TCNE are in dynamic equilibrium with a CT complex, w" ;
+    kag:pageNumber 2 .
+
+ex:b_p003_0001 a doco:Paragraph ;
+    kag:fullText "adduct C-C bond lengths for the TMAnR molecules and corresponding adducts with TCNE investigated in this study. Taken together, these results 1) present the TMAnR platform as a useful, sterically tunable electron donor and diene, and 2) demonstrate how to achieve substantial thermodynamic tuning of the DA/rDA equilibrium using simultaneous stabilization of an electron-rich donor and destabilization of the DA adduct. We expect this approach to be broadly applicable to DA systems for synthetic organic chemistry and DCC applications." ;
+    kag:hasBBox "[[66, 79, 492, 198]]" ;
+    kag:hasContentRef "paragraph:568f9b4528d2fb9d" ;
+    kag:mainText "adduct C-C bond lengths for the TMAnR molecules and corresponding adducts with TCNE investigated in this study. Taken to" ;
+    kag:pageNumber 3 .
+
+ex:b_p003_0002 a doco:SectionTitle ;
+    kag:fullText "## Results and Discussion" ;
+    kag:hasBBox "[[67, 222, 262, 236]]" ;
+    kag:hasContentRef "section_title:2045a27d2dbdd450" ;
+    kag:mainText "## Results and Discussion" ;
+    kag:pageNumber 3 .
+
+ex:b_p003_0003 a doco:Paragraph ;
+    kag:fullText "2,3,6,7-tetramethoxy-9,10-dialkyl-anthracenes (TMAnR, R = methyl, ethyl, nbutyl, nheptyl, and phenethyl, abbreviated Me, Et, nBu, nHept, and EtPh, respectively,) were readily prepared by reacting veratrole and the appropriately substituted aldehydes in sulfuric acid. \\( ^{[28]} \\)  TMAnMe, TMAnEt, and TMAnnBu were prepared following literature procedures. TMAnnHept and TMAnEtPh were prepared using an analogous procedure and are reported for the first time as part of this work (Figure S1-S4)." ;
+    kag:hasBBox "[[66, 243, 492, 370]]" ;
+    kag:hasContentRef "paragraph:3ce4538bea15a58b" ;
+    kag:mainText "2,3,6,7-tetramethoxy-9,10-dialkyl-anthracenes (TMAnR, R = methyl, ethyl, nbutyl, nheptyl, and phenethyl, abbreviated Me," ;
+    kag:pageNumber 3 ;
+    cito:cites ex:b_p008_0029 .
+
+ex:b_p003_0004 a doco:Paragraph ;
+    kag:fullText "To assess how decoration with methoxy groups and 9,10-derivatization affects reduction potential, cyclic voltammetry was performed on AnMe as well as each TMAnR (Figure 2b, Table S1). The  \\( E_{1/2} \\)  of the first oxidation event of TMAnMe (0.38 V vs.  \\( Fc^{+/0} \\) ) is cathodically shifted with respect to those of An and AnMe by 0.36 and 0.27 V vs.  \\( Fc^{+/0} \\) , respectively. \\( ^{[29]} \\)  The other TMAnR are similarly cathodically shifted, with  \\( E_{1/2} \\)  values between 0.42 and 0.45 V vs  \\( Fc^{+/0} \\) . To benchmark the electron donating ability of the TMAnR series, we note that their first oxidation potentials are closer to those of canonical electron donors in organic materials chemistry such as tetrathiafulvalene (TTF) (0.31 V vs.  \\( Fc^{+/0} \\) ) \\( ^{[30]} \\)  than to that of unsubstituted An (0.74 V vs.  \\( Fc^{+/0} \\) ). \\( ^{[31,32]} \\)  Despite changes in 9,10-substituents, the oxidation potentials of the TMAnR donors remain fairly consistent (0.38 – 0.45 V vs.  \\( Fc^{+/0} \\) ). A shift to lower energy is observed in the DFT calculated gas-phase Ionization Potentials (IP) and Electron Affinities (EA) of the TMAnR donors compared to AnMe (Figure 2c). The TMAnR series thus represents a useful set of similarly electron-rich dienes with which to probe the effect of substitution at bridgehead positions on DA/rDA thermodynamics and kinetics." ;
+    kag:hasBBox "[[66, 372, 492, 670]]" ;
+    kag:hasContentRef "paragraph:cc242f60752887c1" ;
+    kag:mainText "To assess how decoration with methoxy groups and 9,10-derivatization affects reduction potential, cyclic voltammetry was" ;
+    kag:pageNumber 3 ;
+    kag:refersTo ex:b_p003_0008 ;
+    cito:cites ex:b_p008_0030,
+        ex:b_p008_0031,
+        ex:b_p008_0032,
+        ex:b_p008_0033 .
+
+ex:b_p003_0005 a doco:Paragraph ;
+    kag:fullText "Equimolar TCNE and either AnMe or TMAnMe react in dichloromethane (DCM) at 25 °C to form colorless DA adducts, as observed by  \\( {}^{1} \\) H nuclear magnetic resonance (NMR) (Figure S5 & S6). The adducts are readily isolable as powders in good yield. Under identical conditions, equimolar mixtures of TCNE and TMAnEt, TMAnnBu, TMAnnHept, or TMAnEtPh immediately form dark green solutions, indicative of the presence of CT complexes (Figure 3a) (TMAnR-CT). \\( ^{33,34} \\)  Peak broadening in the  \\( {}^{1} \\) H NMR of these mixtures is consistent with a dynamic equilibrium between neutral TMAnR + TCNE and TMAnR-CT (Figure 3b). For TMAnnBu, TMAnnHept, and TMAnEtPh, the room temperature equilibrium constants for CT complex" ;
+    kag:hasBBox "[[66, 671, 492, 841]]" ;
+    kag:hasContentRef "paragraph:afc5b1ac8b9c57ac" ;
+    kag:mainText "Equimolar TCNE and either AnMe or TMAnMe react in dichloromethane (DCM) at 25 °C to form colorless DA adducts, as observ" ;
+    kag:pageNumber 3 ;
+    kag:refersTo ex:b_p004_0001 .
+
+ex:b_p003_0006 a doco:Figure ;
+    kag:fullText "[image] page=3 bbox=[[520, 99, 925, 224]]" ;
+    kag:hasBBox "[[520, 99, 925, 224]]" ;
+    kag:hasContentRef "figure:5b26973ef13dafbd" ;
+    kag:mainText "[image] page=3 bbox=[[520, 99, 925, 224]]" ;
+    kag:pageNumber 3 .
+
+ex:b_p003_0007 a doco:Figure ;
+    kag:fullText "[image] page=3 bbox=[[520, 231, 897, 592]]" ;
+    kag:hasBBox "[[520, 231, 897, 592]]" ;
+    kag:hasContentRef "figure:52a1d002ec287c59" ;
+    kag:mainText "[image] page=3 bbox=[[520, 231, 897, 592]]" ;
+    kag:pageNumber 3 .
+
+ex:b_p003_0009 a deo:Caption ;
+    kag:describes ex:b_p003_0008 ;
+    kag:fullText "Figure 2. (a) Synthesis of TMAnR: TMAnMe (red), TMAnEt (orange), TMAnnBu (green), TMAnnHept (blue), and TMAnEtPh (purple). (b) Cyclic voltammogram of AnMe (black) and TMAnR (color scheme as in (a)). Electrochemical measurements were carried out using a standard 3-electrode setup in a 400 mM TBAPF \\( _{6} \\)  supporting electrolyte solution in DCM. (c) DFT calculated Ionization Potentials and Electron Affinities of AnMe and TMAnR (color scheme as in (a))." ;
+    kag:hasBBox "[[515, 759, 920, 830]]" ;
+    kag:hasContentRef "caption:fc6f61bf2a55c4c2" ;
+    kag:mainText "Figure 2. (a) Synthesis of TMAnR: TMAnMe (red), TMAnEt (orange), TMAnnBu (green), TMAnnHept (blue), and TMAnEtPh (purple" ;
+    kag:pageNumber 3 .
+
+ex:b_p004_0002 a deo:Caption ;
+    kag:describes ex:b_p004_0001 ;
+    kag:fullText "Figure 3. (a) Dynamic equilibrium of TMAnR (R = Et, nBu, nHept, EtPh) and TCNE with TMAnR-CT and the corresponding  \\( K_{eqCT} \\)  expression. (b)  \\( {}^{1} \\) H NMR spectra of mixtures of TMAnBu and TCNE used to determine  \\( K_{eqCT} \\) . The  \\( {}^{1} \\) H NMR signal for the methoxy groups is unaffected and was omitted for the sake of clarity. (c) Fit of  \\( K_{eqCT} \\)  for TMAnBu-CT at room temperature,  \\( K_{eqCT} = 80 M^{-1} \\) ." ;
+    kag:hasBBox "[[85, 413, 911, 447]]" ;
+    kag:hasContentRef "caption:2f574a0f336efefc" ;
+    kag:mainText "Figure 3. (a) Dynamic equilibrium of TMAnR (R = Et, nBu, nHept, EtPh) and TCNE with TMAnR-CT and the corresponding  \\( K" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0003 a doco:Paragraph ;
+    kag:fullText "formation  \\( (K_{\\mathrm{eqCT}}) \\)  were determined by fitting  \\( {}^{1} \\) H NMR titrations in deuterated DCM of the anthracene donor with TCNE (Figure 3c, Figures S9 – S13, Table S2). At a 1:1 ratio of donor to acceptor (each 0.005 M) there exists a 20-31% CT population, with the bulk of anthracene and TCNE remaining as the neutral species. For TMAnEt and TCNE, room temperature  \\( {}^{1} \\) H NMR spectra show a mixture of starting materials in rapid equilibrium with the CT complex (TMAnEt-CT) and the DA adduct (TMAnEt-DA). The titration experiment to determine  \\( K_{eqCT} \\)  was thus carried out at an elevated temperature to ensure that the only equilibrium measured was for the formation of the CT complex (Figure S7 & S8)." ;
+    kag:hasBBox "[[66, 451, 491, 620]]" ;
+    kag:hasContentRef "paragraph:477a16215f14d0f8" ;
+    kag:mainText "formation  \\( (K_{\\mathrm{eqCT}}) \\)  were determined by fitting  \\( {}^{1} \\) H NMR titrations in deuterated DCM of the" ;
+    kag:pageNumber 4 ;
+    kag:refersTo ex:b_p004_0001 .
+
+ex:b_p004_0004 a doco:Paragraph ;
+    kag:fullText "The presence of a CT population for each pair was further supported by the appearance of new absorbance bands, with peak absorbance in the range of  \\( 750 - 760 \\)  nm detected by solution UV-visible electronic absorption spectroscopy (UV-vis) (Figure S14 – S22). The molar ratio of donor to acceptor in the complex was determined to be 1:1 for each TMAnR-CT using a Job Plot (Figure S23 – S26). \\( ^{35} \\)" ;
+    kag:hasBBox "[[66, 621, 491, 721]]" ;
+    kag:hasContentRef "paragraph:69dc50c080857be3" ;
+    kag:mainText "The presence of a CT population for each pair was further supported by the appearance of new absorbance bands, with peak" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0005 a doco:SectionTitle ;
+    kag:fullText "## Thermal Reversibility & Thermodynamics" ;
+    kag:hasBBox "[[67, 735, 352, 748]]" ;
+    kag:hasContentRef "section_title:991d1574e8871e4d" ;
+    kag:mainText "## Thermal Reversibility & Thermodynamics" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0006 a doco:Paragraph ;
+    kag:fullText "Variable temperature (VT)  \\( {}^{1} \\) H NMR experiments were carried out on solutions prepared with equimolar TMAnR and TCNE (0.05M) in deuterated DCM. Conversion to the corresponding DA adducts (TMAnEt-DA, TMAnBu-DA, TMAnHept-DA, and TMAnEtPh-DA) was observed between -60 and -80 °C, depending on the alkyl substituents (Figure 4, Figure S29 – S32). Full conversion is observed for TMAnEt-DA, TMAnBu-DA, and TMAnHept-DA while only a 90% conversion is seen for TMAnEtPh-DA at -80 °C. For each anthracene, returning to room-temperature restored the initial equilibrium between the free, neutral species and the small population of CT complex within minutes. At intermediate temperatures, four species are present in solution, with one equilibrium between the neutral TMAnR and TCNE and TMAnR-CT and another between the TMAnR-CT complex and the TMAnR-DA:" ;
+    kag:hasBBox "[[66, 750, 492, 891], [503, 451, 929, 534]]" ;
+    kag:hasContentRef "paragraph:b0f691eb6de705af" ;
+    kag:mainText "Variable temperature (VT)  \\( {}^{1} \\) H NMR experiments were carried out on solutions prepared with equimolar TMAnR an" ;
+    kag:pageNumber 4 ;
+    kag:refersTo ex:b_p005_0001 .
+
+ex:b_p004_0007 a doco:Formula ;
+    kag:fullText "\\[ \\begin{aligned}TMAnR+TCNE\\Rightarrow TMAnR-CT\\\\ and\\end{aligned} \\]" ;
+    kag:hasBBox "[[600, 535, 833, 561]]" ;
+    kag:hasContentRef "equation:16927a96005bc8b4" ;
+    kag:mainText "\\[ \\begin{aligned}TMAnR+TCNE\\Rightarrow TMAnR-CT\\\\ and\\end{aligned} \\]" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0008 a doco:Formula ;
+    kag:fullText "\\[ TMAnR-CT\\rightleftharpoons TMAnR-DA \\]" ;
+    kag:hasBBox "[[600, 564, 830, 577]]" ;
+    kag:hasContentRef "equation:1050df96b119a46a" ;
+    kag:mainText "\\[ TMAnR-CT\\rightleftharpoons TMAnR-DA \\]" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0009 a doco:Paragraph ;
+    kag:fullText "The overall equilibrium expression is thus:" ;
+    kag:hasBBox "[[504, 579, 790, 591]]" ;
+    kag:hasContentRef "paragraph:7744ea4527a6101c" ;
+    kag:mainText "The overall equilibrium expression is thus:" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0010 a doco:Formula ;
+    kag:fullText "\\[ K_{eqDA}=\\frac{[TMAnR-DA]}{[TMAnR][TCNE]} \\]" ;
+    kag:hasBBox "[[616, 591, 808, 619]]" ;
+    kag:hasContentRef "equation:96718c80179d3553" ;
+    kag:mainText "\\[ K_{eqDA}=\\frac{[TMAnR-DA]}{[TMAnR][TCNE]} \\]" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0011 a doco:Paragraph ;
+    kag:fullText "To deconvolute [TMAnR] and [TMAnR-CT] by  \\( {}^{1} \\) H NMR, we would need the value of  \\( K_{eqCT} \\)  for each temperature point in the VT experiments. However, this value is not straightforward to determine at lower temperatures where TMAnR-DA is favored. The addition of more equivalents of TCNE as in the RT titrations discussed above will increase both [TMAnR-CT] and [TMAnR-DA], further obscuring our ability to determine accurate integrations and peak positions for the small non-TMAAnR-DA population at low temperatures. As a result, we are only able to determine the concentration of the combined non-TMAAnR-DA fraction, i.e. [TMAnR] + [TMAnR-CT]. Although not explicitly discussed in other literature reports, this is also the case for any DA reaction with a charge transfer intermediate, and we follow the same approach used in these other cases - so long as [TMAnR-CT] is small relative to [TMAnR], [TMAnR] + [TMAnR-CT] ≈ [TMAnR], and we can determine an approximate  \\( K_{eqDA} \\)  as shown below." ;
+    kag:hasBBox "[[503, 620, 929, 860]]" ;
+    kag:hasContentRef "paragraph:225981ae853fedff" ;
+    kag:mainText "To deconvolute [TMAnR] and [TMAnR-CT] by  \\( {}^{1} \\) H NMR, we would need the value of  \\( K_{eqCT} \\)  for each tempe" ;
+    kag:pageNumber 4 .
+
+ex:b_p004_0012 a doco:Formula ;
+    kag:fullText "\\[ K_{eqDA}\\approx\\frac{[TMAnR-DA]}{([TMAnR]+[TMAnR-CT])[TCNE]} \\]" ;
+    kag:hasBBox "[[550, 860, 882, 889]]" ;
+    kag:hasContentRef "equation:7a79fe6cb5650ff8" ;
+    kag:mainText "\\[ K_{eqDA}\\approx\\frac{[TMAnR-DA]}{([TMAnR]+[TMAnR-CT])[TCNE]} \\]" ;
+    kag:pageNumber 4 .
+
+ex:b_p005_0002 a deo:Caption ;
+    kag:describes ex:b_p005_0001 ;
+    kag:fullText "Figure 4. VT  \\( {}^{1} \\) H NMR experiments for TMAnnBu, with spectra shown every 20 °C. Separate solutions of equimolar TMAnnBu and TCNE were combined at 25 °C in an NMR tube. Warming from -80 °C to RT shows the complete cyclo-reversion of TMAnnBu-DA. The  \\( ^{*} \\)  denote relevant peaks for TMAnnBu-DA and TMAnnBu/TMAnnBu-CT." ;
+    kag:hasBBox "[[74, 369, 489, 428]]" ;
+    kag:hasContentRef "caption:30510b03f9a12333" ;
+    kag:mainText "Figure 4. VT  \\( {}^{1} \\) H NMR experiments for TMAnnBu, with spectra shown every 20 °C. Separate solutions of equimola" ;
+    kag:pageNumber 5 .
+
+ex:b_p005_0003 a doco:Paragraph ;
+    kag:fullText "The thermodynamic parameters discussed in this section are determined using this approximation." ;
+    kag:hasBBox "[[66, 429, 490, 456]]" ;
+    kag:hasContentRef "paragraph:6621d717d15016c7" ;
+    kag:mainText "The thermodynamic parameters discussed in this section are determined using this approximation." ;
+    kag:pageNumber 5 .
+
+ex:b_p005_0004 a doco:Paragraph ;
+    kag:fullText "Pure AnMe-DA and TMAnMe-DA are observed at 25 °C, so these species were studied by VT  \\( {}^{1} \\) H NMR at elevated temperatures to determine the onset of their respective rDA reactions in either deuterated acetonitrile or dioxane. By 65 °C and 55 °C, respectively, the rDA reactions began for AnMe-DA and TMAnMe-DA (Figure S27 & S28). When the reaction is cooled back to 25 °C, the DA adducts are found to be the sole species in solution, as expected. The 50/50 point of the DA:rDA equilibria is much lower for TMAnMe compared to AnMe. More broadly, the 50/50 point along the TMAnR-DA series was found to vary with the size of the alkyl substituent (Table 1). From the  \\( K_{eqDA} \\)  calculated at each temperature, thermodynamic parameters for the formation of DA adducts from equilibrium mixtures of neutral species and CT complexes were calculated, using the linear version of the van 't Hoff equation (Table 2, Figure S33 – S38)." ;
+    kag:hasBBox "[[65, 457, 491, 685]]" ;
+    kag:hasContentRef "paragraph:360d2805a18b8eb4" ;
+    kag:mainText "Pure AnMe-DA and TMAnMe-DA are observed at 25 °C, so these species were studied by VT  \\( {}^{1} \\) H NMR at elevated te" ;
+    kag:pageNumber 5 ;
+    kag:refersTo ex:b_p005_0006 .
+
+ex:b_p005_0005 a deo:Caption ;
+    kag:describes ex:b_p005_0006 ;
+    kag:fullText "Table 2. Temperatures at which there would be a 50/50 equilibrium population of free anthracene and DA adduct, extrapolated from a linear fit of the measured equilibrium populations. Experiments conducted at a concentration of 0.05 M." ;
+    kag:hasBBox "[[100, 697, 448, 744]]" ;
+    kag:hasContentRef "caption:d2bd85adf6b33be0" ;
+    kag:mainText "Table 2. Temperatures at which there would be a 50/50 equilibrium population of free anthracene and DA adduct, extrapola" ;
+    kag:pageNumber 5 .
+
+ex:b_p005_0007 a deo:Caption ;
+    kag:describes ex:b_p005_0006 ;
+    kag:fullText "Table 1. Thermodynamic parameters for DA adduct formation.  \\( \\Delta H \\)  and  \\( \\Delta S \\)  were determined using the linear form of the Van't Hoff equation with values of  \\( k_{eqDA} \\)  found from relative integrations of the methoxy peaks in the  \\( {}^{1}H \\)  NMR at each time point." ;
+    kag:hasBBox "[[512, 82, 928, 117]]" ;
+    kag:hasContentRef "caption:8c78ae103a250db3" ;
+    kag:mainText "Table 1. Thermodynamic parameters for DA adduct formation.  \\( \\Delta H \\)  and  \\( \\Delta S \\)  were determined using t" ;
+    kag:pageNumber 5 .
+
+ex:b_p005_0008 a doco:Table ;
+    kag:fullText "<table><tr><td></td><td>\\( \\Delta G_{193K} \\)  (kcal/mol)</td><td>\\( \\Delta G_{298K} \\)  (kcal/mol)</td><td>\\( \\Delta H \\)  (kcal/mol)</td><td>\\( \\Delta S \\)  (cal/mol·K)</td></tr><tr><td>AnMe</td><td>-14</td><td>-10</td><td>-21</td><td>-36</td></tr><tr><td>TMAnMe</td><td>-6</td><td>-5</td><td>-8</td><td>-7</td></tr><tr><td>TMAnEt</td><td>-7</td><td>-3</td><td>-14</td><td>-36</td></tr><tr><td>TMAnnBu</td><td>-6</td><td>-2</td><td>-12</td><td>-35</td></tr><tr><td>TMAnnHept</td><td>-6</td><td>-2</td><td>-12</td><td>-34</td></tr><tr><td>TMAnEtPh</td><td>-4</td><td>-1</td><td>-8</td><td>-25</td></tr></table>" ;
+    kag:hasBBox "[[512, 119, 923, 248]]" ;
+    kag:hasContentRef "table:03431d93f232b852" ;
+    kag:mainText "<table><tr><td></td><td>\\( \\Delta G_{193K} \\)  (kcal/mol)</td><td>\\( \\Delta G_{298K} \\)  (kcal/mol)</td><td>\\( \\Delta H " ;
+    kag:pageNumber 5 .
+
+ex:b_p005_0009 a doco:Paragraph ;
+    kag:fullText "The TMAnMe-DA adduct is less downhill from the free starting materials than AnMe-DA by 5 kcal·mol \\( ^{-1} \\)  at 25 °C. As the bridgehead sterics are the same for these two donors, the change is likely due to the increased electron density imparted by the methoxy groups of TMAnMe, which lowers the relative energy of the donor platform. The  \\( \\Delta G \\)  for TMAnR-DA formation becomes less favorable along the TMAnR series as substituent length and complexity increases, with the least favorable  \\( \\Delta G \\)  found for TMAnEtPh-DA. The lower driving force follows the same trend across all temperature points:  \\( \\Delta G_{AnMe-DA} > \\Delta G_{TMAnMe-DA} > \\Delta G_{TMAnEt-DA} > \\Delta G_{TMAnnBu-DA} \\approx \\Delta G_{TMAnnHept-DA} > \\Delta G_{TMAnEtPh-DA} \\) . The formation of the DA adduct is more favorable at lower temperatures, as the DA adduct is the enthalpically favored product. Increasing the size of the R-substituent makes  \\( \\Delta G \\)  less negative, allowing us to tune the 50/50 point of the DA:rDA equilibrium over a 175 °C range." ;
+    kag:hasBBox "[[502, 256, 930, 484]]" ;
+    kag:hasContentRef "paragraph:565a338ca078bd10" ;
+    kag:mainText "The TMAnMe-DA adduct is less downhill from the free starting materials than AnMe-DA by 5 kcal·mol \\( ^{-1} \\)  at 25 °C." ;
+    kag:pageNumber 5 .
+
+ex:b_p005_0010 a doco:SectionTitle ;
+    kag:fullText "## Reaction Kinetics and Energy Barriers" ;
+    kag:hasBBox "[[504, 497, 745, 510]]" ;
+    kag:hasContentRef "section_title:51b7d9a1fbada17d" ;
+    kag:mainText "## Reaction Kinetics and Energy Barriers" ;
+    kag:pageNumber 5 .
+
+ex:b_p005_0011 a doco:Paragraph ;
+    kag:fullText "In our VT NMR studies, the DA:rDA equilibrium was established within the time needed to stabilize the NMR instrument at each temperature for all TMAnR. Still, we wanted to quantify the impact of the steric tuning at the 9,10 positions on the kinetics of DA formation/cyclo-reversion as rapid kinetics are preferable for DCC applications. The kinetics of adduct formation were studied using stopped-flow UV-Vis. Due to the nature of this technique, experiments were largely carried out at far lower concentrations than those employed for VT NMR (see Figure 5 caption)." ;
+    kag:hasBBox "[[502, 515, 930, 656]]" ;
+    kag:hasContentRef "paragraph:77030a62af77395b" ;
+    kag:mainText "In our VT NMR studies, the DA:rDA equilibrium was established within the time needed to stabilize the NMR instrument at " ;
+    kag:pageNumber 5 ;
+    kag:refersTo ex:b_p006_0001 .
+
+ex:b_p005_0012 a doco:Paragraph ;
+    kag:fullText "Equimolar amounts of each anthracene and TCNE solution were combined in DCM at  \\( -80^{\\circ} \\) C, resulting in the appearance of a CT band between 600 – 700 nm. In each case, this CT band was observed at its maximum intensity in the first measured spectrum after the 10 – 15 ms instrument mixing time (Figure 5). The formation of the CT complex is therefore very rapid, even at low temperatures and at the 0.06 mM concentrations ( \\( k > 10^{6} \\)  M \\( ^{-1} \\)  s \\( ^{-1} \\) ). The subsequent decay of the CT band, indicating the formation of the DA adduct, is the rate limiting step for the overall transformation. Using the back-calculated  \\( K_{eq193K} \\)  from the previous section and the concentrations used for the stopped-flow experiments, we calculate the expected percent conversion to the DA adduct. For all adducts, apart from TMAnEtPh-DA, the percent conversion is greater than 95%. The kinetics of the decay of the CT complex fit well to a first-order expression and the resulting rate constants are given in Table 3." ;
+    kag:hasBBox "[[502, 657, 930, 885]]" ;
+    kag:hasContentRef "paragraph:0c4a3f5783e3cf1d" ;
+    kag:mainText "Equimolar amounts of each anthracene and TCNE solution were combined in DCM at  \\( -80^{\\circ} \\) C, resulting in the ap" ;
+    kag:pageNumber 5 ;
+    kag:refersTo ex:b_p006_0001,
+        ex:b_p006_0006 .
+
+ex:b_p006_0002 a deo:Caption ;
+    kag:describes ex:b_p006_0001 ;
+    kag:fullText "Figure 5. Stopped-flow UV-vis kinetic traces for the disappearance of TMAnnBu-CT at 0.06 mM starting concentrations of TMAnnBu and TCNE. The raw data is shown as points with the fits as dotted lines. As the temperature is increased, the rate at which the CT band decays increase." ;
+    kag:hasBBox "[[68, 321, 486, 368]]" ;
+    kag:hasContentRef "caption:5e0e8ce246ff21a8" ;
+    kag:mainText "Figure 5. Stopped-flow UV-vis kinetic traces for the disappearance of TMAnnBu-CT at 0.06 mM starting concentrations of T" ;
+    kag:pageNumber 6 .
+
+ex:b_p006_0003 a doco:Paragraph ;
+    kag:fullText "(Figures S39 -42). Given the incomplete conversion to the DA adduct, the TMAnEtPh-CT decay cannot be fit to a mono-exponential decay (Figure S43). These measured rate constants  \\( (k_{\\mathrm{obs}}) \\)  are considered to be close to the single-step rate constants for the formation of the DA adduct from the CT complex, and this approximation is used throughout the rest of the paper. This approach neglects two factors, 1) that a small part of the measured CT decay is from its reversion to neutral starting materials as their concentrations decline, and 2) that some cases perhaps should be modeled with approach to equilibrium kinetic expressions, as is clearly the case for TMAnEtPh-CT." ;
+    kag:hasBBox "[[65, 370, 491, 539]]" ;
+    kag:hasContentRef "paragraph:6c586642394e1609" ;
+    kag:mainText "(Figures S39 -42). Given the incomplete conversion to the DA adduct, the TMAnEtPh-CT decay cannot be fit to a mono-expon" ;
+    kag:pageNumber 6 .
+
+ex:b_p006_0004 a doco:Paragraph ;
+    kag:fullText "The measured rate constants decreased significantly from AnMe to TMAnnHept, but even the slowest reaction for TMAnnHept-DA was complete in about one minute by stopped-flow. In the fastest case, full conversion to AnMe-DA occurred within the 10-15 ms mixing time of the instrument for all temperatures above -80 °C. In general, the rate constants increased with increasing temperatures, as expected. Converting the  \\( k_{obs} \\)  to free energy barriers at -80° showed that the  \\( (\\Delta G^{\\ddagger}) \\)  increased going from AnMe to TMAnMe and again from TMAnMe to TMAnEt (Table 3). The barriers are the same for TMAnEt, TMAnnBu, and TMAnnHept. Taken together, these" ;
+    kag:hasBBox "[[65, 541, 491, 697]]" ;
+    kag:hasContentRef "paragraph:6855f544f95ca5f6" ;
+    kag:mainText "The measured rate constants decreased significantly from AnMe to TMAnnHept, but even the slowest reaction for TMAnnHept-" ;
+    kag:pageNumber 6 ;
+    kag:refersTo ex:b_p006_0006 .
+
+ex:b_p006_0005 a deo:Caption ;
+    kag:describes ex:b_p006_0006 ;
+    kag:fullText "Table 3. Rate constants ( \\( k_{obs} \\) ) derived by fitting the stopped-flow experiments to a first-order expression. Reaction barriers for the formation of the DA adduct were calculated using the Eyring equation." ;
+    kag:hasBBox "[[99, 703, 440, 738]]" ;
+    kag:hasContentRef "caption:68be43336771a6b6" ;
+    kag:mainText "Table 3. Rate constants ( \\( k_{obs} \\) ) derived by fitting the stopped-flow experiments to a first-order expression. R" ;
+    kag:pageNumber 6 .
+
+ex:b_p006_0007 a doco:Paragraph ;
+    kag:fullText "thermodynamic and kinetic parameters demonstrate that TMAnR is a versatile diene allowing for steric tuning of an rDA reaction that is observable and fast well below 25 °C." ;
+    kag:hasBBox "[[503, 80, 928, 123]]" ;
+    kag:hasContentRef "paragraph:6ec394c7689b2609" ;
+    kag:mainText "thermodynamic and kinetic parameters demonstrate that TMAnR is a versatile diene allowing for steric tuning of an rDA re" ;
+    kag:pageNumber 6 .
+
+ex:b_p006_0008 a doco:SectionTitle ;
+    kag:fullText "## X-ray Crystallography" ;
+    kag:hasBBox "[[504, 137, 656, 150]]" ;
+    kag:hasContentRef "section_title:24bcde26ad417de8" ;
+    kag:mainText "## X-ray Crystallography" ;
+    kag:pageNumber 6 .
+
+ex:b_p006_0009 a doco:Paragraph ;
+    kag:fullText "Our study of TMAnR-DA thus far indicated that adducts aside from TMAnMe-DA only form in appreciable amounts in solution at low temperatures. However, TMAnEt-DA, TMAnnBu-DA, and TMAnnHept-DA were all isolated as single crystals suitable for Single Crystal X-ray Diffraction (SCXRD) (Figure 6), either by evaporation of CT solutions (1:1.5 TMAnR:TCNE) at 25 °C for TMAnEt-DA and TMAnnBu-DA or at 5 °C for TMAnnHept-DA. The formation of DA adducts in the solid state likely arises from the initial crystallization of a CT complex, which rapidly cyclizes in the solid state. This phenomenon has been demonstrated previously for a variety of anthracene-based dienes and electron-poor dienophiles. \\( ^{36-44} \\)  Unlike in the previously published systems that remain as the DA adduct when re-dissolved, when crystals of TMAnEt-DA, TMAnnBu-DA, or TMAnnHept-DA are re-dissolved at room temperature they cyclo-revert rapidly, reforming equilibrium CT complexes in solution. Crystalline AnMe-DA, TMAnMe-DA, and TMAnEt-DA are completely colorless, as expected due to the breaking of conjugation. On the other hand, TMAnnBu-DA and TMAnnHept-DA crystals are orange and red, respectively. The color of these DA adduct single crystals is attributed to a trapped population of the CT complex that is too minor to model crystallographically. This is consistent with the proposed mechanism that DA crystals form through an initial CT complex that converts in the solid state. Such trapped CT populations are typical of crystals formed by this mechanism. \\( ^{36-43} \\)  A non-zero population of the CT complex was further confirmed by the presence of a CT band in the diffuse reflectance electronic absorption spectra (Figure S44 & S45). All DA adduct single crystals had solvent within the lattice, except for TMAnnHept-DA, which instead featured an additional two equivalents of cocrystallized TCNE. TMAnEtPh-DA did not form in the solid state; instead, a single crystal of TMAnEtPh-CT was obtained. The CT crystal structure consists of alternating layers of TMAnEtPh donor and TCNE acceptor, with TCNE oriented above the central ring of the anthracene and below the phenyl ring of the phenethyl substituent of a neighboring molecule." ;
+    kag:hasBBox "[[502, 151, 930, 678]]" ;
+    kag:hasContentRef "paragraph:e8a15b676df7090f" ;
+    kag:mainText "Our study of TMAnR-DA thus far indicated that adducts aside from TMAnMe-DA only form in appreciable amounts in solution " ;
+    kag:pageNumber 6 ;
+    kag:refersTo ex:b_p007_0001 .
+
+ex:b_p006_0010 a doco:Paragraph ;
+    kag:fullText "The stability of the DA adducts were indirectly assessed through comparison of bond lengths for the newly formed C-C bonds. The following trend is observed for the average C-C bond lengths: AnMe-DA < TMAnMe-DA < TMAnEt-DA < TMAnnBu-DA < TMAnnHept-DA (Figure 6). All the TMAnR-DA that are in dynamic equilibrium at or below RT have an average bond length of at least 1.62 Å compared to the bond length of 1.604(2) Å in AnMe-DA. We report the longest C-C DA bond to our knowledge for TMAnnHept-DA (1.637(4) Å), with the next longest reported by Hirsch et. al. in 2014 (1.622 Å). \\( ^{45} \\)  Lengthening of the C-C bonds within this system is attributed to electronic and steric features of TMAnR. The methoxy groups impart increased electron density, leading to a stronger CT interaction with TCNE. \\( ^{46} \\)  As the oxidation potentials for the TMAnR series are all within a similar range, the extent to which" ;
+    kag:hasBBox "[[502, 678, 930, 892]]" ;
+    kag:hasContentRef "paragraph:694703efe569c1ba" ;
+    kag:mainText "The stability of the DA adducts were indirectly assessed through comparison of bond lengths for the newly formed C-C bon" ;
+    kag:pageNumber 6 ;
+    kag:refersTo ex:b_p007_0001 .
+
+ex:b_p007_0002 a deo:Caption ;
+    kag:describes ex:b_p007_0001 ;
+    kag:fullText "Figure 6. (a) AnMe-DA, (b) TMAnMe-DA, (c) TMAnEt-DA, (d) TMAnnBu-DA, (e) TMAnnHept-DA, and (f) TMAnEtPh-CT (Color scheme: C, grey; O, red; N, blue). DA adduct C-C bonds are outlined in red, with the average bond lengths listed. Hydrogen atoms, solvent molecules, and extra equivalents of TCNE are omitted for clarity." ;
+    kag:hasBBox "[[130, 374, 896, 406]]" ;
+    kag:hasContentRef "caption:ecf053be22fc636b" ;
+    kag:mainText "Figure 6. (a) AnMe-DA, (b) TMAnMe-DA, (c) TMAnEt-DA, (d) TMAnnBu-DA, (e) TMAnnHept-DA, and (f) TMAnEtPh-CT (Color scheme" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0003 a doco:Paragraph ;
+    kag:fullText "the energy of the neutral donor is decreased remains relatively consistent. Meanwhile, as alkyl substituent length and complexity increase, there is increased strain at the bridgehead carbons. This lengthening and, therefore, weakening of bonds results in a less stable DA adduct. \\( ^{47} \\)  The lowered energy of the electron-rich donor and destabilization of the DA adduct are also reflected in the thermodynamic and kinetic trends discussed above." ;
+    kag:hasBBox "[[65, 411, 491, 525]]" ;
+    kag:hasContentRef "paragraph:fe510ad44b85f703" ;
+    kag:mainText "the energy of the neutral donor is decreased remains relatively consistent. Meanwhile, as alkyl substituent length and c" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0004 a doco:SectionTitle ;
+    kag:fullText "## Conclusions" ;
+    kag:hasBBox "[[66, 550, 174, 564]]" ;
+    kag:hasContentRef "section_title:e67a558a961bf69f" ;
+    kag:mainText "## Conclusions" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0005 a doco:Paragraph ;
+    kag:fullText "We employed a highly modular, electron-rich scaffold, TMAnR, to explore how electronics and sterics can be leveraged to tune DA/rDA thermodynamics and kinetics. Upon combination with TCNE at ambient conditions, AnMe-DA and TMAnMe-DA readily formed, while the remaining TMAnR form equilibrium mixtures of CT complexes in solution. At much lower temperatures, the DA adducts for TMAnR with longer alkyl substituents were formed. The trend in reaction free energy indicates a decreased favorability for adduct formation for more electron-rich anthracenes with longer or more rigid substituents at bridgehead carbons." ;
+    kag:hasBBox "[[65, 570, 491, 727]]" ;
+    kag:hasContentRef "paragraph:0b63d8abf0665863" ;
+    kag:mainText "We employed a highly modular, electron-rich scaffold, TMAnR, to explore how electronics and sterics can be leveraged to " ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0006 a doco:Paragraph ;
+    kag:fullText "All DA adducts were shown to form rapidly, with quantitative formation observed within one minute at  \\( -80^{\\circ}C \\)  for TMAnnHept-DA. Diffraction-quality single crystals were obtained for all DA adducts aside from TMAnEtPh-DA. Longer C-C bonds were identified for the TMAnR-DA series than AnMe-DA, including the longest known C-C bond in a DA adduct,  \\( 1.637(4) \\)  Å in TMAnnHept-DA. Overall, combination of TMAnR (R = Et, nBu, nHept, EtPh) with TCNE results in dynamic DA/rDA equilibria well below  \\( 25^{\\circ}C \\) . This work presents the easily prepared, electron-rich, and sterically tunable TMAnR platform as both a tool for investigation of steric and electronic effects and as a class of dienes that can undergo highly reversible DA reactions relevant to the design of DCC systems." ;
+    kag:hasBBox "[[65, 728, 492, 884], [503, 411, 929, 439]]" ;
+    kag:hasContentRef "paragraph:11c8438b197563e4" ;
+    kag:mainText "All DA adducts were shown to form rapidly, with quantitative formation observed within one minute at  \\( -80^{\\circ}C \\)" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0007 a doco:SectionTitle ;
+    kag:fullText "## Author Contributions" ;
+    kag:hasBBox "[[504, 464, 688, 479]]" ;
+    kag:hasContentRef "section_title:f67c8bfaa91182f2" ;
+    kag:mainText "## Author Contributions" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0008 a doco:Paragraph ;
+    kag:fullText "S.A.W. and A.K.Bartholomew conceived and planned the experiments. N.J.G. and J.M.M. assisted with experimental design and analysis. S.A.W. synthesized all compounds and collected all data apart from those from stopped-flow UV-Vis experiments and DFT calculations. S.A.W. and N.J.G performed the stopped-flow studies collaboratively, with N.J.G. doing most of the data modelling. K.T.C refined all crystallographic data. A.K.Banki performed the DFT calculations. S.A.W. wrote the text of the manuscript and A.K.Bartholomew and J.M.M. edited the manuscript." ;
+    kag:hasBBox "[[502, 485, 930, 628]]" ;
+    kag:hasContentRef "paragraph:048cfe54cce66542" ;
+    kag:mainText "S.A.W. and A.K.Bartholomew conceived and planned the experiments. N.J.G. and J.M.M. assisted with experimental design an" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0009 a doco:SectionTitle ;
+    kag:fullText "## Conflicts of interest" ;
+    kag:hasBBox "[[504, 652, 675, 667]]" ;
+    kag:hasContentRef "section_title:564428fc6804b75f" ;
+    kag:mainText "## Conflicts of interest" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0010 a doco:Paragraph ;
+    kag:fullText "There are no conflicts to declare." ;
+    kag:hasBBox "[[504, 673, 728, 686]]" ;
+    kag:hasContentRef "paragraph:9d0fcaeabf027e6c" ;
+    kag:mainText "There are no conflicts to declare." ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0011 a doco:SectionTitle ;
+    kag:fullText "## Acknowledgements" ;
+    kag:hasBBox "[[504, 711, 678, 726]]" ;
+    kag:hasContentRef "section_title:160098dc7c59b3d0" ;
+    kag:mainText "## Acknowledgements" ;
+    kag:pageNumber 7 .
+
+ex:b_p007_0012 a doco:Paragraph ;
+    kag:fullText "This work was primarily supported by the Yale University Provost’s Office and the Yale University Chemistry Department. This research made use of the Chemical and Biophysical Instrumentation Center at Yale University (RRID:SCR_021738). N.J.G. was supported by the U.S. National Science Foundation under award 2403842 to J.M.M. and through a Graduate Research Fellowship. J.M.M.’s work on molecular reactivity is supported by the U.S. National Institutes of Health, award 1R35GM144105. The authors would also like to thank Madison E. Logelin, Prof. Scott J. Miller, Dr. Andrew B. Mayfield, Mariana G. Mohsen, and Dr. Eric Schreiber for helpful discussions." ;
+    kag:hasBBox "[[502, 733, 930, 890]]" ;
+    kag:hasContentRef "paragraph:24a064a540bab982" ;
+    kag:mainText "This work was primarily supported by the Yale University Provost’s Office and the Yale University Chemistry Department. " ;
+    kag:pageNumber 7 .
+
+ex:b_p008_0001 a doco:SectionTitle ;
+    kag:fullText "## Notes and references" ;
+    kag:hasBBox "[[68, 80, 254, 95]]" ;
+    kag:hasContentRef "section_title:224bf9bf0b341b77" ;
+    kag:mainText "## Notes and references" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0002 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 1 ;
+    kag:citationText "1 P. J. Boul, P. Reutenauer and J.-M. Lehn, Org. Lett., 2005, 7, 15–18." ;
+    kag:fullText "1 P. J. Boul, P. Reutenauer and J.-M. Lehn, Org. Lett., 2005, 7, 15–18." ;
+    kag:hasBBox "[[68, 101, 483, 126]]" ;
+    kag:hasContentRef "paragraph:4151a4430a958e4c" ;
+    kag:mainText "1 P. J. Boul, P. Reutenauer and J.-M. Lehn, Org. Lett., 2005, 7, 15–18." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0003 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 2 ;
+    kag:citationText "2 S. Kotha and S. Banerjee, RSC Adv., 2013, 3, 7642–7666." ;
+    kag:fullText "2 S. Kotha and S. Banerjee, RSC Adv., 2013, 3, 7642–7666." ;
+    kag:hasBBox "[[68, 127, 440, 140]]" ;
+    kag:hasContentRef "paragraph:1ecfde1208a34fe7" ;
+    kag:mainText "2 S. Kotha and S. Banerjee, RSC Adv., 2013, 3, 7642–7666." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0004 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 3 ;
+    kag:citationText "3 D. K. Mandal, in Pericyclic Chemistry, ed. D. K. Mandal, Elsevier, 2018, pp. 107–190." ;
+    kag:fullText "3 D. K. Mandal, in Pericyclic Chemistry, ed. D. K. Mandal, Elsevier, 2018, pp. 107–190." ;
+    kag:hasBBox "[[68, 140, 481, 165]]" ;
+    kag:hasContentRef "paragraph:ad86c6c9f479d223" ;
+    kag:mainText "3 D. K. Mandal, in Pericyclic Chemistry, ed. D. K. Mandal, Elsevier, 2018, pp. 107–190." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0005 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 4 ;
+    kag:citationText "4 L. Smal, F. Kerff, K. Robeyns and M. L. Singleton, J. Am. Chem. Soc., DOI:10.1021/jacs.5c14812." ;
+    kag:fullText "4 L. Smal, F. Kerff, K. Robeyns and M. L. Singleton, J. Am. Chem. Soc., DOI:10.1021/jacs.5c14812." ;
+    kag:hasBBox "[[68, 166, 468, 191]]" ;
+    kag:hasContentRef "paragraph:4139f5bc74b0cad7" ;
+    kag:mainText "4 L. Smal, F. Kerff, K. Robeyns and M. L. Singleton, J. Am. Chem. Soc., DOI:10.1021/jacs.5c14812." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0006 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 5 ;
+    kag:citationText "5 M. Werr, E. Kaifer and H.-J. Himmel, Chemistry – A European Journal, 2020, 26, 12328–12332." ;
+    kag:fullText "5 M. Werr, E. Kaifer and H.-J. Himmel, Chemistry – A European Journal, 2020, 26, 12328–12332." ;
+    kag:hasBBox "[[68, 192, 466, 217]]" ;
+    kag:hasContentRef "paragraph:13e557163d902849" ;
+    kag:mainText "5 M. Werr, E. Kaifer and H.-J. Himmel, Chemistry – A European Journal, 2020, 26, 12328–12332." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0007 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 6 ;
+    kag:citationText "6 B. Masci, S. Pasquale and P. Thuéry, Org. Lett., 2008, 10, 4835–4838." ;
+    kag:fullText "6 B. Masci, S. Pasquale and P. Thuéry, Org. Lett., 2008, 10, 4835–4838." ;
+    kag:hasBBox "[[68, 218, 480, 243]]" ;
+    kag:hasContentRef "paragraph:75becc3203d98885" ;
+    kag:mainText "6 B. Masci, S. Pasquale and P. Thuéry, Org. Lett., 2008, 10, 4835–4838." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0008 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 7 ;
+    kag:citationText "7 P. Reutenauer, E. Buhler, P. J. Boul, S. J. Candau and J.-M. Lehn, Chemistry – A European Journal, 2009, 15, 1893–1900." ;
+    kag:fullText "7 P. Reutenauer, E. Buhler, P. J. Boul, S. J. Candau and J.-M. Lehn, Chemistry – A European Journal, 2009, 15, 1893–1900." ;
+    kag:hasBBox "[[68, 244, 481, 269]]" ;
+    kag:hasContentRef "paragraph:a8f24f94ac17994f" ;
+    kag:mainText "7 P. Reutenauer, E. Buhler, P. J. Boul, S. J. Candau and J.-M. Lehn, Chemistry – A European Journal, 2009, 15, 1893–1900" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0009 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 8 ;
+    kag:citationText "8 Q.-T. Li, M.-J. Jiang, G. Wu, L. Chen, S.-C. Chen, Y.-X. Cao and Y.-Z. Wang, ACS Appl. Mater. Interfaces, 2017, 9, 20797–20807." ;
+    kag:fullText "8 Q.-T. Li, M.-J. Jiang, G. Wu, L. Chen, S.-C. Chen, Y.-X. Cao and Y.-Z. Wang, ACS Appl. Mater. Interfaces, 2017, 9, 20797–20807." ;
+    kag:hasBBox "[[68, 270, 481, 296]]" ;
+    kag:hasContentRef "paragraph:3c9e1a3cd7f8e776" ;
+    kag:mainText "8 Q.-T. Li, M.-J. Jiang, G. Wu, L. Chen, S.-C. Chen, Y.-X. Cao and Y.-Z. Wang, ACS Appl. Mater. Interfaces, 2017, 9, 207" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0010 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 9 ;
+    kag:citationText "9 M. Fan, J. Liu, X. Li, J. Zhang and J. Cheng, Ind. Eng. Chem. Res., 2014, 53, 16156–16163." ;
+    kag:fullText "9 M. Fan, J. Liu, X. Li, J. Zhang and J. Cheng, Ind. Eng. Chem. Res., 2014, 53, 16156–16163." ;
+    kag:hasBBox "[[68, 297, 479, 322]]" ;
+    kag:hasContentRef "paragraph:4a48b79ddfa6bd8a" ;
+    kag:mainText "9 M. Fan, J. Liu, X. Li, J. Zhang and J. Cheng, Ind. Eng. Chem. Res., 2014, 53, 16156–16163." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0011 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 10 ;
+    kag:citationText "10 A. M. Peterson, R. E. Jensen and G. R. Palmese, ACS Appl. Mater. Interfaces, 2010, 2, 2169–2169." ;
+    kag:fullText "10 A. M. Peterson, R. E. Jensen and G. R. Palmese, ACS Appl. Mater. Interfaces, 2010, 2, 2169–2169." ;
+    kag:hasBBox "[[68, 323, 485, 348]]" ;
+    kag:hasContentRef "paragraph:d06c9ee2f6f3ec93" ;
+    kag:mainText "10 A. M. Peterson, R. E. Jensen and G. R. Palmese, ACS Appl. Mater. Interfaces, 2010, 2, 2169–2169." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0012 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 11 ;
+    kag:citationText "11 X. Chen, F. Wudl, A. K. Mal, H. Shen and S. R. Nutt, Macromolecules, 2003, 36, 1802–1807." ;
+    kag:fullText "11 X. Chen, F. Wudl, A. K. Mal, H. Shen and S. R. Nutt, Macromolecules, 2003, 36, 1802–1807." ;
+    kag:hasBBox "[[68, 349, 402, 374]]" ;
+    kag:hasContentRef "paragraph:7ad4ae2059a3b722" ;
+    kag:mainText "11 X. Chen, F. Wudl, A. K. Mal, H. Shen and S. R. Nutt, Macromolecules, 2003, 36, 1802–1807." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0013 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 12 ;
+    kag:citationText "12 A. L. Widstrom and B. J. Lear, Sci Rep, 2019, 9, 18267." ;
+    kag:fullText "12 A. L. Widstrom and B. J. Lear, Sci Rep, 2019, 9, 18267." ;
+    kag:hasBBox "[[68, 375, 421, 388]]" ;
+    kag:hasContentRef "paragraph:0455297a37eb595b" ;
+    kag:mainText "12 A. L. Widstrom and B. J. Lear, Sci Rep, 2019, 9, 18267." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0014 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 13 ;
+    kag:citationText "13 N. Roy and J.-M. Lehn, Chemistry – An Asian Journal, 2011, 6, 2419–2425." ;
+    kag:fullText "13 N. Roy and J.-M. Lehn, Chemistry – An Asian Journal, 2011, 6, 2419–2425." ;
+    kag:hasBBox "[[68, 389, 471, 414]]" ;
+    kag:hasContentRef "paragraph:25066e7fdd5e812d" ;
+    kag:mainText "13 N. Roy and J.-M. Lehn, Chemistry – An Asian Journal, 2011, 6, 2419–2425." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0015 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 14 ;
+    kag:citationText "14 P. Reutenauer, P. J. Boul and J.-M. Lehn, European Journal of Organic Chemistry, 2009, 2009, 1691–1697." ;
+    kag:fullText "14 P. Reutenauer, P. J. Boul and J.-M. Lehn, European Journal of Organic Chemistry, 2009, 2009, 1691–1697." ;
+    kag:hasBBox "[[68, 415, 470, 440]]" ;
+    kag:hasContentRef "paragraph:17b83486d6e4cb15" ;
+    kag:mainText "14 P. Reutenauer, P. J. Boul and J.-M. Lehn, European Journal of Organic Chemistry, 2009, 2009, 1691–1697." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0016 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 15 ;
+    kag:citationText "15 Y. Chung, B. F. Duerr, T. A. McKelvey, P. Nanjappan and A. W. Czarnik, J. Org. Chem., 1989, 54, 1018–1032." ;
+    kag:fullText "15 Y. Chung, B. F. Duerr, T. A. McKelvey, P. Nanjappan and A. W. Czarnik, J. Org. Chem., 1989, 54, 1018–1032." ;
+    kag:hasBBox "[[68, 440, 470, 466]]" ;
+    kag:hasContentRef "paragraph:4b8645d43294289a" ;
+    kag:mainText "15 Y. Chung, B. F. Duerr, T. A. McKelvey, P. Nanjappan and A. W. Czarnik, J. Org. Chem., 1989, 54, 1018–1032." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0034 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 33 ;
+    kag:citationText "33 S. M. Rosenfeld, A. M. Shedlow, J. M. Kirwin and C. A. Amaral, J. Org. Chem., 1990, 55, 1356–1359." ;
+    kag:fullText "33 S. M. Rosenfeld, A. M. Shedlow, J. M. Kirwin and C. A. Amaral, J. Org. Chem., 1990, 55, 1356–1359." ;
+    kag:hasBBox "[[506, 157, 922, 182]]" ;
+    kag:hasContentRef "paragraph:0a3f5f652d1741fa" ;
+    kag:mainText "33 S. M. Rosenfeld, A. M. Shedlow, J. M. Kirwin and C. A. Amaral, J. Org. Chem., 1990, 55, 1356–1359." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0035 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 34 ;
+    kag:citationText "34 J. M. Masnovi, E. A. Seddon and J. K. Kochi, Can. J. Chem., 1984, 62, 2552–2559." ;
+    kag:fullText "34 J. M. Masnovi, E. A. Seddon and J. K. Kochi, Can. J. Chem., 1984, 62, 2552–2559." ;
+    kag:hasBBox "[[506, 183, 920, 208]]" ;
+    kag:hasContentRef "paragraph:a40bfe53e8969692" ;
+    kag:mainText "34 J. M. Masnovi, E. A. Seddon and J. K. Kochi, Can. J. Chem., 1984, 62, 2552–2559." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0036 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 35 ;
+    kag:citationText "35 J. S. Renny, L. L. Tomasevich, E. H. Tallmadge and D. B. Collum, Angewandte Chemie International Edition, 2013, 52, 11998–12013." ;
+    kag:fullText "35 J. S. Renny, L. L. Tomasevich, E. H. Tallmadge and D. B. Collum, Angewandte Chemie International Edition, 2013, 52, 11998–12013." ;
+    kag:hasBBox "[[506, 210, 914, 246]]" ;
+    kag:hasContentRef "paragraph:4f52680e89e20aff" ;
+    kag:mainText "35 J. S. Renny, L. L. Tomasevich, E. H. Tallmadge and D. B. Collum, Angewandte Chemie International Edition, 2013, 52, 1" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0037 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 36 ;
+    kag:citationText "36 S. Khorasani and M. A. Fernandes, Crystal Growth & Design, 2013, 13, 5499–5505." ;
+    kag:fullText "36 S. Khorasani and M. A. Fernandes, Crystal Growth & Design, 2013, 13, 5499–5505." ;
+    kag:hasBBox "[[506, 248, 898, 273]]" ;
+    kag:hasContentRef "paragraph:588ce522fd25537c" ;
+    kag:mainText "36 S. Khorasani and M. A. Fernandes, Crystal Growth & Design, 2013, 13, 5499–5505." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0038 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 37 ;
+    kag:citationText "37 J. H. Kim, S. M. Hubig, S. V. Lindeman and J. K. Kochi, J. Am. Chem. Soc., 2001, 123, 87–95." ;
+    kag:fullText "37 J. H. Kim, S. M. Hubig, S. V. Lindeman and J. K. Kochi, J. Am. Chem. Soc., 2001, 123, 87–95." ;
+    kag:hasBBox "[[506, 275, 894, 299]]" ;
+    kag:hasContentRef "paragraph:9d9b7df6d51500e0" ;
+    kag:mainText "37 J. H. Kim, S. M. Hubig, S. V. Lindeman and J. K. Kochi, J. Am. Chem. Soc., 2001, 123, 87–95." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0039 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 38 ;
+    kag:citationText "38 J. H. Kim, S. V. Lindeman and J. K. Kochi, J. Am. Chem. Soc., 2001, 123, 4951–4959." ;
+    kag:fullText "38 J. H. Kim, S. V. Lindeman and J. K. Kochi, J. Am. Chem. Soc., 2001, 123, 4951–4959." ;
+    kag:hasBBox "[[506, 300, 928, 325]]" ;
+    kag:hasContentRef "paragraph:ad869e886e92a8d1" ;
+    kag:mainText "38 J. H. Kim, S. V. Lindeman and J. K. Kochi, J. Am. Chem. Soc., 2001, 123, 4951–4959." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0040 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 39 ;
+    kag:citationText "39 A. Lai, M. C. Madhusudanah and K. M. Sureshan, Angewandte Chemie, 2024, 136, e202411165." ;
+    kag:fullText "39 A. Lai, M. C. Madhusudanah and K. M. Sureshan, Angewandte Chemie, 2024, 136, e202411165." ;
+    kag:hasBBox "[[506, 327, 920, 352]]" ;
+    kag:hasContentRef "paragraph:d03b4fc0fe865212" ;
+    kag:mainText "39 A. Lai, M. C. Madhusudanah and K. M. Sureshan, Angewandte Chemie, 2024, 136, e202411165." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0041 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 40 ;
+    kag:citationText "40 S. Khorasani, D. S. Botes, M. A. Fernandes and D. C. Levendis, CrystEngComm, 2015, 17, 8933–8945." ;
+    kag:fullText "40 S. Khorasani, D. S. Botes, M. A. Fernandes and D. C. Levendis, CrystEngComm, 2015, 17, 8933–8945." ;
+    kag:hasBBox "[[506, 353, 910, 378]]" ;
+    kag:hasContentRef "paragraph:576cf9ea644ed740" ;
+    kag:mainText "40 S. Khorasani, D. S. Botes, M. A. Fernandes and D. C. Levendis, CrystEngComm, 2015, 17, 8933–8945." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0042 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 41 ;
+    kag:citationText "41 J. Y. Yun, J. J. Koo, D. K. Lee and J. H. Kim, Dyes and Pigments, 2009, 83, 262–265." ;
+    kag:fullText "41 J. Y. Yun, J. J. Koo, D. K. Lee and J. H. Kim, Dyes and Pigments, 2009, 83, 262–265." ;
+    kag:hasBBox "[[506, 379, 909, 404]]" ;
+    kag:hasContentRef "paragraph:c4a1c6e69516323b" ;
+    kag:mainText "41 J. Y. Yun, J. J. Koo, D. K. Lee and J. H. Kim, Dyes and Pigments, 2009, 83, 262–265." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0043 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 42 ;
+    kag:citationText "42 Z. Wang, Y. Pei, A. Hao and P. Xing, Nat Commun, 2025, 16, 5539." ;
+    kag:fullText "42 Z. Wang, Y. Pei, A. Hao and P. Xing, Nat Commun, 2025, 16, 5539." ;
+    kag:hasBBox "[[506, 405, 896, 430]]" ;
+    kag:hasContentRef "paragraph:7a73c0afe729a4a0" ;
+    kag:mainText "42 Z. Wang, Y. Pei, A. Hao and P. Xing, Nat Commun, 2025, 16, 5539." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0044 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 43 ;
+    kag:citationText "43 T. A. Lau, S. Khorasani and M. A. Fernandes, CrystEngComm, 2023, 25, 3988–3997." ;
+    kag:fullText "43 T. A. Lau, S. Khorasani and M. A. Fernandes, CrystEngComm, 2023, 25, 3988–3997." ;
+    kag:hasBBox "[[506, 431, 900, 456]]" ;
+    kag:hasContentRef "paragraph:a3d1db6345825334" ;
+    kag:mainText "43 T. A. Lau, S. Khorasani and M. A. Fernandes, CrystEngComm, 2023, 25, 3988–3997." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0045 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 44 ;
+    kag:citationText "44 V. D. Kiselev, A. O. Kolesnikova, I. F. Dinikaev, A. A. Shulyatiev, A. E. Klimovitskii and D. A. Kornilov, International Journal of Chemical Kinetics, 2021, 53, 207–212." ;
+    kag:fullText "44 V. D. Kiselev, A. O. Kolesnikova, I. F. Dinikaev, A. A. Shulyatiev, A. E. Klimovitskii and D. A. Kornilov, International Journal of Chemical Kinetics, 2021, 53, 207–212." ;
+    kag:hasBBox "[[506, 457, 928, 495]]" ;
+    kag:hasContentRef "paragraph:d4121b7735b99b6e" ;
+    kag:mainText "44 V. D. Kiselev, A. O. Kolesnikova, I. F. Dinikaev, A. A. Shulyatiev, A. E. Klimovitskii and D. A. Kornilov, Internatio" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0046 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 45 ;
+    kag:citationText "45 A. K. H. Hirsch, P. Reutenauer, M. Le Moignan, S. Ulrich, P. J. Boul, J. M. Harrowfield, P. D. Jarowski and J.-M. Lehn, Chemistry – A European Journal, 2014, 20, 1073–1080." ;
+    kag:fullText "45 A. K. H. Hirsch, P. Reutenauer, M. Le Moignan, S. Ulrich, P. J. Boul, J. M. Harrowfield, P. D. Jarowski and J.-M. Lehn, Chemistry – A European Journal, 2014, 20, 1073–1080." ;
+    kag:hasBBox "[[506, 496, 928, 534]]" ;
+    kag:hasContentRef "paragraph:8313e3d70161676a" ;
+    kag:mainText "45 A. K. H. Hirsch, P. Reutenauer, M. Le Moignan, S. Ulrich, P. J. Boul, J. M. Harrowfield, P. D. Jarowski and J.-M. Leh" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0047 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 46 ;
+    kag:citationText "46 J. E. Frey, Applied Spectroscopy Reviews, 1987, 23, 247–283." ;
+    kag:fullText "46 J. E. Frey, Applied Spectroscopy Reviews, 1987, 23, 247–283." ;
+    kag:hasBBox "[[506, 535, 904, 548]]" ;
+    kag:hasContentRef "paragraph:c8881707c41763d6" ;
+    kag:mainText "46 J. E. Frey, Applied Spectroscopy Reviews, 1987, 23, 247–283." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0048 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 47 ;
+    kag:citationText "47 Y. W. Goh and J. M. White, Aust. J. Chem., 2009, 62, 419." ;
+    kag:fullText "47 Y. W. Goh and J. M. White, Aust. J. Chem., 2009, 62, 419." ;
+    kag:hasBBox "[[506, 549, 880, 561]]" ;
+    kag:hasContentRef "paragraph:4fdd256c32cc1a0a" ;
+    kag:mainText "47 Y. W. Goh and J. M. White, Aust. J. Chem., 2009, 62, 419." ;
+    kag:pageNumber 8 .
+
+ex:section_01 a deo:Abstract,
+        doco:Section ;
+    kag:contains ex:b_p001_0002,
+        ex:b_p001_0003,
+        ex:b_p001_0004,
+        ex:b_p002_0001,
+        ex:b_p002_0002,
+        ex:b_p002_0003 ;
+    kag:containsAsHeader ex:b_p001_0003 ;
+    kag:hasContentRef "section:4a6d3ead8804444d"^^xsd:string ;
+    kag:pageNumber 1 .
+
+ex:section_02 a deo:Introduction,
+        doco:Section ;
+    kag:contains ex:b_p002_0005,
+        ex:b_p002_0006,
+        ex:b_p002_0007,
+        ex:b_p002_0008,
+        ex:b_p002_0009,
+        ex:b_p003_0001 ;
+    kag:containsAsHeader ex:b_p002_0004 ;
+    kag:hasContentRef "section:b6dd3bb324760a1e"^^xsd:string ;
+    kag:pageNumber 2 .
+
+ex:section_03 a deo:Discussion,
+        doco:Section ;
+    kag:contains ex:b_p003_0003,
+        ex:b_p003_0004,
+        ex:b_p003_0005,
+        ex:b_p003_0006,
+        ex:b_p003_0007,
+        ex:b_p003_0008,
+        ex:b_p003_0009,
+        ex:b_p004_0001,
+        ex:b_p004_0002,
+        ex:b_p004_0003,
+        ex:b_p004_0004 ;
+    kag:containsAsHeader ex:b_p003_0002 ;
+    kag:hasContentRef "section:8dfdc86c5e08c17c"^^xsd:string ;
+    kag:pageNumber 3 .
+
+ex:section_04 a doco:Section ;
+    kag:contains ex:b_p004_0006,
+        ex:b_p004_0007,
+        ex:b_p004_0008,
+        ex:b_p004_0009,
+        ex:b_p004_0010,
+        ex:b_p004_0011,
+        ex:b_p004_0012,
+        ex:b_p005_0001,
+        ex:b_p005_0002,
+        ex:b_p005_0003,
+        ex:b_p005_0004,
+        ex:b_p005_0005,
+        ex:b_p005_0006,
+        ex:b_p005_0007,
+        ex:b_p005_0008,
+        ex:b_p005_0009 ;
+    kag:containsAsHeader ex:b_p004_0005 ;
+    kag:hasContentRef "section:524cf4ca7c78094a"^^xsd:string ;
+    kag:pageNumber 4 .
+
+ex:section_05 a doco:Section ;
+    kag:contains ex:b_p005_0011,
+        ex:b_p005_0012,
+        ex:b_p006_0001,
+        ex:b_p006_0002,
+        ex:b_p006_0003,
+        ex:b_p006_0004,
+        ex:b_p006_0005,
+        ex:b_p006_0006,
+        ex:b_p006_0007 ;
+    kag:containsAsHeader ex:b_p005_0010 ;
+    kag:hasContentRef "section:47d64cb45a069389"^^xsd:string ;
+    kag:pageNumber 5 .
+
+ex:section_06 a doco:Section ;
+    kag:contains ex:b_p006_0009,
+        ex:b_p006_0010,
+        ex:b_p007_0001,
+        ex:b_p007_0002,
+        ex:b_p007_0003 ;
+    kag:containsAsHeader ex:b_p006_0008 ;
+    kag:hasContentRef "section:1288e80e07adf164"^^xsd:string ;
+    kag:pageNumber 6 .
+
+ex:section_07 a deo:Conclusion,
+        doco:Section ;
+    kag:contains ex:b_p007_0005,
+        ex:b_p007_0006 ;
+    kag:containsAsHeader ex:b_p007_0004 ;
+    kag:hasContentRef "section:807b66ebb76c9256"^^xsd:string ;
+    kag:pageNumber 7 .
+
+ex:section_08 a doco:Section ;
+    kag:contains ex:b_p007_0008 ;
+    kag:containsAsHeader ex:b_p007_0007 ;
+    kag:hasContentRef "section:a2757ab39d64cef8"^^xsd:string ;
+    kag:pageNumber 7 .
+
+ex:section_09 a doco:Section ;
+    kag:contains ex:b_p007_0010 ;
+    kag:containsAsHeader ex:b_p007_0009 ;
+    kag:hasContentRef "section:5f00eac960723edf"^^xsd:string ;
+    kag:pageNumber 7 .
+
+ex:section_10 a deo:Acknowledgements,
+        doco:Section ;
+    kag:contains ex:b_p007_0012 ;
+    kag:containsAsHeader ex:b_p007_0011 ;
+    kag:hasContentRef "section:2e08a096642ad65d"^^xsd:string ;
+    kag:pageNumber 7 .
+
+ex:section_11 a doco:ListOfReferences,
+        doco:Section ;
+    kag:contains ex:b_p008_0002,
+        ex:b_p008_0003,
+        ex:b_p008_0004,
+        ex:b_p008_0005,
+        ex:b_p008_0006,
+        ex:b_p008_0007,
+        ex:b_p008_0008,
+        ex:b_p008_0009,
+        ex:b_p008_0010,
+        ex:b_p008_0011,
+        ex:b_p008_0012,
+        ex:b_p008_0013,
+        ex:b_p008_0014,
+        ex:b_p008_0015,
+        ex:b_p008_0016,
+        ex:b_p008_0017,
+        ex:b_p008_0018,
+        ex:b_p008_0019,
+        ex:b_p008_0020,
+        ex:b_p008_0021,
+        ex:b_p008_0022,
+        ex:b_p008_0023,
+        ex:b_p008_0024,
+        ex:b_p008_0025,
+        ex:b_p008_0026,
+        ex:b_p008_0027,
+        ex:b_p008_0028,
+        ex:b_p008_0029,
+        ex:b_p008_0030,
+        ex:b_p008_0031,
+        ex:b_p008_0032,
+        ex:b_p008_0033,
+        ex:b_p008_0034,
+        ex:b_p008_0035,
+        ex:b_p008_0036,
+        ex:b_p008_0037,
+        ex:b_p008_0038,
+        ex:b_p008_0039,
+        ex:b_p008_0040,
+        ex:b_p008_0041,
+        ex:b_p008_0042,
+        ex:b_p008_0043,
+        ex:b_p008_0044,
+        ex:b_p008_0045,
+        ex:b_p008_0046,
+        ex:b_p008_0047,
+        ex:b_p008_0048 ;
+    kag:containsAsHeader ex:b_p008_0001 ;
+    kag:hasContentRef "section:6f693d42320bb1e6"^^xsd:string ;
+    kag:pageNumber 8 .
+
+ex:b_p001_0003 a doco:SectionTitle ;
+    kag:fullText "## Abstract" ;
+    kag:hasBBox "[[75, 244, 152, 260]]" ;
+    kag:hasContentRef "section_title:3cac7c0b35ae333b" ;
+    kag:mainText "## Abstract" ;
+    kag:pageNumber 1 .
+
+ex:b_p008_0017 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 16 ;
+    kag:citationText "16 K. L. Burgess, M. S. Corbett, P. Eugenio, N. J. Lajkiewicz, X. Liu, A. Sanyal, W. Yan, Q. Yuan and J. K. Snyder, Bioorganic & Medicinal Chemistry, 2005, 13, 5299–5309." ;
+    kag:fullText "16 K. L. Burgess, M. S. Corbett, P. Eugenio, N. J. Lajkiewicz, X. Liu, A. Sanyal, W. Yan, Q. Yuan and J. K. Snyder, Bioorganic & Medicinal Chemistry, 2005, 13, 5299–5309." ;
+    kag:hasBBox "[[68, 466, 488, 504]]" ;
+    kag:hasContentRef "paragraph:dfbdf554a2502359" ;
+    kag:mainText "16 K. L. Burgess, M. S. Corbett, P. Eugenio, N. J. Lajkiewicz, X. Liu, A. Sanyal, W. Yan, Q. Yuan and J. K. Snyder, Bioo" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0018 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 17 ;
+    kag:citationText "17 J. C. C. Atherton and S. Jones, Tetrahedron, 2003, 59, 9039–9057." ;
+    kag:fullText "17 J. C. C. Atherton and S. Jones, Tetrahedron, 2003, 59, 9039–9057." ;
+    kag:hasBBox "[[68, 505, 463, 530]]" ;
+    kag:hasContentRef "paragraph:627a183703987e59" ;
+    kag:mainText "17 J. C. C. Atherton and S. Jones, Tetrahedron, 2003, 59, 9039–9057." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0019 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 18 ;
+    kag:citationText "18 V. N. Huynh, M. Leitner, A. Bhattacharyya, L. Uhlstein, P. Kreitmeier, P. Sakrausky, J. Rehbein and O. Reiser, Commun Chem, 2020, 3, 158." ;
+    kag:fullText "18 V. N. Huynh, M. Leitner, A. Bhattacharyya, L. Uhlstein, P. Kreitmeier, P. Sakrausky, J. Rehbein and O. Reiser, Commun Chem, 2020, 3, 158." ;
+    kag:hasBBox "[[68, 531, 464, 569]]" ;
+    kag:hasContentRef "paragraph:88fabcc23232d9d8" ;
+    kag:mainText "18 V. N. Huynh, M. Leitner, A. Bhattacharyya, L. Uhlstein, P. Kreitmeier, P. Sakrausky, J. Rehbein and O. Reiser, Commun" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0020 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 19 ;
+    kag:citationText "19 Y. S. Zholdassov, L. Yuan, S. R. Garcia, R. W. Kwok, A. Boscoboinik, D. J. Valles, M. Marianski, A. Martini, R. W. Carpick and A. B. Braunschweig, Science, 2023, 380, 1053–1058." ;
+    kag:fullText "19 Y. S. Zholdassov, L. Yuan, S. R. Garcia, R. W. Kwok, A. Boscoboinik, D. J. Valles, M. Marianski, A. Martini, R. W. Carpick and A. B. Braunschweig, Science, 2023, 380, 1053–1058." ;
+    kag:hasBBox "[[68, 570, 486, 609]]" ;
+    kag:hasContentRef "paragraph:2900b4099f9a78e9" ;
+    kag:mainText "19 Y. S. Zholdassov, L. Yuan, S. R. Garcia, R. W. Kwok, A. Boscoboinik, D. J. Valles, M. Marianski, A. Martini, R. W. Ca" ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0021 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 20 ;
+    kag:citationText "20 L. J. Andrews and R. M. Keefer, J. Am. Chem. Soc., 1955, 77, 6284–6289." ;
+    kag:fullText "20 L. J. Andrews and R. M. Keefer, J. Am. Chem. Soc., 1955, 77, 6284–6289." ;
+    kag:hasBBox "[[68, 610, 459, 634]]" ;
+    kag:hasContentRef "paragraph:37473cfbdc380bba" ;
+    kag:mainText "20 L. J. Andrews and R. M. Keefer, J. Am. Chem. Soc., 1955, 77, 6284–6289." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0022 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 21 ;
+    kag:citationText "21 S. Fukuzumi and J. K. Kochi, Tetrahedron, 1982, 38, 1035–1049." ;
+    kag:fullText "21 S. Fukuzumi and J. K. Kochi, Tetrahedron, 1982, 38, 1035–1049." ;
+    kag:hasBBox "[[68, 636, 480, 648]]" ;
+    kag:hasContentRef "paragraph:2073d5fcd7fa0d6d" ;
+    kag:mainText "21 S. Fukuzumi and J. K. Kochi, Tetrahedron, 1982, 38, 1035–1049." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0023 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 22 ;
+    kag:citationText "22 V. D. Kiselev and J. G. Miller, J. Am. Chem. Soc., 1975, 97, 4036–4039." ;
+    kag:fullText "22 V. D. Kiselev and J. G. Miller, J. Am. Chem. Soc., 1975, 97, 4036–4039." ;
+    kag:hasBBox "[[68, 649, 485, 673]]" ;
+    kag:hasContentRef "paragraph:850b682229178046" ;
+    kag:mainText "22 V. D. Kiselev and J. G. Miller, J. Am. Chem. Soc., 1975, 97, 4036–4039." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0024 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 23 ;
+    kag:citationText "23 K. E. Wise and R. A. Wheeler, J. Phys. Chem. A, 1999, 103, 8279–8287." ;
+    kag:fullText "23 K. E. Wise and R. A. Wheeler, J. Phys. Chem. A, 1999, 103, 8279–8287." ;
+    kag:hasBBox "[[68, 675, 486, 700]]" ;
+    kag:hasContentRef "paragraph:9637e53502e033eb" ;
+    kag:mainText "23 K. E. Wise and R. A. Wheeler, J. Phys. Chem. A, 1999, 103, 8279–8287." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0025 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 24 ;
+    kag:citationText "24 M. Lotfi and R. M. G. Roberts, Tetrahedron, 1979, 35, 2131–2136." ;
+    kag:fullText "24 M. Lotfi and R. M. G. Roberts, Tetrahedron, 1979, 35, 2131–2136." ;
+    kag:hasBBox "[[68, 701, 465, 726]]" ;
+    kag:hasContentRef "paragraph:b3bcbada0df5d105" ;
+    kag:mainText "24 M. Lotfi and R. M. G. Roberts, Tetrahedron, 1979, 35, 2131–2136." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0026 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 25 ;
+    kag:citationText "25 R. M. G. Roberts and F. Yavari, Tetrahedron, 1981, 37, 2657–2662." ;
+    kag:fullText "25 R. M. G. Roberts and F. Yavari, Tetrahedron, 1981, 37, 2657–2662." ;
+    kag:hasBBox "[[68, 727, 466, 752]]" ;
+    kag:hasContentRef "paragraph:3e7a67f7d94794b1" ;
+    kag:mainText "25 R. M. G. Roberts and F. Yavari, Tetrahedron, 1981, 37, 2657–2662." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0027 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 26 ;
+    kag:citationText "26 J. K. Kochi, Angewandte Chemie International Edition in English, 1988, 27, 1227–1266." ;
+    kag:fullText "26 J. K. Kochi, Angewandte Chemie International Edition in English, 1988, 27, 1227–1266." ;
+    kag:hasBBox "[[68, 753, 483, 778]]" ;
+    kag:hasContentRef "paragraph:5711beecdc8afc38" ;
+    kag:mainText "26 J. K. Kochi, Angewandte Chemie International Edition in English, 1988, 27, 1227–1266." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0028 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 27 ;
+    kag:citationText "27 M. J. Modjewski, R. Shukla, S. V. Lindeman and R. Rathore, Tetrahedron Letters, 2009, 50, 6687–6690." ;
+    kag:fullText "27 M. J. Modjewski, R. Shukla, S. V. Lindeman and R. Rathore, Tetrahedron Letters, 2009, 50, 6687–6690." ;
+    kag:hasBBox "[[68, 779, 454, 804]]" ;
+    kag:hasContentRef "paragraph:663a1739ec8e2597" ;
+    kag:mainText "27 M. J. Modjewski, R. Shukla, S. V. Lindeman and R. Rathore, Tetrahedron Letters, 2009, 50, 6687–6690." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0029 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 28 ;
+    kag:citationText "28 B. S. Ghanem, M. Hashem, K. D. M. Harris, K. J. Msayib, M. Xu, P. M. Budd, N. Chaukura, D. Book, S. Tedds, A. Walton and N. B. McKeown, Macromolecules, 2010, 43, 5287–5294." ;
+    kag:fullText "28 B. S. Ghanem, M. Hashem, K. D. M. Harris, K. J. Msayib, M. Xu, P. M. Budd, N. Chaukura, D. Book, S. Tedds, A. Walton and N. B. McKeown, Macromolecules, 2010, 43, 5287–5294." ;
+    kag:hasBBox "[[68, 805, 486, 843]]" ;
+    kag:hasContentRef "paragraph:b68b3914a61ae44b" ;
+    kag:mainText "28 B. S. Ghanem, M. Hashem, K. D. M. Harris, K. J. Msayib, M. Xu, P. M. Budd, N. Chaukura, D. Book, S. Tedds, A. Walton " ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0030 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 29 ;
+    kag:citationText "29 C. A. Paddon, C. E. Banks, I. G. Davies and R. G. Compton, Ultrasonics Sonochemistry, 2006, 13, 126–132." ;
+    kag:fullText "29 C. A. Paddon, C. E. Banks, I. G. Davies and R. G. Compton, Ultrasonics Sonochemistry, 2006, 13, 126–132." ;
+    kag:hasBBox "[[68, 845, 444, 870]]" ;
+    kag:hasContentRef "paragraph:375e874c7bec9e6c" ;
+    kag:mainText "29 C. A. Paddon, C. E. Banks, I. G. Davies and R. G. Compton, Ultrasonics Sonochemistry, 2006, 13, 126–132." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0031 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 30 ;
+    kag:citationText "30 S. Adeel, M. E. Abdelhamid, A. Nafady, Q. Li, L. L. Martin and A. M. Bond, RSC Adv., 2015, 5, 18384–18390." ;
+    kag:fullText "30 S. Adeel, M. E. Abdelhamid, A. Nafady, Q. Li, L. L. Martin and A. M. Bond, RSC Adv., 2015, 5, 18384–18390." ;
+    kag:hasBBox "[[506, 79, 918, 104]]" ;
+    kag:hasContentRef "paragraph:589c2d65bfa7b51c" ;
+    kag:mainText "30 S. Adeel, M. E. Abdelhamid, A. Nafady, Q. Li, L. L. Martin and A. M. Bond, RSC Adv., 2015, 5, 18384–18390." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0032 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 31 ;
+    kag:citationText "31 R. R. Gagne, C. A. Koval and G. C. Lisensky, Inorg. Chem., 1980, 19, 2854–2855." ;
+    kag:fullText "31 R. R. Gagne, C. A. Koval and G. C. Lisensky, Inorg. Chem., 1980, 19, 2854–2855." ;
+    kag:hasBBox "[[506, 105, 916, 130]]" ;
+    kag:hasContentRef "paragraph:25c424dc90642804" ;
+    kag:mainText "31 R. R. Gagne, C. A. Koval and G. C. Lisensky, Inorg. Chem., 1980, 19, 2854–2855." ;
+    kag:pageNumber 8 .
+
+ex:b_p008_0033 a deo:BibliographicReference,
+        doco:Paragraph ;
+    kag:citationNumber 32 ;
+    kag:citationText "32 E. J. Majeski, J. D. Stuart and W. E. Ohnesorge, J. Am. Chem. Soc., 1968, 90, 633–636." ;
+    kag:fullText "32 E. J. Majeski, J. D. Stuart and W. E. Ohnesorge, J. Am. Chem. Soc., 1968, 90, 633–636." ;
+    kag:hasBBox "[[506, 131, 900, 156]]" ;
+    kag:hasContentRef "paragraph:a73c5184e4c2e154" ;
+    kag:mainText "32 E. J. Majeski, J. D. Stuart and W. E. Ohnesorge, J. Am. Chem. Soc., 1968, 90, 633–636." ;
+    kag:pageNumber 8 .
+
+ex:b_p003_0008 a doco:Figure ;
+    kag:fullText "[image] page=3 bbox=[[523, 592, 897, 752]]" ;
+    kag:hasBBox "[[523, 592, 897, 752]]" ;
+    kag:hasContentRef "figure:fd3553d23baca9d3" ;
+    kag:mainText "[image] page=3 bbox=[[523, 592, 897, 752]]" ;
+    kag:pageNumber 3 .
+
+ex:b_p005_0001 a doco:Figure ;
+    kag:fullText "[image] page=5 bbox=[[78, 85, 480, 366]]" ;
+    kag:hasBBox "[[78, 85, 480, 366]]" ;
+    kag:hasContentRef "figure:031bb0e8687df965" ;
+    kag:mainText "[image] page=5 bbox=[[78, 85, 480, 366]]" ;
+    kag:pageNumber 5 .
+
+ex:b_p002_0008 a doco:Figure ;
+    kag:fullText "[image] page=2 bbox=[[515, 626, 920, 816]]" ;
+    kag:hasBBox "[[515, 626, 920, 816]]" ;
+    kag:hasContentRef "figure:1bcac25ae8e92dd8" ;
+    kag:mainText "[image] page=2 bbox=[[515, 626, 920, 816]]" ;
+    kag:pageNumber 2 .
+
+ex:b_p004_0001 a doco:Figure ;
+    kag:fullText "[image] page=4 bbox=[[120, 90, 864, 406]]" ;
+    kag:hasBBox "[[120, 90, 864, 406]]" ;
+    kag:hasContentRef "figure:c3e05c312d4ab4b0" ;
+    kag:mainText "[image] page=4 bbox=[[120, 90, 864, 406]]" ;
+    kag:pageNumber 4 .
+
+ex:b_p005_0006 a doco:Table ;
+    kag:fullText "<table><tr><td>Anthracene</td><td>50/50 Population Temperature ( \\( ^\\circ \\) C)</td></tr><tr><td>AnMe</td><td>165</td></tr><tr><td>TMAnMe</td><td>130</td></tr><tr><td>TMAnEt</td><td>20</td></tr><tr><td>TMAnnBu</td><td>-8.4</td></tr><tr><td>TMAnnHept</td><td>-10</td></tr><tr><td>TMAnEtPh</td><td>-46</td></tr></table>" ;
+    kag:hasBBox "[[102, 747, 444, 889]]" ;
+    kag:hasContentRef "table:665e07311cce2dfd" ;
+    kag:mainText "<table><tr><td>Anthracene</td><td>50/50 Population Temperature ( \\( ^\\circ \\) C)</td></tr><tr><td>AnMe</td><td>165</td><" ;
+    kag:pageNumber 5 .
+
+ex:b_p006_0001 a doco:Figure ;
+    kag:fullText "[image] page=6 bbox=[[76, 85, 456, 316]]" ;
+    kag:hasBBox "[[76, 85, 456, 316]]" ;
+    kag:hasContentRef "figure:9a1ec78ad1237ee4" ;
+    kag:mainText "[image] page=6 bbox=[[76, 85, 456, 316]]" ;
+    kag:pageNumber 6 .
+
+ex:b_p006_0006 a doco:Table ;
+    kag:fullText "<table><tr><td></td><td>\\( k_{\\text{obs,193K}} \\)  (s \\( ^{-1} \\) )</td><td>\\( \\Delta G_{\\text{DA}} \\)  \\( ^{\\ddagger} \\) 193K (kcal/mol)</td></tr><tr><td>AnMe</td><td>94</td><td>9</td></tr><tr><td>TMAnMe</td><td>2.3</td><td>11</td></tr><tr><td>TMAnEt</td><td>0.12</td><td>12</td></tr><tr><td>TMAnnBu</td><td>0.062</td><td>12</td></tr><tr><td>TMAnnHept</td><td>0.079</td><td>12</td></tr><tr><td>TMAnEtPh</td><td>-</td><td>-</td></tr></table>" ;
+    kag:hasBBox "[[101, 741, 436, 882]]" ;
+    kag:hasContentRef "table:4cc7344aa1001862" ;
+    kag:mainText "<table><tr><td></td><td>\\( k_{\\text{obs,193K}} \\)  (s \\( ^{-1} \\) )</td><td>\\( \\Delta G_{\\text{DA}} \\)  \\( ^{\\ddagger} \\" ;
+    kag:pageNumber 6 .
+
+ex:b_p007_0001 a doco:Figure ;
+    kag:fullText "[image] page=7 bbox=[[155, 100, 850, 365]]" ;
+    kag:hasBBox "[[155, 100, 850, 365]]" ;
+    kag:hasContentRef "figure:9d5fb56ba769d17a" ;
+    kag:mainText "[image] page=7 bbox=[[155, 100, 850, 365]]" ;
+    kag:pageNumber 7 .
+

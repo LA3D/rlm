@@ -1,0 +1,92 @@
+{
+  "run_id": "kag_entity_pet_20260211T131729Z",
+  "graph_dir": "experiments/KAG/results/sprint4_pet_20260210T152550Z",
+  "out_dir": "experiments/KAG/results/kag_entity_pet_20260211T131729Z",
+  "answer": "\nExtracted key entities, measurements, and claims from paper on 89Zr-Nivolumab PET imaging:\n\nCHEMICAL ENTITIES (5):\n- Nivolumab: Anti-PD-1 monoclonal antibody\n- p-SCN-Bn-DFO: Bifunctional chelator\n- Zirconium-89: PET radioisotope\n- Nivolumab-DFO: Conjugate (CAR 1.14, 88% yield, >95% purity)\n- 89Zr-Nivolumab: Final PET tracer\n\nBIOLOGICAL TARGETS (3):\n- PD-1, PD-L1, PD-L2 proteins\n\nMEASUREMENTS (9):\n- CAR: 1.14\n- Conjugation yield: 88%\n- Purity: >95%\n- Radiochemical yield: 53 \u00b1 8%\n- Specific activity: 352 \u00b1 87 MBq/mg\n- KD (Nivolumab): 3.10 nM\n- KD (Nivolumab-DFO): 3.75 nM\n- Activity range: 225-341 MBq\n- Injected dose: 54.5 \u00b1 11.0 MBq\n\nSCIENTIFIC CLAIMS (5):\n1. Spleen uptake reduced 82.5 \u00b1 4.6% with carrier-added nivolumab\n2. Binding affinity preserved after DFO conjugation\n3. Successful 89Zr radiolabeling achieved\n4. Efficient DFO conjugation to nivolumab\n5. 89Zr-nivolumab enables PET imaging in NHP\n\nAll entities grounded to document sources. All graphs SHACL-conformant.\n",
+  "validation": {
+    "conforms": true,
+    "layers": {
+      "entity": {
+        "conforms": true,
+        "total_violations": 0
+      },
+      "claim": {
+        "conforms": true,
+        "total_violations": 0
+      },
+      "cross_graph": {
+        "conforms": true,
+        "ungrounded": [],
+        "total_ungrounded": 0
+      }
+    }
+  },
+  "stats": {
+    "doc": {
+      "triples": 1133,
+      "types": {
+        "doco:Document": 1,
+        "doco:Title": 1,
+        "doco:Figure": 10,
+        "doco:Paragraph": 86,
+        "doco:SectionTitle": 18,
+        "deo:Caption": 12,
+        "doco:Table": 3,
+        "deo:BibliographicReference": 37,
+        "doco:Section": 18,
+        "deo:Discussion": 1,
+        "deo:Conclusion": 1,
+        "deo:Acknowledgements": 1,
+        "doco:ListOfReferences": 1,
+        "deo:Introduction": 1,
+        "deo:Methods": 1
+      }
+    },
+    "entity": {
+      "triples": 102,
+      "types": {
+        "sio:ChemicalEntity": 5,
+        "sio:Protein": 4,
+        "sio:Atom": 1,
+        "qudt:QuantityValue": 9
+      }
+    },
+    "claim": {
+      "triples": 33,
+      "types": {
+        "sio:Statement": 5
+      }
+    }
+  },
+  "iterations": 17,
+  "operator_counts": {
+    "op_create_entity": 22,
+    "op_assert_type": 2,
+    "op_set_literal": 61,
+    "op_add_link": 49,
+    "op_set_link": 9
+  },
+  "lm_usage": {
+    "total_calls": 17,
+    "prompt_tokens": 223205,
+    "completion_tokens": 16601,
+    "total_tokens": 239806,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "total_cost": 0.91863
+  },
+  "leakage": {
+    "stdout_chars": 0,
+    "large_returns": 0
+  },
+  "errors": {
+    "sandbox_crashes": 0,
+    "tool_binding_errors": 0
+  },
+  "artifacts": {
+    "trajectory_jsonl": "experiments/KAG/results/kag_entity_pet_20260211T131729Z/trajectory.jsonl",
+    "summary_json": "experiments/KAG/results/kag_entity_pet_20260211T131729Z/summary.json",
+    "g_entity_ttl": "experiments/KAG/results/kag_entity_pet_20260211T131729Z/g_entity.ttl",
+    "g_claim_ttl": "experiments/KAG/results/kag_entity_pet_20260211T131729Z/g_claim.ttl"
+  }
+}
