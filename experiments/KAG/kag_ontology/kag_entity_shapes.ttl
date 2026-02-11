@@ -92,7 +92,8 @@ kag:MeasuredValueShape a sh:NodeShape ;
         sh:path qudt:unit ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:message "MeasuredValue must have exactly one qudt:unit. Fix: op_set_link(mv_iri, 'qudt:unit', 'unit:ANGSTROM')."
+        sh:nodeKind sh:IRI ;
+        sh:message "MeasuredValue must have exactly one qudt:unit as an IRI (not a literal string). Fix: op_set_link(mv_iri, 'qudt:unit', 'unit:ANGSTROM'). NEVER use op_set_literal for units."
     ] ;
     sh:property [
         sh:path prov:wasDerivedFrom ;
@@ -114,5 +115,6 @@ kag:QuantityValueShape a sh:NodeShape ;
         sh:path qudt:unit ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:message "QuantityValue must have exactly one qudt:unit. Fix: op_set_link(qv_iri, 'qudt:unit', 'unit:DEG_C')."
+        sh:nodeKind sh:IRI ;
+        sh:message "QuantityValue must have exactly one qudt:unit as an IRI (not a literal string). Fix: op_set_link(qv_iri, 'qudt:unit', 'unit:DEG_C'). NEVER use op_set_literal for units."
     ] .
